@@ -6,7 +6,8 @@ export function HomePage() {
       <div style={{ textAlign: 'center' }}>
         <h1>🧬 Science Live Platform</h1>
         <p>Step 1: Foundation Setup Complete ✅</p>
-        <p>Step 2: Database Setup - Testing Now...</p>
+        <p>Step 2: Database Setup Complete ✅</p>
+        <p>Step 3: Nanopub Parser - Testing...</p>
       </div>
 
       <DatabaseTest />
@@ -24,8 +25,22 @@ export function HomePage() {
           href="/api/v1/users/test" 
           target="_blank" 
           rel="noopener noreferrer"
+          style={{ marginRight: '1rem' }}
         >
           Test Database (JSON)
+        </a>
+        <a 
+          href="/test-parser"
+          style={{ 
+            padding: '8px 16px',
+            backgroundColor: '#4F46E5',
+            color: 'white',
+            textDecoration: 'none',
+            borderRadius: '4px',
+            display: 'inline-block'
+          }}
+        >
+          🧪 Test Nanopub Parser
         </a>
       </div>
     </div>
