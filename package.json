@@ -1,0 +1,23 @@
+{
+  "name": "science-live-platform",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "api"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=frontend",
+    "dev:api": "vercel dev",
+    "build": "npm run build --workspace=frontend",
+    "test": "npm run test --workspaces"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.75.1",
+    "@vercel/node": "^5.4.0"
+  }
+}
