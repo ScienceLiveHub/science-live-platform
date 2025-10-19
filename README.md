@@ -14,8 +14,8 @@ Science Live enables researchers to create FAIR (Findable, Accessible, Interoper
 |-------|--------|-------------|
 | ✅ Step 1 | Complete | Foundation setup (monorepo, Vercel, React) |
 | ✅ Step 2 | Complete | Database integration (Supabase, PostgreSQL) |
-| 🔄 Step 3 | In Progress | Nanopub viewer component |
-| ⏳ Step 4 | Planned | Credit system implementation |
+| ✅ Step 3 | Complete | Nanopub parser and viewer with display modes |
+| 🔄 Step 4 | Next | Credit system implementation |
 | ⏳ Step 5 | Planned | ORCID authentication |
 | ⏳ Step 6 | Planned | Template processing engine |
 
