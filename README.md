@@ -1,4 +1,4 @@
-# 🧬 Science Live Platform
+# Science Live Platform
 
 Transform research into connected knowledge through stackable knowledge bricks.
 
