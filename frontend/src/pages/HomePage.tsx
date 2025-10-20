@@ -7,17 +7,24 @@ export function HomePage() {
         <h1>🧬 Science Live Platform</h1>
         <p>Step 1: Foundation Setup Complete ✅</p>
         <p>Step 2: Database Setup Complete ✅</p>
-        <p>Step 3: Nanopub Parser - Testing...</p>
+        <p>Step 3: Nanopub Parser Complete ✅</p>
       </div>
 
       <DatabaseTest />
 
-      <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+      <div style={{ marginTop: '2rem', textAlign: 'center', display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
         <a 
           href="/api/v1/health" 
           target="_blank" 
           rel="noopener noreferrer"
-          style={{ marginRight: '1rem' }}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#10B981',
+            color: 'white',
+            textDecoration: 'none',
+            borderRadius: '4px',
+            fontSize: '14px'
+          }}
         >
           Test API Health
         </a>
@@ -25,9 +32,16 @@ export function HomePage() {
           href="/api/v1/users/test" 
           target="_blank" 
           rel="noopener noreferrer"
-          style={{ marginRight: '1rem' }}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#10B981',
+            color: 'white',
+            textDecoration: 'none',
+            borderRadius: '4px',
+            fontSize: '14px'
+          }}
         >
-          Test Database (JSON)
+          Test Database
         </a>
         <a 
           href="/test-parser"
@@ -37,10 +51,24 @@ export function HomePage() {
             color: 'white',
             textDecoration: 'none',
             borderRadius: '4px',
-            display: 'inline-block'
+            fontSize: '14px'
           }}
         >
-          🧪 Test Nanopub Parser
+          🧪 Test Parser (Sample)
+        </a>
+        <a 
+          href="/test-real"
+          style={{ 
+            padding: '8px 16px',
+            backgroundColor: '#DC2626',
+            color: 'white',
+            textDecoration: 'none',
+            borderRadius: '4px',
+            fontSize: '14px',
+            fontWeight: '600'
+          }}
+        >
+          🌐 Test Real Nanopubs
         </a>
       </div>
     </div>

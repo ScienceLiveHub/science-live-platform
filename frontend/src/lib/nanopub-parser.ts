@@ -9,81 +9,15 @@ import type {
 // ============= LABEL FETCHER =============
 class LabelFetcher {
   private cache: Map<string, string> = new Map();
-  private pendingRequests: Map<string, Promise<string | null>> = new Map();
 
-  async getLabel(uri: string, localLabels: Record<string, string> = {}): Promise<string> {
-  // Check local labels first
-  if (localLabels[uri]) {
-    return localLabels[uri];
-  }
-
-  // Check cache
-  if (this.cache.has(uri)) {
-    return this.cache.get(uri)!;
-  }
-
-  // FOR NOW: Skip web fetching, just parse URIs
-  // TODO: Enable web fetching via API proxy later
-  const parsedLabel = this.parseUriLabel(uri);
-  this.cache.set(uri, parsedLabel);
-  return parsedLabel;
-
-  /* Original web fetching code - commented out for now
-  // Check if request is pending
-  if (this.pendingRequests.has(uri)) {
-    return this.pendingRequests.get(uri)!.then(label => label || this.parseUriLabel(uri));
-  }
-
-  // Create new request
-  const requestPromise = this.fetchLabelFromWeb(uri);
-  this.pendingRequests.set(uri, requestPromise);
-
-  try {
-    const label = await requestPromise;
-    if (label) {
-      this.cache.set(uri, label);
-      return label;
+  async getLabel(uri: string): Promise<string> {
+    if (this.cache.has(uri)) {
+      return this.cache.get(uri)!;
     }
-  } finally {
-    this.pendingRequests.delete(uri);
-  }
 
-  // Fallback to parsing URI
-  const parsedLabel = this.parseUriLabel(uri);
-  this.cache.set(uri, parsedLabel);
-  return parsedLabel;
-  */
-}
-
-  private async fetchLabelFromWeb(uri: string): Promise<string | null> {
-    try {
-      const response = await fetch(uri, {
-        headers: {
-          'Accept': 'application/ld+json, application/json'
-        }
-      });
-
-      if (!response.ok) return null;
-
-      const data = await response.json();
-
-      // Try different label predicates
-      if (data['rdfs:label']) {
-        const label = data['rdfs:label'];
-        return typeof label === 'object' ? label['@value'] : label;
-      }
-
-      if (data['@graph']) {
-        for (const node of data['@graph']) {
-          if (node['@id'] === uri && node['rdfs:label']) {
-            return node['rdfs:label'];
-          }
-        }
-      }
-    } catch (e) {
-      // Silently fail
-    }
-    return null;
+    const parsedLabel = this.parseUriLabel(uri);
+    this.cache.set(uri, parsedLabel);
+    return parsedLabel;
   }
 
   parseUriLabel(uri: string): string {
@@ -106,62 +40,56 @@ class LabelFetcher {
     return label;
   }
 
-  async batchGetLabels(uris: string[], localLabels: Record<string, string> = {}): Promise<Map<string, string>> {
+  async batchGetLabels(uris: string[]): Promise<Map<string, string>> {
     const results = new Map<string, string>();
-    const promises = uris.map(async uri => {
-      const label = await this.getLabel(uri, localLabels);
+    for (const uri of uris) {
+      const label = await this.getLabel(uri);
       results.set(uri, label);
-    });
-    
-    await Promise.all(promises);
+    }
     return results;
-  }
-
-  clearCache(): void {
-    this.cache.clear();
-    this.pendingRequests.clear();
   }
 }
 
-// ============= NANOPUB PARSER =============
+// ============= SIMPLE NANOPUB PARSER =============
 export class NanopubParser {
   private content: string;
-  private templateContent: string;
   private prefixes: Record<string, string> = {};
-  private data: {
-    assertions: any[];
-    provenance: any[];
-    pubinfo: any[];
-  } = {
-    assertions: [],
+  private graphs: Record<string, any[]> = {
+    assertion: [],
     provenance: [],
-    pubinfo: []
+    pubinfo: [],
+    head: []
   };
-  private template: any = null;
   private labelFetcher: LabelFetcher;
+  private nanopubUri: string = '';
 
-  constructor(content: string, templateContent: string = '') {
+  constructor(content: string) {
     this.content = content;
-    this.templateContent = templateContent;
     this.labelFetcher = new LabelFetcher();
   }
 
   async parseWithLabels(): Promise<ParsedNanopub> {
-    console.log('=== parseWithLabels START ===');
+    console.log('=== PARSING START ===');
+    console.log('Content length:', this.content.length);
+    console.log('First 200 chars:', this.content.substring(0, 200));
 
+    // Extract prefixes
     this.extractPrefixes();
-    console.log('Prefixes extracted:', Object.keys(this.prefixes).length);
+    console.log('Prefixes:', this.prefixes);
     
-    if (this.templateContent) {
-      console.log('Parsing template...');
-      // Template processor would go here
-      // For now, we'll skip it
+    // Parse into graphs
+    this.parseGraphs();
+    
+    console.log('=== PARSE RESULTS ===');
+    console.log('Assertions:', this.graphs.assertion.length);
+    console.log('Provenance:', this.graphs.provenance.length);
+    console.log('Pubinfo:', this.graphs.pubinfo.length);
+    console.log('Nanopub URI:', this.nanopubUri);
+
+    if (this.graphs.assertion.length > 0) {
+      console.log('Sample assertion:', this.graphs.assertion[0]);
     }
-    
-    console.log('Parsing statements...');
-    this.parseAllStatements();
-    
-    console.log('Fetching labels...');
+
     return await this.formatForPublication();
   }
 
@@ -173,174 +101,316 @@ export class NanopubParser {
         const match = trimmed.match(/@prefix\s+(\S+):\s+<([^>]+)>/);
         if (match) {
           this.prefixes[match[1]] = match[2];
+          console.log('Found prefix:', match[1], '=', match[2]);
         }
       }
     }
   }
 
-  private parseAllStatements(): void {
-    const lines = this.content.split('\n');
-    let currentGraph = '';
+private parseGraphs(): void {
+  const lines = this.content.split('\n');
+  let currentGraphName = '';
+  let currentGraphType: 'assertion' | 'provenance' | 'pubinfo' | 'head' | null = null;
+  let graphContent: string[] = [];
+  let braceDepth = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    // Skip empty lines, comments, and prefixes
+    if (!line || line.startsWith('#') || line.startsWith('@')) continue;
+
+    // Detect graph start
+    if (line.includes('{') && braceDepth === 0) {
+      // Extract graph name (everything before the {)
+      const graphNamePart = line.split('{')[0].trim();
+      currentGraphName = this.expandUri(graphNamePart);
+      
+      console.log('=== Found graph:', currentGraphName);
+      
+      // Determine graph type
+      const lowerName = currentGraphName.toLowerCase();
+      if (lowerName.includes('assertion') || lowerName.endsWith('#assertion')) {
+        currentGraphType = 'assertion';
+      } else if (lowerName.includes('provenance') || lowerName.endsWith('#provenance')) {
+        currentGraphType = 'provenance';
+      } else if (lowerName.includes('pubinfo') || lowerName.endsWith('#pubinfo')) {
+        currentGraphType = 'pubinfo';
+      } else if (lowerName.includes('head') || lowerName.endsWith('#head')) {
+        currentGraphType = 'head';
+        if (currentGraphName.includes('/np/')) {
+          this.nanopubUri = currentGraphName.split('#')[0];
+        }
+      } else {
+        currentGraphType = null;
+      }
+      
+      console.log('Graph type:', currentGraphType);
+      
+      braceDepth = 1;
+      graphContent = [];
+      
+      // Check if there's content after the { on the same line
+      const afterBrace = line.split('{')[1];
+      if (afterBrace && afterBrace.trim() && !afterBrace.trim().startsWith('}')) {
+        graphContent.push(afterBrace);
+      }
+      
+      continue;
+    }
+
+    // Track brace depth
+    if (line.includes('{')) braceDepth++;
+    if (line.includes('}')) braceDepth--;
+
+    // Detect graph end
+    if (braceDepth === 0 && currentGraphType) {
+      // Parse the accumulated content
+      const contentStr = graphContent.join('\n');
+      console.log('Graph content:', contentStr.substring(0, 100));
+      
+      if (contentStr.trim()) {
+        const triples = this.parseTriples(contentStr);
+        console.log('Found', triples.length, 'triples in', currentGraphType);
+        this.graphs[currentGraphType].push(...triples);
+      }
+      
+      currentGraphType = null;
+      currentGraphName = '';
+      graphContent = [];
+      continue;
+    }
+
+    // Accumulate graph content
+    if (braceDepth > 0 && currentGraphType) {
+      graphContent.push(line);
+    }
+  }
+}
+
+  private parseTriples(content: string): any[] {
+    const triples: any[] = [];
+    
+    // Split by lines and process
+    const lines = content.split('\n');
+    let currentSubject = '';
+    let currentPredicate = '';
     
     for (const line of lines) {
       const trimmed = line.trim();
       
-      if (trimmed.includes('{')) {
-        // Extract graph name
-        if (trimmed.includes('assertion')) currentGraph = 'assertion';
-        else if (trimmed.includes('provenance')) currentGraph = 'provenance';
-        else if (trimmed.includes('pubinfo')) currentGraph = 'pubinfo';
-        continue;
-      }
-      
-      if (trimmed.includes('}')) {
-        currentGraph = '';
-        continue;
-      }
-      
-      // Parse triple
-      if (trimmed && !trimmed.startsWith('#') && !trimmed.startsWith('@')) {
-        const triple = this.parseTriple(trimmed);
-        if (triple) {
-          if (currentGraph === 'assertion') {
-            this.data.assertions.push(triple);
-          } else if (currentGraph === 'provenance') {
-            this.data.provenance.push(triple);
-          } else if (currentGraph === 'pubinfo') {
-            this.data.pubinfo.push(triple);
-          }
+      // Skip empty lines and comments
+      if (!trimmed || trimmed.startsWith('#')) continue;
+
+      // Remove trailing punctuation
+      let statement = trimmed.replace(/[;,.]$/, '').trim();
+      if (!statement) continue;
+
+      // Check if this starts a new statement (has a subject)
+      if (!statement.startsWith(';') && !statement.startsWith(',')) {
+        // Parse as full triple: subject predicate object
+        const parts = this.smartSplit(statement);
+        
+        if (parts.length >= 3) {
+          currentSubject = this.expandUri(parts[0]);
+          currentPredicate = this.expandUri(parts[1]);
+          const object = this.parseObject(parts.slice(2).join(' '));
+          
+          triples.push({
+            subject: currentSubject,
+            predicate: currentPredicate,
+            object
+          });
+          
+          console.log('Parsed triple:', currentSubject, currentPredicate, object);
+        }
+      } else if (statement.startsWith(';')) {
+        // Same subject, new predicate
+        statement = statement.substring(1).trim();
+        const parts = this.smartSplit(statement);
+        
+        if (parts.length >= 2 && currentSubject) {
+          currentPredicate = this.expandUri(parts[0]);
+          const object = this.parseObject(parts.slice(1).join(' '));
+          
+          triples.push({
+            subject: currentSubject,
+            predicate: currentPredicate,
+            object
+          });
+        }
+      } else if (statement.startsWith(',')) {
+        // Same subject and predicate, new object
+        statement = statement.substring(1).trim();
+        const object = this.parseObject(statement);
+        
+        if (currentSubject && currentPredicate) {
+          triples.push({
+            subject: currentSubject,
+            predicate: currentPredicate,
+            object
+          });
         }
       }
     }
+    
+    return triples;
   }
 
-  private parseTriple(line: string): any | null {
-    // Simple triple parsing
-    const match = line.match(/(\S+)\s+(\S+)\s+(.+?)\s*[;.]$/);
-    if (!match) return null;
+  private smartSplit(statement: string): string[] {
+    const parts: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    let inBrackets = false;
 
-    return {
-      subject: this.expandPrefix(match[1]),
-      predicate: this.expandPrefix(match[2]),
-      object: this.parseObject(match[3])
-    };
+    for (let i = 0; i < statement.length; i++) {
+      const char = statement[i];
+
+      if (char === '"' && statement[i - 1] !== '\\') {
+        inQuotes = !inQuotes;
+        current += char;
+      } else if (char === '<' && !inQuotes) {
+        inBrackets = true;
+        current += char;
+      } else if (char === '>' && inBrackets) {
+        inBrackets = false;
+        current += char;
+      } else if ((char === ' ' || char === '\t') && !inQuotes && !inBrackets) {
+        if (current.trim()) {
+          parts.push(current.trim());
+          current = '';
+        }
+      } else {
+        current += char;
+      }
+    }
+
+    if (current.trim()) {
+      parts.push(current.trim());
+    }
+
+    return parts;
   }
 
-  private expandPrefix(term: string): string {
+  private expandUri(term: string): string {
+    if (!term) return term;
+    
+    term = term.trim();
+    
+    // Already expanded
     if (term.startsWith('<') && term.endsWith('>')) {
       return term.slice(1, -1);
     }
     
-    const [prefix, local] = term.split(':');
-    if (this.prefixes[prefix]) {
-      return this.prefixes[prefix] + (local || '');
+    if (term.startsWith('http://') || term.startsWith('https://')) {
+      return term;
     }
-    
+
+    // Blank node
+    if (term.startsWith('_:')) {
+      return term;
+    }
+
+    // Expand prefix
+    const colonIndex = term.indexOf(':');
+    if (colonIndex > 0) {
+      const prefix = term.substring(0, colonIndex);
+      const local = term.substring(colonIndex + 1);
+      
+      if (this.prefixes[prefix]) {
+        return this.prefixes[prefix] + local;
+      }
+    }
+
     return term;
   }
 
   private parseObject(obj: string): any {
     obj = obj.trim();
     
+    // URI in brackets
     if (obj.startsWith('<') && obj.endsWith('>')) {
       return { type: 'uri', value: obj.slice(1, -1) };
     }
-    
+
+    // Literal
     if (obj.startsWith('"')) {
-      return { type: 'literal', value: obj };
+      const endQuote = obj.lastIndexOf('"');
+      if (endQuote > 0) {
+        const value = obj.substring(1, endQuote);
+        const remainder = obj.substring(endQuote + 1);
+
+        let datatype = undefined;
+        if (remainder.includes('^^')) {
+          const match = remainder.match(/\^\^<?([^>]+)>?/);
+          if (match) datatype = match[1];
+        }
+
+        return { type: 'literal', value, datatype };
+      }
     }
-    
-    return { type: 'uri', value: this.expandPrefix(obj) };
+
+    // Prefixed URI
+    const expanded = this.expandUri(obj);
+    return { type: 'uri', value: expanded };
   }
 
   private async formatForPublication(): Promise<ParsedNanopub> {
-    // Collect all URIs that need labels
-    const uris: string[] = [];
+    // Collect URIs
+    const allUris = new Set<string>();
     
-    this.data.assertions.forEach((triple: any) => {
-      if (triple.subject) uris.push(triple.subject);
-      if (triple.predicate) uris.push(triple.predicate);
-      if (triple.object?.type === 'uri') uris.push(triple.object.value);
+    [...this.graphs.assertion, ...this.graphs.provenance, ...this.graphs.pubinfo].forEach(triple => {
+      if (triple.subject && !triple.subject.startsWith('_:')) allUris.add(triple.subject);
+      if (triple.predicate) allUris.add(triple.predicate);
+      if (triple.object?.type === 'uri') allUris.add(triple.object.value);
     });
 
-    // Fetch labels in batch
-    const labels = await this.labelFetcher.batchGetLabels([...new Set(uris)]);
+    const labels = await this.labelFetcher.batchGetLabels(Array.from(allUris));
 
-    // Format assertions with labels
-    const assertions: ParsedAssertion[] = this.data.assertions.map((triple: any) => ({
-      subject: triple.subject,
-      predicate: triple.predicate,
-      object: triple.object?.value || triple.object,
-      subjectLabel: labels.get(triple.subject) || this.labelFetcher.parseUriLabel(triple.subject),
-      predicateLabel: labels.get(triple.predicate) || this.labelFetcher.parseUriLabel(triple.predicate),
-      objectLabel: triple.object?.type === 'uri' 
-        ? (labels.get(triple.object.value) || this.labelFetcher.parseUriLabel(triple.object.value))
-        : triple.object?.value
-    }));
+    // Format assertions
+    const assertions: ParsedAssertion[] = this.graphs.assertion.map(triple => {
+      const objValue = triple.object?.value || triple.object;
+      const objIsUri = triple.object?.type === 'uri';
+
+      return {
+        subject: triple.subject,
+        predicate: triple.predicate,
+        object: objValue,
+        subjectLabel: labels.get(triple.subject) || this.labelFetcher.parseUriLabel(triple.subject),
+        predicateLabel: labels.get(triple.predicate) || this.labelFetcher.parseUriLabel(triple.predicate),
+        objectLabel: objIsUri 
+          ? (labels.get(objValue) || this.labelFetcher.parseUriLabel(objValue))
+          : objValue
+      };
+    });
 
     // Extract metadata
-    const metadata: NanopubMetadata = this.extractMetadata();
-
-    // Format provenance
-    const provenance: ParsedProvenance = {
-      other: this.data.provenance
-    };
-
-    // Format pubinfo
-    const publicationInfo: ParsedPubInfo = {
-      other: this.data.pubinfo
-    };
-
-    return {
-      uri: this.extractNanopubUri(),
-      metadata,
-      assertions,
-      provenance,
-      publicationInfo,
-      rawTriples: {
-        assertion: this.data.assertions,
-        provenance: this.data.provenance,
-        pubinfo: this.data.pubinfo
-      }
-    };
-  }
-
-  private extractMetadata(): NanopubMetadata {
     const metadata: NanopubMetadata = {};
-    
-    // Extract from pubinfo
-    this.data.pubinfo.forEach((triple: any) => {
-      const pred = triple.predicate.split(/[#\/]/).pop() || '';
+    this.graphs.pubinfo.forEach(triple => {
+      const pred = triple.predicate.split(/[#/]/).pop()?.toLowerCase() || '';
       const obj = triple.object?.value || triple.object;
       
-      if (pred === 'created') metadata.created = obj;
-      if (pred === 'creator') metadata.creator = obj;
-      if (pred === 'license') metadata.license = obj;
+      if (pred.includes('created')) metadata.created = obj;
+      if (pred.includes('creator')) metadata.creator = obj;
+      if (pred.includes('license')) metadata.license = obj;
     });
-    
-    return metadata;
-  }
 
-  private extractNanopubUri(): string {
-    // Try to find nanopub URI in head section
-    return 'http://example.org/nanopub/temp';
-  }
-
-  extractTemplateUri(): string | null {
-    // Look for template reference in provenance
-    for (const triple of this.data.provenance) {
-      if (triple.predicate.includes('wasGeneratedBy') || triple.predicate.includes('generatedFromTemplate')) {
-        return triple.object?.value || triple.object;
+    return {
+      uri: this.nanopubUri || 'unknown',
+      metadata,
+      assertions,
+      provenance: { other: this.graphs.provenance },
+      publicationInfo: { other: this.graphs.pubinfo },
+      rawTriples: {
+        assertion: this.graphs.assertion,
+        provenance: this.graphs.provenance,
+        pubinfo: this.graphs.pubinfo
       }
-    }
-    return null;
+    };
   }
 }
 
-/**
- * Main export function to parse nanopub content
- */
-export async function parseNanopub(trigContent: string, templateContent: string = ''): Promise<ParsedNanopub> {
-  const parser = new NanopubParser(trigContent, templateContent);
+export async function parseNanopub(trigContent: string): Promise<ParsedNanopub> {
+  const parser = new NanopubParser(trigContent);
   return await parser.parseWithLabels();
 }
