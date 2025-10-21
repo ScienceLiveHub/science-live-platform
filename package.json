@@ -17,6 +17,8 @@
     "typescript": "^5.3.0"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.1.0",
+    "@sciencelivehub/nanopub-view": "file:../nanopub-view",
     "@supabase/supabase-js": "^2.75.1",
     "@vercel/node": "^5.4.1"
   }
