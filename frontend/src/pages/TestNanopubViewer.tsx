@@ -1,7 +1,7 @@
 // frontend/src/pages/TestNanopubViewer.tsx
 import { useState } from 'react';
 import { NanopubViewer } from '@sciencelivehub/nanopub-view/react';
-import '@sciencelivehub/nanopub-view/src/styles/viewer.css';
+import '../styles/nanopub-viewer.css';
 
 export function TestNanopubViewer() {
   const [uri, setUri] = useState('https://w3id.org/np/RA6Cz33icPZrBAummwxw6MwdS-RepX-sUjW_fZz905Rvc');

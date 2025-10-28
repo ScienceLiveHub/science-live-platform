@@ -12,7 +12,26 @@ export default defineConfig({
   server: {
     port: 3000,
     hmr: {
-      overlay: false, // Disable error overlay
+      overlay: false,
     }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
+  },
+  optimizeDeps: {
+    include: [
+      'react', 
+      'react-dom', 
+      'react-router-dom', 
+      '@supabase/supabase-js',
+      '@sciencelivehub/nanopub-view'
+    ],
   },
 });
