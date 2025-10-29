@@ -13,10 +13,17 @@ export default defineConfig({
     port: 3000,
     hmr: {
       overlay: false,
-    }
+    },
+    // Add headers for WASM support
+    headers: {
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+    },
   },
   build: {
     target: 'esnext', // Required for top-level await in WASM
+    // Increase chunk size limit for large WASM files
+    chunkSizeWarningLimit: 5000,
     rollupOptions: {
       output: {
         manualChunks: undefined,
@@ -27,7 +34,11 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ['@nanopub/sign'], // Don't pre-bundle WASM modules
+    // Don't pre-bundle WASM modules
+    exclude: [
+      '@nanopub/sign',
+      '@sciencelivehub/nanopub-create'  // Add this
+    ],
     include: [
       'react', 
       'react-dom', 
@@ -35,8 +46,14 @@ export default defineConfig({
       '@supabase/supabase-js',
       '@sciencelivehub/nanopub-view'
     ],
+    // Force optimization even for large dependencies
+    esbuildOptions: {
+      target: 'esnext'
+    }
   },
   worker: {
     format: 'es',
   },
+  // Explicitly handle WASM and other binary files
+  assetsInclude: ['**/*.wasm'],
 });
