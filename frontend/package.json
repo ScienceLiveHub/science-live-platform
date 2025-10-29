@@ -10,6 +10,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@sciencelivehub/nanopub-create": "github:ScienceLiveHub/nanopub-create",
     "@sciencelivehub/nanopub-view": "github:ScienceLiveHub/nanopub-view",
     "@supabase/supabase-js": "^2.39.0",
     "axios": "^1.6.0",
