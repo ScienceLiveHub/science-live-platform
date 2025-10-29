@@ -3,6 +3,7 @@ import { HomePage } from './pages/HomePage';
 import { NanopubTest } from './pages/NanopubTest';
 import { RealNanopubTest } from './pages/RealNanopubTest';
 import { TestNanopubViewer } from './pages/TestNanopubViewer';
+import NanopubTestPage from './pages/NanopubTestPage';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/test-parser" element={<NanopubTest />} />
         <Route path="/test-real" element={<RealNanopubTest />} />
         <Route path="/test-viewer" element={<TestNanopubViewer />} />
+        <Route path="/test-nanopub" element={<NanopubTestPage />} />
       </Routes>
     </Router>
   );

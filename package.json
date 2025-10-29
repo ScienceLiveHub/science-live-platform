@@ -1,6 +1,6 @@
 {
   "name": "science-live-platform",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
   "workspaces": [
     "frontend",
@@ -10,7 +10,9 @@
     "dev": "npm run dev --workspace=frontend",
     "dev:api": "vercel dev",
     "build": "npm run build --workspace=frontend",
-    "test": "npm run test --workspaces"
+    "test": "npm run test --workspaces",
+    "postinstall": "bash scripts/build-nanopub-deps.sh",
+    "build:nanopub": "bash scripts/build-nanopub-deps.sh"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
@@ -18,6 +20,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.1.0",
+    "@sciencelivehub/nanopub-create": "github:ScienceLiveHub/nanopub-create",
     "@sciencelivehub/nanopub-view": "github:ScienceLiveHub/nanopub-view",
     "@supabase/supabase-js": "^2.75.1",
     "@vercel/node": "^5.4.1"

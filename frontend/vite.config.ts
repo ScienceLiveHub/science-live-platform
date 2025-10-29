@@ -16,6 +16,7 @@ export default defineConfig({
     }
   },
   build: {
+    target: 'esnext', // Required for top-level await in WASM
     rollupOptions: {
       output: {
         manualChunks: undefined,
@@ -26,6 +27,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
+    exclude: ['@nanopub/sign'], // Don't pre-bundle WASM modules
     include: [
       'react', 
       'react-dom', 
@@ -33,5 +35,8 @@ export default defineConfig({
       '@supabase/supabase-js',
       '@sciencelivehub/nanopub-view'
     ],
+  },
+  worker: {
+    format: 'es',
   },
 });

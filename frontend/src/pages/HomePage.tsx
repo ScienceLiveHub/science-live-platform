@@ -4,7 +4,7 @@ export function HomePage() {
   return (
     <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
       <div style={{ textAlign: 'center' }}>
-        <h1>🧬 Science Live Platform</h1>
+        <h1> Science Live Platform</h1>
         <p>Step 1: Foundation Setup Complete ✅</p>
         <p>Step 2: Database Setup Complete ✅</p>
         <p>Step 3: Nanopub Parser Complete ✅</p>

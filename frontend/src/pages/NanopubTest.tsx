@@ -39,7 +39,7 @@ export function NanopubTest() {
   return (
     <div style={{ padding: '2rem' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <h1 style={{ marginBottom: '2rem' }}>🧪 Nanopub Viewer Test</h1>
+        <h1 style={{ marginBottom: '2rem' }}>Nanopub Viewer Test</h1>
         
         {!showViewer ? (
           <div>
