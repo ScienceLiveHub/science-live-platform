@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { NanopubViewer } from '@sciencelivehub/nanopub-view/react';
 import NanopubCreator from '@sciencelivehub/nanopub-create';
-import '@sciencelivehub/nanopub-view/dist/nanopub-viewer.css';
-import '@sciencelivehub/nanopub-create/dist/nanopub-creator.css';
+import '../../../node_modules/@sciencelivehub/nanopub-view/dist/nanopub-view.css';
+import '../../../node_modules/@sciencelivehub/nanopub-create/dist/nanopub-creator.css';
 import '../styles/NanopubTestPage.css';
 
 export default function NanopubTestPage() {

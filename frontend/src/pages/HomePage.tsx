@@ -124,7 +124,7 @@ export function HomePage() {
               <div className="feature-icon">
                 <i className="fas fa-book-open"></i>
               </div>
-              <h3>View Nanopublications</h3>
+              <h3>View Knowledge Bricks</h3>
               <p>Beautiful, interactive display of scientific nanopublications with automatic template fetching</p>
               <Link to="/test-nanopub" className="feature-link">
                 Try viewer <i className="fas fa-arrow-right"></i>
