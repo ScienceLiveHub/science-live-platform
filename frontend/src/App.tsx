@@ -9,11 +9,14 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Main Pages - For Demo/Production */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/test-nanopub" element={<NanopubTestPage />} /> {/* CURRENT DEMO */}
+        
+        {/* Development/Testing Pages - Keep for development */}
         <Route path="/test-parser" element={<NanopubTest />} />
         <Route path="/test-real" element={<RealNanopubTest />} />
         <Route path="/test-viewer" element={<TestNanopubViewer />} />
-        <Route path="/test-nanopub" element={<NanopubTestPage />} />
       </Routes>
     </Router>
   );
