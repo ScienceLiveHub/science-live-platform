@@ -30,7 +30,32 @@ export default function NanopubTestPage() {
             theme: 'default',
             showHelp: true
           });
-          await creatorRef.current.init();
+          // Note: initWasm() is called automatically in constructor
+          // Just wait a moment for it to complete
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // Set up event listeners
+          creatorRef.current.on('create', ({ trigContent }) => {
+            console.log('✅ Nanopub created!');
+            console.log('📄 Content:', trigContent);
+            alert('Nanopublication created successfully! Check console for details.');
+          });
+          
+          creatorRef.current.on('publish', ({ uri, signedContent }) => {
+            console.log('✅ Nanopub published!');
+            console.log('🌐 URI:', uri);
+            console.log('📄 Signed content:', signedContent);
+            if (uri) {
+              alert(`Nanopublication published!\n\nURI: ${uri}\n\nView at: https://nanodash.knowledgepixels.com/explore?id=${uri}`);
+            } else {
+              alert('Nanopublication signed and ready to download!');
+            }
+          });
+          
+          creatorRef.current.on('error', ({ type, error }) => {
+            console.error('❌ Error:', type, error);
+            alert(`Error during ${type}: ${error.message}`);
+          });
           
           // Check if profile already exists
           if (creatorRef.current.hasProfile()) {
