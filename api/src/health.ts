@@ -5,7 +5,9 @@ import { sql } from "drizzle-orm";
 const app = new Hono();
 
 app.get("/", async (c) => {
-  const isDbLive = !!(await db.execute(sql`select 1`));
+  // Check whether db connection is valid and live
+  const isDbLive = !!(await db.execute(sql`select 1`).catch((error) => {}));
+
   return c.json({
     status: "healthy",
     revision: process.env.VERCEL_GIT_COMMIT_SHA ?? "?",
