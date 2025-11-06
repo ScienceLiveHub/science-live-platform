@@ -66,21 +66,21 @@ Science Live enables researchers to create FAIR (Findable, Accessible, Interoper
          └─────────────────────────────────────────┘
 ```
 
-## 🚀 Quick Start
+## 🚀 Developer Quick Start
 
 ### Prerequisites
 
 - Git
 - A Postgres database and connection string
-
-If NOT using the recommended devcontainer:
-
-- Node.js v22 or higher
-- npm (comes with Node.js)
-
-If you want to deploy to Vercel:
-
-- A [Vercel](https://vercel.com) account (free tier)
+- **If using the recommended devcontainer:**
+  - vscode (or other IDE that supports devcontainer)
+  - Docker
+- **If NOT using the recommended devcontainer** (which has everything built in), you need to manually install:
+  - Node.js v22 or higher
+  - npm (comes with Node.js)
+- **If you want to deploy to Vercel:**
+  - A [Vercel](https://vercel.com) account (free tier)
+  - Log into `vercel` CLI
 
 ### First-time Setup
 
@@ -104,7 +104,7 @@ If you want to deploy to Vercel:
 
 ### Development - using devcontainer (_RECOMMENDED_)
 
-If you have vscode and Docker, simply build and start the [devcontainer](https://code.visualstudio.com/docs/devcontainers/containers) which contains everything you need, by clicking the blue icon in the bottom-left-most corner of the vscode window. Wait for the container to build and start running, which can take a while first time. The default shell is `fish` but you can change it if you prefer.
+Simply build and start the [devcontainer](https://code.visualstudio.com/docs/devcontainers/containers) by clicking the blue icon in the bottom-left-most corner of the vscode window. Wait for the container to build for the first time and start running.
 
 If you are starting with a blank database, run initial [database migrations](#database-migrations)
 
@@ -176,10 +176,7 @@ open http://localhost:3000
 
 ```bash
 # Health check
-curl http://localhost:3000/api/v1/health
-
-# Database connection
-curl http://localhost:3000/api/v1/users/test
+curl http://localhost:3001/api/health
 ```
 
 ## 🛠️ Technology Stack
