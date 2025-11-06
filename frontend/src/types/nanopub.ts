@@ -36,7 +36,7 @@ export interface NanopubMetadata {
 }
 
 // Display modes
-export type DisplayMode = 'technical' | 'simplified' | 'beginner';
+export type DisplayMode = "technical" | "simplified" | "beginner";
 
 // Parsed nanopub for display
 export interface ParsedNanopub {
