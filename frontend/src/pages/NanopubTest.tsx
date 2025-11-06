@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { NanopubViewer } from '@sciencelivehub/nanopub-view/react';
-import '../styles/nanopub-viewer.css';
+import { useState } from "react";
+import { NanopubViewer } from "@sciencelivehub/nanopub-view/react";
+import "../styles/nanopub-viewer.css";
 
 export function NanopubTest() {
   const [showViewer, setShowViewer] = useState(false);
@@ -37,61 +37,63 @@ export function NanopubTest() {
 }`;
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <h1 style={{ marginBottom: '2rem' }}>Nanopub Viewer Test</h1>
-        
+    <div style={{ padding: "2rem" }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+        <h1 style={{ marginBottom: "2rem" }}>Nanopub Viewer Test</h1>
+
         {!showViewer ? (
           <div>
-            <button 
+            <button
               onClick={() => setShowViewer(true)}
               style={{
-                padding: '16px 32px',
-                backgroundColor: '#4F46E5',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '18px',
-                fontWeight: '600',
-                marginBottom: '2rem'
+                padding: "16px 32px",
+                backgroundColor: "#4F46E5",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontSize: "18px",
+                fontWeight: "600",
+                marginBottom: "2rem",
               }}
             >
               🚀 Load Sample Nanopub
             </button>
 
-            <div style={{ marginTop: '2rem' }}>
+            <div style={{ marginTop: "2rem" }}>
               <h3>📝 Sample Nanopub Content:</h3>
-              <pre style={{
-                backgroundColor: '#F3F4F6',
-                padding: '1rem',
-                borderRadius: '8px',
-                overflow: 'auto',
-                fontSize: '0.85em',
-                border: '1px solid #D1D5DB'
-              }}>
+              <pre
+                style={{
+                  backgroundColor: "#F3F4F6",
+                  padding: "1rem",
+                  borderRadius: "8px",
+                  overflow: "auto",
+                  fontSize: "0.85em",
+                  border: "1px solid #D1D5DB",
+                }}
+              >
                 {sampleNanopub}
               </pre>
             </div>
           </div>
         ) : (
           <div>
-            <button 
+            <button
               onClick={() => setShowViewer(false)}
               style={{
-                padding: '8px 16px',
-                backgroundColor: '#6B7280',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                marginBottom: '24px'
+                padding: "8px 16px",
+                backgroundColor: "#6B7280",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "14px",
+                marginBottom: "24px",
               }}
             >
               ← Back
             </button>
-            
+
             <NanopubViewer content={sampleNanopub} />
           </div>
         )}

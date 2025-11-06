@@ -1,0 +1,28 @@
+{
+  "name": "science-live-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot run src/index.ts",
+    "dev-vc": "vercel",
+    "db:generate": "npx drizzle-kit generate",
+    "db:migrate": "npx drizzle-kit migrate",
+    "db:studio": "npx drizzle-kit studio --port=3002"
+  },
+  "dependencies": {
+    "better-auth": "^1.3.34",
+    "drizzle-orm": "^0.44.7",
+    "hono": "^4.10.4",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@hono/vite-dev-server": "^0.23.0",
+    "@types/node": "^24.10.0",
+    "bun": "^1.3.1",
+    "drizzle-kit": "^0.31.6",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.12",
+    "vitest": "^4.0.7"
+  }
+}

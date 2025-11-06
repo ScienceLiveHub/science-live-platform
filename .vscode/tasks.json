@@ -1,0 +1,56 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+        "label": "runDevelopment",
+        "dependsOrder": "parallel",
+        "dependsOn": [
+            "api",
+            "frontend",
+        ],
+        "detail": "Run both frontend and backend together for local development",
+        "problemMatcher": []
+    },
+    {
+        "label": "api",
+        "type": "shell",
+        "command": "npm run dev:api",
+        "presentation": {
+            "group": "cloud",
+            "panel": "shared"
+        },
+        "icon": {
+            "id": "server"
+        },
+        "isBackground": true,
+        "detail": "The Backend API server",
+        "problemMatcher": []
+    },
+    {
+        "label": "frontend",
+        "type": "shell",
+        "command": "npm run dev",
+        "presentation": {
+            "group": "cloud",
+            "panel": "shared"
+        },
+        "icon": {
+            "id": "browser"
+        },
+        "isBackground": true,
+        "detail": "The Frontend UI server",
+        "problemMatcher": []
+    },
+    {
+        "label": "db-gui",
+        "type": "shell",
+        "command": "npm run -w api db:studio",
+        "icon": {
+            "id": "database"
+        },
+        "isBackground": true,
+        "detail": "A friendly GUI for exploring the database (Drizzle Studio)",
+        "problemMatcher": []
+    },
+]
+}

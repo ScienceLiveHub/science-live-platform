@@ -10,18 +10,30 @@ Science Live enables researchers to create FAIR (Findable, Accessible, Interoper
 
 🚧 **In Active Development** (October 2025 - June 2026)
 
-| Phase | Status | Description |
-|-------|--------|-------------|
-| ✅ Step 1 | Complete | Foundation setup (monorepo, Vercel, React) |
-| ✅ Step 2 | Complete | Database integration (Supabase, PostgreSQL) |
+| Phase     | Status   | Description                                  |
+| --------- | -------- | -------------------------------------------- |
+| ✅ Step 1 | Complete | Foundation setup (monorepo, Vercel, React)   |
+| ✅ Step 2 | Complete | Database integration (PostgreSQL)            |
 | ✅ Step 3 | Complete | Nanopub parser and viewer with display modes |
-| 🔄 Step 4 | Next | Credit system implementation |
-| ⏳ Step 5 | Planned | ORCID authentication |
-| ⏳ Step 6 | Planned | Template processing engine |
+| 🔄 Step 4 | Next     | Credit system implementation                 |
+| ⏳ Step 5 | Planned  | ORCID authentication                         |
+| ⏳ Step 6 | Planned  | Template processing engine                   |
 
 **Timeline:** Beta launch planned for January 2026, Public launch June 2026.
 
 ## 🏗️ Architecture
+
+### Architecture preferences
+
+- Open Source
+- GDPR compliant
+- Modern developer experience
+- Serverless and low running cost (economical scale up and down)
+- Avoid hard-dependency on proprietary micro-services
+  - Self-contained auth broker (better-auth), any OIDC provider can be added
+  - Plain postgres database via connection string
+  - Vercel is default deployement but can be hosted elsewhere easily
+- Future potential for private enterprise self-hosted instance
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -33,7 +45,7 @@ Science Live enables researchers to create FAIR (Findable, Accessible, Interoper
 │  - Nanopub creation & display                           │
 │  - Template-based forms                                 │
 ├─────────────────────────────────────────────────────────┤
-│  Backend API (Python FastAPI - Serverless)              │
+│  Backend API (Serverless)                               │
 │  - /api/v1/auth/*       - ORCID OAuth2                  │
 │  - /api/v1/users/*      - User profiles & credits       │
 │  - /api/v1/nanopubs/*   - Create, validate, fetch       │
@@ -44,7 +56,7 @@ Science Live enables researchers to create FAIR (Findable, Accessible, Interoper
          ┌─────────────────────────────────────────┐
          │  Data & Infrastructure                  │
          ├─────────────────────────────────────────┤
-         │  PostgreSQL (Supabase)                  │
+         │  PostgreSQL                             │
          │  - Users, credits, transactions         │
          │  - Organizations, travel grants         │
          ├─────────────────────────────────────────┤
@@ -54,180 +66,158 @@ Science Live enables researchers to create FAIR (Findable, Accessible, Interoper
          └─────────────────────────────────────────┘
 ```
 
-## 🚀 Quick Start
+## 🚀 Developer Quick Start
 
 ### Prerequisites
 
-- Node.js v18 or higher
-- npm (comes with Node.js)
 - Git
-- A [Supabase](https://supabase.com) account (free tier)
-- A [Vercel](https://vercel.com) account (free tier)
+- A Postgres database and connection string
+- **If using the recommended devcontainer:**
+  - vscode (or other IDE that supports devcontainer)
+  - Docker
+- **If NOT using the recommended devcontainer** (which has everything built in), you need to manually install:
+  - Node.js v22 or higher
+  - npm (comes with Node.js)
+- **If you want to deploy to Vercel:**
+  - A [Vercel](https://vercel.com) account (free tier)
+  - Log into `vercel` CLI
 
-### Installation
+### First-time Setup
+
+1. **Clone repository**
+
+   ```bash
+   git clone https://github.com/ScienceLiveHub/science-live-platform.git
+   cd science-live-platform
+   ```
+
+2. **Copy environment templates:**
+
+   ```bash
+   cp frontend/.env.example frontend/.env
+   cp api/.env.example api/.env
+   ```
+
+3. **Update both `.env` with your settings and credentials**
+
+   Mainly, the variables marked REQUIRED must be changed.
+
+### Development - using devcontainer (_RECOMMENDED_)
+
+Simply build and start the [devcontainer](https://code.visualstudio.com/docs/devcontainers/containers) by clicking the blue icon in the bottom-left-most corner of the vscode window. Wait for the container to build for the first time and start running.
+
+If you are starting with a blank database, run initial [database migrations](#database-migrations)
+
+The running container will automatically close when you exit vscode.
+
+### Development - using manual setup
+
+_Note: You dont need to do any of this if you are using the devcontainer mentioned above_
 
 ```bash
-# Clone repository
-git clone https://github.com/YOUR-USERNAME/science-live-platform.git
-cd science-live-platform
-
-# Install root dependencies
+# Install all dependencies
 npm install
 
-# Install frontend dependencies
-cd frontend
-npm install
-cd ..
-
-# Install API dependencies
-cd api
-npm install
-cd ..
-
-# Install Vercel CLI globally (if not already installed)
+# If deploying to vercel, install Vercel CLI globally if required
 npm install -g vercel
 ```
 
-### Configuration
+If you are starting with a blank database, run initial [database migrations](#database-migrations)
 
-1. **Copy environment template:**
-   ```bash
-   cp .env.example .env
-   ```
+### Database migrations
 
-2. **Create Supabase project:**
-   - Go to https://supabase.com
-   - Create new project: `science-live-platform`
-   - Region: Europe (Frankfurt) for GDPR compliance
-   - Copy your credentials from Settings → API
-
-3. **Update `.env` with your credentials:**
-   ```bash
-   # Edit .env and add your Supabase URL and keys
-   VITE_SUPABASE_URL=https://your-project.supabase.co
-   VITE_SUPABASE_ANON_KEY=your_anon_key
-   SUPABASE_URL=https://your-project.supabase.co
-   SUPABASE_SERVICE_KEY=your_service_key
-   ```
-
-4. **Set up database:**
-   - Go to Supabase SQL Editor
-   - Run the schema from `database/migrations/001_initial_schema.sql`
-   - Or see [SETUP.md](SETUP.md) for complete SQL
-
-### Development
+You will need to run this initially on a blank database to set up the schema:
 
 ```bash
-# Start development server
-vercel dev
-
-# Answer setup questions:
-# - Set up and develop? YES
-# - Which scope? (your account)
-# - Link to existing project? NO
-# - Project name: science-live-platform
-
-# Server will start on http://localhost:3000
+npm -w api run db:migrate
 ```
+
+Then if you change the databse [schema](./api/src/db/schema), you will need to generate the new migration and apply it to the db:
+
+```bash
+npm -w api run db:generate
+npm -w api run db:migrate
+```
+
+### Running the app for local development:
+
+#### Using vscode Run Task
+
+1. You can hit `Ctrl + Shift + P`
+2. Type "Run Task", `Enter`
+3. Select the `runDevelopment` task to start the frontend Vite server and backend Bun server.
+
+Alternatively use the `npm run dev` and `npm run dev:api` commands.
 
 Visit http://localhost:3000 to see the application.
 
-## 📁 Project Structure
+#### Using terminal
 
-```
-science-live-platform/
-├── README.md               # This file
-├── SETUP.md               # Detailed setup instructions
-├── .env.example           # Environment variables template
-├── .env                   # Your local environment (DO NOT COMMIT)
-├── .gitignore            # Git ignore rules
-├── vercel.json           # Vercel deployment configuration
-├── package.json          # Root dependencies
-│
-├── frontend/             # React frontend application
-│   ├── src/
-│   │   ├── components/   # Reusable React components
-│   │   │   └── DatabaseTest.tsx
-│   │   ├── pages/        # Page components
-│   │   │   └── HomePage.tsx
-│   │   ├── lib/          # Utilities and libraries
-│   │   │   └── supabase.ts
-│   │   ├── styles/       # CSS styles
-│   │   │   └── index.css
-│   │   ├── App.tsx       # Main app component
-│   │   └── main.tsx      # Entry point
-│   ├── public/           # Static assets
-│   ├── index.html        # HTML template
-│   ├── package.json      # Frontend dependencies
-│   ├── vite.config.ts    # Vite configuration
-│   └── tsconfig.json     # TypeScript configuration
-│
-├── api/                  # Backend API functions (serverless)
-│   ├── package.json      # API dependencies
-│   └── v1/               # API version 1
-│       ├── health.ts     # Health check endpoint
-│       └── users/
-│           └── test.ts   # Database test endpoint
-│
-└── database/
-    └── migrations/       # Database schema migrations
+```bash
+# Option 1: Run backend using Bun (doesn't require Vercel account)
+npm run dev:api
+# Option 2: Run backend using Vercel (will need to log in using a Vercel account)
+npm run dev:api-vc
+
+# Run frontend using Vite
+npm run dev
 ```
 
 ## 🧪 Testing
 
 ### Test Frontend
+
 ```bash
 # Should show the homepage
 open http://localhost:3000
 ```
 
 ### Test API Endpoints
+
 ```bash
 # Health check
-curl http://localhost:3000/api/v1/health
-
-# Database connection
-curl http://localhost:3000/api/v1/users/test
-```
-
-### Run Tests (coming soon)
-```bash
-npm test
+curl http://localhost:3001/api/health
 ```
 
 ## 🛠️ Technology Stack
 
-### Frontend
-- **React 18** - UI library
+#### Both Frontend and Backend
+
+- **Node.js 22** - Runtime
 - **TypeScript** - Type safety
-- **Vite** - Build tool and dev server
+
+#### Frontend
+
+- **React 19** - UI library
 - **React Router** - Client-side routing
-- **Supabase Client** - Database client
+- **Vite** - Build tool and Dev server
+  TODO: Suggested additions: add @daveyplate/better-auth-ui for easy auth components, TailwindCSS, shadcn/ui, Sonner (toast) for simpler UI styling
 
-### Backend
-- **Vercel Serverless Functions** - API endpoints
-- **TypeScript** - Type safety
-- **Node.js** - Runtime
+#### Backend
 
-### Database
-- **Supabase** (PostgreSQL) - Primary database
+- **Hono** - API endpoints
+- **Bun** - Dev server
+- **Vercel Serverless Functions** - Target Deployment
+- **Better-Auth** - Auth library and user management
+- **Drizzle** - ORM
+
+#### Database
+
+- **PostgreSQL** - Primary database
 - **Knowledge Pixels Nanopub Network** - Decentralized RDF storage
 
-### Infrastructure
-- **Vercel** - Hosting and deployment
+#### Default Infrastructure (can be easily changed)
+
+- **Vercel** - Default hosting and deployment
+- **Neon** - Default postgres database
 - **GitHub** - Version control
-
-## 📚 Documentation
-
-- [SETUP.md](SETUP.md) - Complete setup guide with troubleshooting
-- [Technical Specifications](docs/technical-specs.pdf) - Detailed technical documentation
-- [API Documentation](docs/api.md) - API endpoint reference (coming soon)
 
 ## 🤝 Contributing
 
 This project is currently in active development. Contribution guidelines will be added once the beta phase begins (January 2026).
 
 ### Development Team
+
 - **Project Lead:** Anne Fouilloux (VitenHub AS)
 - **Technical Architecture:** Knowledge Pixels + Prophet Town
 - **Semantic Consulting:** Barbara Magagna (Mabablue)
@@ -236,7 +226,7 @@ This project is currently in active development. Contribution guidelines will be
 ## 🔒 Security
 
 - **Environment Variables:** Never commit `.env` files. Use `.env.example` as template.
-- **API Keys:** Keep Supabase service role keys secret. Only use anon keys in frontend.
+- **API Keys:** Keep backend keys secret. Only use anon keys in frontend.
 - **GDPR Compliance:** Data stored in EU region (Frankfurt).
 
 ## 📜 License
@@ -263,4 +253,4 @@ Science Live is supported by the Astera Institute with planned transition to com
 ---
 
 **Current Version:** 0.1.0 (Development)  
-**Last Updated:** October 2025
+**Last Updated:** November 2025
