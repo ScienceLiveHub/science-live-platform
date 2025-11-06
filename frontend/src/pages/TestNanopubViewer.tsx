@@ -1,7 +1,6 @@
 // frontend/src/pages/TestNanopubViewer.tsx
 import { useState } from "react";
 import { NanopubViewer } from "@sciencelivehub/nanopub-view/react";
-import "../styles/nanopub-viewer.css";
 
 export function TestNanopubViewer() {
   const [uri, setUri] = useState(

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { NanopubViewer } from "@sciencelivehub/nanopub-view/react";
-import "../styles/nanopub-viewer.css";
 
 export function NanopubTest() {
   const [showViewer, setShowViewer] = useState(false);

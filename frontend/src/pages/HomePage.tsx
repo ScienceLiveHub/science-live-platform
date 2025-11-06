@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import "../styles/HomePage.css";
 import { authClient } from "@/auth/auth-client";
 
 export function HomePage() {

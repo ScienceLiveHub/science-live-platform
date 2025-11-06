@@ -6,7 +6,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { NanopubViewer } from "@sciencelivehub/nanopub-view/react";
 import NanopubCreator from "@sciencelivehub/nanopub-create";
-import "../styles/NanopubTestPage.css";
 
 export default function NanopubTestPage() {
   const [activeTab, setActiveTab] = useState("view");

@@ -191,7 +191,7 @@ curl http://localhost:3001/api/health
 - **React 19** - UI library
 - **React Router** - Client-side routing
 - **Vite** - Build tool and Dev server
-  TODO: Suggested additions: add @daveyplate/better-auth-ui for easy auth components, TailwindCSS, shadcn/ui, Sonner (toast) for simpler UI styling
+  TODO: Suggested additions: add @daveyplate/better-auth-ui for easy auth components, Sonner (toast) for simpler UI styling
 
 #### Backend
 
