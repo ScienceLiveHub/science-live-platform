@@ -1,23 +1,27 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { NanopubViewer } from '@sciencelivehub/nanopub-view/react';
-import NanopubCreator from '@sciencelivehub/nanopub-create';
-import '../styles/NanopubTestPage.css';
+// TODO: this is a jsx since it relies on a js module nanopub-create.
+//       The tsconfig has `"allowJs": true`, to allow for this.
+//       Consider resolving properly by making nanopub-create support ts.
+
+import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
+import { NanopubViewer } from "@sciencelivehub/nanopub-view/react";
+import NanopubCreator from "@sciencelivehub/nanopub-create";
+import "../styles/NanopubTestPage.css";
 
 export default function NanopubTestPage() {
-  const [activeTab, setActiveTab] = useState('view');
-  const [nanopubUri, setNanopubUri] = useState('');
-  const [templateUri, setTemplateUri] = useState('');
+  const [activeTab, setActiveTab] = useState("view");
+  const [nanopubUri, setNanopubUri] = useState("");
+  const [templateUri, setTemplateUri] = useState("");
   const [isLoadingView, setIsLoadingView] = useState(false);
   const [isLoadingCreate, setIsLoadingCreate] = useState(false);
-  
+
   // Profile state
   const [hasProfile, setHasProfile] = useState(false);
-  const [profileName, setProfileName] = useState('');
-  const [profileOrcid, setProfileOrcid] = useState('');
+  const [profileName, setProfileName] = useState("");
+  const [profileOrcid, setProfileOrcid] = useState("");
   const [isSettingUpProfile, setIsSettingUpProfile] = useState(false);
-  const [profileError, setProfileError] = useState('');
-  
+  const [profileError, setProfileError] = useState("");
+
   const creatorRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -27,73 +31,77 @@ export default function NanopubTestPage() {
       if (!creatorRef.current) {
         try {
           creatorRef.current = new NanopubCreator({
-            theme: 'default',
-            showHelp: true
+            theme: "default",
+            showHelp: true,
           });
           // Note: initWasm() is called automatically in constructor
           // Just wait a moment for it to complete
-          await new Promise(resolve => setTimeout(resolve, 100));
-          
+          await new Promise((resolve) => setTimeout(resolve, 100));
+
           // Set up event listeners
-          creatorRef.current.on('create', ({ trigContent }) => {
-            console.log('✅ Nanopub created!');
-            console.log('📄 Content:', trigContent);
-            alert('Nanopublication created successfully! Check console for details.');
+          creatorRef.current.on("create", ({ trigContent }) => {
+            console.log("✅ Nanopub created!");
+            console.log("📄 Content:", trigContent);
+            alert(
+              "Nanopublication created successfully! Check console for details."
+            );
           });
-          
-          creatorRef.current.on('publish', ({ uri, signedContent }) => {
-            console.log('✅ Nanopub published!');
-            console.log('🌐 URI:', uri);
-            console.log('📄 Signed content:', signedContent);
+
+          creatorRef.current.on("publish", ({ uri, signedContent }) => {
+            console.log("✅ Nanopub published!");
+            console.log("🌐 URI:", uri);
+            console.log("📄 Signed content:", signedContent);
             if (uri) {
-              alert(`Nanopublication published!\n\nURI: ${uri}\n\nView at: https://nanodash.knowledgepixels.com/explore?id=${uri}`);
+              alert(
+                `Nanopublication published!\n\nURI: ${uri}\n\nView at: https://nanodash.knowledgepixels.com/explore?id=${uri}`
+              );
             } else {
-              alert('Nanopublication signed and ready to download!');
+              alert("Nanopublication signed and ready to download!");
             }
           });
-          
-          creatorRef.current.on('error', ({ type, error }) => {
-            console.error('❌ Error:', type, error);
+
+          creatorRef.current.on("error", ({ type, error }) => {
+            console.error("❌ Error:", type, error);
             alert(`Error during ${type}: ${error.message}`);
           });
-          
+
           // Check if profile already exists
           if (creatorRef.current.hasProfile()) {
             const profile = creatorRef.current.getProfile();
             setHasProfile(true);
-            setProfileName(profile.name || '');
-            setProfileOrcid(profile.orcid || '');
+            setProfileName(profile.name || "");
+            setProfileOrcid(profile.orcid || "");
           }
         } catch (error) {
-          console.error('Failed to initialize creator:', error);
+          console.error("Failed to initialize creator:", error);
         }
       }
     };
-    
+
     initCreator();
   }, []);
 
   const handleSetupProfile = async (e) => {
     e.preventDefault();
-    
+
     if (!profileName.trim()) {
-      setProfileError('Please enter your name');
+      setProfileError("Please enter your name");
       return;
     }
-    
+
     setIsSettingUpProfile(true);
-    setProfileError('');
-    
+    setProfileError("");
+
     try {
       await creatorRef.current.setupProfile(
         profileName.trim(),
         profileOrcid.trim() || null
       );
-      
+
       setHasProfile(true);
-      setProfileError('');
+      setProfileError("");
     } catch (error) {
-      console.error('Profile setup failed:', error);
+      console.error("Profile setup failed:", error);
       setProfileError(`Failed to setup profile: ${error.message}`);
     } finally {
       setIsSettingUpProfile(false);
@@ -108,22 +116,27 @@ export default function NanopubTestPage() {
 
   const loadCreateExample = async (uri) => {
     if (!hasProfile) {
-      setProfileError('Please setup your profile first before creating nanopublications');
+      setProfileError(
+        "Please setup your profile first before creating nanopublications"
+      );
       return;
     }
-    
+
     setTemplateUri(uri);
     setIsLoadingCreate(true);
-    
+
     if (creatorRef.current && containerRef.current) {
       try {
-        containerRef.current.innerHTML = ''; // Clear container
-        await creatorRef.current.renderFromTemplateUri(uri, containerRef.current);
+        containerRef.current.innerHTML = ""; // Clear container
+        await creatorRef.current.renderFromTemplateUri(
+          uri,
+          containerRef.current
+        );
       } catch (error) {
-        console.error('Failed to load template:', error);
+        console.error("Failed to load template:", error);
       }
     }
-    
+
     setIsLoadingCreate(false);
   };
 
@@ -145,7 +158,7 @@ export default function NanopubTestPage() {
             <i className="fas fa-globe logo-icon"></i>
             <span className="logo-text">Science Live</span>
           </Link>
-          
+
           <nav className="nav-links">
             <Link to="/" className="nav-link">
               <i className="fas fa-arrow-left"></i> Back to Home
@@ -161,7 +174,8 @@ export default function NanopubTestPage() {
             <i className="fas fa-flask"></i> Nanopublication Tools Demo
           </h1>
           <p className="page-subtitle">
-            Test the core features of Science Live: viewing and creating nanopublications
+            Test the core features of Science Live: viewing and creating
+            nanopublications
           </p>
           <div className="demo-badge">
             <i className="fas fa-bolt"></i>
@@ -172,16 +186,18 @@ export default function NanopubTestPage() {
         {/* Tab Navigation */}
         <div className="tab-navigation">
           <button
-            onClick={() => setActiveTab('view')}
-            className={`tab-button ${activeTab === 'view' ? 'active' : ''}`}
+            onClick={() => setActiveTab("view")}
+            className={`tab-button ${activeTab === "view" ? "active" : ""}`}
           >
             <i className="fas fa-book-open tab-icon"></i>
             <span className="tab-label">View Nanopublication</span>
-            <span className="tab-desc">Display & explore existing nanopubs</span>
+            <span className="tab-desc">
+              Display & explore existing nanopubs
+            </span>
           </button>
           <button
-            onClick={() => setActiveTab('create')}
-            className={`tab-button ${activeTab === 'create' ? 'active' : ''}`}
+            onClick={() => setActiveTab("create")}
+            className={`tab-button ${activeTab === "create" ? "active" : ""}`}
           >
             <i className="fas fa-pen-fancy tab-icon"></i>
             <span className="tab-label">Create Nanopublication</span>
@@ -190,7 +206,7 @@ export default function NanopubTestPage() {
         </div>
 
         {/* View Tab Content */}
-        {activeTab === 'view' && (
+        {activeTab === "view" && (
           <div className="tab-content">
             <div className="content-section">
               <div className="section-header">
@@ -198,8 +214,9 @@ export default function NanopubTestPage() {
                   <i className="fas fa-book-open"></i> Nanopublication Viewer
                 </h2>
                 <p className="section-description">
-                  Enter a nanopublication URI to see how Science Live beautifully displays
-                  scientific knowledge with automatic template fetching and interactive features.
+                  Enter a nanopublication URI to see how Science Live
+                  beautifully displays scientific knowledge with automatic
+                  template fetching and interactive features.
                 </p>
               </div>
 
@@ -219,7 +236,7 @@ export default function NanopubTestPage() {
                   />
                   {nanopubUri && (
                     <button
-                      onClick={() => setNanopubUri('')}
+                      onClick={() => setNanopubUri("")}
                       className="btn btn-secondary"
                     >
                       <i className="fas fa-times"></i> Clear
@@ -244,7 +261,11 @@ export default function NanopubTestPage() {
                       </div>
                     </div>
                     <button
-                      onClick={() => loadViewExample('https://w3id.org/np/RAfSPxIIuH8uX9Sk2XWEJAQOQN7DjQt_-I2XEGPNj3zBg')}
+                      onClick={() =>
+                        loadViewExample(
+                          "https://w3id.org/np/RAfSPxIIuH8uX9Sk2XWEJAQOQN7DjQt_-I2XEGPNj3zBg"
+                        )
+                      }
                       className="btn btn-primary btn-small"
                     >
                       Load Example <i className="fas fa-arrow-right"></i>
@@ -260,7 +281,11 @@ export default function NanopubTestPage() {
                       </div>
                     </div>
                     <button
-                      onClick={() => loadViewExample('https://w3id.org/np/RA1Rh2OoWHPP9lzK6Au5KmcTw1bBfN-fg_GnbkNJkYavo')}
+                      onClick={() =>
+                        loadViewExample(
+                          "https://w3id.org/np/RA1Rh2OoWHPP9lzK6Au5KmcTw1bBfN-fg_GnbkNJkYavo"
+                        )
+                      }
                       className="btn btn-primary btn-small"
                     >
                       Load Example <i className="fas fa-arrow-right"></i>
@@ -272,11 +297,18 @@ export default function NanopubTestPage() {
                       <i className="fas fa-file-alt example-icon"></i>
                       <div>
                         <h4>Indicate Geographical area in Nanopub</h4>
-                        <p>Quote and indicate geographical location as a nanopublication</p>
+                        <p>
+                          Quote and indicate geographical location as a
+                          nanopublication
+                        </p>
                       </div>
                     </div>
                     <button
-                      onClick={() => loadViewExample('https://w3id.org/np/RAuU9BrOOYHLkOki1W_jANOyuC7YYiaz14Zvn2ie0Y-Q8')}
+                      onClick={() =>
+                        loadViewExample(
+                          "https://w3id.org/np/RAuU9BrOOYHLkOki1W_jANOyuC7YYiaz14Zvn2ie0Y-Q8"
+                        )
+                      }
                       className="btn btn-primary btn-small"
                     >
                       Load Example <i className="fas fa-arrow-right"></i>
@@ -292,7 +324,11 @@ export default function NanopubTestPage() {
                       </div>
                     </div>
                     <button
-                      onClick={() => loadViewExample('https://w3id.org/np/RAO-uvgIVtvbyvzb95vUz28h_AzhnhbjjVmc_dU2LD1sA')}
+                      onClick={() =>
+                        loadViewExample(
+                          "https://w3id.org/np/RAO-uvgIVtvbyvzb95vUz28h_AzhnhbjjVmc_dU2LD1sA"
+                        )
+                      }
                       className="btn btn-primary btn-small"
                     >
                       Load Example <i className="fas fa-arrow-right"></i>
@@ -313,8 +349,10 @@ export default function NanopubTestPage() {
                     <div className="viewer-container">
                       <NanopubViewer
                         uri={nanopubUri}
-                        onLoad={(data) => console.log('Nanopub loaded:', data)}
-                        onError={(err) => console.error('Error loading nanopub:', err)}
+                        onLoad={(data) => console.log("Nanopub loaded:", data)}
+                        onError={(err) =>
+                          console.error("Error loading nanopub:", err)
+                        }
                       />
                     </div>
                   )
@@ -331,7 +369,7 @@ export default function NanopubTestPage() {
         )}
 
         {/* Create Tab Content */}
-        {activeTab === 'create' && (
+        {activeTab === "create" && (
           <div className="tab-content">
             <div className="content-section">
               <div className="section-header">
@@ -339,7 +377,8 @@ export default function NanopubTestPage() {
                   <i className="fas fa-pen-fancy"></i> Nanopublication Creator
                 </h2>
                 <p className="section-description">
-                  Create your own FAIR knowledge bricks. First setup your profile, then load a template.
+                  Create your own FAIR knowledge bricks. First setup your
+                  profile, then load a template.
                 </p>
               </div>
 
@@ -347,21 +386,34 @@ export default function NanopubTestPage() {
               <div className="profile-section">
                 <h3 className="section-subtitle">
                   <i className="fas fa-user-circle"></i> Your Profile
-                  {hasProfile && <span className="status-badge status-success">✓ Configured</span>}
-                  {!hasProfile && <span className="status-badge status-warning">⚠ Not configured</span>}
+                  {hasProfile && (
+                    <span className="status-badge status-success">
+                      ✓ Configured
+                    </span>
+                  )}
+                  {!hasProfile && (
+                    <span className="status-badge status-warning">
+                      ⚠ Not configured
+                    </span>
+                  )}
                 </h3>
 
                 {!hasProfile ? (
                   <div className="profile-setup-card">
                     <p className="profile-info">
-                      To create and sign nanopublications, you need to setup a profile with your name and ORCID.
-                      This generates cryptographic keys to sign your nanopublications.
+                      To create and sign nanopublications, you need to setup a
+                      profile with your name and ORCID. This generates
+                      cryptographic keys to sign your nanopublications.
                     </p>
-                    
-                    <form onSubmit={handleSetupProfile} className="profile-form">
+
+                    <form
+                      onSubmit={handleSetupProfile}
+                      className="profile-form"
+                    >
                       <div className="form-group">
                         <label htmlFor="profile-name">
-                          <i className="fas fa-user"></i> Your Name <span className="required">*</span>
+                          <i className="fas fa-user"></i> Your Name{" "}
+                          <span className="required">*</span>
                         </label>
                         <input
                           type="text"
@@ -387,13 +439,21 @@ export default function NanopubTestPage() {
                           className="text-input"
                         />
                         <small className="help-text">
-                          Learn more at <a href="https://orcid.org" target="_blank" rel="noopener noreferrer">orcid.org</a>
+                          Learn more at{" "}
+                          <a
+                            href="https://orcid.org"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            orcid.org
+                          </a>
                         </small>
                       </div>
 
                       {profileError && (
                         <div className="error-message">
-                          <i className="fas fa-exclamation-triangle"></i> {profileError}
+                          <i className="fas fa-exclamation-triangle"></i>{" "}
+                          {profileError}
                         </div>
                       )}
 
@@ -404,17 +464,20 @@ export default function NanopubTestPage() {
                       >
                         {isSettingUpProfile ? (
                           <>
-                            <i className="fas fa-spinner fa-spin"></i> Generating Keys...
+                            <i className="fas fa-spinner fa-spin"></i>{" "}
+                            Generating Keys...
                           </>
                         ) : (
                           <>
-                            <i className="fas fa-key"></i> Generate Keys & Save Profile
+                            <i className="fas fa-key"></i> Generate Keys & Save
+                            Profile
                           </>
                         )}
                       </button>
-                      
+
                       <p className="help-text">
-                        <i className="fas fa-info-circle"></i> Keys are stored locally in your browser and never leave your device.
+                        <i className="fas fa-info-circle"></i> Keys are stored
+                        locally in your browser and never leave your device.
                       </p>
                     </form>
                   </div>
@@ -427,14 +490,18 @@ export default function NanopubTestPage() {
                         </span>
                         <span className="profile-value">{profileName}</span>
                       </div>
-                      
+
                       {profileOrcid && (
                         <div className="profile-field">
                           <span className="profile-label">
                             <i className="fas fa-id-card"></i> ORCID:
                           </span>
                           <span className="profile-value">
-                            <a href={profileOrcid} target="_blank" rel="noopener noreferrer">
+                            <a
+                              href={profileOrcid}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
                               {profileOrcid}
                             </a>
                           </span>
@@ -442,7 +509,8 @@ export default function NanopubTestPage() {
                       )}
                     </div>
                     <p className="profile-note">
-                      <i className="fas fa-lock"></i> Your profile and keys are stored securely in your browser.
+                      <i className="fas fa-lock"></i> Your profile and keys are
+                      stored securely in your browser.
                     </p>
                   </div>
                 )}
@@ -467,7 +535,7 @@ export default function NanopubTestPage() {
                       />
                       {templateUri && (
                         <button
-                          onClick={() => setTemplateUri('')}
+                          onClick={() => setTemplateUri("")}
                           className="btn btn-secondary"
                         >
                           <i className="fas fa-times"></i> Clear
@@ -492,7 +560,11 @@ export default function NanopubTestPage() {
                           </div>
                         </div>
                         <button
-                          onClick={() => loadCreateExample('https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE')}
+                          onClick={() =>
+                            loadCreateExample(
+                              "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE"
+                            )
+                          }
                           className="btn btn-primary btn-small"
                         >
                           Load Template <i className="fas fa-arrow-right"></i>
@@ -504,11 +576,18 @@ export default function NanopubTestPage() {
                           <i className="fas fa-comments example-icon"></i>
                           <div>
                             <h4>Annotate papers with Geographical Area</h4>
-                            <p>Documenting geographical coverage of research based on textual evidence</p>
+                            <p>
+                              Documenting geographical coverage of research
+                              based on textual evidence
+                            </p>
                           </div>
                         </div>
                         <button
-                          onClick={() => loadCreateExample('https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao')}
+                          onClick={() =>
+                            loadCreateExample(
+                              "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao"
+                            )
+                          }
                           className="btn btn-primary btn-small"
                         >
                           Load Template <i className="fas fa-arrow-right"></i>
@@ -524,7 +603,11 @@ export default function NanopubTestPage() {
                           </div>
                         </div>
                         <button
-                          onClick={() => loadCreateExample('http://purl.org/np/RAn0gvGnriPVVIes27pRmyCzVVQk5cKbjiQNu9phlpCjE')}
+                          onClick={() =>
+                            loadCreateExample(
+                              "http://purl.org/np/RAn0gvGnriPVVIes27pRmyCzVVQk5cKbjiQNu9phlpCjE"
+                            )
+                          }
                           className="btn btn-primary btn-small"
                         >
                           Load Template <i className="fas fa-arrow-right"></i>
@@ -561,7 +644,10 @@ export default function NanopubTestPage() {
                       <div className="empty-state">
                         <i className="fas fa-magic empty-icon"></i>
                         <h3>Ready to Create</h3>
-                        <p>Enter a template URI above or choose an example to begin creating your nanopublication</p>
+                        <p>
+                          Enter a template URI above or choose an example to
+                          begin creating your nanopublication
+                        </p>
                       </div>
                     )}
                   </div>
@@ -579,8 +665,8 @@ export default function NanopubTestPage() {
           </div>
           <div className="info-content">
             <p>
-              <strong>Nanopublications</strong> are the smallest units of publishable information.
-              Each nanopub contains:
+              <strong>Nanopublications</strong> are the smallest units of
+              publishable information. Each nanopub contains:
             </p>
             <ul>
               <li>
@@ -594,8 +680,9 @@ export default function NanopubTestPage() {
               </li>
             </ul>
             <p className="info-footer">
-              These tools demonstrate Science Live's core capability: making scientific
-              knowledge FAIR (Findable, Accessible, Interoperable, Reusable).
+              These tools demonstrate Science Live's core capability: making
+              scientific knowledge FAIR (Findable, Accessible, Interoperable,
+              Reusable).
             </p>
           </div>
         </div>

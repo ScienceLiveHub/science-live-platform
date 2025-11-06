@@ -1,0 +1,41 @@
+{
+  "name": "Science Live Platform",
+  /* Node v22 is current default in Vercel, so target that for now */
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:22-bookworm",
+  "workspaceFolder": "/workspaces/science-live-platform",
+  "remoteUser": "node",
+  "runArgs": [
+    /* Name the container to easily identify it in Docker */
+    "--name=science-live-platform",
+    /* Use host network, so we dont bother forwarding ports and can easily access any localhost services if required */  
+    "--network=host"
+  ],
+  "forwardPorts": [],
+  "features": {
+    /* Default to fish shell, remove if you prefer bash */
+    "ghcr.io/meaningful-ooo/devcontainer-features/fish:2": {},
+    "ghcr.io/devcontainers-extra/features/vercel-cli:1": {}
+  },
+  "postCreateCommand": "npm install",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        /* Ideal, for consistent formatting via prettier */
+        "editor.formatOnSave": true,
+
+        /* These are required when using `--network=host` to prevent vscode redundant port forwarding */
+        "remote.autoForwardPorts": false,
+        "remote.forwardOnOpen": false,
+        "remote.restoreForwardedPorts": false,
+        "remote.localPortHost": "localhost"
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "mhutchie.git-graph",
+        /* Roo Code is my preferred agentic coding assistant in vscode */
+        "RooVeterinaryInc.roo-cline"
+      ]
+    }
+  }
+}
