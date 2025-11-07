@@ -12,9 +12,13 @@
   },
   "dependencies": {
     "@daveyplate/better-auth-ui": "^3.2.8",
+    "@hookform/resolvers": "^5.2.2",
+    "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-navigation-menu": "^1.2.14",
     "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
     "@sciencelivehub/nanopub-create": "github:ScienceLiveHub/nanopub-create#update-packages",
     "@sciencelivehub/nanopub-view": "github:ScienceLiveHub/nanopub-view#update-packages",
@@ -26,9 +30,11 @@
     "react-dom": "^19.2.0",
     "react-error-boundary": "^6.0.0",
     "react-error-overlay": "^6.1.0",
+    "react-hook-form": "^7.66.0",
     "react-router-dom": "^7.9.5",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^4.1.17"
+    "tailwindcss": "^4.1.17",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.17",

@@ -1,5 +1,5 @@
 import { Routes, Route, BrowserRouter, useNavigate } from "react-router-dom";
-import { HomePage } from "./pages/HomePage";
+import { HomePage } from "./pages/homepage/page";
 import { NanopubTest } from "./pages/NanopubTest";
 import { RealNanopubTest } from "./pages/RealNanopubTest";
 import { TestNanopubViewer } from "./pages/TestNanopubViewer";
