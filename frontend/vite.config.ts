@@ -18,7 +18,8 @@ export default defineConfig(({ mode }) => {
       strictPort: true,
       port: Number(env.PORT),
       hmr: {
-        overlay: false,
+        // TODO: I expected this to add an error overlay for dev, didn't work so I rolled my own ErrorBoundary
+        overlay: true,
       },
       // Add headers for WASM support
       headers: {

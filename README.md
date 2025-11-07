@@ -163,6 +163,27 @@ npm run dev:api-vc
 npm run dev
 ```
 
+### Frontend UI Development
+
+We are using **shadcn**, which is a tool to pull pre-made UI component code from online repositories. This allows for a high degree of customization and transparency of the UI, while still being as quick and easy to use as opaque imported UI libraries.
+
+The components get pulled into the [frontend/src/components](frontend/src/components/ui) directory ready for import e.g.: `import { Button } from "@/components/ui/button";`
+
+There is a helper script to pull new components, which must be run from the frontend folder:
+
+```
+cd frontend
+npm run ui:add popover
+```
+
+There are basic [official components](https://ui.shadcn.com/docs/components) you can import and customize, or more powerful third-party composites available in [other repositories](https://www.shadcn.io/components).
+
+Note that some of the components are just composites of simpler components, and you are expected to simply copy the component code into your app yourself rather than use the command.
+
+Styling is done via **tailwindcss**. We should minimize the amount of custom css we need to manage. The main aspects of the theme can be edited in [frontend/src/styles/index.css](frontend/src/styles/index.css).
+
+To adjust a specific UI elements style, layout, padding etc, use [tailwindcss](https://tailwindcss.com/docs) utility classes e.g.: `className="pt-6"` to set top padding of the element to 6.
+
 ## 🧪 Testing
 
 ### Test Frontend

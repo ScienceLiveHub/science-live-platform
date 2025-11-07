@@ -1,17 +1,13 @@
 import { Link } from "react-router-dom";
-import { authClient } from "@/auth/auth-client";
-import { Button } from "@/components/ui/button";
+import { Navbar01 } from "@/components/ui/shadcn-io/navbar-01";
 
 export function HomePage() {
-  const {
-    data: session,
-    // isPending, //loading state
-    // error, //error object
-    // refetch, //refetch the session
-  } = authClient.useSession();
   return (
-    <div className="home-page">
+    <div>
       {/* Hero Section */}
+      <div className="relative w-full">
+        <Navbar01 />
+      </div>
       <header className="hero">
         <div className="hero-content">
           <div className="logo-container">
@@ -43,106 +39,9 @@ export function HomePage() {
               <i className="fas fa-book-open"></i>
               <span>Documentation</span>
             </a>
-            {!session ? (
-              <>
-                <Link to="/signin">
-                  <Button>Sign In</Button>
-                </Link>
-                <Link to="/signup">
-                  <Button>Sign Up</Button>
-                </Link>
-              </>
-            ) : (
-              <Link to="/signout">
-                <Button>Sign Out</Button>
-              </Link>
-            )}
           </div>
         </div>
       </header>
-
-      {/* Project Status */}
-      <section className="status-section">
-        <div className="container">
-          <h2 className="section-title">
-            <i className="fas fa-chart-line"></i> Development Progress
-          </h2>
-          <p className="section-subtitle">October 2025 - June 2026</p>
-
-          <div className="timeline">
-            <div className="timeline-item complete">
-              <div className="timeline-marker">
-                <i className="fas fa-check"></i>
-              </div>
-              <div className="timeline-content">
-                <h3>Step 1: Foundation</h3>
-                <p>Monorepo, Vercel, React setup</p>
-              </div>
-            </div>
-
-            <div className="timeline-item complete">
-              <div className="timeline-marker">
-                <i className="fas fa-check"></i>
-              </div>
-              <div className="timeline-content">
-                <h3>Step 2: Database</h3>
-                <p>PostgreSQL integration</p>
-              </div>
-            </div>
-
-            <div className="timeline-item complete">
-              <div className="timeline-marker">
-                <i className="fas fa-check"></i>
-              </div>
-              <div className="timeline-content">
-                <h3>Step 3: Nanopub Viewer & Creator</h3>
-                <p>Parse, display and create knowledge bricks</p>
-              </div>
-            </div>
-
-            <div className="timeline-item active">
-              <div className="timeline-marker">
-                <i className="fas fa-spinner fa-pulse"></i>
-              </div>
-              <div className="timeline-content">
-                <h3>Step 4: Credit System</h3>
-                <p>Currently in development</p>
-              </div>
-            </div>
-
-            <div className="timeline-item planned">
-              <div className="timeline-marker">
-                <i className="far fa-clock"></i>
-              </div>
-              <div className="timeline-content">
-                <h3>Step 5: ORCID Auth</h3>
-                <p>Planned</p>
-              </div>
-            </div>
-
-            <div className="timeline-item planned">
-              <div className="timeline-marker">
-                <i className="far fa-clock"></i>
-              </div>
-              <div className="timeline-content">
-                <h3>Step 6: Template Engine</h3>
-                <p>Planned</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="milestones">
-            <div className="milestone">
-              <span className="milestone-label">Beta Launch</span>
-              <span className="milestone-date">January 2026</span>
-            </div>
-            <div className="milestone">
-              <span className="milestone-label">Public Launch</span>
-              <span className="milestone-date">June 2026</span>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Features Section */}
       <section className="features-section">
