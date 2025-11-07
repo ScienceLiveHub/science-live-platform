@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { authClient } from "@/auth/auth-client";
+import { Button } from "@/components/ui/button";
 
 export function HomePage() {
   const {
@@ -44,19 +45,16 @@ export function HomePage() {
             </a>
             {!session ? (
               <>
-                <Link to="/signin" className="btn btn-secondary">
-                  <i className="fas fa-sign-in-alt"></i>
-                  <span>Sign In</span>
+                <Link to="/signin">
+                  <Button>Sign In</Button>
                 </Link>
-                <Link to="/signup" className="btn btn-primary">
-                  <i className="fas fa-user-plus"></i>
-                  <span>Sign Up</span>
+                <Link to="/signup">
+                  <Button>Sign Up</Button>
                 </Link>
               </>
             ) : (
-              <Link to="/signout" className="btn btn-secondary">
-                <i className="fas fa-sign-in-alt"></i>
-                <span>Sign Out</span>
+              <Link to="/signout">
+                <Button>Sign Out</Button>
               </Link>
             )}
           </div>
