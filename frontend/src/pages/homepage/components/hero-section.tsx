@@ -55,11 +55,15 @@ export function HeroSection() {
               asChild
             >
               <a href="test-nanopub">
-                <i className="fas fa-flask"></i>
-                Try Demo
+                <i className="fas fa-puzzle-piece"></i>
+                Zotero Plugin
               </a>
             </Button>
           </div>
+          <p className="mx-auto m-10 max-w-xl text-lg text-muted-foreground sm:text-l italic">
+            <i className="fas fa-flask mr-4"></i>
+            Knowledge bricks web interface coming soon.
+          </p>
         </div>
       </div>
     </section>
