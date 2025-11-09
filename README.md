@@ -29,10 +29,11 @@ Science Live enables researchers to create FAIR (Findable, Accessible, Interoper
 - GDPR compliant
 - Modern developer experience
 - Serverless and low running cost (economical scale up and down)
+- Option of deployment full data-sovereignty of user and app data
 - Avoid hard-dependency on proprietary micro-services
   - Self-contained auth broker (better-auth), any OIDC provider can be added
   - Plain postgres database via connection string
-  - Vercel is default deployement but can be hosted elsewhere easily
+  - Vercel is default deployment but can be hosted elsewhere easily
 - Future potential for private enterprise self-hosted instance
 
 ```

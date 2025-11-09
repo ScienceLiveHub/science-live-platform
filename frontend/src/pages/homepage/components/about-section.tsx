@@ -35,11 +35,12 @@ export function AboutSection() {
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
               What are Nanopublications?
             </h2>
-            <h3 className="mb-4">
+            {/* <h3 className="mb-4"> */}
+            <p className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground sm:text-xl">
               Nanopublications are the smallest units of publishable
-              information. Each nanopublication is:
-            </h3>
-            <ul role="list" className="space-y-3 text-sm">
+              information. <br /> Each nanopublication is:
+            </p>
+            <ul role="list" className="space-y-3">
               {items.map((feature) => (
                 <li className="flex items-center gap-3">
                   <Check
@@ -56,7 +57,7 @@ export function AboutSection() {
 
           {/* Side boxes */}
           <div className="space-y-6 order-2 lg:order-2">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer m-0 bg-secondary">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <File className="h-5 w-5 text-primary" />
@@ -64,13 +65,13 @@ export function AboutSection() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-3">
+                <p className="text-muted-foreground mb-1">
                   The actual claim or statement.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer m-0 bg-secondary/55">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Microscope className="h-5 w-5 text-primary" />
@@ -78,13 +79,13 @@ export function AboutSection() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-3">
+                <p className="text-muted-foreground mb-1">
                   Where did this come from?
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer m-0 bg-secondary/15">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <UserCircle className="h-5 w-5 text-primary" />
@@ -92,7 +93,7 @@ export function AboutSection() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-3">
+                <p className="text-muted-foreground mb-1">
                   Who, when, and how?
                 </p>
               </CardContent>

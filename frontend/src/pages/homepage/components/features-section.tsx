@@ -67,16 +67,16 @@ export function FeaturesSection() {
         {/* Modern Values Grid with Enhanced Design */}
         <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 xl:grid-cols-3 mb-12">
           {values.map((value, index) => (
-            <Card key={index} className="group shadow-xs py-2">
+            <Card key={index} className="group shadow-xs py-1">
               <CardContent className="p-8">
                 <div className="flex flex-col items-center text-center">
                   <CardDecorator>
-                    <value.icon className="h-6 w-6" aria-hidden />
+                    <value.icon className="h-12 w-12" aria-hidden />
                   </CardDecorator>
-                  <h3 className="mt-6 font-medium text-balance">
+                  <h3 className="mt-2 font-medium text-balance text-xl">
                     {value.title}
                   </h3>
-                  <p className="text-muted-foreground mt-3 text-sm">
+                  <p className="text-muted-foreground mt-3 text-md">
                     {value.description}
                   </p>
                 </div>
