@@ -1,6 +1,6 @@
 {
   "name": "Science Live Platform",
-  /* Node v22 is current default in Vercel, so target that for now */
+  /* Node v22 is current default */
   "image": "mcr.microsoft.com/devcontainers/typescript-node:22-bookworm",
   "workspaceFolder": "/workspaces/science-live-platform",
   "remoteUser": "node",
@@ -14,7 +14,7 @@
   "features": {
     /* Default to fish shell, remove if you prefer bash */
     "ghcr.io/meaningful-ooo/devcontainer-features/fish:2": {},
-    "ghcr.io/devcontainers-extra/features/vercel-cli:1": {}
+    "ghcr.io/devcontainers-extra/features/cloudflare-wrangler:1": {}
   },
   "postCreateCommand": "npm install",
   "customizations": {

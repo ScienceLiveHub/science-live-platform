@@ -23,7 +23,7 @@ import { useNavigate } from "react-router-dom";
 const Logo = () => {
   return (
     <img
-      src="assets/sciencelive-logo.png"
+      src="sciencelive-logo.png"
       alt="Science Live Logo"
       width="32px"
       className="m-3"

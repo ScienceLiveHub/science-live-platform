@@ -19,6 +19,7 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
 
 # Logs
 npm-debug.log*
@@ -36,10 +37,10 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
-# Vercel
-.vercel
-.env*.local
+# Cloudflare Wrangler - This can be committed to git if desired but the current repo ommits them as they are deployment-specific
+wrangler.json
 
+.wrangler/
 
 # Package locks (can be regenerated)
 package-lock.json

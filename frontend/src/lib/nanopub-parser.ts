@@ -1,8 +1,8 @@
 import type {
   ParsedNanopub,
   ParsedAssertion,
-  ParsedProvenance,
-  ParsedPubInfo,
+  // ParsedProvenance,
+  // ParsedPubInfo,
   NanopubMetadata,
 } from "@/types/nanopub";
 

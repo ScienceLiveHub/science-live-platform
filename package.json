@@ -13,7 +13,12 @@
     "build": "npm run build --workspace=frontend",
     "test": "npm run test --workspaces",
     "postinstall": "bash scripts/build-nanopub-deps.sh",
-    "build:nanopub": "bash scripts/build-nanopub-deps.sh"
+    "build:nanopub": "bash scripts/build-nanopub-deps.sh",
+    "check:frontend": "npm --workspace=frontend run check",
+    "check:api": "npm --workspace=api run check",
+    "deploy:frontend": "npm --workspace=frontend run deploy",
+    "deploy:api": "npm --workspace=api run deploy",
+    "deploy": "npm run deploy:frontend && npm run deploy:api"
   },
   "devDependencies": {
     "@types/node": "^24.10.0",

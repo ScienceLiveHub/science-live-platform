@@ -1,23 +1,32 @@
-import "dotenv/config";
 import { Hono } from "hono";
-import { allowedOrigins, auth } from "./auth";
 import { cors } from "hono/cors";
 import health from "./health";
+import { getAuth } from "./auth";
 
-const app = new Hono().basePath("/api");
+type Env = {
+  ALLOWED_ORIGINS?: string;
+  BETTER_AUTH_URL?: string;
+  BETTER_AUTH_SECRET?: string;
+  HYPERDRIVE?: { connectionString?: string };
+};
 
-// Add normal API endpoints here, importing from other files where required
+const app = new Hono<{ Bindings: Env }>().basePath("/api");
+
+// Normal API endpoints
 app.route("/health", health);
-////
 
-// Add CORS for auth endpoints
+// CORS for auth endpoints
 app.use(
   "/auth/**",
   cors({
-    origin: (origin, _) => {
-      if (allowedOrigins.includes(origin)) {
-        return origin;
-      }
+    origin: (origin, c) => {
+      const allowed = (c.env.ALLOWED_ORIGINS || "")
+        .split(",")
+        .map((s: string) => s.trim())
+        .filter(Boolean);
+      if (!origin) return undefined;
+      if (allowed.length === 0) return origin;
+      if (allowed.includes(origin)) return origin;
       return undefined;
     },
     allowHeaders: ["Content-Type", "Authorization"],
@@ -28,7 +37,7 @@ app.use(
   })
 );
 
-// Add auth, this should always be last
-app.on(["POST", "GET"], "/auth/*", (c) => auth.handler(c.req.raw));
+// Auth endpoints — keep last
+app.on(["POST", "GET"], "/auth/*", (c) => getAuth(c.env).handler(c.req.raw));
 
 export default app;
