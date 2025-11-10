@@ -1,4 +1,4 @@
-import { Routes, Route, BrowserRouter, useNavigate } from "react-router-dom";
+import { Routes, Route, BrowserRouter } from "react-router-dom";
 import { HomePage } from "./pages/homepage/page";
 import { NanopubTest } from "./pages/NanopubTest";
 import { RealNanopubTest } from "./pages/RealNanopubTest";
