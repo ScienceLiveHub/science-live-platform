@@ -12,12 +12,12 @@ Science Live enables researchers to create FAIR (Findable, Accessible, Interoper
 
 | Phase     | Status   | Description                                  |
 | --------- | -------- | -------------------------------------------- |
-| ✅ Step 1 | Complete | Foundation setup (monorepo, Vercel, React)   |
+| ✅ Step 1 | Complete | Foundation setup (monorepo, React)           |
 | ✅ Step 2 | Complete | Database integration (PostgreSQL)            |
 | ✅ Step 3 | Complete | Nanopub parser and viewer with display modes |
-| 🔄 Step 4 | Next     | Credit system implementation                 |
-| ⏳ Step 5 | Planned  | ORCID authentication                         |
-| ⏳ Step 6 | Planned  | Template processing engine                   |
+| 🔄 Step 4 | Next     | ORCID authentication                         |
+| ⏳ Step 5 | Planned  | Template processing engine                   |
+| ⏳ Step 6 | Planned  | Credit system implementation                 |
 
 **Timeline:** Beta launch planned for January 2026, Public launch June 2026.
 
@@ -33,29 +33,32 @@ Science Live enables researchers to create FAIR (Findable, Accessible, Interoper
 - Avoid hard-dependency on proprietary micro-services
   - Self-contained auth broker (better-auth), any OIDC provider can be added
   - Plain postgres database via connection string
-  - Vercel is default deployment but can be hosted elsewhere easily
+  - Cloudflare is the default deployment but can be hosted elsewhere easily
 - Future potential for private enterprise self-hosted instance
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│           Science Live Platform (Vercel)                │
+│           Science Live Platform                         │
 ├─────────────────────────────────────────────────────────┤
-│  Frontend (React + TypeScript + Vite)                   │
+│  Frontend SPA (React + TypeScript + Vite)               │
 │  - Landing pages & marketing                            │
 │  - User dashboard & credit system                       │
 │  - Nanopub creation & display                           │
 │  - Template-based forms                                 │
 ├─────────────────────────────────────────────────────────┤
-│  Backend API (Serverless)                               │
-│  - /api/v1/auth/*       - ORCID OAuth2                  │
-│  - /api/v1/users/*      - User profiles & credits       │
-│  - /api/v1/nanopubs/*   - Create, validate, fetch       │
-│  - /api/v1/templates/*  - Template management           │
+│  Backend API (Serverless, Hono)                         │
+│  - /api/auth/*       - Better Auth + ORCID OIDC         │
+│  - /api/users/*      - User profiles & credits          │
+│  - /api/nanopubs/*   - Create, validate, fetch          │
+│  - /api/templates/*  - Template management              │
 └─────────────────────────────────────────────────────────┘
                            │
                            ▼
          ┌─────────────────────────────────────────┐
-         │  Data & Infrastructure                  │
+         │  Deployment, Data & Infrastructure      │
+         ├─────────────────────────────────────────┤
+         │  Cloudflare                             │
+         │  - Default deployment                   │
          ├─────────────────────────────────────────┤
          │  PostgreSQL                             │
          │  - Users, credits, transactions         │
@@ -66,6 +69,8 @@ Science Live enables researchers to create FAIR (Findable, Accessible, Interoper
          │  - SPARQL query endpoints               │
          └─────────────────────────────────────────┘
 ```
+
+Currently the `frontend` is a static SPA, with no SSR required, and client-side routing using react-router-dom. All dynamic content and data is pulled from the `api` which includes authentication and the database connection. This keeps the UX fast and responsive, as well as being easy to deploy as serverless without edge.
 
 ## 🚀 Developer Quick Start
 
@@ -79,9 +84,13 @@ Science Live enables researchers to create FAIR (Findable, Accessible, Interoper
 - **If NOT using the recommended devcontainer** (which has everything built in), you need to manually install:
   - Node.js v22 or higher
   - npm (comes with Node.js)
-- **If you want to deploy to Vercel:**
-  - A [Vercel](https://vercel.com) account (free tier)
-  - Log into `vercel` CLI
+- **If you want to deploy to Cloudflare:**
+  - A [Cloudflare](https://dash.cloudflare.com) account (free tier works fine)
+    - Either log into `wrangler` CLI (`npx wrangler login`), OR set your `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in both the frontend and api .env files
+    - Set up a Cloudflare Hyperdrive connection to your postgres db, and take note of its its UUID.
+    - Copy each of the `wrangler.json.example` files under both `api/` and `frontend/` folders to `wrangler.json` and enter your ENVS into them where you see `CHANGE_TO_...`.
+    - Create a `frontend/.env.production` file which should specify `VITE_API_URL=` pointing to your production API url
+  - Build and deploy everything from project root: `npm run build` then `npm run deploy`
 
 ### First-time Setup
 
@@ -118,9 +127,6 @@ _Note: You dont need to do any of this if you are using the devcontainer mention
 ```bash
 # Install all dependencies
 npm install
-
-# If deploying to vercel, install Vercel CLI globally if required
-npm install -g vercel
 ```
 
 If you are starting with a blank database, run initial [database migrations](#database-migrations)
@@ -155,10 +161,10 @@ Visit http://localhost:3000 to see the application.
 #### Using terminal
 
 ```bash
-# Option 1: Run backend using Bun (doesn't require Vercel account)
+# Option 1: Run backend using Bun
 npm run dev:api
-# Option 2: Run backend using Vercel (will need to log in using a Vercel account)
-npm run dev:api-vc
+# Option 2: Run backend using Wrangler dev
+npm run dev:api-wd
 
 # Run frontend using Vite
 npm run dev
@@ -219,7 +225,7 @@ curl http://localhost:3001/api/health
 
 - **Hono** - API endpoints
 - **Bun** - Dev server
-- **Vercel Serverless Functions** - Target Deployment
+- **Cloudflare Workers** - Target Serverless Deployment
 - **Better-Auth** - Auth library and user management
 - **Drizzle** - ORM
 
@@ -228,9 +234,9 @@ curl http://localhost:3001/api/health
 - **PostgreSQL** - Primary database
 - **Knowledge Pixels Nanopub Network** - Decentralized RDF storage
 
-#### Default Infrastructure (can be easily changed)
+#### Default Infrastructure used (can be easily changed)
 
-- **Vercel** - Default hosting and deployment
+- **Cloudflare** - Default hosting and deployment
 - **Neon** - Default postgres database
 - **GitHub** - Version control
 
@@ -259,8 +265,6 @@ This project is currently in active development. Contribution guidelines will be
 
 - **Website:** https://sciencelive4all.org
 - **Documentation:** https://docs.sciencelive4all.org (coming soon)
-- **Supabase Dashboard:** https://supabase.com/dashboard
-- **Vercel Dashboard:** https://vercel.com/dashboard
 
 ## 📞 Contact
 

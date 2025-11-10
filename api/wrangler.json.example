@@ -1,0 +1,19 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "science-live-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "upload_source_maps": true,
+  "vars": {
+    "ALLOWED_ORIGINS": "CHANGE_TO_DEPLOYED_FRONTEND_URL",
+    "BETTER_AUTH_URL": "CHANGE_TO_DEPLOYED_API_URL",
+  },
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "CHANGE_TO_HYPERDRIVE_UUID",
+    }
+  ]
+}
