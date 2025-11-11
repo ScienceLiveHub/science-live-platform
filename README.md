@@ -161,10 +161,10 @@ Visit http://localhost:3000 to see the application.
 #### Using terminal
 
 ```bash
-# Option 1: Run backend using Bun
+# Option 1: Run backend using Wrangler dev
 npm run dev:api
-# Option 2: Run backend using Wrangler dev
-npm run dev:api-wd
+# Option 2: Run backend using Bun
+npm run dev:api-bun
 
 # Run frontend using Vite
 npm run dev

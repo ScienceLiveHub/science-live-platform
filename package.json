@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "npm run dev --workspace=frontend",
     "dev:api": "npm run dev --workspace=api",
-    "dev:api-vc": "npm run dev-vc --workspace=api",
+    "dev:api-bun": "npm run dev-bun --workspace=api",
     "build": "npm run build --workspace=frontend",
     "test": "npm run test --workspaces",
     "postinstall": "bash scripts/build-nanopub-deps.sh",

@@ -17,17 +17,13 @@ import {
 import { cn } from "@/lib/utils";
 import { ModeToggle } from "@/components/mode-toggle";
 import { authClient } from "@/lib/auth-client";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { UserButton } from "@daveyplate/better-auth-ui";
 
 // Simple logo component for the navbar
 const Logo = () => {
   return (
-    <img
-      src="sciencelive-logo.png"
-      alt="Science Live Logo"
-      width="32px"
-      className="m-3"
-    />
+    <img src="/sciencelive-logo.png" alt="SL" width="32px" className="m-3" />
   );
 };
 
@@ -69,6 +65,7 @@ export interface Navbar01NavLink {
   href: string;
   label: string;
   active?: boolean;
+  pathName?: string;
 }
 
 export interface Navbar01Props extends React.HTMLAttributes<HTMLElement> {
@@ -84,7 +81,7 @@ export interface Navbar01Props extends React.HTMLAttributes<HTMLElement> {
 
 // Default navigation links
 const defaultNavigationLinks: Navbar01NavLink[] = [
-  { href: "#", label: "Home", active: true },
+  { href: "/", label: "Home", active: true },
   { href: "#features", label: "Features" },
   { href: "#about", label: "About" },
 ];
@@ -94,7 +91,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
     {
       className,
       logo = <Logo />,
-      logoHref = "#",
+      logoHref = "/",
       navigationLinks = defaultNavigationLinks,
       ctaText = "Get Started",
       ctaHref = "#get-started",
@@ -110,6 +107,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
       // refetch, //refetch the session
     } = authClient.useSession();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [isMobile, setIsMobile] = useState(false);
     const containerRef = useRef<HTMLElement>(null);
@@ -133,6 +131,10 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
         resizeObserver.disconnect();
       };
     }, []);
+
+    navigationLinks.forEach((i) => {
+      i.active = i.href === location.pathname;
+    });
 
     // Combine refs
     const combinedRef = React.useCallback(
@@ -197,7 +199,10 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
             {/* Main nav */}
             <div className="flex items-center gap-6">
               <button
-                onClick={(e) => e.preventDefault()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate(logoHref);
+                }}
                 className="flex items-center space-x-2 text-primary hover:text-primary/90 transition-colors cursor-pointer"
               >
                 <div className="text-2xl">{logo}</div>
@@ -254,19 +259,9 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                 Sign In
               </Button>
             ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate("/auth/sign-out");
-                }}
-              >
-                Sign Out
-              </Button>
+              <UserButton size="sm" />
             )}
-            <Button
+            {/* <Button
               size="sm"
               className="text-sm font-medium px-4 h-9 rounded-md shadow-sm"
               onClick={(e) => {
@@ -275,7 +270,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
               }}
             >
               {ctaText}
-            </Button>
+            </Button> */}
             <ModeToggle></ModeToggle>
           </div>
         </div>

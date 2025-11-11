@@ -1,3 +1,10 @@
+/*
+ * Providers to apply to all routes
+ *
+ *  - AuthUIProvider: Enables Better Auth UI components to be used
+ *  - ThemeProvider: Enables switching between light/dark/system theme using a button
+ */
+
 import { AuthUIProvider } from "@daveyplate/better-auth-ui";
 import { authClient } from "./lib/auth-client";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -24,6 +31,8 @@ const LinkWithHref = React.forwardRef<
 
 LinkWithHref.displayName = "LinkWithHref";
 
+const ORCIDIcon = () => <i className="fa-brands fa-orcid"></i>;
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   return (
@@ -31,6 +40,22 @@ export function Providers({ children }: { children: React.ReactNode }) {
       authClient={authClient}
       Link={LinkWithHref}
       navigate={navigate}
+      // Built-in auth providers
+      social={{
+        providers: [
+          /*"github", "google"*/
+        ],
+      }}
+      // Custom auth providers
+      genericOAuth={{
+        providers: [
+          {
+            provider: "orcid",
+            name: "ORCID",
+            icon: ORCIDIcon,
+          },
+        ],
+      }}
     >
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
         {children}

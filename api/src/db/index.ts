@@ -19,6 +19,7 @@ export const createDb = (env: Env) => {
   if (!connectionString) {
     return null;
   }
+  // The settings below are what Cloudflare Workers recommend. If not using Cloudflare, these can be modified.
   const client = postgres(connectionString, {
     // Limit the connections for the Worker request to 5 due to Workers' limits on concurrent external connections
     max: 5,
