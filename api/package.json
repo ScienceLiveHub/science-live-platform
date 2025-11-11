@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --hot run src/index.ts",
-    "dev-wd": "wrangler dev",
+    "dev": "wrangler dev",
+    "dev-bun": "bun --hot run src/index.ts",
     "check": "wrangler deploy --dry-run",
     "deploy": "wrangler deploy",
     "cf-typegen": "wrangler types",
