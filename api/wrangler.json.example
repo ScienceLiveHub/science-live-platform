@@ -9,11 +9,17 @@
   "vars": {
     "ALLOWED_ORIGINS": "CHANGE_TO_DEPLOYED_FRONTEND_URL",
     "BETTER_AUTH_URL": "CHANGE_TO_DEPLOYED_API_URL",
+    "ORCID_CLIENT_ID": "CHANGE_TO_OAUTH_ORCID_CLIENT_ID"
+  },
+  "dev": {
+    "port": 3001,
+    "local_protocol": "http"
   },
   "hyperdrive": [
     {
       "binding": "HYPERDRIVE",
-      "id": "CHANGE_TO_HYPERDRIVE_UUID",
-    }
+      "id": "CHANGE_TO_HYPERDRIVE_UUID"
+      "localConnectionString": "CHANGE_TO_YOUR_DIRECT_DEV_DB_postgresql://..."
+     }
   ]
 }
