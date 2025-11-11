@@ -24,7 +24,9 @@
         },
         "isBackground": true,
         "detail": "The Backend API server",
-        "problemMatcher": []
+        "problemMatcher": [],
+        "runOptions": {},
+        "options": {"env": {"PORT":"3001"}}
     },
     {
         "label": "frontend",

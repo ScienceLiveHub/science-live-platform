@@ -106,6 +106,7 @@ export const getAuth = (env: Env) => {
     },
     hooks: {
       after: createAuthMiddleware(async (ctx) => {
+        //TODO: can we append the partial relative redirect URL to the FRONTEND_URL so it goes back to the same page?
         ctx.redirect(env.FRONTEND_URL ?? "/");
       }),
     },

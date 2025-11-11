@@ -28,7 +28,10 @@ export const customProviders = (env: Env) =>
         mapProfileToUser: async (profile) => {
           return {
             ...profile,
-            name: profile.given_name + profile.family_name,
+            name:
+              profile.given_name + profile.family_name?.length
+                ? " " + profile.family_name
+                : "",
             email: profile.sub + "@orcid-email-missing.com",
           };
         },
