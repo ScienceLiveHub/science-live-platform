@@ -1,9 +1,10 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import health from "./health";
-import { getAuth } from "./auth";
+import { formatAllowedOrigins, getAuth } from "./auth";
 
 type Env = {
+  FRONTEND_URL?: string;
   ALLOWED_ORIGINS?: string;
   BETTER_AUTH_URL?: string;
   BETTER_AUTH_SECRET?: string;
@@ -20,10 +21,7 @@ app.use(
   "/auth/**",
   cors({
     origin: (origin, c) => {
-      const allowed = (c.env.ALLOWED_ORIGINS || "")
-        .split(",")
-        .map((s: string) => s.trim())
-        .filter(Boolean);
+      const allowed = formatAllowedOrigins(c.env);
       if (!origin) return undefined;
       if (allowed.length === 0) return origin;
       if (allowed.includes(origin)) return origin;

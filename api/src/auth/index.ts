@@ -1,12 +1,17 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { createAuthEndpoint, openAPI } from "better-auth/plugins";
+import {
+  createAuthEndpoint,
+  createAuthMiddleware,
+  openAPI,
+} from "better-auth/plugins";
 import { createDb } from "../db";
 import * as authSchema from "../db/schema/user_auth";
 import { customProviders } from "./custom-providers";
 import { builtInProviders } from "./built-in-providers";
 
 type Env = {
+  FRONTEND_URL?: string;
   ALLOWED_ORIGINS?: string;
   BETTER_AUTH_URL?: string;
   BETTER_AUTH_SECRET?: string;
@@ -51,6 +56,22 @@ export const getSocialProviders = () => ({
   },
 });
 
+export const formatAllowedOrigins = (env: any) => {
+  const allowed = (
+    typeof env.ALLOWED_ORIGINS === "string"
+      ? (env.ALLOWED_ORIGINS as string)
+      : ""
+  )
+    .split(",")
+    .map((s: string) => s.trim())
+    .filter(Boolean);
+
+  if (typeof env.FRONTEND_URL === "string") {
+    allowed.push(env.FRONTEND_URL);
+  }
+  return allowed;
+};
+
 /**
  * Factory to create the Better Auth instance using Workers bindings.
  */
@@ -69,14 +90,26 @@ export const getAuth = (env: Env) => {
       autoSignIn: true,
       minPasswordLength: 8,
     },
+    user: {
+      deleteUser: {
+        enabled: true,
+      },
+    },
     plugins: [openAPI(), customProviders(env), getSocialProviders()],
-    trustedOrigins: (typeof env.ALLOWED_ORIGINS === "string"
-      ? env.ALLOWED_ORIGINS
-      : ""
-    )
-      .split(",")
-      .map((s: string) => s.trim())
-      .filter(Boolean),
+    account: {
+      accountLinking: {
+        // TODO: consider always requiring explicit login to link OIDC accounts if `allowDifferentEmails: true`.
+        // That would mitigate the potential for account takeover as suggested in the Better Auth docs, even though it is slightly inconvenient for the user.
+        // This can be done by setting the custom providers config `prompt: "login"`.
+        allowDifferentEmails: true,
+      },
+    },
+    hooks: {
+      after: createAuthMiddleware(async (ctx) => {
+        ctx.redirect(env.FRONTEND_URL ?? "/");
+      }),
+    },
+    trustedOrigins: formatAllowedOrigins(env),
     database: drizzleAdapter(db as any, {
       provider: "pg",
       schema: authSchema,

@@ -19,6 +19,19 @@ export const customProviders = (env: Env) =>
         clientSecret: env.ORCID_CLIENT_SECRET as string,
         discoveryUrl: "https://orcid.org/.well-known/openid-configuration",
         scopes: ["openid"],
+        prompt: "select_account",
+        // In the Public API (individuals), it returns the following profile info:
+        // {"id":"https://orcid.org/0001-0001-1234-5678","emailVerified":false,"name":null,"sub":"0001-0001-1234-5678","family_name":"Doe","given_name":"John"}
+        // The docs mention the Member API for orgs (register/paid) returns additional data, though unclear exactly what.
+        // Due to ORCID OIDC not returning an email (currently required by Better Auth v1.3, but that might change in the next major version),
+        // we map a "fake" one using the sub. See https://github.com/better-auth/better-auth/issues/2059
+        mapProfileToUser: async (profile) => {
+          return {
+            ...profile,
+            name: profile.given_name + profile.family_name,
+            email: profile.sub + "@orcid-email-missing.com",
+          };
+        },
       },
       // Add more custom providers as needed, if they are not already built into Better Auth
       // See https://www.better-auth.com/docs/authentication/other-social-providers for more info
