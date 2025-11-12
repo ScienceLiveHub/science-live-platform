@@ -24,15 +24,15 @@ export const customProviders = (env: Env) =>
         // {"id":"https://orcid.org/0001-0001-1234-5678","emailVerified":false,"name":null,"sub":"0001-0001-1234-5678","family_name":"Doe","given_name":"John"}
         // The docs mention the Member API for orgs (register/paid) returns additional data, though unclear exactly what.
         // Due to ORCID OIDC not returning an email (currently required by Better Auth v1.3, but that might change in the next major version),
-        // we map a "fake" one using the sub. See https://github.com/better-auth/better-auth/issues/2059
+        // we map the profile.sub, see https://github.com/better-auth/better-auth/issues/2059
+        // Without email verification, a user will only have read-only access, so this forces them to go to their account page, enter a valid email in place of the profile.sub, and verify it.
         mapProfileToUser: async (profile) => {
           return {
             ...profile,
             name:
-              profile.given_name + profile.family_name?.length
-                ? " " + profile.family_name
-                : "",
-            email: profile.sub + "@orcid-email-missing.com",
+              profile.given_name +
+              (profile.family_name?.length ? " " + profile.family_name : ""),
+            email: profile.sub + "@orcid",
           };
         },
       },

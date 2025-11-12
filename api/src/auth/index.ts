@@ -11,9 +11,9 @@ import { customProviders } from "./custom-providers";
 import { builtInProviders } from "./built-in-providers";
 
 type Env = {
+  API_URL?: string;
   FRONTEND_URL?: string;
   ALLOWED_ORIGINS?: string;
-  BETTER_AUTH_URL?: string;
   BETTER_AUTH_SECRET?: string;
   HYPERDRIVE?: { connectionString?: string };
   // Provider credentials come in as top-level env vars
@@ -78,8 +78,7 @@ export const formatAllowedOrigins = (env: any) => {
 export const getAuth = (env: Env) => {
   const db = createDb(env);
   return betterAuth({
-    baseURL:
-      typeof env.BETTER_AUTH_URL === "string" ? env.BETTER_AUTH_URL : undefined,
+    baseURL: typeof env.API_URL === "string" ? env.API_URL : undefined,
     secret:
       typeof env.BETTER_AUTH_SECRET === "string"
         ? env.BETTER_AUTH_SECRET
