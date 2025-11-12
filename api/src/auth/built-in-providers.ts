@@ -2,11 +2,6 @@
  * Enable and configure OIDC providers which are built into Better Auth
  */
 
-type Env = {
-  // Provider credentials come in as top-level env vars, with provider name UPPER_CASE_ prefix
-  [key: string]: unknown;
-};
-
 // Enable providers here and add any specicial configuration below
 // See https://www.better-auth.com/docs for a list of Social Signin providers
 const providers: string[] = [
@@ -24,7 +19,7 @@ type ProviderConfig = {
   issuer?: string;
 };
 
-export const builtInProviders = (env: Env) =>
+export const builtInProviders = (env: Env | any) =>
   providers.reduce<Record<string, ProviderConfig>>((acc, provider) => {
     const U = provider.toUpperCase();
     const id = env[`${U}_CLIENT_ID`];

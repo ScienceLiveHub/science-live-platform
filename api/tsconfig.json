@@ -14,8 +14,11 @@
     "noUnusedParameters": false,
     "noImplicitReturns": true,
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": ["node", "./worker-configuration.d.ts"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "drizzle.config.ts"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "drizzle.config.ts", "src/auth/index.tsx"],
   "exclude": ["node_modules", "dist"]
 }

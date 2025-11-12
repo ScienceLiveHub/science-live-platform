@@ -1,15 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import health from "./health";
-import { formatAllowedOrigins, getAuth } from "./auth";
-
-type Env = {
-  API_URL?: string;
-  FRONTEND_URL?: string;
-  ALLOWED_ORIGINS?: string;
-  BETTER_AUTH_SECRET?: string;
-  HYPERDRIVE?: { connectionString?: string };
-};
+import { formatAllowedOrigins, getAuth } from "@/auth";
 
 const app = new Hono<{ Bindings: Env }>().basePath("/api");
 

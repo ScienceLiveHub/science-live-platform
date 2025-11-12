@@ -5,20 +5,11 @@ import {
   createAuthMiddleware,
   openAPI,
 } from "better-auth/plugins";
-import { createDb } from "../db";
-import * as authSchema from "../db/schema/user_auth";
+import { createDb } from "@/db";
+import * as authSchema from "@/db/schema/user_auth";
 import { customProviders } from "./custom-providers";
 import { builtInProviders } from "./built-in-providers";
-
-type Env = {
-  API_URL?: string;
-  FRONTEND_URL?: string;
-  ALLOWED_ORIGINS?: string;
-  BETTER_AUTH_SECRET?: string;
-  HYPERDRIVE?: { connectionString?: string };
-  // Provider credentials come in as top-level env vars
-  [key: string]: unknown;
-};
+import { sendEmail } from "@/email";
 
 /**
  * Better-Auth Plugin that returns the list of available social providers
@@ -88,6 +79,32 @@ export const getAuth = (env: Env) => {
       enabled: true,
       autoSignIn: true,
       minPasswordLength: 8,
+      autoSignInAfterVerification: true,
+      async afterEmailVerification(user: any, request: any) {
+        // TODO: currently there is no feedback for successful email verification, it just redirects the frontend to home.
+        // Perhaps send an email or redirect to the /email-verified page
+        console.log(`${user.email} has been successfully verified!`);
+      },
+      sendResetPassword: async ({ user, url, token }, request) => {
+        // TODO: consider using an email template https://better-auth-ui.com/components/email-template
+        await sendEmail(env, {
+          from: "sciencelive@resend.dev", // TODO: Set correct `from` email once domain verified
+          to: user.email,
+          subject: "Reset your password",
+          html: `Click the link to reset your Science Live Platform password: ${url}`,
+        });
+      },
+    },
+    emailVerification: {
+      sendVerificationEmail: async ({ user, url, token }, request) => {
+        // TODO: consider using an email template https://better-auth-ui.com/components/email-template
+        await sendEmail(env, {
+          from: "sciencelive@resend.dev", // TODO: Set correct `from` email once domain verified
+          to: user.email,
+          subject: "Verify your email address",
+          html: `Click the link to verify your Science Live Platform email: ${url}`,
+        });
+      },
     },
     user: {
       deleteUser: {

@@ -1,13 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
-type Env = {
-  HYPERDRIVE?: {
-    connectionString?: string;
-  };
-  DATABASE_URL?: string;
-};
-
 /**
  * Create a Drizzle client using either a DATABASE_URL if defined,
  * otherwise Cloudflare Hyperdrive in Workers.

@@ -33,6 +33,7 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "mhutchie.git-graph",
+        "bradlc.vscode-tailwindcss",
         /* Roo Code is my preferred agentic coding assistant in vscode */
         "RooVeterinaryInc.roo-cline"
       ]

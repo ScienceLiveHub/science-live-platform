@@ -1,10 +1,6 @@
 import { Hono } from "hono";
 import { sql } from "drizzle-orm";
-import { createDb } from "./db";
-
-type Env = {
-  HYPERDRIVE?: { connectionString?: string };
-};
+import { createDb } from "@/db";
 
 const app = new Hono<{ Bindings: Env }>();
 
