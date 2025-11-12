@@ -8,6 +8,8 @@ import AuthPage from "./pages/AuthPage";
 import { Providers } from "./providers";
 import AccountPage from "./pages/AccountPage";
 import { Navbar01 } from "./components/ui/shadcn-io/navbar-01";
+import { Toaster } from "./components/ui/sonner";
+import EmailVerfied from "./pages/EmailVerified";
 
 function App() {
   return (
@@ -15,6 +17,7 @@ function App() {
       <Providers>
         <div className="relative w-full">
           <Navbar01 />
+          <Toaster />
         </div>
         <Routes>
           <Route path="/auth/:pathname" element={<AuthPage />} />
@@ -23,6 +26,7 @@ function App() {
           {/* Main Pages - For Demo/Production */}
           <Route path="/" element={<HomePage />} />
           <Route path="/test-nanopub" element={<NanopubTestPage />} />
+          <Route path="/email-verified" element={<EmailVerfied />} />
 
           {/* Development/Testing Pages - Keep for development */}
           <Route path="/test-parser" element={<NanopubTest />} />

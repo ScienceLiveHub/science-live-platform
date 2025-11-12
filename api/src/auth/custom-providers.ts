@@ -4,12 +4,6 @@
 
 import { genericOAuth } from "better-auth/plugins";
 
-type Env = {
-  ORCID_CLIENT_ID?: string;
-  ORCID_CLIENT_SECRET?: string;
-  [key: string]: unknown;
-};
-
 export const customProviders = (env: Env) =>
   genericOAuth({
     config: [

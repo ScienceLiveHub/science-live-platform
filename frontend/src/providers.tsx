@@ -40,6 +40,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       authClient={authClient}
       Link={LinkWithHref}
       navigate={navigate}
+      emailVerification={true}
+      deleteUser={true}
       // Built-in auth providers
       social={{
         providers: [
