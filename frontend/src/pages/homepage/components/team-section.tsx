@@ -15,22 +15,20 @@ const team = [
     image: "https://avatars.githubusercontent.com/u/8168508?v=4",
     fallback: "AF",
     social: {
-      linkedin: "#",
-      github: "#",
-      website: "#",
+      linkedin: "https://www.linkedin.com/in/annefouilloux/",
+      github: "https://github.com/annefou",
     },
   },
   {
     id: 2,
     name: "Knowledge Pixels + Prophet Town",
-    role: "Technical Architecture",
+    role: "Technical Architecture and Platform",
     description: "",
     image: "",
     fallback: "KP / PT",
     social: {
-      linkedin: "#",
-      github: "#",
-      website: "#",
+      website: "https://knowledgepixels.com/",
+      website2: "https://ptown.tech/",
     },
   },
   {
@@ -41,9 +39,9 @@ const team = [
     image: "https://avatars.githubusercontent.com/u/32859932?v=4",
     fallback: "BM",
     social: {
-      linkedin: "#",
-      github: "#",
-      website: "#",
+      website: "https://mabablue.com/",
+      linkedin: "https://www.linkedin.com/in/barbara-magagna-2794ba42/",
+      github: "https://github.com/mabablue",
     },
   },
   {
@@ -54,9 +52,7 @@ const team = [
     image: "https://avatars.githubusercontent.com/u/94918055?s=200&v=4",
     fallback: "AI",
     social: {
-      linkedin: "#",
-      github: "#",
-      website: "#",
+      website: "https://astera.org/",
     },
   },
 ];
@@ -109,51 +105,74 @@ export function TeamSection() {
 
                   {/* Social Links */}
                   <div className="flex items-center justify-center gap-3">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 cursor-pointer hover:text-primary"
-                      asChild
-                    >
-                      <a
-                        href={member.social.linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`${member.name} LinkedIn`}
+                    {member.social.linkedin && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 cursor-pointer hover:text-primary"
+                        asChild
                       >
-                        <Linkedin className="h-4 w-4" />
-                      </a>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 cursor-pointer hover:text-primary"
-                      asChild
-                    >
-                      <a
-                        href={member.social.github}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`${member.name} GitHub`}
+                        <a
+                          href={member.social.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${member.name} LinkedIn`}
+                        >
+                          <Linkedin className="h-4 w-4" />
+                        </a>
+                      </Button>
+                    )}
+                    {member.social.github && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 cursor-pointer hover:text-primary"
+                        asChild
                       >
-                        <Github className="h-4 w-4" />
-                      </a>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 cursor-pointer hover:text-primary"
-                      asChild
-                    >
-                      <a
-                        href={member.social.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`${member.name} Website`}
+                        <a
+                          href={member.social.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${member.name} GitHub`}
+                        >
+                          <Github className="h-4 w-4" />
+                        </a>
+                      </Button>
+                    )}
+                    {member.social.website && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 cursor-pointer hover:text-primary"
+                        asChild
                       >
-                        <Globe className="h-4 w-4" />
-                      </a>
-                    </Button>
+                        <a
+                          href={member.social.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${member.name} Website`}
+                        >
+                          <Globe className="h-4 w-4" />
+                        </a>
+                      </Button>
+                    )}
+                    {member.social.website2 && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 cursor-pointer hover:text-primary"
+                        asChild
+                      >
+                        <a
+                          href={member.social.website2}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${member.name} Website`}
+                        >
+                          <Globe className="h-4 w-4" />
+                        </a>
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardContent>
