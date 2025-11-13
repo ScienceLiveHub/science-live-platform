@@ -88,9 +88,9 @@ export const getAuth = (env: Env) => {
       sendResetPassword: async ({ user, url, token }, request) => {
         // TODO: consider using an email template https://better-auth-ui.com/components/email-template
         await sendEmail(env, {
-          from: "sciencelive@resend.dev", // TODO: Set correct `from` email once domain verified
+          from: "noreply@sciencelive4all.org",
           to: user.email,
-          subject: "Reset your password",
+          subject: "[Science Live] Reset your password",
           html: `Click the link to reset your Science Live Platform password: ${url}`,
         });
       },
@@ -99,14 +99,30 @@ export const getAuth = (env: Env) => {
       sendVerificationEmail: async ({ user, url, token }, request) => {
         // TODO: consider using an email template https://better-auth-ui.com/components/email-template
         await sendEmail(env, {
-          from: "sciencelive@resend.dev", // TODO: Set correct `from` email once domain verified
+          from: "noreply@sciencelive4all.org",
           to: user.email,
-          subject: "Verify your email address",
+          subject: "[Science Live] Verify your email address",
           html: `Click the link to verify your Science Live Platform email: ${url}`,
         });
       },
     },
     user: {
+      changeEmail: {
+        enabled: true,
+        sendChangeEmailVerification: async (
+          { user, newEmail, url, token },
+          request
+        ) => {
+          // TODO: consider using an email template https://better-auth-ui.com/components/email-template
+          await sendEmail(env, {
+            from: "noreply@sciencelive4all.org",
+            to: newEmail,
+            subject:
+              "[Science Live] Change of email address - Confirm your new email address",
+            html: `Click the link to confirm your new Science Live Platform email: ${url}`,
+          });
+        },
+      },
       deleteUser: {
         enabled: true,
       },
