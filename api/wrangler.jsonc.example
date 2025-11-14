@@ -4,7 +4,9 @@
   "main": "src/index.ts",
   "compatibility_date": "2025-11-01",
   "compatibility_flags": ["nodejs_compat"],
-  "observability": { "enabled": true },
+  "observability": {
+    "enabled": true
+  },
   "upload_source_maps": true,
   "vars": {
     "FRONTEND_URL": "CHANGE_TO_DEPLOYED_FRONTEND_BASE_URL",

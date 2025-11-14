@@ -88,7 +88,7 @@ Currently the `frontend` is a static SPA, with no SSR required, and client-side 
   - A [Cloudflare](https://dash.cloudflare.com) account (free tier works fine)
     - Either log into `wrangler` CLI (`npx wrangler login`), OR set your `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in both the frontend and api .env files
     - Set up a Cloudflare Hyperdrive connection to your postgres db, and take note of its its UUID.
-    - Copy each of the `wrangler.json.example` files under both `api/` and `frontend/` folders to `wrangler.json` and enter your ENVS into them where you see `CHANGE_TO_...`.
+    - Copy each of the `wrangler.jsonc.example` files under both `api/` and `frontend/` folders to `wrangler.jsonc` and enter your ENVS into them where you see `CHANGE_TO_...`.
     - Create a `frontend/.env.production` file which should specify `VITE_API_URL=` pointing to your production API url
   - Build and deploy everything from project root: `npm run build` then `npm run deploy`
 
@@ -219,25 +219,26 @@ curl http://localhost:3001/api/health
 - **React 19** - UI library
 - **React Router** - Client-side routing
 - **Vite** - Build tool and Dev server
-  TODO: Suggested additions: add @daveyplate/better-auth-ui for easy auth components, Sonner (toast) for simpler UI styling
 
 #### Backend
 
 - **Hono** - API endpoints
 - **Bun** - Dev server
-- **Cloudflare Workers** - Target Serverless Deployment
 - **Better-Auth** - Auth library and user management
 - **Drizzle** - ORM
+- **Wrangler** - CLI for Cloudflare Serverless Deployment
 
 #### Database
 
 - **PostgreSQL** - Primary database
 - **Knowledge Pixels Nanopub Network** - Decentralized RDF storage
 
-#### Default Infrastructure used (can be easily changed)
+#### Default 3rd-party Infrastructure used (can be easily changed)
 
-- **Cloudflare** - Default hosting and deployment
-- **Neon** - Default postgres database
+- **Cloudflare** - Hosting and deployment
+- **Neon** - Postgres database
+- **Resend** - Email API
+- **ORCID** - An OIDC provider
 - **GitHub** - Version control
 
 ## 🤝 Contributing
