@@ -5,7 +5,15 @@
 
 import { CreateEmailOptions, Resend } from "resend";
 
-export function sendEmail(env: any, data: CreateEmailOptions) {
+// This is used if a `from` field is not specified
+export const DEFAULT_SENDER =
+  "Science Live Platform <noreply@sciencelive4all.org>";
+
+export function sendEmail(
+  env: any,
+  data: Omit<CreateEmailOptions, "from"> & { from?: string }
+) {
+  data.from = data.from ?? DEFAULT_SENDER;
   const resend = new Resend(env.RESEND_API_KEY);
-  return resend.emails.send(data);
+  return resend.emails.send(data as CreateEmailOptions);
 }

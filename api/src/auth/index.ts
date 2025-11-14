@@ -88,9 +88,8 @@ export const getAuth = (env: Env) => {
       sendResetPassword: async ({ user, url, token }, request) => {
         // TODO: consider using an email template https://better-auth-ui.com/components/email-template
         await sendEmail(env, {
-          from: "noreply@sciencelive4all.org",
           to: user.email,
-          subject: "[Science Live] Reset your password",
+          subject: "Reset your password",
           html: `Click the link to reset your Science Live Platform password: ${url}`,
         });
       },
@@ -99,9 +98,8 @@ export const getAuth = (env: Env) => {
       sendVerificationEmail: async ({ user, url, token }, request) => {
         // TODO: consider using an email template https://better-auth-ui.com/components/email-template
         await sendEmail(env, {
-          from: "noreply@sciencelive4all.org",
           to: user.email,
-          subject: "[Science Live] Verify your email address",
+          subject: "Verify your email address",
           html: `Click the link to verify your Science Live Platform email: ${url}`,
         });
       },
@@ -115,10 +113,8 @@ export const getAuth = (env: Env) => {
         ) => {
           // TODO: consider using an email template https://better-auth-ui.com/components/email-template
           await sendEmail(env, {
-            from: "noreply@sciencelive4all.org",
             to: newEmail,
-            subject:
-              "[Science Live] Change of email address - Confirm your new email address",
+            subject: "Confirm your change of email address",
             html: `Click the link to confirm your new Science Live Platform email: ${url}`,
           });
         },
