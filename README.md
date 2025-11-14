@@ -47,10 +47,10 @@ Science Live enables researchers to create FAIR (Findable, Accessible, Interoper
 │  - Template-based forms                                 │
 ├─────────────────────────────────────────────────────────┤
 │  Backend API (Serverless, Hono)                         │
-│  - /api/auth/*       - Better Auth + ORCID OIDC         │
-│  - /api/users/*      - User profiles & credits          │
-│  - /api/nanopubs/*   - Create, validate, fetch          │
-│  - /api/templates/*  - Template management              │
+│  - /auth/*       - Better Auth + ORCID OIDC         │
+│  - /users/*      - User profiles & credits          │
+│  - /nanopubs/*   - Create, validate, fetch          │
+│  - /templates/*  - Template management              │
 └─────────────────────────────────────────────────────────┘
                            │
                            ▼
@@ -204,7 +204,7 @@ open http://localhost:3000
 
 ```bash
 # Health check
-curl http://localhost:3001/api/health
+curl http://localhost:3001/health
 ```
 
 ## 🛠️ Technology Stack

@@ -3,7 +3,7 @@ import { cors } from "hono/cors";
 import health from "./health";
 import { formatAllowedOrigins, getAuth } from "@/auth";
 
-const app = new Hono<{ Bindings: Env }>().basePath("/api");
+const app = new Hono<{ Bindings: Env }>();
 
 // Normal API endpoints
 app.route("/health", health);

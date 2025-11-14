@@ -69,7 +69,8 @@ export const formatAllowedOrigins = (env: any) => {
 export const getAuth = (env: Env) => {
   const db = createDb(env);
   return betterAuth({
-    baseURL: typeof env.API_URL === "string" ? env.API_URL : undefined,
+    baseURL:
+      typeof env.API_URL === "string" ? env.API_URL + "/auth" : undefined,
     secret:
       typeof env.BETTER_AUTH_SECRET === "string"
         ? env.BETTER_AUTH_SECRET

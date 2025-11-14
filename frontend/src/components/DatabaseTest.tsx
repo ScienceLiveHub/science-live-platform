@@ -13,7 +13,7 @@ export function DatabaseTest() {
 
   async function testDatabase() {
     try {
-      const response = await fetch("/api/v1/users/test");
+      const response = await fetch("/users/test");
       const result = await response.json();
 
       if (result.success) {
@@ -40,8 +40,8 @@ export function DatabaseTest() {
           status === "success"
             ? "#f0fdf4"
             : status === "error"
-            ? "#fef2f2"
-            : "#f9fafb",
+              ? "#fef2f2"
+              : "#f9fafb",
       }}
     >
       <h2>Database Connection Test</h2>
