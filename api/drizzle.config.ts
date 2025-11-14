@@ -1,3 +1,7 @@
+/*
+ * Config loaded by drizzle-kit CLI and web GUI, NOT used by API
+ */
+
 import "dotenv/config";
 import { defineConfig } from "drizzle-kit";
 

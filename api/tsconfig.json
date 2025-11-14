@@ -2,9 +2,10 @@
   "compilerOptions": {
     "target": "ES2022",
     "useDefineForClassFields": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
+    "module": "es2022",
+    "moduleResolution": "bundler",
     "moduleDetection": "force",
+    "incremental": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
@@ -14,11 +15,12 @@
     "noUnusedParameters": false,
     "noImplicitReturns": true,
     "skipLibCheck": true,
+    "jsx": "react-jsx",
     "types": ["node", "./worker-configuration.d.ts"],
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "drizzle.config.ts", "src/auth/index.tsx"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts",  "drizzle.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

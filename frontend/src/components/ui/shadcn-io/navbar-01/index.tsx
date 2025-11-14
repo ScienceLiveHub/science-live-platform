@@ -23,7 +23,12 @@ import { UserButton } from "@daveyplate/better-auth-ui";
 // Simple logo component for the navbar
 const Logo = () => {
   return (
-    <img src="/sciencelive-logo.png" alt="SL" width="32px" className="m-3" />
+    <img
+      src="/sciencelive-logo-small.webp"
+      alt="SL"
+      width="32px"
+      className="m-3"
+    />
   );
 };
 

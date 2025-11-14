@@ -10,6 +10,11 @@ import * as authSchema from "@/db/schema/user_auth";
 import { customProviders } from "./custom-providers";
 import { builtInProviders } from "./built-in-providers";
 import { sendEmail } from "@/email";
+import {
+  changeEmailTemplate,
+  resetPasswordTemplate,
+  verifyEmailTemplate,
+} from "./email-templates";
 
 /**
  * Better-Auth Plugin that returns the list of available social providers
@@ -87,21 +92,19 @@ export const getAuth = (env: Env) => {
         console.log(`${user.email} has been successfully verified!`);
       },
       sendResetPassword: async ({ user, url, token }, request) => {
-        // TODO: consider using an email template https://better-auth-ui.com/components/email-template
         await sendEmail(env, {
           to: user.email,
           subject: "Reset your password",
-          html: `Click the link to reset your Science Live Platform password: ${url}`,
+          react: resetPasswordTemplate(user.name, env.FRONTEND_URL, url),
         });
       },
     },
     emailVerification: {
       sendVerificationEmail: async ({ user, url, token }, request) => {
-        // TODO: consider using an email template https://better-auth-ui.com/components/email-template
         await sendEmail(env, {
           to: user.email,
           subject: "Verify your email address",
-          html: `Click the link to verify your Science Live Platform email: ${url}`,
+          react: verifyEmailTemplate(user.name, env.FRONTEND_URL, url),
         });
       },
     },
@@ -112,11 +115,10 @@ export const getAuth = (env: Env) => {
           { user, newEmail, url, token },
           request
         ) => {
-          // TODO: consider using an email template https://better-auth-ui.com/components/email-template
           await sendEmail(env, {
             to: newEmail,
             subject: "Confirm your change of email address",
-            html: `Click the link to confirm your new Science Live Platform email: ${url}`,
+            react: changeEmailTemplate(user.name, env.FRONTEND_URL, url),
           });
         },
       },

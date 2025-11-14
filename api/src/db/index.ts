@@ -1,11 +1,12 @@
+/**
+ * Create a Drizzle client using either a DATABASE_URL if defined,
+ * otherwise Cloudflare Hyperdrive in Workers prod deployment.
+ * Returns null if no connection string is found.
+ */
+
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
-/**
- * Create a Drizzle client using either a DATABASE_URL if defined,
- * otherwise Cloudflare Hyperdrive in Workers.
- * Returns null if no connection string is found.
- */
 export const createDb = (env: Env) => {
   const connectionString =
     env.DATABASE_URL ?? env?.HYPERDRIVE?.connectionString;
