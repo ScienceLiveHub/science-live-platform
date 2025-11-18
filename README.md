@@ -14,8 +14,8 @@ Science Live enables researchers to create FAIR (Findable, Accessible, Interoper
 | --------- | -------- | -------------------------------------------- |
 | ✅ Step 1 | Complete | Foundation setup (monorepo, React)           |
 | ✅ Step 2 | Complete | Database integration (PostgreSQL)            |
-| ✅ Step 3 | Complete | Nanopub parser and viewer with display modes |
-| 🔄 Step 4 | Next     | ORCID authentication                         |
+| ✅ Step 3 | Complete | ORCID authentication                         |
+| 🔄 Step 4 | Next     | Nanopub parser and viewer with display modes |
 | ⏳ Step 5 | Planned  | Template processing engine                   |
 | ⏳ Step 6 | Planned  | Credit system implementation                 |
 
@@ -47,10 +47,10 @@ Science Live enables researchers to create FAIR (Findable, Accessible, Interoper
 │  - Template-based forms                                 │
 ├─────────────────────────────────────────────────────────┤
 │  Backend API (Serverless, Hono)                         │
-│  - /auth/*       - Better Auth + ORCID OIDC         │
-│  - /users/*      - User profiles & credits          │
-│  - /nanopubs/*   - Create, validate, fetch          │
-│  - /templates/*  - Template management              │
+│  - /auth/*       - Better Auth + ORCID OIDC             │
+│  - /users/*      - User profiles & credits              │
+│  - /nanopubs/*   - Create, validate, fetch              │
+│  - /templates/*  - Template management                  │
 └─────────────────────────────────────────────────────────┘
                            │
                            ▼

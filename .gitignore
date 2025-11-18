@@ -48,3 +48,10 @@ package-lock.json
 frontend/package-lock.json
 api/package-lock.json
 frontend/public/wasm/
+
+# Roo Code/Commander specific config
+.roo/
+.roomodes
+
+# Local files that should be ignored
+.ignore

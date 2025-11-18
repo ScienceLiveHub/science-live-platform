@@ -18,7 +18,7 @@
     "test": "vitest",
     "typecheck": "tsc -b",
     "check": "vite build && wrangler deploy --dry-run",
-    "deploy": "wrangler deploy",
+    "deploy": "npm run build && wrangler deploy",
     "ui:add": "npx shadcn@latest add"
   },
   "dependencies": {
