@@ -5,6 +5,8 @@ step-by-step.md
 node_modules/
 .pnp
 .pnp.js
+.pnpm-store/
+.yarn/
 
 # Testing
 coverage/
@@ -55,3 +57,4 @@ frontend/public/wasm/
 
 # Local files that should be ignored
 .ignore
+.temp

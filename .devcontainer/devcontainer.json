@@ -1,6 +1,6 @@
 {
   "name": "Science Live Platform",
-  /* Node v22 is current default */
+  /* Node v22 is current default. This image also includes yarn classic and pnpm */
   "image": "mcr.microsoft.com/devcontainers/typescript-node:22-bookworm",
   "workspaceFolder": "/workspaces/science-live-platform",
   "remoteUser": "node",
