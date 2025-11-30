@@ -10,6 +10,8 @@ import AccountPage from "./pages/AccountPage";
 import { Navbar01 } from "./components/ui/shadcn-io/navbar-01";
 import { Toaster } from "./components/ui/sonner";
 import EmailVerfied from "./pages/EmailVerified";
+import ViewRaw from "./pubs/ViewRaw";
+import ViewNanopub from "./pubs/ViewNanopub";
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
 
           {/* Main Pages - For Demo/Production */}
           <Route path="/" element={<HomePage />} />
+          <Route path="/np-raw/:nanopubId" element={<ViewRaw />} />
+          <Route path="/np/:uri" element={<ViewNanopub />} />
           <Route path="/test-nanopub" element={<NanopubTestPage />} />
           <Route path="/email-verified" element={<EmailVerfied />} />
 

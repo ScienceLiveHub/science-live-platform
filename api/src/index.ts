@@ -19,7 +19,8 @@ app.use(
       if (allowed.includes(origin)) return origin;
       return undefined;
     },
-    allowHeaders: ["Content-Type", "Authorization"],
+    // TODO: ideally we should have the allowHeaders setting but it prevents localhost dev from working
+    // allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["POST", "GET", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
     maxAge: 600,
