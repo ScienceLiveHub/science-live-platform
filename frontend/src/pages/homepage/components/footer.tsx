@@ -1,11 +1,6 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -13,8 +8,13 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Github, Linkedin, Mail } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { Logo } from "@/components/ui/shadcn-io/navbar-01";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Github, Linkedin, Mail } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 const newsletterSchema = z.object({
   email: z.string().email({

@@ -1,6 +1,6 @@
-import { Hono } from "hono";
-import { sql } from "drizzle-orm";
 import { createDb } from "@/db";
+import { sql } from "drizzle-orm";
+import { Hono } from "hono";
 
 const app = new Hono<{ Bindings: Env }>();
 

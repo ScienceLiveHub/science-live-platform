@@ -1,10 +1,10 @@
 // frontend/src/pages/TestNanopubViewer.tsx
-import { useState } from "react";
 import { NanopubViewer } from "@sciencelivehub/nanopub-view/react";
+import { useState } from "react";
 
 export function TestNanopubViewer() {
   const [uri, setUri] = useState(
-    "https://w3id.org/np/RA6Cz33icPZrBAummwxw6MwdS-RepX-sUjW_fZz905Rvc"
+    "https://w3id.org/np/RA6Cz33icPZrBAummwxw6MwdS-RepX-sUjW_fZz905Rvc",
   );
   const [currentUri, setCurrentUri] = useState(uri);
   const [loading, setLoading] = useState(false);
@@ -92,7 +92,7 @@ export function TestNanopubViewer() {
           <button
             onClick={() =>
               setUri(
-                "https://w3id.org/np/RA6Cz33icPZrBAummwxw6MwdS-RepX-sUjW_fZz905Rvc"
+                "https://w3id.org/np/RA6Cz33icPZrBAummwxw6MwdS-RepX-sUjW_fZz905Rvc",
               )
             }
             style={{
@@ -109,7 +109,7 @@ export function TestNanopubViewer() {
           <button
             onClick={() =>
               setUri(
-                "https://w3id.org/np/RAltRkGOtHoj5LcBJZ62AMVOAVc0hnxt45LMaCXgxJ4fw"
+                "https://w3id.org/np/RAltRkGOtHoj5LcBJZ62AMVOAVc0hnxt45LMaCXgxJ4fw",
               )
             }
             style={{
@@ -126,7 +126,7 @@ export function TestNanopubViewer() {
           <button
             onClick={() =>
               setUri(
-                "https://w3id.org/np/RAyE-3z1_NojbRmAw6LuTgIoyLfhZ1zJ-dsuwOLM3SpZc"
+                "https://w3id.org/np/RAyE-3z1_NojbRmAw6LuTgIoyLfhZ1zJ-dsuwOLM3SpZc",
               )
             }
             style={{
@@ -143,7 +143,7 @@ export function TestNanopubViewer() {
           <button
             onClick={() =>
               setUri(
-                "https://w3id.org/np/RAE8VvRRXE65JsAsqwlNxoY7HSZ9t2Gvqo_YqAWcEDrcU"
+                "https://w3id.org/np/RAE8VvRRXE65JsAsqwlNxoY7HSZ9t2Gvqo_YqAWcEDrcU",
               )
             }
             style={{
@@ -160,7 +160,7 @@ export function TestNanopubViewer() {
           <button
             onClick={() =>
               setUri(
-                "https://w3id.org/kpxl/ios/ds/np/RAKN2Y56DjlJHRGLK75_vK0Aa7_jl6PwENnzHkqroL-QA"
+                "https://w3id.org/kpxl/ios/ds/np/RAKN2Y56DjlJHRGLK75_vK0Aa7_jl6PwENnzHkqroL-QA",
               )
             }
             style={{

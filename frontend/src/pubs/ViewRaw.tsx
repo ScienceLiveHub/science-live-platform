@@ -1,6 +1,6 @@
-import { useParams } from "react-router-dom";
-import { useEffect } from "react";
 import "@nanopub/display";
+import { useEffect } from "react";
+import { useParams } from "react-router-dom";
 
 export default function ViewRaw() {
   const params = useParams();

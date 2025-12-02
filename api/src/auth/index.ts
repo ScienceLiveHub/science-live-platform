@@ -1,3 +1,6 @@
+import { createDb } from "@/db";
+import * as authSchema from "@/db/schema/user_auth";
+import { sendEmail } from "@/email";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import {
@@ -5,11 +8,8 @@ import {
   createAuthMiddleware,
   openAPI,
 } from "better-auth/plugins";
-import { createDb } from "@/db";
-import * as authSchema from "@/db/schema/user_auth";
-import { customProviders } from "./custom-providers";
 import { builtInProviders } from "./built-in-providers";
-import { sendEmail } from "@/email";
+import { customProviders } from "./custom-providers";
 import {
   changeEmailTemplate,
   resetPasswordTemplate,
@@ -47,7 +47,7 @@ export const getSocialProviders = () => ({
         },
       },
       async (ctx) =>
-        ctx.json(ctx.context.socialProviders?.map((p) => p.name.toLowerCase()))
+        ctx.json(ctx.context.socialProviders?.map((p) => p.name.toLowerCase())),
     ),
   },
 });
@@ -113,7 +113,7 @@ export const getAuth = (env: Env) => {
         enabled: true,
         sendChangeEmailVerification: async (
           { user, newEmail, url, token },
-          request
+          request,
         ) => {
           await sendEmail(env, {
             to: newEmail,

@@ -1,7 +1,7 @@
+import { formatAllowedOrigins, getAuth } from "@/auth";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import health from "./health";
-import { formatAllowedOrigins, getAuth } from "@/auth";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -25,7 +25,7 @@ app.use(
     exposeHeaders: ["Content-Length"],
     maxAge: 600,
     credentials: true,
-  })
+  }),
 );
 
 // Auth endpoints — keep last

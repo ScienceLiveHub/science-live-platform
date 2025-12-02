@@ -48,7 +48,7 @@ function ErrorComponent({ error, resetErrorBoundary }: FallbackProps) {
           Something went wrong
         </h2>
         <p className="text-red-600">{error.message}</p>
-        <pre className="text-justify w-full p-4 overflow-x-auto">
+        <pre className="text-justify w-full p-4 overflow-x-auto text-gray-700 mb-2">
           <code>{error.stack}</code>
         </pre>
 

@@ -21,7 +21,9 @@
     "deploy": "npm run deploy:frontend && npm run deploy:api"
   },
   "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^6.0.0",
     "@types/node": "^24.10.1",
+    "prettier-plugin-organize-imports": "^4.3.0",
     "typescript": "^5.9.3",
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.5.0"
@@ -31,5 +33,10 @@
     "@sciencelivehub/nanopub-create": "github:ScienceLiveHub/nanopub-create#update-packages",
     "@sciencelivehub/nanopub-view": "github:ScienceLiveHub/nanopub-view#update-packages",
     "dotenv": "^17.2.3"
+  },
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-organize-imports"
+    ]
   }
 }

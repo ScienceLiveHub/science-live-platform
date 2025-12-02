@@ -5,11 +5,11 @@
  *  - ThemeProvider: Enables switching between light/dark/system theme using a button
  */
 
-import { AuthUIProvider } from "@daveyplate/better-auth-ui";
-import { authClient } from "./lib/auth-client";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Link, useNavigate } from "react-router-dom";
+import { AuthUIProvider } from "@daveyplate/better-auth-ui";
 import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { authClient } from "./lib/auth-client";
 
 // Wrapper around react-router-dom Link to match AuthUIProvider's Link interface.
 // AuthUIProvider Link expects an `href` parameter while react-router-dom Link uses `to`

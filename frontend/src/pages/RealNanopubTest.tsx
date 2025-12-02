@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { NanopubViewer } from "@sciencelivehub/nanopub-view/react";
+import { useState } from "react";
 
 export function RealNanopubTest() {
   const [nanopubUri, setNanopubUri] = useState("");
