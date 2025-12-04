@@ -17,6 +17,7 @@ export type Metadata = {
   creators?: string[];
   title?: string | null;
   assertionSubjects?: any[];
+  uri?: string;
 };
 
 export const COMMON_LABELS: Record<string, string> = {
@@ -257,6 +258,7 @@ export class Store extends N3Store {
       creators: unique([...(creators || []), ...provCreators]),
       title: title?.object?.value || null,
       assertionSubjects: unique(assertionSubjects),
+      uri: this.prefixes["this"],
     };
   }
 }

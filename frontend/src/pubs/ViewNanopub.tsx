@@ -6,6 +6,26 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
+import {
+  Item,
+  ItemContent,
+  ItemMedia,
+  ItemSeparator,
+  ItemTitle,
+} from "@/components/ui/item";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Snippet,
+  SnippetCopyButton,
+  SnippetHeader,
+  SnippetTabsContent,
+  SnippetTabsList,
+  SnippetTabsTrigger,
+} from "@/components/ui/shadcn-io/snippet";
 import { Spinner } from "@/components/ui/spinner";
 import {
   DEFAULT_PREFIXES,
@@ -15,10 +35,21 @@ import {
   Util,
 } from "@/lib/rdf";
 import { Store } from "@/lib/store";
-import { ChevronsUpDown, File } from "lucide-react";
+import { citationTypes, generateCitation } from "@/lib/utils";
+import {
+  ChevronsUpDown,
+  Copy,
+  Download,
+  ExternalLink,
+  File,
+  LucideIcon,
+  Microscope,
+  Quote,
+  Share2,
+  UserCircle,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-
 /**
  * ViewNanopub
  * - Downloads a nanopublication
@@ -96,11 +127,13 @@ function GraphSection({
   store,
   title,
   statements,
+  Icon = File,
   extraClasses,
 }: {
   store: Store;
   title: string;
   statements: Statement[];
+  Icon: LucideIcon;
   extraClasses?: string;
 }) {
   return (
@@ -111,7 +144,7 @@ function GraphSection({
     >
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <File className="h-5 w-5 text-primary" />
+          <Icon className="h-5 w-5 text-primary" />
           {title}
         </CardTitle>
       </CardHeader>
@@ -139,11 +172,13 @@ function CollapsibleGraphSection({
   store,
   title,
   statements,
+  Icon = File,
   extraClasses,
 }: {
   store: Store;
   title: string;
   statements: Statement[];
+  Icon: LucideIcon;
   extraClasses?: string;
 }) {
   const pubStatements: Statement[] = [];
@@ -174,7 +209,7 @@ function CollapsibleGraphSection({
         <CardHeader>
           <CollapsibleTrigger>
             <CardTitle className="flex items-center gap-2">
-              <File className="h-5 w-5 text-primary" />
+              <Icon className="h-5 w-5 text-primary" />
               {title}{" "}
               <Button variant="ghost" size="icon" className="size-8">
                 <ChevronsUpDown />
@@ -245,6 +280,81 @@ function CollapsibleGraphSection({
   );
 }
 
+export function ShareMenu() {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline">
+          <Share2 />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="">
+        <Item size="sm" asChild>
+          <a href="#">
+            <ItemMedia>
+              <Copy className="size-5" />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>Copy URI</ItemTitle>
+            </ItemContent>
+          </a>
+        </Item>
+        <Item size="sm" asChild>
+          <a href="#">
+            <ItemMedia>
+              <ExternalLink className="size-5" />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>Open original</ItemTitle>
+            </ItemContent>
+          </a>
+        </Item>
+        <ItemSeparator />
+        <Item size="sm" asChild>
+          <a href="#">
+            <ItemMedia>
+              <Download className="size-5" />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>TriG</ItemTitle>
+            </ItemContent>
+          </a>
+        </Item>
+        <Item size="sm" asChild>
+          <a href="#">
+            <ItemMedia>
+              <Download className="size-5" />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>JSON-LD</ItemTitle>
+            </ItemContent>
+          </a>
+        </Item>
+        <Item size="sm" asChild>
+          <a href="#">
+            <ItemMedia>
+              <Download className="size-5" />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>N-Quads</ItemTitle>
+            </ItemContent>
+          </a>
+        </Item>
+        <Item size="sm" asChild>
+          <a href="#">
+            <ItemMedia>
+              <Download className="size-5" />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>XML</ItemTitle>
+            </ItemContent>
+          </a>
+        </Item>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export default function ViewNanopub() {
   const params = useParams();
   const uri = params.uri
@@ -258,6 +368,8 @@ export default function ViewNanopub() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [store, setStore] = useState<Store | null>(null);
+
+  const [selectedCite, setSelectedCite] = useState("apa");
 
   // Derived info
   const prefixes = useMemo(() => DEFAULT_PREFIXES, []);
@@ -378,20 +490,26 @@ export default function ViewNanopub() {
         <>
           {/* Overview */}
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
-            <h2 className="text-2xl md:text-3xl font-bold">
-              {store?.metadata.title}
-            </h2>
-            <div className="font-mono break-all">
-              <a
-                className="text-purple-500 hover:underline"
-                href={currentUri}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {currentUri}
-              </a>
+            <div className="relative">
+              <div className="pr-16">
+                <h2 className="text-2xl md:text-3xl font-bold">
+                  {store?.metadata.title}
+                </h2>
+                <div className="font-mono break-all">
+                  <a
+                    className="text-purple-500 hover:underline"
+                    href={currentUri}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {currentUri}
+                  </a>
+                </div>
+              </div>
+              <div className="absolute right-0 top-0">
+                <ShareMenu />
+              </div>
             </div>
-
             <CardTitle className="mt-4 mb-2 text-muted-foreground">
               Summary
             </CardTitle>
@@ -428,12 +546,40 @@ export default function ViewNanopub() {
             </div>
           </div>
 
+          <Snippet onValueChange={setSelectedCite} value={selectedCite}>
+            <CardTitle className="m-4 text-muted-foreground items-center flex gap-2">
+              <Quote />
+              Cite Nanopublication
+            </CardTitle>
+            <SnippetHeader>
+              <SnippetTabsList>
+                {Object.entries(citationTypes).map(([k, c]) => (
+                  <SnippetTabsTrigger key={k} value={k}>
+                    <c.icon size={14} />
+                    <span>{c.label}</span>
+                  </SnippetTabsTrigger>
+                ))}
+              </SnippetTabsList>
+              {selectedCite && (
+                <SnippetCopyButton
+                  onCopy={() => console.log(`Copied to clipboard`)}
+                  onError={() => console.error(`Failed to copy to clipboard`)}
+                  value={generateCitation(store?.metadata, selectedCite)}
+                />
+              )}
+            </SnippetHeader>
+            <SnippetTabsContent key={selectedCite} value={selectedCite}>
+              {generateCitation(store?.metadata, selectedCite)}
+            </SnippetTabsContent>
+          </Snippet>
+
           {/* Sections */}
           <section className="space-y-4">
             <GraphSection
               store={store!}
               title="Assertion"
               statements={assertionStatements}
+              Icon={File}
               extraClasses="border-l-8 border-l-yellow-300"
             />
 
@@ -441,6 +587,7 @@ export default function ViewNanopub() {
               store={store!}
               title="Provenance"
               statements={provenanceStatements}
+              Icon={Microscope}
               extraClasses="border-l-8 border-l-purple-600"
             />
 
@@ -448,6 +595,7 @@ export default function ViewNanopub() {
               store={store!}
               title="Publication Info"
               statements={pubinfoStatements}
+              Icon={UserCircle}
               extraClasses="border-l-8 border-l-blue-800"
             />
 
@@ -460,6 +608,8 @@ export default function ViewNanopub() {
                     key={g.uri}
                     title={`Graph: ${shrinkUri(g.uri, prefixes)}`}
                     statements={g.statements}
+                    Icon={File}
+                    extraClasses="border-l-8 border-l-purple-600"
                   />
                 ))}
               </div>
