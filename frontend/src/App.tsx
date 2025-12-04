@@ -28,6 +28,7 @@ function App() {
           {/* Main Pages - For Demo/Production */}
           <Route path="/" element={<HomePage />} />
           <Route path="/np-raw/:nanopubId" element={<ViewRaw />} />
+          <Route path="/np/" element={<ViewNanopub />} />
           <Route path="/np/:uri" element={<ViewNanopub />} />
           <Route path="/test-nanopub" element={<NanopubTestPage />} />
           <Route path="/email-verified" element={<EmailVerfied />} />

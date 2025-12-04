@@ -12,18 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import {
-  Item,
-  ItemContent,
-  ItemMedia,
-  ItemSeparator,
-  ItemTitle,
-} from "@/components/ui/item";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { ItemSeparator } from "@/components/ui/item";
 import {
   Snippet,
   SnippetCopyButton,
@@ -286,49 +275,6 @@ function CollapsibleGraphSection({
   );
 }
 
-const MenuItem1 = ({
-  text = "",
-  Icon,
-  href = "#",
-}: {
-  text: string;
-  Icon: LucideIcon;
-  href?: string;
-}) => (
-  <Item size="sm" asChild>
-    <a href={href}>
-      <ItemMedia>
-        <Icon className="size-5" />
-      </ItemMedia>
-      <ItemContent>
-        <ItemTitle className="[a]:hover:text-white [&>a:hover]:text-primary">
-          {text}
-        </ItemTitle>
-      </ItemContent>
-    </a>
-  </Item>
-);
-
-export function ShareMenu1() {
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline">
-          <Share2 />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="">
-        <MenuItem1 text="Copy URI" Icon={Copy} />
-        <MenuItem1 text="Open original" Icon={ExternalLink} />
-        <ItemSeparator />
-        <MenuItem1 text="TriG" Icon={Download} />
-        <MenuItem1 text="JSON-LD" Icon={Download} />
-        <MenuItem1 text="N-Quads" Icon={Download} />
-        <MenuItem1 text="XML" Icon={Download} />
-      </PopoverContent>
-    </Popover>
-  );
-}
 const MenuItem = ({
   text = "",
   Icon,
@@ -338,7 +284,7 @@ const MenuItem = ({
   Icon: LucideIcon;
   href?: string;
 }) => (
-  <a href={href}>
+  <a href={href} target="_blank">
     <DropdownMenuItem className="text-foreground">
       <Icon className="size-5 hover:text-foreground" />
       {text}
@@ -346,7 +292,7 @@ const MenuItem = ({
   </a>
 );
 
-export function ShareMenu() {
+export function ShareMenu({ uri }: { uri: string }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -355,9 +301,20 @@ export function ShareMenu() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <MenuItem text="Copy URI" Icon={Copy} />
-        <MenuItem text="Open original" Icon={ExternalLink} />
+        <SnippetCopyButton
+          asChild
+          onCopy={() => console.log(`Copied to clipboard`)}
+          onError={() => console.error(`Failed to copy to clipboard`)}
+          value={uri}
+        >
+          <DropdownMenuItem className="text-foreground">
+            <Copy className="size-5 hover:text-foreground" />
+            Copy URI
+          </DropdownMenuItem>
+        </SnippetCopyButton>
+        <MenuItem text="Open original" Icon={ExternalLink} href={uri} />
         <ItemSeparator />
+        {/* TODO: these dont work yet */}
         <MenuItem text="TriG" Icon={Download} />
         <MenuItem text="JSON-LD" Icon={Download} />
         <MenuItem text="N-Quads" Icon={Download} />
@@ -373,7 +330,7 @@ export default function ViewNanopub() {
     ? params.uri.startsWith("http")
       ? params.uri
       : `https://w3id.org/np/${params.uri}`
-    : DEFAULT_URI;
+    : "";
 
   const [inputUri, setInputUri] = useState(uri);
   const [currentUri, setCurrentUri] = useState(uri);
@@ -382,9 +339,9 @@ export default function ViewNanopub() {
   const [store, setStore] = useState<Store | null>(null);
 
   const [selectedCite, setSelectedCite] = useState("apa");
+  const prefixes = useMemo(() => DEFAULT_PREFIXES, []);
 
   // Derived info
-  const prefixes = useMemo(() => DEFAULT_PREFIXES, []);
   prefixes.this = inputUri;
   const allStatements = useMemo<Statement[]>(
     () =>
@@ -463,9 +420,7 @@ export default function ViewNanopub() {
   return (
     <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-6xl">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h1 className="text-2xl md:text-3xl font-bold">
-          Nanopublication Viewer
-        </h1>
+        <h1 className="text-xl text-muted-foreground">VIEW NANOPUBLICATION</h1>
         <div className="flex gap-2 w-full md:w-auto">
           <Input
             type="text"
@@ -484,145 +439,179 @@ export default function ViewNanopub() {
         </div>
       </div>
 
-      {/* Status / Errors */}
-      {loading && (
-        <div className="rounded-md border bg-muted/30 p-4 flex items-center gap-3 text-muted-foreground">
-          <Spinner /> <span>Loading nanopublication...</span>
-        </div>
-      )}
-      {error && (
-        <div className="rounded-md border border-red-300 bg-red-50 p-4 text-red-900">
-          {error}
-        </div>
-      )}
-
-      {!loading && !error && (
+      {uri ? (
         <>
-          {/* Overview */}
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
-            <div className="relative">
-              <div className="pr-16">
-                <h2 className="text-2xl md:text-3xl font-bold">
-                  {store?.metadata.title}
-                </h2>
-                <div className="font-mono break-all">
-                  <a
-                    className="text-purple-500 hover:underline"
-                    href={currentUri}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {currentUri}
-                  </a>
+          {/* Status / Errors */}
+          {loading && (
+            <div className="rounded-md border bg-muted/30 p-4 flex items-center gap-3 text-muted-foreground">
+              <Spinner /> <span>Loading nanopublication...</span>
+            </div>
+          )}
+          {error && (
+            <div className="rounded-md border border-red-300 bg-red-50 p-4 text-red-900">
+              {error}
+            </div>
+          )}
+
+          {!loading && !error && (
+            <>
+              {/* Overview */}
+              <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
+                <div className="relative">
+                  <div className="pr-16">
+                    <h2 className="text-2xl md:text-3xl font-bold">
+                      {store?.metadata.title}
+                    </h2>
+                    <div className="font-mono break-all">
+                      <a
+                        className="text-purple-500 hover:underline"
+                        href={currentUri}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {currentUri}
+                      </a>
+                    </div>
+                  </div>
+                  <div className="absolute right-0 top-0">
+                    <ShareMenu uri={uri} />
+                  </div>
+                </div>
+                <div className="mt-1 text-sm space-y-1">
+                  <div>
+                    <span className="font-bold">Published:</span>{" "}
+                    {new Date(
+                      store?.metadata.created!,
+                    ).toLocaleDateString() || (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </div>
+                  <div>
+                    <span className="font-bold">Created by:</span>{" "}
+                    {store?.metadata.creators?.length ? (
+                      <span className="space-x-2">
+                        {store?.metadata.creators.map((c) => (
+                          <a
+                            key={c.name}
+                            className="text-blue-600 hover:underline break-all"
+                            href={
+                              c.href?.startsWith("http") ? c.href : undefined
+                            }
+                            target={
+                              c.href?.startsWith("http") ? "_blank" : undefined
+                            }
+                            rel={
+                              c.href?.startsWith("http")
+                                ? "noreferrer"
+                                : undefined
+                            }
+                          >
+                            {c.name}
+                          </a>
+                        ))}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </div>
                 </div>
               </div>
-              <div className="absolute right-0 top-0">
-                <ShareMenu />
-              </div>
-            </div>
-            <div className="mt-1 text-sm space-y-1">
-              <div>
-                <span className="font-bold">Published:</span>{" "}
-                {new Date(store?.metadata.created!).toLocaleDateString() || (
-                  <span className="text-muted-foreground">—</span>
-                )}
-              </div>
-              <div>
-                <span className="font-bold">Created by:</span>{" "}
-                {store?.metadata.creators?.length ? (
-                  <span className="space-x-2">
-                    {store?.metadata.creators.map((c) => (
-                      <a
-                        key={c.name}
-                        className="text-blue-600 hover:underline break-all"
-                        href={c.href?.startsWith("http") ? c.href : undefined}
-                        target={
-                          c.href?.startsWith("http") ? "_blank" : undefined
-                        }
-                        rel={
-                          c.href?.startsWith("http") ? "noreferrer" : undefined
-                        }
-                      >
-                        {c.name}
-                      </a>
+
+              <Snippet onValueChange={setSelectedCite} value={selectedCite}>
+                <CardTitle className="m-4 text-muted-foreground items-center flex gap-2">
+                  <Quote />
+                  Cite Nanopublication
+                </CardTitle>
+                <SnippetHeader>
+                  <SnippetTabsList>
+                    {Object.entries(citationTypes).map(([k, c]) => (
+                      <SnippetTabsTrigger key={k} value={k}>
+                        <c.icon size={14} />
+                        <span>{c.label}</span>
+                      </SnippetTabsTrigger>
                     ))}
-                  </span>
-                ) : (
-                  <span className="text-muted-foreground">—</span>
-                )}
-              </div>
-            </div>
-          </div>
+                  </SnippetTabsList>
+                  {selectedCite && (
+                    <SnippetCopyButton
+                      onCopy={() => console.log(`Copied to clipboard`)}
+                      onError={() =>
+                        console.error(`Failed to copy to clipboard`)
+                      }
+                      value={generateCitation(store?.metadata, selectedCite)}
+                    />
+                  )}
+                </SnippetHeader>
+                <SnippetTabsContent key={selectedCite} value={selectedCite}>
+                  {generateCitation(store?.metadata, selectedCite)}
+                </SnippetTabsContent>
+              </Snippet>
 
-          <Snippet onValueChange={setSelectedCite} value={selectedCite}>
-            <CardTitle className="m-4 text-muted-foreground items-center flex gap-2">
-              <Quote />
-              Cite Nanopublication
-            </CardTitle>
-            <SnippetHeader>
-              <SnippetTabsList>
-                {Object.entries(citationTypes).map(([k, c]) => (
-                  <SnippetTabsTrigger key={k} value={k}>
-                    <c.icon size={14} />
-                    <span>{c.label}</span>
-                  </SnippetTabsTrigger>
-                ))}
-              </SnippetTabsList>
-              {selectedCite && (
-                <SnippetCopyButton
-                  onCopy={() => console.log(`Copied to clipboard`)}
-                  onError={() => console.error(`Failed to copy to clipboard`)}
-                  value={generateCitation(store?.metadata, selectedCite)}
+              {/* Sections */}
+              <section className="space-y-4">
+                <GraphSection
+                  store={store!}
+                  title="Assertion"
+                  statements={assertionStatements}
+                  Icon={File}
+                  extraClasses="border-l-8 border-l-yellow-300"
                 />
-              )}
-            </SnippetHeader>
-            <SnippetTabsContent key={selectedCite} value={selectedCite}>
-              {generateCitation(store?.metadata, selectedCite)}
-            </SnippetTabsContent>
-          </Snippet>
 
-          {/* Sections */}
-          <section className="space-y-4">
-            <GraphSection
-              store={store!}
-              title="Assertion"
-              statements={assertionStatements}
-              Icon={File}
-              extraClasses="border-l-8 border-l-yellow-300"
-            />
+                <GraphSection
+                  store={store!}
+                  title="Provenance"
+                  statements={provenanceStatements}
+                  Icon={Microscope}
+                  extraClasses="border-l-8 border-l-purple-600"
+                />
 
-            <GraphSection
-              store={store!}
-              title="Provenance"
-              statements={provenanceStatements}
-              Icon={Microscope}
-              extraClasses="border-l-8 border-l-purple-600"
-            />
+                <CollapsibleGraphSection
+                  store={store!}
+                  title="Publication Info"
+                  statements={pubinfoStatements}
+                  Icon={UserCircle}
+                  extraClasses="border-l-8 border-l-blue-800"
+                />
 
-            <CollapsibleGraphSection
-              store={store!}
-              title="Publication Info"
-              statements={pubinfoStatements}
-              Icon={UserCircle}
-              extraClasses="border-l-8 border-l-blue-800"
-            />
-
-            {otherGraphs.length > 0 && (
-              <div className="space-y-3">
-                <h2 className="text-xl font-semibold">Other Graphs</h2>
-                {otherGraphs.map((g) => (
-                  <GraphSection
-                    store={store!}
-                    key={g.uri}
-                    title={`Graph: ${shrinkUri(g.uri, prefixes)}`}
-                    statements={g.statements}
-                    Icon={File}
-                    extraClasses="border-l-8 border-l-purple-600"
-                  />
-                ))}
-              </div>
-            )}
-          </section>
+                {otherGraphs.length > 0 && (
+                  <div className="space-y-3">
+                    <h2 className="text-xl font-semibold">Other Graphs</h2>
+                    {otherGraphs.map((g) => (
+                      <GraphSection
+                        store={store!}
+                        key={g.uri}
+                        title={`Graph: ${shrinkUri(g.uri, store!.prefixes)}`}
+                        statements={g.statements}
+                        Icon={File}
+                        extraClasses="border-l-8 border-l-purple-600"
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
+            </>
+          )}
+        </>
+      ) : (
+        <>
+          Load a URI above, or try an example:{" "}
+          <a
+            href="/np/RA6Cz33icPZrBAummwxw6MwdS-RepX-sUjW_fZz905Rvc"
+            className="text-purple-500 hover:underline"
+          >
+            includes quotation from cvpr.2009.5206848
+          </a>
+          <a
+            href="/np/RAuoXvJWbbzZsFslswYaajgjeEl-040X6SCQFXHfVtjf0#Garfield"
+            className="text-purple-500 hover:underline"
+          >
+            Garfield
+          </a>
+          <a
+            href="/np/RAZMzeEoutrEi1xEpf5XSrSpMnvwTONYzMat5TkIqUWY8"
+            className="text-purple-500 hover:underline"
+          >
+            Garfield is a fictional character
+          </a>
         </>
       )}
     </main>

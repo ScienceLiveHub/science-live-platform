@@ -14,7 +14,7 @@ export function generateCitation(
   data?: Metadata,
   format: keyof typeof citationTypes = "apa",
 ) {
-  const author = data?.creators?.[0] || "Unknown Author";
+  const author = data?.creators?.[0].name || "Unknown Author";
   const year = data?.created ? new Date(data.created).getFullYear() : "n.d.";
   const title = data?.title || "Untitled Nanopublication";
   const uri = data?.uri;

@@ -81,6 +81,9 @@ export class Store extends N3Store {
     store.extractGraphUris();
     await store.extractMetadata();
     setStore(store, prefixes); // TODO maybe just return it
+
+    // TODO: we may also want to fetch and cache all external labels for all Terms, but asynchronously to avoid delaying page load
+    // This should fix the issue where labels are not displayed until elements refresh second time
   }
 
   fetchLabel(t: Term | string): string {
@@ -103,7 +106,7 @@ export class Store extends N3Store {
       label = COMMON_LABELS[uri];
       if (label) return label;
 
-      //TODO: just use the #x string suffix of uri?
+      //TODO: just use the #x string suffix of the uri as the label if present?
       // e.g.
       // http://www.w3.org/2002/07/owl#Thing
       // http://www.w3.org/2002/07/owl#NamedIndividual
