@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ArrowRight, FlaskConical, Puzzle } from "lucide-react";
 // import { Badge } from "@/components/ui/badge";
 
 export function HeroSection() {
@@ -55,15 +55,21 @@ export function HeroSection() {
               asChild
             >
               <a href="https://sciencelive4all.org/zotero-nanopub-plugin/">
-                <i className="fas fa-puzzle-piece"></i>
+                <Puzzle />
                 Zotero Plugin
               </a>
             </Button>
           </div>
-          <p className="mx-auto m-10 max-w-xl text-lg text-muted-foreground sm:text-l italic">
-            <i className="fas fa-flask mr-4"></i>
-            Knowledge bricks web interface coming soon.
+          <p className="mx-auto m-12 mb-5 max-w-xl text-lg text-muted-foreground sm:text-l italic flex items-center justify-center">
+            <FlaskConical className="mr-4" />
+            Full Knowledge bricks web interface coming soon.
           </p>
+          <Button size="lg" className="text-base cursor-pointer" asChild>
+            <a href="/np">
+              Try Web Demo
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </a>
+          </Button>
         </div>
       </div>
     </section>

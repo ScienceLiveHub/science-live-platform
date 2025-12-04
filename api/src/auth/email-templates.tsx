@@ -3,7 +3,7 @@ import { EmailTemplate } from "@daveyplate/better-auth-ui/server";
 export const verifyEmailTemplate = (
   name: string,
   baseUrl: string,
-  link: string
+  link: string,
 ) =>
   EmailTemplate({
     imageUrl: `${baseUrl}/sciencelive-logo-small.webp`,
@@ -24,7 +24,7 @@ export const verifyEmailTemplate = (
 export const changeEmailTemplate = (
   name: string,
   baseUrl: string,
-  link: string
+  link: string,
 ) =>
   EmailTemplate({
     imageUrl: `${baseUrl}/sciencelive-logo-small.webp`,
@@ -45,7 +45,7 @@ export const changeEmailTemplate = (
 export const resetPasswordTemplate = (
   name: string,
   baseUrl: string,
-  link: string
+  link: string,
 ) =>
   EmailTemplate({
     imageUrl: `${baseUrl}/sciencelive-logo-small.webp`,

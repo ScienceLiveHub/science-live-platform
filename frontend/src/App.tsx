@@ -1,15 +1,17 @@
-import { Routes, Route, BrowserRouter } from "react-router-dom";
-import { HomePage } from "./pages/homepage/page";
-import { NanopubTest } from "./pages/NanopubTest";
-import { RealNanopubTest } from "./pages/RealNanopubTest";
-import { TestNanopubViewer } from "./pages/TestNanopubViewer";
-import NanopubTestPage from "./pages/NanopubTestPage";
-import AuthPage from "./pages/AuthPage";
-import { Providers } from "./providers";
-import AccountPage from "./pages/AccountPage";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Navbar01 } from "./components/ui/shadcn-io/navbar-01";
 import { Toaster } from "./components/ui/sonner";
+import AccountPage from "./pages/AccountPage";
+import AuthPage from "./pages/AuthPage";
 import EmailVerfied from "./pages/EmailVerified";
+import { HomePage } from "./pages/homepage/page";
+import { NanopubTest } from "./pages/NanopubTest";
+import NanopubTestPage from "./pages/NanopubTestPage";
+import { RealNanopubTest } from "./pages/RealNanopubTest";
+import { TestNanopubViewer } from "./pages/TestNanopubViewer";
+import { Providers } from "./providers";
+import ViewNanopub from "./pubs/ViewNanopub";
+import ViewRaw from "./pubs/ViewRaw";
 
 function App() {
   return (
@@ -25,6 +27,9 @@ function App() {
 
           {/* Main Pages - For Demo/Production */}
           <Route path="/" element={<HomePage />} />
+          <Route path="/np-raw/:nanopubId" element={<ViewRaw />} />
+          <Route path="/np/" element={<ViewNanopub />} />
+          <Route path="/np/:uri" element={<ViewNanopub />} />
           <Route path="/test-nanopub" element={<NanopubTestPage />} />
           <Route path="/email-verified" element={<EmailVerfied />} />
 

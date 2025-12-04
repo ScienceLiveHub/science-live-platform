@@ -1,8 +1,8 @@
+import ErrorComponent from "@/components/error";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
 import { ErrorBoundary } from "react-error-boundary";
-import ErrorComponent from "@/components/error";
+import App from "./App";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -10,5 +10,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <ErrorBoundary FallbackComponent={ErrorComponent}>
       <App />
     </ErrorBoundary>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

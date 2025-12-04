@@ -1,9 +1,9 @@
 import type {
-  ParsedNanopub,
-  ParsedAssertion,
   // ParsedProvenance,
   // ParsedPubInfo,
   NanopubMetadata,
+  ParsedAssertion,
+  ParsedNanopub,
 } from "@/types/nanopub";
 
 // ============= LABEL FETCHER =============
@@ -244,7 +244,7 @@ export class NanopubParser {
             "Parsed triple:",
             currentSubject,
             currentPredicate,
-            object
+            object,
           );
         }
       } else if (statement.startsWith(";")) {
@@ -415,7 +415,7 @@ export class NanopubParser {
             ? labels.get(objValue) || this.labelFetcher.parseUriLabel(objValue)
             : objValue,
         };
-      }
+      },
     );
 
     // Extract metadata
@@ -445,7 +445,7 @@ export class NanopubParser {
 }
 
 export async function parseNanopub(
-  trigContent: string
+  trigContent: string,
 ): Promise<ParsedNanopub> {
   const parser = new NanopubParser(trigContent);
   return await parser.parseWithLabels();

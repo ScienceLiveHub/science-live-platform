@@ -191,6 +191,10 @@ Styling is done via **tailwindcss**. We should minimize the amount of custom css
 
 To adjust a specific UI elements style, layout, padding etc, use [tailwindcss](https://tailwindcss.com/docs) utility classes e.g.: `className="pt-6"` to set top padding of the element to 6.
 
+### Package updates
+
+Currently we dont have a update manager, so use `npx npm-check-updates -w` in the project root to check for package updates. Run with `-t minor` flag to only do minor udpates where there is low risk of breaking anything. Then run it again adding the `-u` flag to save updates to package.json, then `npm i` to install them. Make sure you check everything still works, particularly after major version increments.
+
 ## 🧪 Testing
 
 ### Test Frontend

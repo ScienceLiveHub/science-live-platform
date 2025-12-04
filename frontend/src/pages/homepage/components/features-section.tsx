@@ -3,12 +3,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { CardDecorator } from "@/components/ui/card-decorator";
 import {
+  BookOpen,
+  ChartBar,
+  Pen,
   Search,
   Trophy,
-  ChartBar,
   Workflow,
-  Pen,
-  BookOpen,
 } from "lucide-react";
 
 const values = [

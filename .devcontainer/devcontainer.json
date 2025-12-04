@@ -1,6 +1,6 @@
 {
   "name": "Science Live Platform",
-  /* Node v22 is current default */
+  /* Node v22 is current default. This image also includes yarn classic and pnpm */
   "image": "mcr.microsoft.com/devcontainers/typescript-node:22-bookworm",
   "workspaceFolder": "/workspaces/science-live-platform",
   "remoteUser": "node",
@@ -9,6 +9,10 @@
     "--name=science-live-platform",
     /* Use host network, so we dont bother forwarding ports and can easily access any localhost services if required */
     "--network=host"
+  ],
+  /* Mounts must be absolute paths on the host so adjust for your machine as necessary */
+  "mounts": [
+    "source=/home/vijay/Documents/ProphetTown/Science-Live/nanopub-js,target=/workspaces/nanopub-js,type=bind,consistency=cached"
   ],
   "forwardPorts": [],
   "features": {

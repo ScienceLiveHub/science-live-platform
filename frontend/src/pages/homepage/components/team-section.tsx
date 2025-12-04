@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CardDecorator } from "@/components/ui/card-decorator";
-import { Github, Linkedin, Globe } from "lucide-react";
+import { Github, Globe, Linkedin } from "lucide-react";
 
 const team = [
   {

@@ -1,7 +1,7 @@
+import { formatAllowedOrigins, getAuth } from "@/auth";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import health from "./health";
-import { formatAllowedOrigins, getAuth } from "@/auth";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -19,12 +19,13 @@ app.use(
       if (allowed.includes(origin)) return origin;
       return undefined;
     },
-    allowHeaders: ["Content-Type", "Authorization"],
+    // TODO: ideally we should have the allowHeaders setting but it prevents localhost dev from working
+    // allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["POST", "GET", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
     maxAge: 600,
     credentials: true,
-  })
+  }),
 );
 
 // Auth endpoints — keep last

@@ -11,7 +11,7 @@ export const DEFAULT_SENDER =
 
 export function sendEmail(
   env: any,
-  data: Omit<CreateEmailOptions, "from"> & { from?: string }
+  data: Omit<CreateEmailOptions, "from"> & { from?: string },
 ) {
   data.from = data.from ?? DEFAULT_SENDER;
   const resend = new Resend(env.RESEND_API_KEY);
