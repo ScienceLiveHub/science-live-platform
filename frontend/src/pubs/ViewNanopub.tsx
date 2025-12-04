@@ -5,6 +5,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Item,
@@ -280,7 +286,30 @@ function CollapsibleGraphSection({
   );
 }
 
-export function ShareMenu() {
+const MenuItem1 = ({
+  text = "",
+  Icon,
+  href = "#",
+}: {
+  text: string;
+  Icon: LucideIcon;
+  href?: string;
+}) => (
+  <Item size="sm" asChild>
+    <a href={href}>
+      <ItemMedia>
+        <Icon className="size-5" />
+      </ItemMedia>
+      <ItemContent>
+        <ItemTitle className="[a]:hover:text-white [&>a:hover]:text-primary">
+          {text}
+        </ItemTitle>
+      </ItemContent>
+    </a>
+  </Item>
+);
+
+export function ShareMenu1() {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -289,69 +318,52 @@ export function ShareMenu() {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="">
-        <Item size="sm" asChild>
-          <a href="#">
-            <ItemMedia>
-              <Copy className="size-5" />
-            </ItemMedia>
-            <ItemContent>
-              <ItemTitle>Copy URI</ItemTitle>
-            </ItemContent>
-          </a>
-        </Item>
-        <Item size="sm" asChild>
-          <a href="#">
-            <ItemMedia>
-              <ExternalLink className="size-5" />
-            </ItemMedia>
-            <ItemContent>
-              <ItemTitle>Open original</ItemTitle>
-            </ItemContent>
-          </a>
-        </Item>
+        <MenuItem1 text="Copy URI" Icon={Copy} />
+        <MenuItem1 text="Open original" Icon={ExternalLink} />
         <ItemSeparator />
-        <Item size="sm" asChild>
-          <a href="#">
-            <ItemMedia>
-              <Download className="size-5" />
-            </ItemMedia>
-            <ItemContent>
-              <ItemTitle>TriG</ItemTitle>
-            </ItemContent>
-          </a>
-        </Item>
-        <Item size="sm" asChild>
-          <a href="#">
-            <ItemMedia>
-              <Download className="size-5" />
-            </ItemMedia>
-            <ItemContent>
-              <ItemTitle>JSON-LD</ItemTitle>
-            </ItemContent>
-          </a>
-        </Item>
-        <Item size="sm" asChild>
-          <a href="#">
-            <ItemMedia>
-              <Download className="size-5" />
-            </ItemMedia>
-            <ItemContent>
-              <ItemTitle>N-Quads</ItemTitle>
-            </ItemContent>
-          </a>
-        </Item>
-        <Item size="sm" asChild>
-          <a href="#">
-            <ItemMedia>
-              <Download className="size-5" />
-            </ItemMedia>
-            <ItemContent>
-              <ItemTitle>XML</ItemTitle>
-            </ItemContent>
-          </a>
-        </Item>
+        <MenuItem1 text="TriG" Icon={Download} />
+        <MenuItem1 text="JSON-LD" Icon={Download} />
+        <MenuItem1 text="N-Quads" Icon={Download} />
+        <MenuItem1 text="XML" Icon={Download} />
       </PopoverContent>
     </Popover>
+  );
+}
+const MenuItem = ({
+  text = "",
+  Icon,
+  href = "#",
+}: {
+  text: string;
+  Icon: LucideIcon;
+  href?: string;
+}) => (
+  <a href={href}>
+    <DropdownMenuItem className="text-foreground">
+      <Icon className="size-5 hover:text-foreground" />
+      {text}
+    </DropdownMenuItem>
+  </a>
+);
+
+export function ShareMenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">
+          <Share2 />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <MenuItem text="Copy URI" Icon={Copy} />
+        <MenuItem text="Open original" Icon={ExternalLink} />
+        <ItemSeparator />
+        <MenuItem text="TriG" Icon={Download} />
+        <MenuItem text="JSON-LD" Icon={Download} />
+        <MenuItem text="N-Quads" Icon={Download} />
+        <MenuItem text="XML" Icon={Download} />
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -383,10 +395,10 @@ export default function ViewNanopub() {
   );
   const graphsMap = useMemo(() => groupByGraph(allStatements), [allStatements]);
 
-  const headStatements = useMemo(() => {
-    if (!store?.graphUris.head) return [];
-    return graphsMap.get(store?.graphUris.head) || [];
-  }, [graphsMap, store?.graphUris]);
+  // const headStatements = useMemo(() => {
+  //   if (!store?.graphUris.head) return [];
+  //   return graphsMap.get(store?.graphUris.head) || [];
+  // }, [graphsMap, store?.graphUris]);
 
   const assertionStatements = useMemo(() => {
     if (!store?.graphUris.assertion) return [];

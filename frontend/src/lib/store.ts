@@ -85,7 +85,7 @@ export class Store extends N3Store {
 
   fetchLabel(t: Term | string): string {
     let label;
-    const uri = isNamedNode(t) ? t.id : (t as string);
+    const uri = isNamedNode(t as Term) ? (t as NamedNode).id : (t as string);
     if (uri) {
       // First search the current store for a label
       label = this.matchOne(namedNode(uri), NS.RDFS("label"), null, null)
