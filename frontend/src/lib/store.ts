@@ -14,7 +14,7 @@ type GraphUris = {
 
 export type Metadata = {
   created?: string | null;
-  creators?: string[];
+  creators?: { name: string; href?: string }[];
   title?: string | null;
   assertionSubjects?: any[];
   uri?: string;
@@ -228,7 +228,10 @@ export class Store extends N3Store {
       DCT("creator"),
       this.graphUris.pubinfo,
     ).map((q) => {
-      return this.fetchLabel(namedNode(q.object.value));
+      return {
+        name: this.fetchLabel(namedNode(q.object.value)),
+        href: q.object.value,
+      };
     });
     // Also check prov:wasAttributedTo in provenance
     const provCreators = this.matchPredicate(
@@ -255,7 +258,7 @@ export class Store extends N3Store {
 
     this.metadata = {
       created: createdLit?.object ? createdLit.object.value : null,
-      creators: unique([...(creators || []), ...provCreators]),
+      creators: creators,
       title: title?.object?.value || null,
       assertionSubjects: unique(assertionSubjects),
       uri: this.prefixes["this"],

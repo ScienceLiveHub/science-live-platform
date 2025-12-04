@@ -439,8 +439,6 @@ export default function ViewNanopub() {
     loadNanopubUri(inputUri);
   }, []);
 
-  const totalTriples = allStatements.length;
-
   const otherGraphs = useMemo(() => {
     // Exclude known graphs
     const known = new Set(
@@ -522,32 +520,30 @@ export default function ViewNanopub() {
                 <ShareMenu />
               </div>
             </div>
-            <CardTitle className="mt-4 mb-2 text-muted-foreground">
-              Summary
-            </CardTitle>
             <div className="mt-1 text-sm space-y-1">
               <div>
-                Total triples: <strong>{totalTriples}</strong>
-              </div>
-              <div>
-                Created:{" "}
-                {store?.metadata.created || (
+                <span className="font-bold">Published:</span>{" "}
+                {new Date(store?.metadata.created!).toLocaleDateString() || (
                   <span className="text-muted-foreground">—</span>
                 )}
               </div>
               <div>
-                Creator(s):{" "}
+                <span className="font-bold">Created by:</span>{" "}
                 {store?.metadata.creators?.length ? (
                   <span className="space-x-2">
-                    {store?.metadata.creators.map((c: string) => (
+                    {store?.metadata.creators.map((c) => (
                       <a
-                        key={c}
-                        className="text-blue-300 hover:underline break-all"
-                        href={c.startsWith("http") ? c : undefined}
-                        target={c.startsWith("http") ? "_blank" : undefined}
-                        rel={c.startsWith("http") ? "noreferrer" : undefined}
+                        key={c.name}
+                        className="text-blue-600 hover:underline break-all"
+                        href={c.href?.startsWith("http") ? c.href : undefined}
+                        target={
+                          c.href?.startsWith("http") ? "_blank" : undefined
+                        }
+                        rel={
+                          c.href?.startsWith("http") ? "noreferrer" : undefined
+                        }
                       >
-                        {c}
+                        {c.name}
                       </a>
                     ))}
                   </span>
