@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, FlaskConical } from "lucide-react";
 
 export function CtaSection() {
   return (
@@ -30,8 +30,8 @@ export function CtaSection() {
             className="text-base cursor-pointer"
             asChild
           >
-            <a href="test-nanopub">
-              <i className="fas fa-flask"></i>
+            <a href="np">
+              <FlaskConical />
               Try Demo
             </a>
           </Button>

@@ -7,6 +7,7 @@
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthUIProvider } from "@daveyplate/better-auth-ui";
+import { SiOrcid } from "@icons-pack/react-simple-icons";
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authClient } from "./lib/auth-client";
@@ -31,7 +32,7 @@ const LinkWithHref = React.forwardRef<
 
 LinkWithHref.displayName = "LinkWithHref";
 
-const ORCIDIcon = () => <i className="fa-brands fa-orcid"></i>;
+const ORCIDIcon = () => <SiOrcid />;
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();

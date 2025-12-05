@@ -29,7 +29,6 @@
     "vite-plugin-wasm": "^3.5.0"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^7.1.0",
     "@sciencelivehub/nanopub-create": "github:ScienceLiveHub/nanopub-create#update-packages",
     "@sciencelivehub/nanopub-view": "github:ScienceLiveHub/nanopub-view#update-packages",
     "dotenv": "^17.2.3"
