@@ -2,6 +2,15 @@ import "@nanopub/display";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 
+/**
+ * ViewRaw
+ *
+ * - View a nanopub using nanopub/display library, in a simple and "raw" way
+ *
+ * Intended for simple and literal viewing of nanopub data.
+ * TODO: Implement the new nanopub/display library when available
+ */
+
 export default function ViewRaw() {
   const params = useParams();
 

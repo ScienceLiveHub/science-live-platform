@@ -52,7 +52,7 @@ export const COMMON_LABELS: Record<string, string> = {
  *       and conform to Nanopublications spec.
  *
  */
-export class Store extends N3Store {
+export class NanopubStore extends N3Store {
   // Store a map of URIs and their "friendly" labels, which could include both internal or external
   private labelCache: Record<string, string> = {};
 
@@ -68,9 +68,9 @@ export class Store extends N3Store {
    */
   static async loadNanopub(
     url: string,
-    setStore: (store: Store, prefixes?: any) => void,
+    setStore: (store: NanopubStore, prefixes?: any) => void,
   ) {
-    const store = new Store();
+    const store = new NanopubStore();
     const prefixes: any = {}; // TODO: save prefixes to the object
     await fetchQuads(
       url,

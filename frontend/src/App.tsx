@@ -10,8 +10,8 @@ import NanopubTestPage from "./pages/NanopubTestPage";
 import { RealNanopubTest } from "./pages/RealNanopubTest";
 import { TestNanopubViewer } from "./pages/TestNanopubViewer";
 import { Providers } from "./providers";
-import ViewNanopub from "./pubs/ViewNanopub";
-import ViewRaw from "./pubs/ViewRaw";
+import ViewNanopub from "./pages/np/ViewNanopub";
+import ViewRaw from "./pages/np/ViewRaw";
 
 function App() {
   return (

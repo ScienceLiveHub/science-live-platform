@@ -29,7 +29,7 @@ import {
   Statement,
   Util,
 } from "@/lib/rdf";
-import { Store } from "@/lib/store";
+import { NanopubStore } from "@/lib/store";
 import { citationTypes, generateCitation } from "@/lib/utils";
 import {
   ChevronsUpDown,
@@ -45,18 +45,16 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
+
 /**
  * ViewNanopub
- * - Downloads a nanopublication
- * - Parses it with rdflib.js
+ *
+ * - View a nanopub fetched from the given URI, in a friendly way
  * - Displays graphs (Head, Assertion, Provenance, PubInfo) and triples in a readable format
  *
  * Intended for generic viewing of any nanopub content.
- * If the nanopub uses a supported Science Live template, then it should render a template-specific view instead.
+ * TODO: If the nanopub uses a supported Science Live template, then it should render a template-specific view instead.
  */
-
-const DEFAULT_URI =
-  "http://w3id.org/np/RAWcbb3lRQZNYrCYo1uUfxHF1p6apBUW9hTeJRoHrqYZQ";
 
 function TripleCell({
   display,
@@ -90,7 +88,7 @@ function TripleRow({
   st,
   excludeSub,
 }: {
-  store: Store;
+  store: NanopubStore;
   st: Statement;
   excludeSub?: boolean;
 }) {
@@ -125,7 +123,7 @@ function GraphSection({
   Icon = File,
   extraClasses,
 }: {
-  store: Store;
+  store: NanopubStore;
   title: string;
   statements: Statement[];
   Icon: LucideIcon;
@@ -170,7 +168,7 @@ function CollapsibleGraphSection({
   Icon = File,
   extraClasses,
 }: {
-  store: Store;
+  store: NanopubStore;
   title: string;
   statements: Statement[];
   Icon: LucideIcon;
@@ -336,13 +334,13 @@ export default function ViewNanopub() {
   const [currentUri, setCurrentUri] = useState(uri);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [store, setStore] = useState<Store | null>(null);
+  const [store, setStore] = useState<NanopubStore | null>(null);
 
   const [selectedCite, setSelectedCite] = useState("apa");
   const prefixes = useMemo(() => DEFAULT_PREFIXES, []);
 
   // Derived info
-  prefixes.this = inputUri;
+  prefixes.this = currentUri;
   const allStatements = useMemo<Statement[]>(
     () =>
       store
@@ -372,20 +370,23 @@ export default function ViewNanopub() {
     return graphsMap.get(store?.graphUris.pubinfo) || [];
   }, [graphsMap, store?.graphUris]);
 
-  const loadNanopubUri = (uri: string) => {
+  const loadNanopubUri = (newUri?: string) => {
+    if (!newUri) return;
     setError(null);
     setLoading(true);
 
-    Store.loadNanopub(uri, (st: Store) => {
+    NanopubStore.loadNanopub(newUri, (st: NanopubStore) => {
       setStore(st);
       //TODO: update browser URL based on new URI
-      setCurrentUri(inputUri);
+      setCurrentUri(newUri);
       setLoading(false);
-    }).catch((e: any) => {
-      console.error("Failed to load/parse nanopublication:", e);
-      setError(e?.message || "Failed to load/parse nanopublication.");
-      setStore(null);
-    });
+    })
+      .catch((e: any) => {
+        console.error("Failed to load/parse nanopublication:", e);
+        setError(e?.message || "Failed to load/parse nanopublication.");
+        setStore(null);
+      })
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -393,7 +394,9 @@ export default function ViewNanopub() {
     // Note in dev (<Strict> mode) this gets called twice, which is a "feature" not a bug
     // React does this deliberately to detect any unintended side effects or state mutations.
     // Devs should always ensure calling it multiple times does not change the page.
-    loadNanopubUri(inputUri);
+    if (inputUri) {
+      loadNanopubUri(inputUri);
+    }
   }, []);
 
   const otherGraphs = useMemo(() => {
@@ -431,7 +434,7 @@ export default function ViewNanopub() {
           />
           <button
             className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
-            disabled={loading || !inputUri}
+            disabled={loading}
             onClick={() => loadNanopubUri(inputUri)}
           >
             Load
@@ -439,20 +442,19 @@ export default function ViewNanopub() {
         </div>
       </div>
 
-      {uri ? (
+      {/* Status / Errors */}
+      {loading && (
+        <div className="rounded-md border bg-muted/30 p-4 flex items-center gap-3 text-muted-foreground">
+          <Spinner /> <span>Loading nanopublication...</span>
+        </div>
+      )}
+      {error && (
+        <div className="rounded-md border border-red-300 bg-red-50 p-4 text-red-900">
+          {error}
+        </div>
+      )}
+      {currentUri ? (
         <>
-          {/* Status / Errors */}
-          {loading && (
-            <div className="rounded-md border bg-muted/30 p-4 flex items-center gap-3 text-muted-foreground">
-              <Spinner /> <span>Loading nanopublication...</span>
-            </div>
-          )}
-          {error && (
-            <div className="rounded-md border border-red-300 bg-red-50 p-4 text-red-900">
-              {error}
-            </div>
-          )}
-
           {!loading && !error && (
             <>
               {/* Overview */}
@@ -474,7 +476,7 @@ export default function ViewNanopub() {
                     </div>
                   </div>
                   <div className="absolute right-0 top-0">
-                    <ShareMenu uri={uri} />
+                    <ShareMenu uri={currentUri} />
                   </div>
                 </div>
                 <div className="mt-1 text-sm space-y-1">
