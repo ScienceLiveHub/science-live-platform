@@ -1,6 +1,3 @@
-"use no memo";
-"use client";
-
 import { useFormedible } from "@/hooks/use-formedible";
 import { toast } from "sonner";
 import z from "zod";
