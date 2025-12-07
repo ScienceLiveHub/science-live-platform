@@ -434,13 +434,13 @@ export default function ViewNanopub() {
             value={inputUri}
             onChange={(e) => setInputUri(e.target.value)}
           />
-          <button
+          <Button
             className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
             disabled={loading}
             onClick={() => loadNanopubUri(inputUri)}
           >
             Load
-          </button>
+          </Button>
         </div>
       </div>
 

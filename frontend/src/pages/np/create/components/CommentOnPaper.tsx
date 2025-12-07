@@ -66,9 +66,9 @@ export default function CommentOnPaper() {
         citedDoi: "",
       },
       onSubmit: async ({ value }) => {
-        console.log("Form submitted:", value);
-        toast.success("Message sent successfully!", {
-          description: "We'll get back to you soon.",
+        console.log("Data submitted:", value);
+        toast.info("This is only a Demo!", {
+          description: "Publishing features coming soon.",
         });
       },
     },

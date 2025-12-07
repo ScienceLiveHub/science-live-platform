@@ -159,7 +159,7 @@ export default function CreateNanopub() {
           <ComboboxDemo setSelection={setSelected} />
         </div>
       </div>
-      {selected && (
+      {selected ? (
         <>
           <div className="font-bold">
             {" "}
@@ -167,6 +167,8 @@ export default function CreateNanopub() {
           </div>{" "}
           {POPULAR_TEMPLATES[selected].component}
         </>
+      ) : (
+        <>Select a template above.</>
       )}
     </main>
   );

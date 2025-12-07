@@ -1,6 +1,8 @@
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ArrowRight } from "lucide-react";
 import { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 
 /**
  * Demo
@@ -25,7 +27,7 @@ export default function Demo() {
             value={inputUri}
             onChange={(e) => setInputUri(e.target.value)}
           />
-          <button
+          <Button
             className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
             onClick={(e) => {
               e.preventDefault();
@@ -33,7 +35,7 @@ export default function Demo() {
             }}
           >
             Load
-          </button>
+          </Button>
         </div>
       </div>
       Load a URI above, or try an example:{" "}
@@ -55,6 +57,19 @@ export default function Demo() {
       >
         Garfield is a fictional character
       </NavLink>
+      <div className="mt-10 flex items-center justify-between gap-4 flex-wrap">
+        <h1 className="text-xl text-muted-foreground">
+          CREATE NANOPUBLICATION
+        </h1>
+      </div>
+      <div className="flex gap-2 w-full md:w-auto">
+        <Button size="lg" className="text-base cursor-pointer" asChild>
+          <Link to="/np/create">
+            Nanopub Creator demo
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
+        </Button>
+      </div>
     </main>
   );
 }
