@@ -667,6 +667,9 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
   // Setup form with schema validation if provided
   const formConfig = {
     ...formOptions,
+    validators: {
+      onChange: options.schema,
+    },
     ...(formOptions?.onSubmit && {
       onSubmit: async (props: {
         value: TFormValues;
@@ -1459,6 +1462,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
       e.stopPropagation();
 
       const submission = async () => {
+        await form.validate("submit");
         if (onSubmit) {
           console.log("onSubmit");
           onSubmit(e);
