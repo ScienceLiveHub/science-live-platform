@@ -221,6 +221,10 @@ curl http://localhost:3001/health
 #### Frontend
 
 - **React 19** - UI library
+- **shadcn/ui** - Components
+- **Tailwind CSS** - CSS/Styling
+- **Formedible** - Form generation using **Tanstack Form** and **Zod**
+- **Lucide**/**Simple Icons** - Icon sets
 - **React Router** - Client-side routing
 - **Vite** - Build tool and Dev server
 
