@@ -3,15 +3,17 @@ import { Navbar01 } from "./components/ui/shadcn-io/navbar-01";
 import { Toaster } from "./components/ui/sonner";
 import AccountPage from "./pages/AccountPage";
 import AuthPage from "./pages/AuthPage";
+import Demo from "./pages/Demo";
 import EmailVerfied from "./pages/EmailVerified";
 import { HomePage } from "./pages/homepage/page";
 import { NanopubTest } from "./pages/NanopubTest";
 import NanopubTestPage from "./pages/NanopubTestPage";
+import CreateNanopub from "./pages/np/create/CreateNanopub";
+import ViewNanopub from "./pages/np/ViewNanopub";
+import ViewRaw from "./pages/np/ViewRaw";
 import { RealNanopubTest } from "./pages/RealNanopubTest";
 import { TestNanopubViewer } from "./pages/TestNanopubViewer";
 import { Providers } from "./providers";
-import ViewNanopub from "./pages/np/ViewNanopub";
-import ViewRaw from "./pages/np/ViewRaw";
 
 function App() {
   return (
@@ -29,7 +31,9 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/np-raw/:nanopubId" element={<ViewRaw />} />
           <Route path="/np/" element={<ViewNanopub />} />
+          <Route path="/np/demo" element={<Demo />} />
           <Route path="/np/:uri" element={<ViewNanopub />} />
+          <Route path="/np/create" element={<CreateNanopub />} />
           <Route path="/test-nanopub" element={<NanopubTestPage />} />
           <Route path="/email-verified" element={<EmailVerfied />} />
 
