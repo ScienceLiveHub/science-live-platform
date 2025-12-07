@@ -22,6 +22,7 @@ import {
   SnippetTabsTrigger,
 } from "@/components/ui/shadcn-io/snippet";
 import { Spinner } from "@/components/ui/spinner";
+import { NanopubStore } from "@/lib/nanopub-store";
 import {
   DEFAULT_PREFIXES,
   groupByGraph,
@@ -29,7 +30,6 @@ import {
   Statement,
   Util,
 } from "@/lib/rdf";
-import { NanopubStore } from "@/lib/store";
 import { citationTypes, generateCitation } from "@/lib/utils";
 import {
   ChevronsUpDown,

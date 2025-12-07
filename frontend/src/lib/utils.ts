@@ -1,8 +1,11 @@
 import { clsx, type ClassValue } from "clsx";
 import { Book, Code2, GraduationCap, Landmark, LucideIcon } from "lucide-react";
 import { twMerge } from "tailwind-merge";
-import { Metadata } from "./store";
+import { Metadata } from "./nanopub-store";
 
+/**
+ * Tailwind classname merge helper
+ */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

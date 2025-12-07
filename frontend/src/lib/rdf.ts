@@ -118,31 +118,3 @@ export function shrinkUri(
   }
   return uri;
 }
-
-export function termToDisplay(
-  term: RDFT.Term | null | undefined,
-  prefixes: Record<string, string>,
-): { text: string; href?: string } {
-  if (!term) return { text: "" };
-
-  if (isNamedNode(term)) {
-    const uri = term.value;
-    return { text: shrinkUri(uri, prefixes), href: uri };
-  }
-  if (isLiteral(term)) {
-    const val = term.value;
-    // const lang = term.lang;
-    const dt = term.datatype?.value;
-    // if (lang) {
-    //   return { text: `"${val}"@${lang}` };
-    // }
-    if (dt) {
-      return { text: `"${val}"^^${shrinkUri(dt, prefixes)}` };
-    }
-    return { text: `"${val}"` };
-  }
-  if (isBlank(term)) {
-    return { text: `_:${term.value}` };
-  }
-  return { text: term.value };
-}
