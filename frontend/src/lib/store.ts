@@ -17,6 +17,7 @@ export type Metadata = {
   creators?: { name: string; href?: string }[];
   title?: string | null;
   assertionSubjects?: any[];
+  license?: string;
   uri?: string;
 };
 
@@ -112,7 +113,15 @@ export class NanopubStore extends N3Store {
       // http://www.w3.org/2002/07/owl#NamedIndividual
       // https://w3id.org/np/RAuoXvJWbbzZsFslswYaajgjeEl-040X6SCQFXHfVtjf0#Garfield
 
+      // Failing that, a special case where the uri starts with the current nanopubs uri (this/sub)
+      const pre = this.prefixes["this"] ?? this.prefixes["sub"];
+      if (pre && uri.startsWith(pre)) {
+        return uri.replace(pre, "");
+      }
+
       // Failing that also, fetch the document and look for an appropriate label (streaming)
+      // Just store the uri as the label for now because this fetch is asynchronous and we dont want it firing multiple times
+      this.labelCache[uri] = uri;
       fetchQuads(uri, (quad: Quad) => {
         const p = quad.predicate.value;
         const s = quad.subject.value;
@@ -251,6 +260,13 @@ export class NanopubStore extends N3Store {
         this.graphUris.pubinfo,
       );
 
+    const license = this.matchOne(
+      namedNode(this.prefixes["this"]),
+      DCT("license"),
+      null,
+      this.graphUris.pubinfo,
+    )?.object.value;
+
     const unique = (arr: string[]) => Array.from(new Set(arr));
 
     const assertionSubjects = this.graphUris.assertion
@@ -264,6 +280,7 @@ export class NanopubStore extends N3Store {
       creators: creators,
       title: title?.object?.value || null,
       assertionSubjects: unique(assertionSubjects),
+      license: license,
       uri: this.prefixes["this"],
     };
   }

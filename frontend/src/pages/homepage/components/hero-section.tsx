@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ArrowRight, FlaskConical, Puzzle } from "lucide-react";
+import { Link } from "react-router-dom";
 // import { Badge } from "@/components/ui/badge";
 
 export function HeroSection() {
@@ -65,10 +66,10 @@ export function HeroSection() {
             Full Knowledge bricks web interface coming soon.
           </p>
           <Button size="lg" className="text-base cursor-pointer" asChild>
-            <a href="/np">
+            <Link to="/np/demo">
               Try Web Demo
               <ArrowRight className="ml-2 h-4 w-4" />
-            </a>
+            </Link>
           </Button>
         </div>
       </div>

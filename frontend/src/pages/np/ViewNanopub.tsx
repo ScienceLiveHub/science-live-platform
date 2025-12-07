@@ -327,7 +327,9 @@ export default function ViewNanopub() {
   const uri = params.uri
     ? params.uri.startsWith("http")
       ? params.uri
-      : `https://w3id.org/np/${params.uri}`
+      : // TODO: this could be something other than w3id.org/np e.g. purl/ or w3id.org/sciencelive etc
+        // we whould probably switch to a query string or have that as an alternative
+        `https://w3id.org/np/${params.uri}`
     : "";
 
   const [inputUri, setInputUri] = useState(uri);
@@ -432,13 +434,13 @@ export default function ViewNanopub() {
             value={inputUri}
             onChange={(e) => setInputUri(e.target.value)}
           />
-          <button
+          <Button
             className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
             disabled={loading}
             onClick={() => loadNanopubUri(inputUri)}
           >
             Load
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -515,6 +517,10 @@ export default function ViewNanopub() {
                     ) : (
                       <span className="text-muted-foreground">—</span>
                     )}
+                  </div>
+                  <div>
+                    <span className="font-bold">License:</span>{" "}
+                    {store?.metadata.license}
                   </div>
                 </div>
               </div>
@@ -594,27 +600,7 @@ export default function ViewNanopub() {
           )}
         </>
       ) : (
-        <>
-          Load a URI above, or try an example:{" "}
-          <a
-            href="/np/RA6Cz33icPZrBAummwxw6MwdS-RepX-sUjW_fZz905Rvc"
-            className="text-purple-500 hover:underline"
-          >
-            includes quotation from cvpr.2009.5206848
-          </a>
-          <a
-            href="/np/RAuoXvJWbbzZsFslswYaajgjeEl-040X6SCQFXHfVtjf0#Garfield"
-            className="text-purple-500 hover:underline"
-          >
-            Garfield
-          </a>
-          <a
-            href="/np/RAZMzeEoutrEi1xEpf5XSrSpMnvwTONYzMat5TkIqUWY8"
-            className="text-purple-500 hover:underline"
-          >
-            Garfield is a fictional character
-          </a>
-        </>
+        <>Load a URI above.</>
       )}
     </main>
   );
