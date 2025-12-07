@@ -516,6 +516,10 @@ export default function ViewNanopub() {
                       <span className="text-muted-foreground">—</span>
                     )}
                   </div>
+                  <div>
+                    <span className="font-bold">License:</span>{" "}
+                    {store?.metadata.license}
+                  </div>
                 </div>
               </div>
 
