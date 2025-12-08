@@ -134,7 +134,7 @@ export function ComboboxDemo({
                   }}
                 >
                   <span className="font-bold">{t.name}</span>
-                  <span className="text-muted-foreground">{t.description}</span>
+                  <span className="font-light">{t.description}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
