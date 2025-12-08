@@ -13,7 +13,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, FilePlus } from "lucide-react";
 import * as React from "react";
 import AIDASentence from "./components/AIDASentence";
 import AnnotateAPaperQuotation from "./components/AnnotateAPaperQuotation";
@@ -151,7 +151,8 @@ export default function CreateNanopub() {
   return (
     <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-6xl">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h1 className="text-xl text-muted-foreground">
+        <h1 className="flex items-center text-xl text-muted-foreground font-black">
+          <FilePlus className="mr-4" />
           CREATE NANOPUBLICATION
         </h1>
         <div className="flex gap-2 w-full md:w-auto">

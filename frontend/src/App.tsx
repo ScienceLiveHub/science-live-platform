@@ -6,13 +6,13 @@ import AuthPage from "./pages/AuthPage";
 import Demo from "./pages/Demo";
 import EmailVerfied from "./pages/EmailVerified";
 import { HomePage } from "./pages/homepage/page";
-import { NanopubTest } from "./pages/NanopubTest";
-import NanopubTestPage from "./pages/NanopubTestPage";
 import CreateNanopub from "./pages/np/create/CreateNanopub";
 import ViewNanopub from "./pages/np/ViewNanopub";
 import ViewRaw from "./pages/np/ViewRaw";
-import { RealNanopubTest } from "./pages/RealNanopubTest";
-import { TestNanopubViewer } from "./pages/TestNanopubViewer";
+import { NanopubTest } from "./pages/old/NanopubTest";
+import NanopubTestPage from "./pages/old/NanopubTestPage";
+import { RealNanopubTest } from "./pages/old/RealNanopubTest";
+import { TestNanopubViewer } from "./pages/old/TestNanopubViewer";
 import { Providers } from "./providers";
 
 function App() {

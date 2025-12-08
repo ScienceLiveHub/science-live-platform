@@ -1,6 +1,7 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, File, Microscope, UserCircle } from "lucide-react";
+import { Check, File, FileInput, Microscope, UserCircle } from "lucide-react";
+import { NavLink } from "react-router-dom";
 
 const items = [
   {
@@ -25,16 +26,18 @@ const items = [
   },
 ];
 
-export function AboutSection() {
+export function AboutSection({ hideTitle }: { hideTitle?: boolean }) {
   return (
-    <section id="about" className="py-24 sm:py-32">
+    <section id="about" className="py-16 sm:py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-2">
           {/* Info */}
           <div className="lg:col-span-1 order-1 lg:order-1">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
-              What are Nanopublications?
-            </h2>
+            {!hideTitle && (
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
+                What are Nanopublications?
+              </h2>
+            )}
             {/* <h3 className="mb-4"> */}
             <p className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground sm:text-xl">
               Nanopublications are the smallest units of publishable
@@ -57,7 +60,7 @@ export function AboutSection() {
 
           {/* Side boxes */}
           <div className="space-y-6 order-2 lg:order-2">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer m-0 bg-secondary">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer m-0 border-l-8 border-l-yellow-300">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <File className="h-5 w-5 text-primary" />
@@ -71,7 +74,7 @@ export function AboutSection() {
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-md transition-shadow cursor-pointer m-0 bg-secondary/55">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer m-0 border-l-8 border-l-purple-600">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Microscope className="h-5 w-5 text-primary" />
@@ -85,7 +88,7 @@ export function AboutSection() {
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-md transition-shadow cursor-pointer m-0 bg-secondary/15">
+            <Card className="hover:shadow-md transition-shadow cursor-pointer m-0 border-l-8 border-l-blue-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <UserCircle className="h-5 w-5 text-primary" />
@@ -100,6 +103,17 @@ export function AboutSection() {
             </Card>
           </div>
         </div>
+        {!hideTitle && (
+          <div className="flex items-center">
+            <FileInput className="mr-2" /> Example nanopublication:
+            <NavLink
+              to="/np/RAuoXvJWbbzZsFslswYaajgjeEl-040X6SCQFXHfVtjf0#Garfield"
+              className="text-purple-500 hover:underline ml-3"
+            >
+              Garfield
+            </NavLink>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -30,13 +30,18 @@ import {
   Statement,
   Util,
 } from "@/lib/rdf";
-import { citationTypes, generateCitation } from "@/lib/utils";
+import {
+  citationTypes,
+  generateCitation,
+  parseURI as parseUri,
+} from "@/lib/utils";
 import {
   ChevronsUpDown,
   Copy,
   Download,
   ExternalLink,
   File,
+  FileCode,
   LucideIcon,
   Microscope,
   Quote,
@@ -324,13 +329,7 @@ export function ShareMenu({ uri }: { uri: string }) {
 
 export default function ViewNanopub() {
   const params = useParams();
-  const uri = params.uri
-    ? params.uri.startsWith("http")
-      ? params.uri
-      : // TODO: this could be something other than w3id.org/np e.g. purl/ or w3id.org/sciencelive etc
-        // we whould probably switch to a query string or have that as an alternative
-        `https://w3id.org/np/${params.uri}`
-    : "";
+  const uri = parseUri(params.uri);
 
   const [inputUri, setInputUri] = useState(uri);
   const [currentUri, setCurrentUri] = useState(uri);
@@ -425,7 +424,10 @@ export default function ViewNanopub() {
   return (
     <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-6xl">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h1 className="text-xl text-muted-foreground">VIEW NANOPUBLICATION</h1>
+        <h1 className="flex items-center text-xl text-muted-foreground font-black">
+          <FileCode className="mr-4" />
+          VIEW NANOPUBLICATION
+        </h1>
         <div className="flex gap-2 w-full md:w-auto">
           <Input
             type="text"
@@ -468,7 +470,7 @@ export default function ViewNanopub() {
                     </h2>
                     <div className="font-mono break-all">
                       <a
-                        className="text-purple-500 hover:underline"
+                        className="text-purple-600 dark:text-purple-400 hover:underline"
                         href={currentUri}
                         target="_blank"
                         rel="noreferrer"

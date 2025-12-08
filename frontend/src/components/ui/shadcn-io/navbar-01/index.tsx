@@ -1,8 +1,7 @@
 "use client";
 
-import * as React from "react";
+import { ModeToggle } from "@/components/mode-toggle";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState, useRef } from "react";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -14,11 +13,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { ModeToggle } from "@/components/mode-toggle";
 import { authClient } from "@/lib/auth-client";
-import { useLocation, useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import { UserButton } from "@daveyplate/better-auth-ui";
+import * as React from "react";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // Simple logo component for the navbar
 const Logo = () => {
@@ -89,6 +89,7 @@ const defaultNavigationLinks: Navbar01NavLink[] = [
   { href: "/", label: "Home", active: true },
   { href: "#features", label: "Features" },
   { href: "#about", label: "About" },
+  { href: "/np/demo", label: "Demo" },
 ];
 
 export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
@@ -103,7 +104,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
       onCtaClick,
       ...props
     },
-    ref
+    ref,
   ) => {
     const {
       data: session,
@@ -151,7 +152,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
           ref.current = node;
         }
       },
-      [ref]
+      [ref],
     );
 
     return (
@@ -159,7 +160,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
         ref={combinedRef}
         className={cn(
           "sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 md:px-6 [&_*]:no-underline",
-          className
+          className,
         )}
         {...props}
       >
@@ -189,7 +190,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                               "flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer no-underline",
                               link.active
                                 ? "bg-accent text-accent-foreground"
-                                : "text-foreground/80"
+                                : "text-foreground/80",
                             )}
                           >
                             {link.label}
@@ -237,7 +238,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                             "group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer no-underline",
                             link.active
                               ? "bg-accent text-accent-foreground"
-                              : "text-foreground/80 hover:text-accent-foreground/80"
+                              : "text-foreground/80 hover:text-accent-foreground/80",
                           )}
                         >
                           {link.label}
@@ -281,9 +282,9 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
         </div>
       </header>
     );
-  }
+  },
 );
 
 Navbar01.displayName = "Navbar01";
 
-export { Logo, HamburgerIcon };
+export { HamburgerIcon, Logo };
