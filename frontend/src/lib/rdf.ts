@@ -1,5 +1,5 @@
 import * as RDFT from "@rdfjs/types";
-import { DataFactory, Parser, Quad, Util } from "n3";
+import { DataFactory, NamedNode, Parser, Quad, Store, Term, Util } from "n3";
 
 const { namedNode } = DataFactory;
 const { isNamedNode, isBlankNode: isBlank, isLiteral, prefix } = Util;
@@ -117,4 +117,127 @@ export function shrinkUri(
     return `${bestPrefix}:${uri.substring(bestBase.length)}`;
   }
   return uri;
+}
+
+/**
+ * Extract all the properties of a subject from the graph.
+ *
+ * - Supports multiple predicates mapping to the same property (hence predicates are specified in an array).
+ * - Supports strings and arrays of strings for properties (props with the suffix `_$array` are treated as arrays).
+ *
+ * TODO: there is a chance that if multiple props with same name are found, only one will be opaquely returned.
+ *
+ * Property mapping example:
+ *
+ *   const propertyMap = {
+ *     name: [NS.RDFS("label")],
+ *     description: [NS.DCT("description")],
+ *     types_$array: [NS.RDF("type")],
+ *     statements_$array: [NS.NPT("includes"), NS.NPT("hasStatement")],
+ *     targetNanopubType: [NS.NPT("hasTargetNanopubType")],
+ *     labelPattern: [NS.NPT("hasNanopubLabelPattern")],
+ *     tags_$array: [NS.NPT("hasTag")],
+ *   };
+ */
+
+export function extractSubjectProps(
+  store: Store,
+  sub: NamedNode,
+  propertyMap: Record<string, (NamedNode | ((q: Quad) => boolean))[]>,
+  graphUri?: string | null,
+) {
+  const outputObj: any = {};
+  store.forEach((quad) => {
+    if (!graphUri || quad.graph.value === graphUri) {
+      if (quad.subject.equals(sub)) {
+        const mappedKey = Object.entries(propertyMap).find(([k, maps]) => {
+          return maps.some((map) => {
+            if (typeof map === "function") {
+              return map(quad as Quad);
+            } else {
+              return termsAreEqual(quad.predicate as Term, map);
+            }
+          });
+        });
+        let key = mappedKey?.[0] ?? quad.predicate.value;
+        if (key.endsWith("_$array")) {
+          key = key.replace("_$array", "");
+          if (!outputObj[key]) {
+            outputObj[key] = [];
+          }
+          outputObj[key].push(quad.object.value);
+        } else {
+          outputObj[key] = quad.object.value;
+        }
+      }
+    }
+  });
+  return outputObj;
+}
+
+/**
+ * Extract all the subjects (optionally filtering for specified predicate/object/graph), and their properties.
+ *
+ * Uses property mappings from above, and url `#fragment` for subject names where available (e.g. [URL]/#assertion -> "assertion" )
+ *
+ */
+export function extractSubjects(
+  store: Store,
+  propertyMap: Record<string, (NamedNode | ((q: Quad) => boolean))[]>,
+  predicate?: string | null,
+  object?: string | null,
+  graphUri?: string | null,
+) {
+  const outputObj: any = {};
+  store.forSubjects(
+    (sub) => {
+      // let fragment = getUriFragment(sub.value);
+      outputObj[/*fragment ??*/ sub.value] = extractSubjectProps(
+        store,
+        namedNode(sub.value),
+        propertyMap,
+      );
+    },
+    predicate ?? null,
+    object ?? null,
+    graphUri ? namedNode(graphUri) : null,
+  );
+  return outputObj;
+}
+
+export function extractSubjectsFiltered(
+  store: Store,
+  propertyMap: Record<string, (NamedNode | ((q: Quad) => boolean))[]>,
+  filter: (q: RDFT.Quad) => boolean,
+  graphUri?: string | null,
+) {
+  const outputObj: any = {};
+
+  const filtered = store
+    .filter(filter)
+    ?.toArray()
+    .map((q) => q.subject.value);
+
+  filtered?.forEach((sub) => {
+    outputObj[sub] = extractSubjectProps(
+      store,
+      namedNode(sub),
+      propertyMap,
+      graphUri,
+    );
+  });
+
+  return outputObj;
+}
+
+/**
+ * Compare terms for equality, ignoring http/https
+ * TODO: this is not a good solution. Ideally the templates and nanopubs which miss-use http/https should be fixed
+ */
+export function termsAreEqual(a: Term, b: Term) {
+  const a_id = a?.id?.replace("https://", "http://");
+  const a_value = a?.value?.replace("https://", "http://");
+  const b_id = b?.id?.replace("https://", "http://");
+  const b_value = b?.value?.replace("https://", "http://");
+  return a?.termType === b?.termType && a_id === b_id && a_value === b_value;
 }

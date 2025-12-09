@@ -94,14 +94,6 @@ fi
 
 cd ../../..
 
-echo "🔗 Linking @nanopub libraries locally..."
-
-cd ../nanopub-js/
-npm link
-cd ../science-live-platform/frontend/
-npm link @nanopub/utils @nanopub/display
-cd ..
-
 echo ""
 echo "✅ All nanopub dependencies built successfully!"
 echo ""
@@ -112,9 +104,3 @@ ls -lh node_modules/@sciencelivehub/nanopub-view/dist/ 2>/dev/null || echo "    
 echo ""
 echo "  📦 nanopub-create:"
 ls -lh node_modules/@sciencelivehub/nanopub-create/dist/ 2>/dev/null || echo "     ⚠️ (no dist files)"
-echo ""
-echo "  📦 @nanopub/utils:"
-ls -lh node_modules/@nanopub/utils/dist/ 2>/dev/null || echo "     ⚠️ (no dist files)"
-echo ""
-echo "  📦 @nanopub/display:"
-ls -lh node_modules/@nanopub/display/dist/ 2>/dev/null || echo "     ⚠️ (no dist files)"

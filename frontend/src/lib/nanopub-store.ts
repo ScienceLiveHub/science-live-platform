@@ -125,7 +125,7 @@ export class NanopubStore extends N3Store {
       fetchQuads(uri, (quad: Quad) => {
         const p = quad.predicate.value;
         const s = quad.subject.value;
-        if (s === uri || s === uri + "#assertion") {
+        if (s === uri || s === uri + "#assertion" || s === uri + "/assertion") {
           if (p === NS.RDFS("label").value) {
             label = quad.object.value;
             this.labelCache[uri] = label;
@@ -202,7 +202,7 @@ export class NanopubStore extends N3Store {
    * If the store is a well-formed nanopublication, it MUST contain these four URIs in he head
    *
    */
-  private extractGraphUris() {
+  protected extractGraphUris() {
     // Search for URIs, as per spec: https://nanopub.net/guidelines/working_draft/#well-formed-nanopublications
     // "exactly one quad of the form '[N] rdf:type np:Nanopublication [H]', which identifies [N] as the nanopublication URI, and [H] as the head URI"
     const headQuad = this.matchOne(
@@ -230,7 +230,7 @@ export class NanopubStore extends N3Store {
    * Process and store some metadata about the nanopublication
    *
    */
-  private async extractMetadata() {
+  protected async extractMetadata() {
     // Prefer pubinfo graph for created/creator/etc., else any
     const createdLit = this.matchOnePredicate(
       DCT("created"),

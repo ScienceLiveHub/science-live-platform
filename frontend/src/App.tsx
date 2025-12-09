@@ -8,7 +8,6 @@ import EmailVerfied from "./pages/EmailVerified";
 import { HomePage } from "./pages/homepage/page";
 import CreateNanopub from "./pages/np/create/CreateNanopub";
 import ViewNanopub from "./pages/np/ViewNanopub";
-import ViewRaw from "./pages/np/ViewRaw";
 import { NanopubTest } from "./pages/old/NanopubTest";
 import NanopubTestPage from "./pages/old/NanopubTestPage";
 import { RealNanopubTest } from "./pages/old/RealNanopubTest";
@@ -29,7 +28,6 @@ function App() {
 
           {/* Main Pages - For Demo/Production */}
           <Route path="/" element={<HomePage />} />
-          <Route path="/np-raw/:nanopubId" element={<ViewRaw />} />
           <Route path="/np/" element={<ViewNanopub />} />
           <Route path="/np/demo" element={<Demo />} />
           <Route path="/np/:uri" element={<ViewNanopub />} />

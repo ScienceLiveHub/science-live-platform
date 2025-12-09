@@ -1,10 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Citation } from "@/components/np/citation";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+  CollapsibleGraphSection,
+  GraphSection,
+} from "@/components/np/graph-section";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,30 +12,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { ItemSeparator } from "@/components/ui/item";
-import {
-  Snippet,
-  SnippetCopyButton,
-  SnippetHeader,
-  SnippetTabsContent,
-  SnippetTabsList,
-  SnippetTabsTrigger,
-} from "@/components/ui/shadcn-io/snippet";
+import { SnippetCopyButton } from "@/components/ui/shadcn-io/snippet";
 import { Spinner } from "@/components/ui/spinner";
 import { NanopubStore } from "@/lib/nanopub-store";
+import { shrinkUri, Statement } from "@/lib/rdf";
+import { parseURI as parseUri } from "@/lib/utils";
 import {
-  DEFAULT_PREFIXES,
-  groupByGraph,
-  shrinkUri,
-  Statement,
-  Util,
-} from "@/lib/rdf";
-import {
-  citationTypes,
-  generateCitation,
-  parseURI as parseUri,
-} from "@/lib/utils";
-import {
-  ChevronsUpDown,
   Copy,
   Download,
   ExternalLink,
@@ -44,7 +25,6 @@ import {
   FileCode,
   LucideIcon,
   Microscope,
-  Quote,
   Share2,
   UserCircle,
 } from "lucide-react";
@@ -60,223 +40,6 @@ import { useParams } from "react-router-dom";
  * Intended for generic viewing of any nanopub content.
  * TODO: If the nanopub uses a supported Science Live template, then it should render a template-specific view instead.
  */
-
-function TripleCell({
-  display,
-  className,
-}: {
-  display: { text: string; href?: string };
-  className?: string;
-}) {
-  return (
-    <td
-      className={`py-2 align-top font-mono text-sm wrap-break-word max-w-0 ${className || ""}`}
-    >
-      {display.href ? (
-        <a
-          className="text-blue-600 dark:text-blue-300 hover:underline"
-          href={display.href}
-          target="_blank"
-          rel="noreferrer"
-        >
-          {display.text}
-        </a>
-      ) : (
-        display.text
-      )}
-    </td>
-  );
-}
-
-function TripleRow({
-  store,
-  st,
-  excludeSub,
-}: {
-  store: NanopubStore;
-  st: Statement;
-  excludeSub?: boolean;
-}) {
-  const s = {
-    text: store.fetchLabel(st.subject.value as string),
-    href: st.subject.value,
-  };
-  const p = {
-    text: store.fetchLabel(st.predicate.value as string),
-    href: st.predicate.value,
-  };
-  const o = Util.isLiteral(st.object)
-    ? { text: st.object.value }
-    : {
-        text: store.fetchLabel(st.object.value as string),
-        href: st.object.value,
-      };
-
-  return (
-    <tr className="border-b last:border-b-0">
-      {!excludeSub && <TripleCell display={s} className="pr-3" />}
-      <TripleCell display={p} className="px-3 text-muted-foreground" />
-      <TripleCell display={o} className="pl-3" />
-    </tr>
-  );
-}
-
-function GraphSection({
-  store,
-  title,
-  statements,
-  Icon = File,
-  extraClasses,
-}: {
-  store: NanopubStore;
-  title: string;
-  statements: Statement[];
-  Icon: LucideIcon;
-  extraClasses?: string;
-}) {
-  return (
-    <Card
-      className={
-        "hover:shadow-md transition-shadow cursor-pointer m-0 " + extraClasses
-      }
-    >
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Icon className="h-5 w-5 text-primary" />
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <table className="w-full text-left">
-          <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
-            <tr>
-              <th className="py-2 pr-3 pl-4">Subject</th>
-              <th className="py-2 px-3">Predicate</th>
-              <th className="py-2 pl-3 pr-4">Object</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {statements.map((st, idx) => (
-              <TripleRow store={store} key={idx} st={st} />
-            ))}
-          </tbody>
-        </table>
-      </CardContent>
-    </Card>
-  );
-}
-
-function CollapsibleGraphSection({
-  store,
-  title,
-  statements,
-  Icon = File,
-  extraClasses,
-}: {
-  store: NanopubStore;
-  title: string;
-  statements: Statement[];
-  Icon: LucideIcon;
-  extraClasses?: string;
-}) {
-  const pubStatements: Statement[] = [];
-  const sigStatements: Statement[] = [];
-  const otherStatements: Statement[] = [];
-
-  statements.forEach((st) => {
-    const sub = st.subject.value;
-    if (sub === store.prefixes["this"]) {
-      pubStatements.push(st);
-    } else if (
-      sub === store.prefixes["this"] + "/sig" ||
-      sub === store.prefixes["this"] + "#sig"
-    ) {
-      sigStatements.push(st);
-    } else {
-      otherStatements.push(st);
-    }
-  });
-
-  return (
-    <Card
-      className={
-        "hover:shadow-md transition-shadow cursor-pointer m-0 " + extraClasses
-      }
-    >
-      <Collapsible>
-        <CardHeader>
-          <CollapsibleTrigger>
-            <CardTitle className="flex items-center gap-2">
-              <Icon className="h-5 w-5 text-primary" />
-              {title}{" "}
-              <Button variant="ghost" size="icon" className="size-8">
-                <ChevronsUpDown />
-                <span className="sr-only">Toggle</span>
-              </Button>
-            </CardTitle>
-          </CollapsibleTrigger>
-        </CardHeader>
-        <CollapsibleContent>
-          <CardContent>
-            <Card
-              className={"hover:shadow-md transition-shadow cursor-pointer m-3"}
-            >
-              <CardContent>
-                <p className="mb-2 font-medium">This Nanopublication...</p>
-                <table className="w-full table-fixed text-left">
-                  <colgroup>
-                    <col className="w-1/2" />
-                    <col className="w-1/2" />
-                  </colgroup>
-                  <tbody className="divide-y">
-                    {pubStatements.map((st, idx) => (
-                      <TripleRow store={store} key={idx} st={st} excludeSub />
-                    ))}
-                  </tbody>
-                </table>
-              </CardContent>
-            </Card>
-            <Card
-              className={"hover:shadow-md transition-shadow cursor-pointer m-3"}
-            >
-              <CardContent>
-                <p className="mb-2 font-medium">Signature...</p>
-                <table className="w-full table-fixed text-left">
-                  <colgroup>
-                    <col className="w-1/2" />
-                    <col className="w-1/2" />
-                  </colgroup>
-                  <tbody className="divide-y">
-                    {sigStatements.map((st, idx) => (
-                      <TripleRow store={store} key={idx} st={st} excludeSub />
-                    ))}
-                  </tbody>
-                </table>
-              </CardContent>
-            </Card>
-            <CardContent>
-              <p className="mb-4 mt-4 font-medium">Other info</p>
-              <table className="w-full text-left">
-                <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
-                  <tr>
-                    <th className="py-2 pr-3 pl-4">Subject</th>
-                    <th className="py-2 px-3">Predicate</th>
-                    <th className="py-2 pl-3 pr-4">Object</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {otherStatements.map((st, idx) => (
-                    <TripleRow store={store} key={idx} st={st} />
-                  ))}
-                </tbody>
-              </table>
-            </CardContent>
-          </CardContent>
-        </CollapsibleContent>
-      </Collapsible>
-    </Card>
-  );
-}
 
 const MenuItem = ({
   text = "",
@@ -337,39 +100,23 @@ export default function ViewNanopub() {
   const [error, setError] = useState<string | null>(null);
   const [store, setStore] = useState<NanopubStore | null>(null);
 
-  const [selectedCite, setSelectedCite] = useState("apa");
-  const prefixes = useMemo(() => DEFAULT_PREFIXES, []);
-
-  // Derived info
-  prefixes.this = currentUri;
-  const allStatements = useMemo<Statement[]>(
-    () =>
-      store
-        ? store.match(undefined, undefined, undefined, undefined)?.toArray()
-        : [],
-    [store],
-  );
-  const graphsMap = useMemo(() => groupByGraph(allStatements), [allStatements]);
-
-  // const headStatements = useMemo(() => {
-  //   if (!store?.graphUris.head) return [];
-  //   return graphsMap.get(store?.graphUris.head) || [];
-  // }, [graphsMap, store?.graphUris]);
-
   const assertionStatements = useMemo(() => {
-    if (!store?.graphUris.assertion) return [];
-    return graphsMap.get(store?.graphUris.assertion) || [];
-  }, [graphsMap, store?.graphUris]);
+    return store?.graphUris.assertion
+      ? store.getQuads(null, null, null, store?.graphUris.assertion)
+      : [];
+  }, [store]);
 
   const provenanceStatements = useMemo(() => {
-    if (!store?.graphUris.provenance) return [];
-    return graphsMap.get(store?.graphUris.provenance) || [];
-  }, [graphsMap, store?.graphUris]);
+    return store?.graphUris.provenance
+      ? store.getQuads(null, null, null, store?.graphUris.provenance)
+      : [];
+  }, [store]);
 
   const pubinfoStatements = useMemo(() => {
-    if (!store?.graphUris.pubinfo) return [];
-    return graphsMap.get(store?.graphUris.pubinfo) || [];
-  }, [graphsMap, store?.graphUris]);
+    return store?.graphUris.pubinfo
+      ? store.getQuads(null, null, null, store?.graphUris.pubinfo)
+      : [];
+  }, [store]);
 
   const loadNanopubUri = (newUri?: string) => {
     if (!newUri) return;
@@ -400,7 +147,9 @@ export default function ViewNanopub() {
     }
   }, []);
 
+  // otherGraphs should always be empty if its a valid nanopublication, but keep it as a backstop for anomolies
   const otherGraphs = useMemo(() => {
+    store?.filter;
     // Exclude known graphs
     const known = new Set(
       [
@@ -411,15 +160,11 @@ export default function ViewNanopub() {
       ].filter(Boolean) as string[],
     );
     const entries: { uri: string; statements: Statement[] }[] = [];
-    for (const [uri, sts] of graphsMap.entries()) {
-      if (!known.has(uri)) {
-        entries.push({ uri, statements: sts });
-      }
-    }
-    // Sort by size desc
-    entries.sort((a, b) => b.statements.length - a.statements.length);
+    store?.forEach((q) => {
+      return !known.has(q.graph.value);
+    });
     return entries;
-  }, [graphsMap, store?.graphUris]);
+  }, [store?.graphUris]);
 
   return (
     <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-6xl">
@@ -527,34 +272,7 @@ export default function ViewNanopub() {
                 </div>
               </div>
 
-              <Snippet onValueChange={setSelectedCite} value={selectedCite}>
-                <CardTitle className="m-4 text-muted-foreground items-center flex gap-2">
-                  <Quote />
-                  Cite Nanopublication
-                </CardTitle>
-                <SnippetHeader>
-                  <SnippetTabsList>
-                    {Object.entries(citationTypes).map(([k, c]) => (
-                      <SnippetTabsTrigger key={k} value={k}>
-                        <c.icon size={14} />
-                        <span>{c.label}</span>
-                      </SnippetTabsTrigger>
-                    ))}
-                  </SnippetTabsList>
-                  {selectedCite && (
-                    <SnippetCopyButton
-                      onCopy={() => console.log(`Copied to clipboard`)}
-                      onError={() =>
-                        console.error(`Failed to copy to clipboard`)
-                      }
-                      value={generateCitation(store?.metadata, selectedCite)}
-                    />
-                  )}
-                </SnippetHeader>
-                <SnippetTabsContent key={selectedCite} value={selectedCite}>
-                  {generateCitation(store?.metadata, selectedCite)}
-                </SnippetTabsContent>
-              </Snippet>
+              <Citation data={store?.metadata} />
 
               {/* Sections */}
               <section className="space-y-4">

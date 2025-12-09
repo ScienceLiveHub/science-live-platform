@@ -11,9 +11,7 @@
     "--network=host"
   ],
   /* Mounts must be absolute paths on the host so adjust for your machine as necessary */
-  "mounts": [
-    "source=/home/vijay/Documents/ProphetTown/Science-Live/nanopub-js,target=/workspaces/nanopub-js,type=bind,consistency=cached"
-  ],
+  "mounts": [],
   "forwardPorts": [],
   "features": {
     /* Default to fish shell, remove if you prefer bash */
