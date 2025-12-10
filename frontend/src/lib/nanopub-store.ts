@@ -67,7 +67,7 @@ export class NanopubStore extends N3Store {
    * (Technically this will load any RDF given a URL, not just nanopubs)
    *
    */
-  static async loadNanopub(
+  static async load(
     url: string,
     setStore: (store: NanopubStore, prefixes?: any) => void,
   ) {

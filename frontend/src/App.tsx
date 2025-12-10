@@ -32,6 +32,7 @@ function App() {
           <Route path="/np/demo" element={<Demo />} />
           <Route path="/np/:uri" element={<ViewNanopub />} />
           <Route path="/np/create" element={<CreateNanopub />} />
+          <Route path="/np/create/:uri" element={<CreateNanopub />} />
           <Route path="/test-nanopub" element={<NanopubTestPage />} />
           <Route path="/email-verified" element={<EmailVerfied />} />
 

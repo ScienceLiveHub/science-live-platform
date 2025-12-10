@@ -123,7 +123,7 @@ export default function ViewNanopub() {
     setError(null);
     setLoading(true);
 
-    NanopubStore.loadNanopub(newUri, (st: NanopubStore) => {
+    NanopubStore.load(newUri, (st: NanopubStore) => {
       setStore(st);
       //TODO: update browser URL based on new URI
       setCurrentUri(newUri);

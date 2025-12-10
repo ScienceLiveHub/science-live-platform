@@ -4,6 +4,11 @@ import { DataFactory, NamedNode, Parser, Quad, Store, Term, Util } from "n3";
 const { namedNode } = DataFactory;
 const { isNamedNode, isBlankNode: isBlank, isLiteral, prefix } = Util;
 
+/**
+ * Convenience functions for working with RDF data using n3
+ *
+ */
+
 // Common Namespaces
 export namespace NS {
   export const RDF = prefix("http://www.w3.org/1999/02/22-rdf-syntax-ns#");

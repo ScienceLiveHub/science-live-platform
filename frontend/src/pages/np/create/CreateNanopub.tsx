@@ -1,5 +1,7 @@
 "use client";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Command,
   CommandEmpty,
@@ -8,15 +10,20 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ChevronsUpDown, FilePlus } from "lucide-react";
-import * as React from "react";
+import { ComponentType, useState } from "react";
+import { useParams } from "react-router-dom";
+import { toast } from "sonner";
 import AIDASentence from "./components/AIDASentence";
 import AnnotateAPaperQuotation from "./components/AnnotateAPaperQuotation";
+import AnyTemplate from "./components/AnyTemplate";
 import CitationWithCiTO from "./components/CitationWithCiTO";
 import CommentOnPaper from "./components/CommentOnPaper";
 import DocumentGeographicalCoverage from "./components/DocumentGeographicalCoverage";
@@ -32,7 +39,7 @@ export interface NanopubTemplate {
   icon: string; // Emoji icon (optional)
   recommended?: boolean; // Show in main menu
   keywords?: string[]; // For search
-  component?: React.ReactElement;
+  component?: ComponentType;
 }
 
 /**
@@ -49,7 +56,7 @@ export const POPULAR_TEMPLATES: Record<string, NanopubTemplate> = {
     icon: "📚",
     recommended: true,
     keywords: ["citation", "cito", "reference", "cite"],
-    component: <CitationWithCiTO />,
+    component: CitationWithCiTO,
   },
   "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU": {
     uri: "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU",
@@ -59,7 +66,7 @@ export const POPULAR_TEMPLATES: Record<string, NanopubTemplate> = {
     icon: "❝❞",
     recommended: true,
     keywords: ["comment", "annotation", "quote", "interpretation"],
-    component: <AnnotateAPaperQuotation />,
+    component: AnnotateAPaperQuotation,
   },
   "https://w3id.org/np/RAVEpTdLrX5XrhNl_gnvTaBcjRRSDu_hhZix8gu2HO7jI": {
     uri: "https://w3id.org/np/RAVEpTdLrX5XrhNl_gnvTaBcjRRSDu_hhZix8gu2HO7jI",
@@ -69,7 +76,7 @@ export const POPULAR_TEMPLATES: Record<string, NanopubTemplate> = {
     icon: "💬",
     recommended: true,
     keywords: ["comment", "annotation", "quote", "review"],
-    component: <CommentOnPaper />,
+    component: CommentOnPaper,
   },
   "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE": {
     uri: "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE",
@@ -79,7 +86,7 @@ export const POPULAR_TEMPLATES: Record<string, NanopubTemplate> = {
     icon: "🔬",
     recommended: true,
     keywords: ["aida", "claim", "assertion", "scientific"],
-    component: <AIDASentence />,
+    component: AIDASentence,
   },
   "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao": {
     uri: "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao",
@@ -90,17 +97,17 @@ export const POPULAR_TEMPLATES: Record<string, NanopubTemplate> = {
     icon: "📝",
     recommended: false,
     keywords: ["statement", "general", "rdf", "triple"],
-    component: <DocumentGeographicalCoverage />,
+    component: DocumentGeographicalCoverage,
   },
 };
 
-export function ComboboxDemo({
+export function Combobox({
   setSelection,
 }: {
   setSelection: (value: string) => void;
 }) {
-  const [open, setOpen] = React.useState(false);
-  const [selected, setSelected] = React.useState("");
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState("");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -146,7 +153,27 @@ export function ComboboxDemo({
 }
 
 export default function CreateNanopub() {
-  const [selected, setSelected] = React.useState("");
+  const [selected, setSelected] = useState("");
+
+  const params = useParams();
+  const templateUri = params.uri;
+
+  const [inputUri, setInputUri] = useState(templateUri || "");
+  const [activeUri, setActiveUri] = useState(templateUri || "");
+
+  const handleLoadTemplate = () => {
+    if (!inputUri.trim()) {
+      toast.error("Please enter a template URI");
+      return;
+    }
+    setActiveUri(inputUri.trim());
+  };
+  const reset = () => {
+    setActiveUri("");
+    setInputUri("");
+    setSelected("");
+  };
+  const Comp = POPULAR_TEMPLATES[selected]?.component;
 
   return (
     <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-6xl">
@@ -155,21 +182,55 @@ export default function CreateNanopub() {
           <FilePlus className="mr-4" />
           CREATE NANOPUBLICATION
         </h1>
-        <div className="flex gap-2 w-full md:w-auto">
-          {" "}
-          <ComboboxDemo setSelection={setSelected} />
-        </div>
       </div>
-      {selected ? (
+      {selected && Comp ? (
         <>
-          <div className="font-bold">
-            {" "}
-            {POPULAR_TEMPLATES[selected].description}
-          </div>{" "}
-          {POPULAR_TEMPLATES[selected].component}
+          <div className="font-bold">{POPULAR_TEMPLATES[selected].name} </div>{" "}
+          {POPULAR_TEMPLATES[selected].description}
+          <Comp />
         </>
+      ) : activeUri ? (
+        <AnyTemplate templateUri={activeUri} />
       ) : (
-        <>Select a template above.</>
+        <>
+          <Card>
+            <CardContent>
+              <h1 className="text-lg font-semibold mb-8">
+                Select a Template to use
+              </h1>
+
+              <div className="gap-2 w-full md:w-auto space-y-4">
+                <Label>
+                  Use a predefined template:
+                  <Badge variant="default">Recommended</Badge>
+                </Label>{" "}
+                <Combobox setSelection={setSelected} />
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <Label className="m-10" htmlFor="template-uri">
+                    OR...
+                  </Label>
+                  <Label className="my-6" htmlFor="template-uri">
+                    Enter any nanopublication template URI{" "}
+                    <Badge variant="secondary">Advanced</Badge>
+                  </Label>
+                  <Input
+                    id="template-uri"
+                    type="url"
+                    value={inputUri}
+                    onChange={(e) => setInputUri(e.target.value)}
+                    placeholder="https://w3id.org/np/..."
+                    className="w-full"
+                  />
+                </div>
+                <Button disabled={!inputUri} onClick={handleLoadTemplate}>
+                  Load Template
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </>
       )}
     </main>
   );
