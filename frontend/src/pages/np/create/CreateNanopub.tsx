@@ -183,18 +183,24 @@ export default function CreateNanopub() {
           CREATE NANOPUBLICATION
         </h1>
       </div>
-      {selected && Comp ? (
-        <>
-          <div className="font-bold">{POPULAR_TEMPLATES[selected].name} </div>{" "}
-          {POPULAR_TEMPLATES[selected].description}
-          <Comp />
-        </>
-      ) : activeUri ? (
-        <AnyTemplate templateUri={activeUri} />
-      ) : (
-        <>
-          <Card>
-            <CardContent>
+      <Card>
+        <CardContent>
+          {selected && Comp ? (
+            <>
+              <div className="font-bold">
+                {POPULAR_TEMPLATES[selected].name}{" "}
+              </div>{" "}
+              <div className="my-6">
+                {POPULAR_TEMPLATES[selected].description}
+              </div>{" "}
+              <Comp />
+            </>
+          ) : activeUri ? (
+            <>
+              <AnyTemplate templateUri={activeUri} />
+            </>
+          ) : (
+            <>
               <h1 className="text-lg font-semibold mb-8">
                 Select a Template to use
               </h1>
@@ -228,10 +234,10 @@ export default function CreateNanopub() {
                   Load Template
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        </>
-      )}
+            </>
+          )}
+        </CardContent>
+      </Card>
     </main>
   );
 }

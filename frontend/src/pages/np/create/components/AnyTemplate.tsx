@@ -52,7 +52,7 @@ export default function AnyTemplate({ templateUri }: DynamicTemplateProps) {
   const { Form } = useFormedible({
     schema,
     fields,
-    submitLabel: "Publish Nanopublication",
+    submitLabel: "Publish",
     collapseLabel: "Hide",
     expandLabel: "Show",
     formOptions: {
@@ -109,28 +109,19 @@ export default function AnyTemplate({ templateUri }: DynamicTemplateProps) {
   return (
     <div className="space-y-6">
       {/* Template header */}
-      <div className="border rounded-lg p-6 bg-muted/20">
-        <h2 className="text-xl font-semibold mb-2">
-          {template.metadata.title}
-        </h2>
-        {template.description && (
-          <p className="text-muted-foreground mb-4">
-            {parse(template.description)}
-          </p>
-        )}
-        <div className="text-sm text-muted-foreground">
-          <strong>Template URI:</strong>
-          <a
-            href={template.metadata.uri}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-2 text-blue-600 hover:underline"
-          >
-            {template.metadata.uri}
-          </a>
-        </div>
+      <div className="font-bold">{template.metadata.title} </div>{" "}
+      <div className="my-6">{parse(template.description)}</div>{" "}
+      <div className="text-sm text-muted-foreground">
+        <strong>Template URI:</strong>
+        <a
+          href={template.metadata.uri}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-2 text-blue-600 hover:underline"
+        >
+          {template.metadata.uri}
+        </a>
       </div>
-
       {/* Dynamic form */}
       <Form />
     </div>
