@@ -5,6 +5,7 @@ import {
   NanopubTemplate,
   templateFieldsToFormedible,
 } from "@/lib/nanopub-template";
+import parse from "html-react-parser";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -113,7 +114,9 @@ export default function AnyTemplate({ templateUri }: DynamicTemplateProps) {
           {template.metadata.title}
         </h2>
         {template.description && (
-          <p className="text-muted-foreground mb-4">{template.description}</p>
+          <p className="text-muted-foreground mb-4">
+            {parse(template.description)}
+          </p>
         )}
         <div className="text-sm text-muted-foreground">
           <strong>Template URI:</strong>
