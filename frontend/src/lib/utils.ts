@@ -30,3 +30,22 @@ export function getUriFragment(uri: string) {
   const fragment = new URL(uri).hash;
   return fragment ? fragment.replace("#", "") : undefined;
 }
+
+/**
+ * Returns the last element of the URL, in prescedence: #fragment, end of path, last element in path (if ends with /)
+ */
+export function getUriEnd(uri: string) {
+  const u = new URL(uri);
+  if (u.hash?.length > 1) {
+    return u.hash.replace("#", "");
+  }
+  const end = u.pathname.split("/").pop();
+  if (end) {
+    return end;
+  }
+  const lastPath = u.pathname.slice(0, -1).split("/").pop();
+  if (lastPath) {
+    return lastPath;
+  }
+  return undefined;
+}

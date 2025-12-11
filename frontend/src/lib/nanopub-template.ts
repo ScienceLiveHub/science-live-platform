@@ -57,12 +57,21 @@ function getPlaceholderType(typeUri: string): PlaceholderType {
   return PlaceholderType.TEXT_PLACEHOLDER; // Default
 }
 
+type Statement = {
+  types?: string[];
+  subject: string;
+  predicate: string;
+  object: string;
+};
+type Statements = Map<string, Statement>;
+
 export class NanopubTemplate extends NanopubStore {
   /**
    * Fields specific to Templates
    */
   description: string = "-";
   fields: TemplateField[] = [];
+  statements: Statements = new Map();
 
   static async load(
     url: string,
@@ -110,6 +119,8 @@ export class NanopubTemplate extends NanopubStore {
       this.graphUris.assertion,
     );
 
+    props.statements = props.statements?.sort();
+
     // Extract template metadata
     let description = props.description ?? "";
 
@@ -123,10 +134,17 @@ export class NanopubTemplate extends NanopubStore {
       hasPrefix: [NS.NPT("hasPrefix")],
       hasPrefixLabel: [NS.NPT("hasPrefixLabel")],
     };
-    type Placeholders = Record<
-      string,
-      Record<keyof typeof placeholderPropertyMap, any>
-    >;
+    type Placeholder = {
+      type: string;
+      name: string;
+      description: string;
+      possibleValuesFrom: string;
+      hasRegex: string;
+      hasPrefix: string;
+      hasPrefixLabel: string;
+    };
+
+    type Placeholders = Map<string, Placeholder>;
     const placeholders: Placeholders = extractSubjectsFiltered(
       this,
       placeholderPropertyMap,
@@ -143,10 +161,6 @@ export class NanopubTemplate extends NanopubStore {
       predicate: [NS.RDF("predicate")],
       object: [NS.RDF("object")],
     };
-    type Statements = Record<
-      string,
-      Record<keyof typeof statementsPropertyMap | "types", any>
-    >;
 
     const statements: Statements = extractSubjectsFiltered(
       this,
@@ -156,19 +170,22 @@ export class NanopubTemplate extends NanopubStore {
     );
 
     // ---- 4. match up properties of statements to contained placeholders
-    Object.entries(placeholders).forEach(([pk, p]) => {
+    placeholders.forEach((pv, pk) => {
       // Check whether required/optional
       // It's optional if it appears only in optional statements and doesn't appear in any non-optional statements
-      const required = !Object.entries(statements).some(
-        ([, q]) =>
+      const required = Object.values(statements).some(
+        (q) =>
           q.object === pk &&
           q.types?.includes(
             "https://w3id.org/np/o/ntemplate/OptionalStatement",
           ),
       );
 
+      // test using https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo
+
       // TODO: Check whether repeatable
       // It's repeatable if its part of a repeatable statement
+      // if multiple placeholders are part of the same statement, they should be grouped together when part of the multiple
 
       // TODO: Check whether it's a multichoice
       // It's repeatable if its part of a repeatable statement
@@ -204,10 +221,10 @@ export class NanopubTemplate extends NanopubStore {
 
       fields.push({
         id: pk,
-        label: p.name,
-        type: p.type,
-        description: p.description,
-        regex: p.hasRegex,
+        label: pv.name,
+        type: pv.type,
+        description: pv.description,
+        regex: pv.hasRegex,
         // options,
         // multiple: !!repeatableQuad,
         required, // Most placeholders are required by default
@@ -215,6 +232,7 @@ export class NanopubTemplate extends NanopubStore {
       });
     });
     this.fields = fields;
+    this.statements = statements;
     this.description = description;
   }
 }

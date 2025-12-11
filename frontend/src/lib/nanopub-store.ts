@@ -1,5 +1,7 @@
 import { fetchQuads, NS, shrinkUri, Statement } from "@/lib/rdf";
+import ky from "ky";
 import { DataFactory, Store as N3Store, NamedNode, Quad, Term, Util } from "n3";
+import { getUriEnd } from "./utils";
 
 const { namedNode } = DataFactory;
 const { isNamedNode } = Util;
@@ -55,7 +57,7 @@ export const COMMON_LABELS: Record<string, string> = {
  */
 export class NanopubStore extends N3Store {
   // Store a map of URIs and their "friendly" labels, which could include both internal or external
-  private labelCache: Record<string, string> = {};
+  labelCache: Record<string, string> = {};
 
   graphUris: GraphUris = {};
   metadata: Metadata = {};
@@ -92,9 +94,9 @@ export class NanopubStore extends N3Store {
     const uri = isNamedNode(t as Term) ? (t as NamedNode).id : (t as string);
     if (uri) {
       // First search the current store for a label
-      label = this.matchOne(namedNode(uri), NS.RDFS("label"), null, null)
-        ?.object.value;
-      if (label) return label;
+      // label = this.matchOne(namedNode(uri), NS.RDFS("label"), null, null)
+      //   ?.object.value;
+      // if (label) return label;
       label = this.matchOne(namedNode(uri), NS.FOAF("name"), null, null)?.object
         .value;
       if (label) return label;
@@ -107,17 +109,40 @@ export class NanopubStore extends N3Store {
       label = COMMON_LABELS[uri];
       if (label) return label;
 
-      //TODO: just use the #x string suffix of the uri as the label if present?
-      // e.g.
-      // http://www.w3.org/2002/07/owl#Thing
-      // http://www.w3.org/2002/07/owl#NamedIndividual
-      // https://w3id.org/np/RAuoXvJWbbzZsFslswYaajgjeEl-040X6SCQFXHfVtjf0#Garfield
+      // Is it a nanopub?
+      const npIndex = uri.search("/np/R");
+      let isNanopub = npIndex && uri.substring(npIndex + 5).length === 44;
+
+      // Failing that, and if not a nanopublication uri, use the end-most part of the URL converted to space case
+      if (!isNanopub) {
+        // TODO: the following an fetchQuads is async and needs to be called using a hook instead
+        if (uri.startsWith("https://doi.org/10.")) {
+          ky.get(
+            uri.replace("https://doi.org", "https://api.crossref.org/works"),
+            {},
+          ).then(function (response) {
+            return (response.json() as any).message.title[0];
+          });
+        } else {
+          label = getUriEnd(uri);
+          if (label) {
+            return label.split(/(?=[A-Z])/).reduce((p, c) => p + " " + c)!;
+          }
+        }
+      }
 
       // Failing that, a special case where the uri starts with the current nanopubs uri (this/sub)
       const pre = this.prefixes["this"] ?? this.prefixes["sub"];
       if (pre && uri.startsWith(pre)) {
-        return uri.replace(pre, "");
+        label = uri.replace(pre, "");
+        if (label.length) {
+          return label;
+        } else {
+          return "this nanopublication";
+        }
       }
+
+      label = undefined;
 
       // Failing that also, fetch the document and look for an appropriate label (streaming)
       // Just store the uri as the label for now because this fetch is asynchronous and we dont want it firing multiple times
