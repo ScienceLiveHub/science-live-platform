@@ -8,7 +8,7 @@ import {
   CollapsibleTrigger,
 } from "@radix-ui/react-collapsible";
 import { ChevronsUpDown, File, LucideIcon } from "lucide-react";
-import { Util } from "n3";
+import { Term, Util } from "n3";
 
 function TripleCell({
   display,
@@ -18,9 +18,7 @@ function TripleCell({
   className?: string;
 }) {
   return (
-    <td
-      className={`py-2 align-top font-mono text-sm wrap-break-word max-w-0 ${className || ""}`}
-    >
+    <td className={`py-2 align-top font-mono text-sm ${className || ""}`}>
       {display.href ? (
         <a
           className="text-blue-600 dark:text-blue-300 hover:underline"
@@ -41,23 +39,31 @@ function TripleRow({
   store,
   st,
   excludeSub,
+  getLabel,
 }: {
   store: NanopubStore;
   st: Statement;
   excludeSub?: boolean;
+  getLabel: (term: Term | string) => string;
 }) {
   const s = {
-    text: store.fetchLabel(st.subject.value as string),
+    text:
+      store.findInternalLabel(st.subject.value) ??
+      getLabel(st.subject.value as string),
     href: st.subject.value,
   };
   const p = {
-    text: store.fetchLabel(st.predicate.value as string),
+    text:
+      store.findInternalLabel(st.predicate.value) ??
+      getLabel(st.predicate.value as string),
     href: st.predicate.value,
   };
   const o = Util.isLiteral(st.object)
     ? { text: st.object.value }
     : {
-        text: store.fetchLabel(st.object.value as string),
+        text:
+          store.findInternalLabel(st.object.value) ??
+          getLabel(st.object.value as string),
         href: st.object.value,
       };
 
@@ -65,7 +71,7 @@ function TripleRow({
     <tr className="border-b last:border-b-0">
       {!excludeSub && <TripleCell display={s} className="pr-3" />}
       <TripleCell display={p} className="px-3 text-muted-foreground" />
-      <TripleCell display={o} className="pl-3" />
+      <TripleCell display={o} className="pl-3 wrap-anywhere" />
     </tr>
   );
 }
@@ -76,12 +82,14 @@ export function GraphSection({
   statements,
   Icon = File,
   extraClasses,
+  getLabel,
 }: {
   store: NanopubStore;
   title: string;
   statements: Statement[];
   Icon: LucideIcon;
   extraClasses?: string;
+  getLabel: (term: Term | string) => string;
 }) {
   return (
     <Card
@@ -96,17 +104,10 @@ export function GraphSection({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <table className="w-full text-left">
-          <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
-            <tr>
-              <th className="py-2 pr-3 pl-4">Subject</th>
-              <th className="py-2 px-3">Predicate</th>
-              <th className="py-2 pl-3 pr-4">Object</th>
-            </tr>
-          </thead>
+        <table className=" text-left">
           <tbody className="divide-y">
             {statements.map((st, idx) => (
-              <TripleRow store={store} key={idx} st={st} />
+              <TripleRow store={store} key={idx} st={st} getLabel={getLabel} />
             ))}
           </tbody>
         </table>
@@ -121,17 +122,20 @@ export function CollapsibleGraphSection({
   statements,
   Icon = File,
   extraClasses,
+  getLabel,
 }: {
   store: NanopubStore;
   title: string;
   statements: Statement[];
   Icon: LucideIcon;
   extraClasses?: string;
+  getLabel: (term: Term | string) => string;
 }) {
   const pubStatements: Statement[] = [];
   const sigStatements: Statement[] = [];
   const otherStatements: Statement[] = [];
 
+  // Filter statements into sections for display
   statements.forEach((st) => {
     const sub = st.subject.value;
     if (sub === store.prefixes["this"]) {
@@ -172,14 +176,16 @@ export function CollapsibleGraphSection({
             >
               <CardContent>
                 <p className="mb-2 font-medium">This Nanopublication...</p>
-                <table className="w-full table-fixed text-left">
-                  <colgroup>
-                    <col className="w-1/2" />
-                    <col className="w-1/2" />
-                  </colgroup>
+                <table className="table-auto text-left">
                   <tbody className="divide-y">
                     {pubStatements.map((st, idx) => (
-                      <TripleRow store={store} key={idx} st={st} excludeSub />
+                      <TripleRow
+                        store={store}
+                        key={idx}
+                        st={st}
+                        excludeSub
+                        getLabel={getLabel}
+                      />
                     ))}
                   </tbody>
                 </table>
@@ -190,14 +196,16 @@ export function CollapsibleGraphSection({
             >
               <CardContent>
                 <p className="mb-2 font-medium">Signature...</p>
-                <table className="w-full table-fixed text-left">
-                  <colgroup>
-                    <col className="w-1/2" />
-                    <col className="w-1/2" />
-                  </colgroup>
+                <table className="table-auto text-left">
                   <tbody className="divide-y">
                     {sigStatements.map((st, idx) => (
-                      <TripleRow store={store} key={idx} st={st} excludeSub />
+                      <TripleRow
+                        store={store}
+                        key={idx}
+                        st={st}
+                        excludeSub
+                        getLabel={getLabel}
+                      />
                     ))}
                   </tbody>
                 </table>
@@ -205,17 +213,15 @@ export function CollapsibleGraphSection({
             </Card>
             <CardContent>
               <p className="mb-4 mt-4 font-medium">Other info</p>
-              <table className="w-full text-left">
-                <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
-                  <tr>
-                    <th className="py-2 pr-3 pl-4">Subject</th>
-                    <th className="py-2 px-3">Predicate</th>
-                    <th className="py-2 pl-3 pr-4">Object</th>
-                  </tr>
-                </thead>
+              <table className="table-auto text-left">
                 <tbody className="divide-y">
                   {otherStatements.map((st, idx) => (
-                    <TripleRow store={store} key={idx} st={st} />
+                    <TripleRow
+                      store={store}
+                      key={idx}
+                      st={st}
+                      getLabel={getLabel}
+                    />
                   ))}
                 </tbody>
               </table>

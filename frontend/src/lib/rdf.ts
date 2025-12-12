@@ -1,8 +1,14 @@
 import * as RDFT from "@rdfjs/types";
+import ky from "ky";
 import { DataFactory, NamedNode, Parser, Quad, Store, Term, Util } from "n3";
 
 const { namedNode } = DataFactory;
 const { isNamedNode, isBlankNode: isBlank, isLiteral, prefix } = Util;
+
+/**
+ * Convenience functions for working with RDF data using n3
+ *
+ */
 
 // Common Namespaces
 export namespace NS {
@@ -34,7 +40,7 @@ export const DEFAULT_PREFIXES: Record<string, string> = {
 };
 
 /**
- * fetch() the RDF document, parse it (streaming) and run the callback on each quad that it finds.
+ * fetch the RDF document, parse it (streaming) and run the callback on each quad that it finds.
  *
  */
 export async function fetchQuads(
@@ -46,7 +52,7 @@ export async function fetchQuads(
   const PREFERRED_FORMAT = "application/trig";
 
   // Download RDF
-  const res = await fetch(url, {
+  const res = await ky(url, {
     headers: {
       Accept: PREFERRED_FORMAT,
     },
@@ -188,14 +194,13 @@ export function extractSubjects(
   object?: string | null,
   graphUri?: string | null,
 ) {
-  const outputObj: any = {};
+  const outputObj: Map<string, any> = new Map();
   store.forSubjects(
     (sub) => {
       // let fragment = getUriFragment(sub.value);
-      outputObj[/*fragment ??*/ sub.value] = extractSubjectProps(
-        store,
-        namedNode(sub.value),
-        propertyMap,
+      outputObj.set(
+        /*fragment ??*/ sub.value,
+        extractSubjectProps(store, namedNode(sub.value), propertyMap),
       );
     },
     predicate ?? null,
@@ -204,14 +209,17 @@ export function extractSubjects(
   );
   return outputObj;
 }
-
+/**
+ * Similar to extractSubjects() above but filter using a function.
+ *
+ */
 export function extractSubjectsFiltered(
   store: Store,
   propertyMap: Record<string, (NamedNode | ((q: Quad) => boolean))[]>,
   filter: (q: RDFT.Quad) => boolean,
   graphUri?: string | null,
 ) {
-  const outputObj: any = {};
+  const outputObj: Map<string, any> = new Map();
 
   const filtered = store
     .filter(filter)
@@ -219,11 +227,9 @@ export function extractSubjectsFiltered(
     .map((q) => q.subject.value);
 
   filtered?.forEach((sub) => {
-    outputObj[sub] = extractSubjectProps(
-      store,
-      namedNode(sub),
-      propertyMap,
-      graphUri,
+    outputObj.set(
+      sub,
+      extractSubjectProps(store, namedNode(sub), propertyMap, graphUri),
     );
   });
 
