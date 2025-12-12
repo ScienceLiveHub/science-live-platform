@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { ItemSeparator } from "@/components/ui/item";
 import { SnippetCopyButton } from "@/components/ui/shadcn-io/snippet";
 import { Spinner } from "@/components/ui/spinner";
+import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { shrinkUri, Statement } from "@/lib/rdf";
 import { parseURI as parseUri } from "@/lib/utils";
@@ -99,6 +100,9 @@ export default function ViewNanopub() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [store, setStore] = useState<NanopubStore | null>(null);
+
+  // Initialize the labels hook with the store's label cache
+  const { getLabel } = useLabels(store?.labelCache);
 
   const assertionStatements = useMemo(() => {
     return store?.graphUris.assertion
@@ -282,6 +286,7 @@ export default function ViewNanopub() {
                   statements={assertionStatements}
                   Icon={File}
                   extraClasses="border-l-8 border-l-yellow-300"
+                  getLabel={getLabel}
                 />
 
                 <GraphSection
@@ -290,6 +295,7 @@ export default function ViewNanopub() {
                   statements={provenanceStatements}
                   Icon={Microscope}
                   extraClasses="border-l-8 border-l-purple-600"
+                  getLabel={getLabel}
                 />
 
                 <CollapsibleGraphSection
@@ -298,6 +304,7 @@ export default function ViewNanopub() {
                   statements={pubinfoStatements}
                   Icon={UserCircle}
                   extraClasses="border-l-8 border-l-blue-800"
+                  getLabel={getLabel}
                 />
 
                 {otherGraphs.length > 0 && (
@@ -311,6 +318,7 @@ export default function ViewNanopub() {
                         statements={g.statements}
                         Icon={File}
                         extraClasses="border-l-8 border-l-purple-600"
+                        getLabel={getLabel}
                       />
                     ))}
                   </div>

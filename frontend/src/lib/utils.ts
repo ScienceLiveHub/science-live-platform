@@ -25,10 +25,19 @@ export function parseURI(uri?: string) {
 
 /**
  * Returns the fragment of the URL, if any (i.e. after the hash: "http://www.example.com/page#section" -> "section")
+ * Uses indexOf (not lastIndexOf) to find the first # symbol, as per URL standards
  */
-export function getUriFragment(uri: string) {
-  const fragment = new URL(uri).hash;
-  return fragment ? fragment.replace("#", "") : undefined;
+export function getUriFragment(uri: string): string {
+  if (!uri || typeof uri !== "string") {
+    return "";
+  }
+
+  const index = uri.indexOf("#");
+  if (index < 0 || index === uri.length - 1) {
+    return "";
+  }
+
+  return uri.substring(index + 1);
 }
 
 /**
@@ -48,4 +57,22 @@ export function getUriEnd(uri: string) {
     return lastPath;
   }
   return undefined;
+}
+
+/**
+ * Detect if it is valid nanupublication URI (without any additional suffix/path)
+ */
+export function isNanopubUri(uri: string) {
+  const npIndex = uri?.search("/np/R");
+  const hash = uri?.substring(npIndex + 4);
+  return !!(
+    npIndex &&
+    hash &&
+    hash.match(new RegExp("^[A-Za-z0-9_-]+$")) &&
+    hash.length === 45
+  );
+}
+
+export function isDoiUri(uri: string) {
+  return uri.startsWith("https://doi.org/10.");
 }

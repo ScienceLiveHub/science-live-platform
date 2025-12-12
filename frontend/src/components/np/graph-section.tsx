@@ -8,7 +8,7 @@ import {
   CollapsibleTrigger,
 } from "@radix-ui/react-collapsible";
 import { ChevronsUpDown, File, LucideIcon } from "lucide-react";
-import { Util } from "n3";
+import { Term, Util } from "n3";
 
 function TripleCell({
   display,
@@ -41,23 +41,31 @@ function TripleRow({
   store,
   st,
   excludeSub,
+  getLabel,
 }: {
   store: NanopubStore;
   st: Statement;
   excludeSub?: boolean;
+  getLabel: (term: Term | string) => string;
 }) {
   const s = {
-    text: store.fetchLabel(st.subject.value as string),
+    text:
+      store.findInternalLabel(st.subject.value) ??
+      getLabel(st.subject.value as string),
     href: st.subject.value,
   };
   const p = {
-    text: store.fetchLabel(st.predicate.value as string),
+    text:
+      store.findInternalLabel(st.predicate.value) ??
+      getLabel(st.predicate.value as string),
     href: st.predicate.value,
   };
   const o = Util.isLiteral(st.object)
     ? { text: st.object.value }
     : {
-        text: store.fetchLabel(st.object.value as string),
+        text:
+          store.findInternalLabel(st.object.value) ??
+          getLabel(st.object.value as string),
         href: st.object.value,
       };
 
@@ -76,12 +84,14 @@ export function GraphSection({
   statements,
   Icon = File,
   extraClasses,
+  getLabel,
 }: {
   store: NanopubStore;
   title: string;
   statements: Statement[];
   Icon: LucideIcon;
   extraClasses?: string;
+  getLabel: (term: Term | string) => string;
 }) {
   return (
     <Card
@@ -106,7 +116,7 @@ export function GraphSection({
           </thead>
           <tbody className="divide-y">
             {statements.map((st, idx) => (
-              <TripleRow store={store} key={idx} st={st} />
+              <TripleRow store={store} key={idx} st={st} getLabel={getLabel} />
             ))}
           </tbody>
         </table>
@@ -121,17 +131,20 @@ export function CollapsibleGraphSection({
   statements,
   Icon = File,
   extraClasses,
+  getLabel,
 }: {
   store: NanopubStore;
   title: string;
   statements: Statement[];
   Icon: LucideIcon;
   extraClasses?: string;
+  getLabel: (term: Term | string) => string;
 }) {
   const pubStatements: Statement[] = [];
   const sigStatements: Statement[] = [];
   const otherStatements: Statement[] = [];
 
+  // Filter statements into sections for display
   statements.forEach((st) => {
     const sub = st.subject.value;
     if (sub === store.prefixes["this"]) {
@@ -179,7 +192,13 @@ export function CollapsibleGraphSection({
                   </colgroup>
                   <tbody className="divide-y">
                     {pubStatements.map((st, idx) => (
-                      <TripleRow store={store} key={idx} st={st} excludeSub />
+                      <TripleRow
+                        store={store}
+                        key={idx}
+                        st={st}
+                        excludeSub
+                        getLabel={getLabel}
+                      />
                     ))}
                   </tbody>
                 </table>
@@ -197,7 +216,13 @@ export function CollapsibleGraphSection({
                   </colgroup>
                   <tbody className="divide-y">
                     {sigStatements.map((st, idx) => (
-                      <TripleRow store={store} key={idx} st={st} excludeSub />
+                      <TripleRow
+                        store={store}
+                        key={idx}
+                        st={st}
+                        excludeSub
+                        getLabel={getLabel}
+                      />
                     ))}
                   </tbody>
                 </table>
@@ -215,7 +240,12 @@ export function CollapsibleGraphSection({
                 </thead>
                 <tbody className="divide-y">
                   {otherStatements.map((st, idx) => (
-                    <TripleRow store={store} key={idx} st={st} />
+                    <TripleRow
+                      store={store}
+                      key={idx}
+                      st={st}
+                      getLabel={getLabel}
+                    />
                   ))}
                 </tbody>
               </table>

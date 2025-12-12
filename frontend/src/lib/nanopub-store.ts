@@ -1,7 +1,6 @@
 import { fetchQuads, NS, shrinkUri, Statement } from "@/lib/rdf";
-import ky from "ky";
-import { DataFactory, Store as N3Store, NamedNode, Quad, Term, Util } from "n3";
-import { getUriEnd } from "./utils";
+import { DataFactory, Store as N3Store, NamedNode, Term, Util } from "n3";
+import { getUriEnd, isDoiUri, isNanopubUri } from "./utils";
 
 const { namedNode } = DataFactory;
 const { isNamedNode } = Util;
@@ -89,81 +88,56 @@ export class NanopubStore extends N3Store {
     // This should fix the issue where labels are not displayed until elements refresh second time
   }
 
-  fetchLabel(t: Term | string): string {
+  /**
+   * Find a user-friendly label for term, using heuristics and searching within the nanopub
+   *
+   */
+  findInternalLabel(t: Term | string): string | undefined {
     let label;
     const uri = isNamedNode(t as Term) ? (t as NamedNode).id : (t as string);
     if (uri) {
-      // First search the current store for a label
+      // Search the document internally, then the local cache, then a list of common labels
       // label = this.matchOne(namedNode(uri), NS.RDFS("label"), null, null)
       //   ?.object.value;
-      // if (label) return label;
-      label = this.matchOne(namedNode(uri), NS.FOAF("name"), null, null)?.object
-        .value;
+      label =
+        this.matchOne(namedNode(uri), NS.FOAF("name"), null, null)?.object
+          .value ??
+        this.labelCache[uri] ??
+        COMMON_LABELS[uri];
       if (label) return label;
 
-      // Failing that, look in the local labelCache
-      label = this.labelCache[uri];
-      if (label) return label;
-
-      // Failing that, look in the global list of common labels
-      label = COMMON_LABELS[uri];
-      if (label) return label;
-
-      // Is it a nanopub?
-      const npIndex = uri.search("/np/R");
-      let isNanopub = npIndex && uri.substring(npIndex + 5).length === 44;
-
-      // Failing that, and if not a nanopublication uri, use the end-most part of the URL converted to space case
-      if (!isNanopub) {
-        // TODO: the following an fetchQuads is async and needs to be called using a hook instead
-        if (uri.startsWith("https://doi.org/10.")) {
-          ky.get(
-            uri.replace("https://doi.org", "https://api.crossref.org/works"),
-            {},
-          ).then(function (response) {
-            return (response.json() as any).message.title[0];
-          });
-        } else {
-          label = getUriEnd(uri);
-          if (label) {
-            return label.split(/(?=[A-Z])/).reduce((p, c) => p + " " + c)!;
-          }
-        }
+      // Return null if it's a Nanopub or DOI
+      // The caller can handle this (e.g. do an async call using a hook or just show the uri)
+      if (isNanopubUri(uri) || isDoiUri(uri)) {
+        return undefined;
       }
 
       // Failing that, a special case where the uri starts with the current nanopubs uri (this/sub)
-      const pre = this.prefixes["this"] ?? this.prefixes["sub"];
-      if (pre && uri.startsWith(pre)) {
-        label = uri.replace(pre, "");
+      const thisNpUri = this.prefixes["this"] ?? this.prefixes["sub"];
+      if (thisNpUri && uri.startsWith(thisNpUri)) {
+        label = uri.replace(thisNpUri, "");
+        const firstChar = label.charAt(0);
+        if (firstChar === "/" || firstChar === "#") {
+          label = label.substring(1);
+        }
+        label = label === "assertion" ? "This assertion" : label;
         if (label.length) {
           return label;
         } else {
-          return "this nanopublication";
+          return "This nanopublication";
         }
       }
 
-      label = undefined;
+      // Failing that, use the end-most part of the URL converted to space case
+      label = getUriEnd(uri);
+      if (label) {
+        return label; //label.split(/(?=[A-Z])/).reduce((p, c) => p + " " + c)!;
+      }
 
-      // Failing that also, fetch the document and look for an appropriate label (streaming)
-      // Just store the uri as the label for now because this fetch is asynchronous and we dont want it firing multiple times
-      this.labelCache[uri] = uri;
-      fetchQuads(uri, (quad: Quad) => {
-        const p = quad.predicate.value;
-        const s = quad.subject.value;
-        if (s === uri || s === uri + "#assertion" || s === uri + "/assertion") {
-          if (p === NS.RDFS("label").value) {
-            label = quad.object.value;
-            this.labelCache[uri] = label;
-          } else if (p === NS.FOAF("name").value) {
-            label = quad.object.value;
-            this.labelCache[uri] = label;
-          }
-        }
-        // TODO: if we find a label, we should exit
-      }).then();
+      return shrinkUri(uri, this.prefixes);
     }
 
-    return label ?? shrinkUri(uri, this.prefixes);
+    return undefined;
   }
 
   /**
@@ -266,7 +240,9 @@ export class NanopubStore extends N3Store {
       this.graphUris.pubinfo,
     ).map((q) => {
       return {
-        name: this.fetchLabel(namedNode(q.object.value)),
+        // TODO: we could also set the name to undefined if not found, and the UI can try to fetch something better via the useLabels hook
+        name:
+          this.findInternalLabel(namedNode(q.object.value)) ?? q.object.value,
         href: q.object.value,
       };
     });
