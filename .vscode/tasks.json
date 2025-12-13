@@ -50,6 +50,20 @@
       "isBackground": true,
       "detail": "A friendly GUI for exploring the database (Drizzle Studio)",
       "problemMatcher": []
+    },
+    {
+      "label": "webhook",
+      "type": "shell",
+      "command": "bash -c \"while true; do lt -p 3001 -s sweet-poems-cover --print-requests; sleep 1; done\"",
+      "presentation": {
+        "panel": "dedicated"
+      },
+      "icon": {
+        "id": "log-in"
+      },
+      "isBackground": true,
+      "detail": "Exposes api to web, mainly as a webhook for localhost dev, to receive user account link events from OIDC providers",
+      "problemMatcher": []
     }
   ]
 }

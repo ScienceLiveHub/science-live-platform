@@ -19,7 +19,8 @@
     "ghcr.io/devcontainers-extra/features/cloudflare-wrangler:1": {},
     "ghcr.io/jsburckhardt/devcontainer-features/opencode:1": {},
     "ghcr.io/devcontainers-community/npm-features/prettier:1": {},
-    "ghcr.io/devcontainers-extra/features/micro:1": {}
+    "ghcr.io/devcontainers-extra/features/micro:1": {},
+    "ghcr.io/devcontainers-extra/features/localtunnel-npm": {}
   },
   "postCreateCommand": "bash scripts/devcontainer-setup.sh",
   "customizations": {
