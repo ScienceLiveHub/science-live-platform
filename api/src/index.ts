@@ -2,15 +2,12 @@ import { formatAllowedOrigins, getAuth } from "@/auth";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import health from "./health";
+import userProfile from "./user-profile";
 
 const app = new Hono<{ Bindings: Env }>();
 
-// Normal API endpoints
-app.route("/health", health);
-
-// CORS for auth endpoints
+// CORS for endpoints
 app.use(
-  "/auth/**",
   cors({
     origin: (origin, c) => {
       const allowed = formatAllowedOrigins(c.env);
@@ -27,6 +24,10 @@ app.use(
     credentials: true,
   }),
 );
+
+// Normal API endpoints
+app.route("/health", health);
+app.route("/user-profile", userProfile);
 
 // Auth endpoints — keep last
 app.on(["POST", "GET"], "/auth/*", (c) => getAuth(c.env).handler(c.req.raw));

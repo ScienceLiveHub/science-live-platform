@@ -16,6 +16,7 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { UserButton } from "@daveyplate/better-auth-ui";
+import { UserCircle } from "lucide-react";
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -265,7 +266,17 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                 Sign In
               </Button>
             ) : (
-              <UserButton size="sm" />
+              <UserButton
+                size="sm"
+                additionalLinks={[
+                  {
+                    href: "/profile",
+                    icon: <UserCircle />,
+                    label: "Profile",
+                    signedIn: true,
+                  },
+                ]}
+              />
             )}
             {/* <Button
               size="sm"

@@ -12,6 +12,7 @@ import { NanopubTest } from "./pages/old/NanopubTest";
 import NanopubTestPage from "./pages/old/NanopubTestPage";
 import { RealNanopubTest } from "./pages/old/RealNanopubTest";
 import { TestNanopubViewer } from "./pages/old/TestNanopubViewer";
+import UserProfile from "./pages/UserProfile";
 import { Providers } from "./providers";
 
 function App() {
@@ -25,6 +26,8 @@ function App() {
         <Routes>
           <Route path="/auth/:pathname" element={<AuthPage />} />
           <Route path="/account/:pathname" element={<AccountSettings />} />
+          <Route path="/user/:userId" element={<UserProfile />} />
+          <Route path="/profile" element={<UserProfile />} />
 
           {/* Main Pages - For Demo/Production */}
           <Route path="/" element={<HomePage />} />
