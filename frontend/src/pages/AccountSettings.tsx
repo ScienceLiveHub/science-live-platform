@@ -1,7 +1,7 @@
 import { AccountView } from "@daveyplate/better-auth-ui";
 import { useParams } from "react-router-dom";
 
-export default function AccountPage() {
+export default function AccountSettings() {
   const { pathname } = useParams();
 
   return (

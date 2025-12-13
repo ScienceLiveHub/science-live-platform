@@ -195,6 +195,8 @@ To adjust a specific UI elements style, layout, padding etc, use [tailwindcss](h
 
 Currently we dont have a update manager, so use `npx npm-check-updates -w` in the project root to check for package updates. Run with `-t minor` flag to only do minor udpates where there is low risk of breaking anything. Then run it again adding the `-u` flag to save updates to package.json, then `npm i` to install them. Make sure you check everything still works, particularly after major version increments.
 
+Note: for packages installed from a git repo (e.g.`"nanopub-js": "github:Nanopublication/nanopub-js"` in package.json) you need to run install again e.g. `npm install github:Nanopublication/nanopub-js`.
+
 ## 🧪 Testing
 
 ### Test Frontend

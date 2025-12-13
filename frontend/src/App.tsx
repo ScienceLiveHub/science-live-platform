@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Navbar01 } from "./components/ui/shadcn-io/navbar-01";
 import { Toaster } from "./components/ui/sonner";
-import AccountPage from "./pages/AccountPage";
+import AccountSettings from "./pages/AccountSettings";
 import AuthPage from "./pages/AuthPage";
 import Demo from "./pages/Demo";
 import EmailVerfied from "./pages/EmailVerified";
@@ -12,6 +12,7 @@ import { NanopubTest } from "./pages/old/NanopubTest";
 import NanopubTestPage from "./pages/old/NanopubTestPage";
 import { RealNanopubTest } from "./pages/old/RealNanopubTest";
 import { TestNanopubViewer } from "./pages/old/TestNanopubViewer";
+import UserProfile from "./pages/UserProfile";
 import { Providers } from "./providers";
 
 function App() {
@@ -24,7 +25,9 @@ function App() {
         </div>
         <Routes>
           <Route path="/auth/:pathname" element={<AuthPage />} />
-          <Route path="/account/:pathname" element={<AccountPage />} />
+          <Route path="/account/:pathname" element={<AccountSettings />} />
+          <Route path="/user/:userId" element={<UserProfile />} />
+          <Route path="/profile" element={<UserProfile />} />
 
           {/* Main Pages - For Demo/Production */}
           <Route path="/" element={<HomePage />} />

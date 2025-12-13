@@ -94,6 +94,36 @@ fi
 
 cd ../../..
 
+# Build nanopub-js
+echo ""
+echo "📦 Building nanopub-js..."
+cd node_modules/nanopub-js
+
+if [ ! -f "package.json" ]; then
+  echo "❌ nanopub-js not found. Run 'npm install' first."
+  exit 1
+fi
+
+# Install dependencies if needed
+if [ ! -d "node_modules" ]; then
+  echo "Installing nanopub-js dependencies..."
+  npm install
+fi
+
+# Build the library
+echo "Building library..."
+npm run build
+
+if [ -d "dist" ]; then
+  echo "✅ nanopub-js built successfully"
+  ls -lh dist/
+else
+  echo "❌ nanopub-js build failed - no dist directory"
+  exit 1
+fi
+
+cd ../..
+
 echo ""
 echo "✅ All nanopub dependencies built successfully!"
 echo ""
@@ -104,3 +134,6 @@ ls -lh node_modules/@sciencelivehub/nanopub-view/dist/ 2>/dev/null || echo "    
 echo ""
 echo "  📦 nanopub-create:"
 ls -lh node_modules/@sciencelivehub/nanopub-create/dist/ 2>/dev/null || echo "     ⚠️ (no dist files)"
+echo ""
+echo "  📦 nanopub-js:"
+ls -lh node_modules/nanopub-js/dist/ 2>/dev/null || echo "     ⚠️ (no dist files)"

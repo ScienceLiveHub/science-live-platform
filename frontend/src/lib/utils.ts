@@ -61,6 +61,8 @@ export function getUriEnd(uri: string) {
 
 /**
  * Detect if it is valid nanupublication URI (without any additional suffix/path)
+ *
+ * TODO: align with spec https://trustyuri.net/
  */
 export function isNanopubUri(uri: string) {
   const npIndex = uri?.search("/np/R");
