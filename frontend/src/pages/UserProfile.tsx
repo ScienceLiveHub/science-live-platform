@@ -238,22 +238,28 @@ export default function UserProfile() {
                 Latest Nanopublications
               </h3>
               <div className="flex-col m-4">
-                {profile.latestContent?.map((c) => {
-                  return (
-                    <>
-                      <Link to={"/np/" + getUriEnd(c.np)}>{c.label}</Link>
-                      <div className="flex items-center gap-2 text-sm group relative w-70">
-                        <span className="text-muted-foreground w-auto">
-                          {dayjs(c.date).fromNow()}
-                        </span>
-                        <span className="group-hover:opacity-100 transition-opacity bg-muted px-1 text-sm text-muted-foreground rounded-md absolute translate-y-full opacity-0 m-4 mx-auto">
-                          {dayjs(c.date).toString()}
-                        </span>
-                      </div>
-                      <hr className="my-4" />
-                    </>
-                  );
-                })}
+                {profile.latestContent?.length ? (
+                  profile.latestContent?.map((c) => {
+                    return (
+                      <>
+                        <Link to={"/np/" + getUriEnd(c.np)}>{c.label}</Link>
+                        <div className="flex items-center gap-2 text-sm group relative w-70">
+                          <span className="text-muted-foreground w-auto">
+                            {dayjs(c.date).fromNow()}
+                          </span>
+                          <span className="group-hover:opacity-100 transition-opacity bg-muted px-1 text-sm text-muted-foreground rounded-md absolute translate-y-full opacity-0 m-4 mx-auto">
+                            {dayjs(c.date).toString()}
+                          </span>
+                        </div>
+                        <hr className="my-4" />
+                      </>
+                    );
+                  })
+                ) : (
+                  <span className="text-muted-foreground text-sm w-auto">
+                    Nothing found
+                  </span>
+                )}
               </div>
             </div>
           </div>
