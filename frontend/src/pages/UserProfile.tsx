@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
+import { getUriEnd } from "@/lib/utils";
 import { SiOrcid } from "@icons-pack/react-simple-icons";
 import ky from "ky";
 import { Calendar, CheckCircle, ExternalLink, User } from "lucide-react";
@@ -198,23 +199,21 @@ export default function UserProfile() {
                 <SiOrcid />
                 {profile.orcidConnected && profile.orcidId ? (
                   <a
-                    href={`https://orcid.org/${profile.orcidId}`}
+                    href={profile.orcidId}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:text-blue-800 underline"
+                    className="text-sm"
                   >
-                    <Badge variant="outline" className="gap-1">
+                    <Badge className="gap-2 mr-2">
                       <ExternalLink className="h-3 w-3" />
                       ORCID Connected
                     </Badge>
-                    {profile.orcidId}
+                    {getUriEnd(profile.orcidId)}
                   </a>
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="gap-1">
-                      ORCID Not Connected
-                    </Badge>
-                  </div>
+                  <Badge variant="secondary" className="gap-1">
+                    ORCID Not Connected
+                  </Badge>
                 )}
               </div>
             </div>

@@ -43,14 +43,16 @@ app.get("/:userId", async (c) => {
       .where(and(eq(account.userId, userId), eq(account.providerId, "orcid")))
       .limit(1);
 
+    const orcidConnected = orcidAccount.length > 0;
+
     const userProfile = {
       id: userData[0].id,
       name: userData[0].name,
       emailVerified: userData[0].emailVerified,
       image: userData[0].image,
       createdAt: userData[0].createdAt,
-      orcidConnected: orcidAccount.length > 0,
-      orcidId: orcidAccount.length > 0 ? orcidAccount[0].accountId : null,
+      orcidConnected,
+      orcidId: orcidConnected ? orcidAccount[0].accountId : null,
     };
 
     return c.json(userProfile);
