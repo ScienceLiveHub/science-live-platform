@@ -4,12 +4,20 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
+import { usersLatestNanopubs } from "@/lib/queries";
 import { getUriEnd } from "@/lib/utils";
 import { SiOrcid } from "@icons-pack/react-simple-icons";
+import dayjs from "dayjs";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+import relativeTime from "dayjs/plugin/relativeTime";
 import ky from "ky";
 import { Calendar, CheckCircle, ExternalLink, User } from "lucide-react";
+import { NanopubClient } from "nanopub-js";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+
+dayjs.extend(relativeTime);
+dayjs.extend(localizedFormat);
 
 interface UserProfileData {
   id: string;
@@ -19,6 +27,7 @@ interface UserProfileData {
   createdAt: string;
   orcidConnected: boolean;
   orcidId: string | null;
+  latestContent?: any[];
 }
 
 export default function UserProfile() {
@@ -74,6 +83,13 @@ export default function UserProfile() {
           data = await response.json();
         }
 
+        if (data.orcidConnected && data.orcidId) {
+          const client = new NanopubClient();
+
+          data.latestContent = await client.querySparql(
+            usersLatestNanopubs(data.orcidId),
+          );
+        }
         setProfile(data);
       } catch (err) {
         console.log("Error fetching user profile:", err);
@@ -141,7 +157,7 @@ export default function UserProfile() {
   };
 
   return (
-    <div className="container mx-auto max-w-2xl p-6">
+    <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-6xl">
       <Card>
         <CardHeader>
           <div className="flex items-center gap-4">
@@ -174,7 +190,7 @@ export default function UserProfile() {
         <Separator />
 
         <CardContent className="pt-6">
-          <div className="space-y-6">
+          <div className="space-y-16">
             <div>
               <h3 className="text-lg font-semibold mb-3">
                 Account Information
@@ -217,9 +233,32 @@ export default function UserProfile() {
                 )}
               </div>
             </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-3">
+                Latest Nanopublications
+              </h3>
+              <div className="flex-col m-4">
+                {profile.latestContent?.map((c) => {
+                  return (
+                    <>
+                      <Link to={"/np/" + getUriEnd(c.np)}>{c.label}</Link>
+                      <div className="flex items-center gap-2 text-sm group relative w-70">
+                        <span className="text-muted-foreground w-auto">
+                          {dayjs(c.date).fromNow()}
+                        </span>
+                        <span className="group-hover:opacity-100 transition-opacity bg-muted px-1 text-sm text-muted-foreground rounded-md absolute translate-y-full opacity-0 m-4 mx-auto">
+                          {dayjs(c.date).toString()}
+                        </span>
+                      </div>
+                      <hr className="my-4" />
+                    </>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }
