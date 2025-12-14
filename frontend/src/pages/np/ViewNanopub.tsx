@@ -3,6 +3,7 @@ import {
   CollapsibleGraphSection,
   GraphSection,
 } from "@/components/np/graph-section";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -262,6 +263,36 @@ export default function ViewNanopub() {
                             }
                           >
                             {c.name}
+                          </a>
+                        ))}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </div>
+                  <div>
+                    <span className="font-bold">Type:</span>{" "}
+                    {store?.metadata.types?.length ? (
+                      <span className="space-x-2">
+                        {store?.metadata.types.map((c) => (
+                          <a
+                            key={c.name}
+                            className="text-blue-600 hover:underline break-all"
+                            href={
+                              c.href?.startsWith("http") ? c.href : undefined
+                            }
+                            target={
+                              c.href?.startsWith("http") ? "_blank" : undefined
+                            }
+                            rel={
+                              c.href?.startsWith("http")
+                                ? "noreferrer"
+                                : undefined
+                            }
+                          >
+                            <Badge variant="secondary" className="gap-1">
+                              {c.name}
+                            </Badge>
                           </a>
                         ))}
                       </span>
