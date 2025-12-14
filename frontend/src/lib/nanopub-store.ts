@@ -74,7 +74,7 @@ export class NanopubStore extends N3Store {
     setStore: (store: NanopubStore, prefixes?: any) => void,
   ) {
     const store = new NanopubStore();
-    const prefixes: any = {}; // TODO: save prefixes to the object
+    const prefixes: any = {};
     await fetchQuads(
       url,
       (quad) => store.add(quad),
@@ -83,10 +83,9 @@ export class NanopubStore extends N3Store {
     store.prefixes = prefixes;
     store.extractGraphUris();
     await store.extractMetadata();
-    setStore(store, prefixes); // TODO maybe just return it
+    setStore(store, prefixes);
 
-    // TODO: we may also want to fetch and cache all external labels for all Terms, but asynchronously to avoid delaying page load
-    // This should fix the issue where labels are not displayed until elements refresh second time
+    return store;
   }
 
   /**

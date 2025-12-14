@@ -2,27 +2,35 @@ import { DataFactory } from "n3";
 import z from "zod";
 import { FieldConfig } from "./formedible/types";
 import { NanopubStore } from "./nanopub-store";
-import { extractSubjectProps, extractSubjectsFiltered, NS } from "./rdf";
+import {
+  extractSubjectProps,
+  extractSubjectsFiltered,
+  fetchQuads,
+  NS,
+} from "./rdf";
+import { getUriEnd } from "./utils";
 
 const { namedNode } = DataFactory;
 
 // Template placeholder types
 // Get these from https://w3id.org/np/o/ntemplate/
+// NOTE: some templates use https://w3id.org/np/o/ntemplate/latest/PlaceholderType, others do not have /latest/ in the path
 export enum PlaceholderType {
-  GUIDED_CHOICE = "https://w3id.org/np/o/ntemplate/latest/GuidedChoicePlaceholder",
-  LITERAL = "https://w3id.org/np/o/ntemplate/latest/LiteralPlaceholder",
-  LONG_LITERAL = "https://w3id.org/np/o/ntemplate/latest/LongLiteralPlaceholder",
-  PLACEHOLDER = "https://w3id.org/np/o/ntemplate/latest/Placeholder",
-  RESTRICTED_CHOICE = "https://w3id.org/np/o/ntemplate/latest/RestrictedChoicePlaceholder",
-  SEQUENCE_ELEMENT = "https://w3id.org/np/o/ntemplate/latest/SequenceElementPlaceholder",
-  TRUSTY_URI = "https://w3id.org/np/o/ntemplate/latest/TrustyUriPlaceholder",
-  URI = "https://w3id.org/np/o/ntemplate/latest/UriPlaceholder",
-  VALUE = "https://w3id.org/np/o/ntemplate/latest/ValuePlaceholder",
-  REPEATABLE_STATEMENT = "https://w3id.org/np/o/ntemplate/latest/RepeatableStatement",
+  GUIDED_CHOICE = "GuidedChoicePlaceholder",
+  LITERAL = "LiteralPlaceholder",
+  LONG_LITERAL = "LongLiteralPlaceholder",
+  RESTRICTED_CHOICE = "RestrictedChoicePlaceholder",
+  SEQUENCE_ELEMENT = "SequenceElementPlaceholder",
+  TRUSTY_URI = "TrustyUriPlaceholder",
+  URI = "UriPlaceholder",
+  VALUE = "ValuePlaceholder",
+  REPEATABLE_STATEMENT = "RepeatableStatement",
 
-  //TODO: these dont seem to exist even though they are used in many templates?
-  EXTERNAL_URI = "https://w3id.org/np/o/ntemplate/ExternalUriPlaceholder",
-  TEXT_PLACEHOLDER = "TextPlaceholder",
+  PLACEHOLDER = "Placeholder", // The super class, don't use this
+
+  //TODO: these dont seem to exist anymore even though they are used in many older templates?
+  EXTERNAL_URI = "ExternalUriPlaceholder", // -> map to URI
+  TEXT_PLACEHOLDER = "TextPlaceholder", // -> map to LITERAL
 }
 
 // Template field definition
@@ -32,7 +40,7 @@ export interface TemplateField {
   type: string;
   required?: boolean;
   description?: string;
-  options?: string[]; // For restricted choice placeholders
+  options?: { name: string; description: string; uri?: string }[]; // For restricted choice placeholders
   placeholder?: string;
   multiple?: boolean; // For repeatable statements
   regex?: string; // For zod validation
@@ -54,7 +62,7 @@ function getPlaceholderType(typeUri: string): PlaceholderType {
   if (typeUri.includes("RepeatableStatement")) {
     return PlaceholderType.REPEATABLE_STATEMENT;
   }
-  return PlaceholderType.TEXT_PLACEHOLDER; // Default
+  return PlaceholderType.LITERAL; // Default
 }
 
 type Statement = {
@@ -72,30 +80,41 @@ export class NanopubTemplate extends NanopubStore {
   description: string = "-";
   fields: TemplateField[] = [];
   statements: Statements = new Map();
+  type: "Assertion" | "Provenance" | "Pubinfo" | "Unlisted" | "Nanopub" =
+    "Nanopub";
 
   static async load(
     url: string,
     setStore: (store: NanopubTemplate, prefixes?: any) => void,
   ) {
     // Call the NanopubStore super-class load() then re-cast as NanopubTemplate and call template-specific init functions
-    const setTemplate = (store: NanopubStore, prefixes?: any) => {
+    const setTemplate = async (store: NanopubStore, prefixes?: any) => {
       const template = Object.assign(
         new NanopubTemplate(),
         store,
       ) as NanopubTemplate;
 
-      // Perofmr initialization specific to Templates
-      template.extractFields();
+      // Perform initialization specific to Templates
+      await template.extractFields();
 
       setStore(template, prefixes);
     };
-    await super.load(url, setTemplate);
+    return await super.load(url, setTemplate);
+  }
+
+  /**
+   * Generate a nanopub using this template and the specified values for placeholders
+   *
+   * TODO: currently currently hardcoded to produce example nanopubs for testing only
+   */
+  applyTemplate(fields: any) {
+    // TODO:
   }
 
   /**
    * Afer loading a nanopub template, extract its fields
    */
-  extractFields() {
+  async extractFields() {
     const fields: TemplateField[] = [];
 
     // ---- 1. Get the main properties of the template
@@ -170,11 +189,11 @@ export class NanopubTemplate extends NanopubStore {
     );
 
     // ---- 4. match up properties of statements to contained placeholders
-    placeholders.forEach((pv, pk) => {
+    for (const [pk, pv] of placeholders) {
       // Check whether required/optional
       // It's optional if it appears only in optional statements and doesn't appear in any non-optional statements
       const required = Object.values(statements).some(
-        (q) =>
+        (q: Statement) =>
           q.object === pk &&
           q.types?.includes(
             "https://w3id.org/np/o/ntemplate/OptionalStatement",
@@ -185,10 +204,7 @@ export class NanopubTemplate extends NanopubStore {
 
       // TODO: Check whether repeatable
       // It's repeatable if its part of a repeatable statement
-      // if multiple placeholders are part of the same statement, they should be grouped together when part of the multiple
-
-      // TODO: Check whether it's a multichoice
-      // It's repeatable if its part of a repeatable statement
+      // if multiple placeholders are part of the same statement, they should be grouped together when part of the multiple or just follow statements?
 
       // // Check if it's part of a repeatable statement
       // const repeatableQuad = assertionQuads.find(
@@ -203,34 +219,37 @@ export class NanopubTemplate extends NanopubStore {
       //     ),
       // );
 
-      // // Get options for restricted choice placeholders
-      // let options: string[] | undefined;
-      // if (fieldType === PlaceholderType.RESTRICTED_CHOICE) {
-      //   const possibleValuesQuad = assertionQuads.find(
-      //     (quad) =>
-      //       quad.subject.equals(g.subject) &&
-      //       quad.predicate.equals(NS.NPT("possibleValuesFrom")),
-      //   );
+      // Get options for restricted choice placeholders
+      const options: { name: string; description: string; uri?: string }[] = [];
 
-      //   if (possibleValuesQuad) {
-      //     // For now, we'll store the URI and fetch it separately if needed
-      //     // In a real implementation, you might want to fetch the options
-      //     options = [];
-      //   }
-      // }
+      if (pv.possibleValuesFrom) {
+        // TODO: multiple fields might use the same possibleValues, better to cache this
+        await fetchQuads(pv.possibleValuesFrom, (q) => {
+          if (
+            q.predicate.equals(NS.RDFS("label")) &&
+            getUriEnd(q.graph.value) === "assertion"
+          ) {
+            options.push({
+              name: q.subject.value,
+              description: q.object.value,
+              uri: q.subject.value, // TODO: is there any point if name is the same?
+            });
+          }
+        });
+      }
 
       fields.push({
         id: pk,
         label: pv.name,
-        type: pv.type,
+        type: getUriEnd(pv.type) ?? pv.type,
         description: pv.description,
         regex: pv.hasRegex,
-        // options,
+        options: options?.length > 0 ? options : undefined,
         // multiple: !!repeatableQuad,
-        required, // Most placeholders are required by default
+        required, // Placeholders are required by default
         // placeholder: `Enter ${label.toLowerCase()}`,
       });
-    });
+    }
     this.fields = fields;
     this.statements = statements;
     this.description = description;
@@ -255,16 +274,20 @@ export function templateFieldsToFormedible(
 
     // Add type-specific configurations
     switch (field.type) {
+      case PlaceholderType.URI:
       case PlaceholderType.EXTERNAL_URI:
+      case PlaceholderType.TRUSTY_URI:
         baseField.type = "url";
-        baseField.placeholder = "https://doi.org/10... or other URL";
+        baseField.placeholder = "https://... or other URL";
         break;
 
       case PlaceholderType.RESTRICTED_CHOICE:
         baseField.type = "combobox";
         baseField.options =
-          field.options?.map((option) => ({ value: option, label: option })) ||
-          [];
+          field.options?.map((option) => ({
+            value: option.name,
+            label: option.description,
+          })) || [];
         baseField.comboboxConfig = {
           searchable: true,
           placeholder: `Select ${field.label.toLowerCase()}...`,
@@ -273,6 +296,7 @@ export function templateFieldsToFormedible(
         break;
 
       case PlaceholderType.TEXT_PLACEHOLDER:
+      case PlaceholderType.LITERAL:
         baseField.type = "text";
         break;
 
@@ -287,6 +311,9 @@ export function templateFieldsToFormedible(
           removeButtonLabel: "Remove",
         };
         break;
+
+      default:
+        console.warn("Unknown Field Type: ", field);
     }
     return baseField;
   });
@@ -297,11 +324,14 @@ export function templateFieldsToFormedible(
  */
 function getFormedibleFieldType(placeholderType: PlaceholderType): string {
   switch (placeholderType) {
+    case PlaceholderType.URI:
     case PlaceholderType.EXTERNAL_URI:
+    case PlaceholderType.TRUSTY_URI:
       return "url";
     case PlaceholderType.RESTRICTED_CHOICE:
       return "combobox";
     case PlaceholderType.TEXT_PLACEHOLDER:
+    case PlaceholderType.LITERAL:
       return "text";
     case PlaceholderType.REPEATABLE_STATEMENT:
       return "array";
@@ -320,6 +350,7 @@ export function generateZodSchema(
 
   const regexString = (r?: string) =>
     r ? z.string().regex(RegExp(r)) : z.string();
+  const regexUrl = (r?: string) => (r ? z.url().regex(RegExp(r)) : z.url());
 
   for (const field of fields) {
     const fieldName = field.id.replace(/[^a-zA-Z0-9]/g, "_");
@@ -327,18 +358,25 @@ export function generateZodSchema(
 
     // Base schema based on type
     switch (field.type) {
+      case PlaceholderType.URI:
       case PlaceholderType.EXTERNAL_URI:
-        fieldSchema = regexString(field.regex).url("Must be a valid URL");
+        fieldSchema = regexUrl(field.regex);
+        break;
+
+      case PlaceholderType.TRUSTY_URI:
+        // TODO: for trusty URI, we should do additional validation
+        fieldSchema = regexUrl(field.regex);
         break;
 
       case PlaceholderType.RESTRICTED_CHOICE:
         fieldSchema = regexString(field.regex);
         if (field.options && field.options.length > 0) {
-          fieldSchema = z.enum(field.options as [string, ...string[]]);
+          fieldSchema = z.enum(field.options.map((o) => o.name));
         }
         break;
 
       case PlaceholderType.TEXT_PLACEHOLDER:
+      case PlaceholderType.LITERAL:
         fieldSchema = regexString(field.regex).min(1, "This field is required");
         break;
 
