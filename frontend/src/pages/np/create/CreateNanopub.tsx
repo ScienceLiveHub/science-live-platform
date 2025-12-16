@@ -17,6 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
 import { ChevronsUpDown, FilePlus } from "lucide-react";
 import { ComponentType, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -156,6 +157,7 @@ export default function CreateNanopub() {
   const [selected, setSelected] = useState("");
   const [inputUri, setInputUri] = useState("");
   const [activeUri, setActiveUri] = useState("");
+  const [isAdvancedMode, setIsAdvancedMode] = useState(false);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -211,18 +213,36 @@ export default function CreateNanopub() {
           <FilePlus className="mr-4" />
           CREATE NANOPUBLICATION
         </h1>
+        {selected && Comp && (
+          <div className="flex items-center gap-2">
+            <Label htmlFor="advanced-mode" className="text-sm font-medium">
+              Advanced Mode
+            </Label>
+            <Switch
+              id="advanced-mode"
+              checked={isAdvancedMode}
+              onCheckedChange={setIsAdvancedMode}
+            />
+          </div>
+        )}
       </div>
       <Card>
         <CardContent>
           {selected && Comp ? (
             <>
-              <div className="font-bold">
-                {POPULAR_TEMPLATES[selected].name}{" "}
-              </div>{" "}
-              <div className="my-6">
-                {POPULAR_TEMPLATES[selected].description}
-              </div>{" "}
-              <Comp />
+              {isAdvancedMode ? (
+                <AnyTemplate templateUri={selected} />
+              ) : (
+                <>
+                  <div className="font-bold">
+                    {POPULAR_TEMPLATES[selected].name}{" "}
+                  </div>{" "}
+                  <div className="my-6">
+                    {POPULAR_TEMPLATES[selected].description}
+                  </div>{" "}
+                  <Comp />
+                </>
+              )}
             </>
           ) : activeUri ? (
             <>
