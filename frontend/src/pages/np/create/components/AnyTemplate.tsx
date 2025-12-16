@@ -17,6 +17,7 @@ export default function AnyTemplate({ templateUri }: DynamicTemplateProps) {
   const [template, setTemplate] = useState<NanopubTemplate | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [generatedRdf, setGeneratedRdf] = useState<string>("");
 
   useEffect(() => {
     async function loadTemplate() {
@@ -53,6 +54,7 @@ export default function AnyTemplate({ templateUri }: DynamicTemplateProps) {
     schema,
     fields,
     submitLabel: "Publish",
+    resetOnSubmitSuccess: false,
     collapseLabel: "Hide",
     expandLabel: "Show",
     formOptions: {
@@ -78,10 +80,27 @@ export default function AnyTemplate({ templateUri }: DynamicTemplateProps) {
             : null,
         );
 
-        toast.info("This is only a Demo!", {
-          description:
-            "Dynamic template parsing works! Publishing features coming soon.",
-        });
+        try {
+          // Apply template to generate RDF
+          if (template) {
+            const rdfString = await template.applyTemplate(value, {
+              orcid: "0000-0000-0000-0000", // TODO: Get from user session
+              name: "Test User", // TODO: Get from user session
+            });
+            setGeneratedRdf(rdfString);
+            console.log("Generated RDF:", rdfString);
+
+            toast.success("Template applied successfully!", {
+              description: "RDF generated and displayed below.",
+            });
+          }
+        } catch (error) {
+          console.error("Error applying template:", error);
+          toast.error("Failed to apply template", {
+            description:
+              error instanceof Error ? error.message : "Unknown error",
+          });
+        }
       },
     },
   });
@@ -124,6 +143,19 @@ export default function AnyTemplate({ templateUri }: DynamicTemplateProps) {
       </div>
       {/* Dynamic form */}
       <Form />
+      {/* Generated RDF display */}
+      {generatedRdf && (
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold mb-4">
+            Generated RDF (TRIG format)
+          </h3>
+          <div className="bg-muted rounded-lg p-4">
+            <pre className="text-sm whitespace-pre-wrap overflow-x-auto max-h-96 overflow-y-auto">
+              <code>{generatedRdf}</code>
+            </pre>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
