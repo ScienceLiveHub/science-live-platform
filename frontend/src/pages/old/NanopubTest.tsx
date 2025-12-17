@@ -56,7 +56,7 @@ export function NanopubTest() {
                 marginBottom: "2rem",
               }}
             >
-              🚀 Load Sample Nanopub
+              🔃 Load Sample Nanopub
             </button>
 
             <div style={{ marginTop: "2rem" }}>

@@ -4,7 +4,7 @@ import { getUriEnd, isDoiUri, isNanopubUri } from "./utils";
 
 const { namedNode } = DataFactory;
 const { isNamedNode } = Util;
-const { RDF, RDFS, XSD, NP, NPT, DCT, PROV, FOAF } = NS;
+const { RDF, RDFS, XSD, NP, NPT, NPX, DCT, PROV, FOAF } = NS;
 
 type GraphUris = {
   head?: string;
@@ -16,6 +16,7 @@ type GraphUris = {
 export type Metadata = {
   created?: string | null;
   creators?: { name: string; href?: string }[];
+  types?: { name: string; href?: string }[];
   title?: string | null;
   assertionSubjects?: any[];
   license?: string;
@@ -73,7 +74,7 @@ export class NanopubStore extends N3Store {
     setStore: (store: NanopubStore, prefixes?: any) => void,
   ) {
     const store = new NanopubStore();
-    const prefixes: any = {}; // TODO: save prefixes to the object
+    const prefixes: any = {};
     await fetchQuads(
       url,
       (quad) => store.add(quad),
@@ -82,10 +83,9 @@ export class NanopubStore extends N3Store {
     store.prefixes = prefixes;
     store.extractGraphUris();
     await store.extractMetadata();
-    setStore(store, prefixes); // TODO maybe just return it
+    setStore(store, prefixes);
 
-    // TODO: we may also want to fetch and cache all external labels for all Terms, but asynchronously to avoid delaying page load
-    // This should fix the issue where labels are not displayed until elements refresh second time
+    return store;
   }
 
   /**
@@ -252,6 +252,33 @@ export class NanopubStore extends N3Store {
       this.graphUris.provenance,
     ).map((q) => q.object.value);
 
+    // Find all applicable "types" "classes" and "tags" for this nanopub
+    const types: any = [];
+    this.match(
+      namedNode(this.graphUris.assertion!),
+      RDF("type"),
+      null,
+      namedNode(this.graphUris.assertion!),
+    ).forEach((q) => {
+      types.push({
+        name:
+          this.findInternalLabel(namedNode(q.object.value)) ?? q.object.value,
+        href: q.object.value,
+      });
+    });
+    this.match(
+      namedNode(this.prefixes["this"]),
+      NPX("hasNanopubType"),
+      null,
+      namedNode(this.graphUris.pubinfo!),
+    ).forEach((q) => {
+      types.push({
+        name:
+          this.findInternalLabel(namedNode(q.object.value)) ?? q.object.value,
+        href: q.object.value,
+      });
+    });
+
     const title =
       this.matchOnePredicate(DCT("title"), this.graphUris.pubinfo) ??
       this.matchOne(
@@ -279,6 +306,7 @@ export class NanopubStore extends N3Store {
     this.metadata = {
       created: createdLit?.object ? createdLit.object.value : null,
       creators: creators,
+      types: types,
       title: title?.object?.value || null,
       assertionSubjects: unique(assertionSubjects),
       license: license,

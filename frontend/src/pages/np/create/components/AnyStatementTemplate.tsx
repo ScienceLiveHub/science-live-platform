@@ -3,7 +3,7 @@ import { useFormedible } from "@/hooks/use-formedible";
 import {
   generateZodSchema,
   NanopubTemplate,
-  templateFieldsToFormedible,
+  templateStatementsToFormedible,
 } from "@/lib/nanopub-template";
 import parse from "html-react-parser";
 import { useEffect, useMemo, useState } from "react";
@@ -13,7 +13,9 @@ interface DynamicTemplateProps {
   templateUri: string;
 }
 
-export default function AnyTemplate({ templateUri }: DynamicTemplateProps) {
+export default function AnyStatementTemplate({
+  templateUri,
+}: DynamicTemplateProps) {
   const [template, setTemplate] = useState<NanopubTemplate | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +45,9 @@ export default function AnyTemplate({ templateUri }: DynamicTemplateProps) {
   }, [templateUri]);
 
   const fields = useMemo(() => {
-    return template ? templateFieldsToFormedible(template?.fields) : [];
+    return template
+      ? templateStatementsToFormedible(template?.fields, template?.statements)
+      : [];
   }, [template]);
 
   const schema = template
@@ -52,6 +56,7 @@ export default function AnyTemplate({ templateUri }: DynamicTemplateProps) {
 
   const { Form } = useFormedible({
     schema,
+    layout: { type: "grid", columns: 3 },
     fields,
     submitLabel: "Publish",
     resetOnSubmitSuccess: false,

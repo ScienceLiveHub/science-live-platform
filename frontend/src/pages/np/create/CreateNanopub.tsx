@@ -17,13 +17,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
 import { ChevronsUpDown, FilePlus } from "lucide-react";
-import { ComponentType, useState } from "react";
-import { useParams } from "react-router-dom";
+import { ComponentType, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import AIDASentence from "./components/AIDASentence";
 import AnnotateAPaperQuotation from "./components/AnnotateAPaperQuotation";
-import AnyTemplate from "./components/AnyTemplate";
+import AnyStatementTemplate from "./components/AnyStatementTemplate";
 import CitationWithCiTO from "./components/CitationWithCiTO";
 import CommentOnPaper from "./components/CommentOnPaper";
 import DocumentGeographicalCoverage from "./components/DocumentGeographicalCoverage";
@@ -154,24 +155,54 @@ export function Combobox({
 
 export default function CreateNanopub() {
   const [selected, setSelected] = useState("");
+  const [inputUri, setInputUri] = useState("");
+  const [activeUri, setActiveUri] = useState("");
+  const [isAdvancedMode, setIsAdvancedMode] = useState(false);
 
-  const params = useParams();
-  const templateUri = params.uri;
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [inputUri, setInputUri] = useState(templateUri || "");
-  const [activeUri, setActiveUri] = useState(templateUri || "");
+  useEffect(() => {
+    const templateUri = searchParams.get("template") || "";
+    if (!templateUri) {
+      // No template query param -> return to selection view
+      setSelected("");
+      setActiveUri("");
+      setInputUri("");
+      return;
+    }
+
+    if (POPULAR_TEMPLATES[templateUri]) {
+      // Predefined template selected via query param
+      setSelected(templateUri);
+      setActiveUri("");
+      setInputUri("");
+    } else {
+      // Custom template URI via query param
+      setSelected("");
+      setActiveUri(templateUri);
+      setInputUri(templateUri);
+    }
+  }, [searchParams]);
 
   const handleLoadTemplate = () => {
-    if (!inputUri.trim()) {
+    const uri = inputUri.trim();
+    if (!uri) {
       toast.error("Please enter a template URI");
       return;
     }
-    setActiveUri(inputUri.trim());
+    setSelected("");
+    setActiveUri(uri);
+    const next = new URLSearchParams(searchParams);
+    next.set("template", uri);
+    setSearchParams(next);
   };
   const reset = () => {
     setActiveUri("");
     setInputUri("");
     setSelected("");
+    const next = new URLSearchParams(searchParams);
+    next.delete("template");
+    setSearchParams(next);
   };
   const Comp = POPULAR_TEMPLATES[selected]?.component;
 
@@ -182,22 +213,40 @@ export default function CreateNanopub() {
           <FilePlus className="mr-4" />
           CREATE NANOPUBLICATION
         </h1>
+        {selected && Comp && (
+          <div className="flex items-center gap-2">
+            <Label htmlFor="advanced-mode" className="text-sm font-medium">
+              Advanced Mode
+            </Label>
+            <Switch
+              id="advanced-mode"
+              checked={isAdvancedMode}
+              onCheckedChange={setIsAdvancedMode}
+            />
+          </div>
+        )}
       </div>
       <Card>
         <CardContent>
           {selected && Comp ? (
             <>
-              <div className="font-bold">
-                {POPULAR_TEMPLATES[selected].name}{" "}
-              </div>{" "}
-              <div className="my-6">
-                {POPULAR_TEMPLATES[selected].description}
-              </div>{" "}
-              <Comp />
+              {isAdvancedMode ? (
+                <AnyStatementTemplate templateUri={selected} />
+              ) : (
+                <>
+                  <div className="font-bold">
+                    {POPULAR_TEMPLATES[selected].name}{" "}
+                  </div>{" "}
+                  <div className="my-6">
+                    {POPULAR_TEMPLATES[selected].description}
+                  </div>{" "}
+                  <Comp />
+                </>
+              )}
             </>
           ) : activeUri ? (
             <>
-              <AnyTemplate templateUri={activeUri} />
+              <AnyStatementTemplate templateUri={activeUri} />
             </>
           ) : (
             <>
@@ -210,7 +259,16 @@ export default function CreateNanopub() {
                   Use a predefined template:
                   <Badge variant="default">Recommended</Badge>
                 </Label>{" "}
-                <Combobox setSelection={setSelected} />
+                <Combobox
+                  setSelection={(value) => {
+                    setSelected(value);
+                    setActiveUri("");
+                    setInputUri("");
+                    const next = new URLSearchParams(searchParams);
+                    next.set("template", value);
+                    setSearchParams(next);
+                  }}
+                />
               </div>
               <div className="space-y-4">
                 <div>

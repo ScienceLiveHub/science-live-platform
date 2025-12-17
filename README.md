@@ -72,7 +72,7 @@ Science Live enables researchers to create FAIR (Findable, Accessible, Interoper
 
 Currently the `frontend` is a static SPA, with no SSR required, and client-side routing using react-router-dom. All dynamic content and data is pulled from the `api` which includes authentication and the database connection. This keeps the UX fast and responsive, as well as being easy to deploy as serverless without edge.
 
-## 🚀 Developer Quick Start
+## ⚡️ Developer Quick Start
 
 ### Prerequisites
 
