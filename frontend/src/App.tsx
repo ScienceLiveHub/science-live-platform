@@ -33,7 +33,6 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/np/" element={<ViewNanopub />} />
           <Route path="/np/demo" element={<Demo />} />
-          <Route path="/np/:uri" element={<ViewNanopub />} />
           <Route path="/np/create" element={<CreateNanopub />} />
           <Route path="/np/create/:uri" element={<CreateNanopub />} />
           <Route path="/test-nanopub" element={<NanopubTestPage />} />
