@@ -24,7 +24,7 @@ import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import AIDASentence from "./components/AIDASentence";
 import AnnotateAPaperQuotation from "./components/AnnotateAPaperQuotation";
-import AnyTemplate from "./components/AnyTemplate";
+import AnyStatementTemplate from "./components/AnyStatementTemplate";
 import CitationWithCiTO from "./components/CitationWithCiTO";
 import CommentOnPaper from "./components/CommentOnPaper";
 import DocumentGeographicalCoverage from "./components/DocumentGeographicalCoverage";
@@ -231,7 +231,7 @@ export default function CreateNanopub() {
           {selected && Comp ? (
             <>
               {isAdvancedMode ? (
-                <AnyTemplate templateUri={selected} />
+                <AnyStatementTemplate templateUri={selected} />
               ) : (
                 <>
                   <div className="font-bold">
@@ -246,7 +246,7 @@ export default function CreateNanopub() {
             </>
           ) : activeUri ? (
             <>
-              <AnyTemplate templateUri={activeUri} />
+              <AnyStatementTemplate templateUri={activeUri} />
             </>
           ) : (
             <>

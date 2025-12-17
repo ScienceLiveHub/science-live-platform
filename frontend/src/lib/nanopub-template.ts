@@ -1,3 +1,4 @@
+import { FieldWrapper } from "@/components/formedible/fields/base-field-wrapper";
 import * as RDFT from "@rdfjs/types";
 import { DataFactory, Store, Writer } from "n3";
 import z from "zod";
@@ -68,6 +69,7 @@ function getPlaceholderType(typeUri: string): PlaceholderType {
 }
 
 type Statement = {
+  id: string;
   types?: string[];
   subject: string;
   predicate: string;
@@ -486,6 +488,56 @@ export class NanopubTemplate extends NanopubStore {
 }
 
 /**
+ * Add type-specific configuration from TemplateField to baseField
+ */
+function applyTypeSpecificFieldConfig(
+  field: TemplateField,
+  baseField: FieldConfig,
+) {
+  switch (field.type) {
+    case PlaceholderType.URI:
+    case PlaceholderType.EXTERNAL_URI:
+    case PlaceholderType.TRUSTY_URI:
+      baseField.type = "url";
+      baseField.placeholder = "https://... or other URL";
+      break;
+
+    case PlaceholderType.RESTRICTED_CHOICE:
+      baseField.type = "combobox";
+      baseField.options =
+        field.options?.map((option) => ({
+          value: option.name,
+          label: option.description,
+        })) || [];
+      baseField.comboboxConfig = {
+        searchable: true,
+        placeholder: `Select ${field.label.toLowerCase()}...`,
+        noOptionsText: "No options available",
+      };
+      break;
+
+    case PlaceholderType.TEXT_PLACEHOLDER:
+    case PlaceholderType.LITERAL:
+      baseField.type = "text";
+      break;
+
+    case PlaceholderType.REPEATABLE_STATEMENT:
+      baseField.type = "array";
+      baseField.arrayConfig = {
+        itemType: "text",
+        itemLabel: field.label,
+        itemPlaceholder: field.placeholder,
+        minItems: field.required ? 1 : 0,
+        addButtonLabel: `Add ${field.label}`,
+        removeButtonLabel: "Remove",
+      };
+      break;
+
+    default:
+      console.warn("Unknown Field Type: ", field);
+  }
+}
+/**
  * Convert template fields to Formedible field configurations
  */
 export function templateFieldsToFormedible(
@@ -501,51 +553,60 @@ export function templateFieldsToFormedible(
       required: field.required,
     };
 
-    // Add type-specific configurations
-    switch (field.type) {
-      case PlaceholderType.URI:
-      case PlaceholderType.EXTERNAL_URI:
-      case PlaceholderType.TRUSTY_URI:
-        baseField.type = "url";
-        baseField.placeholder = "https://... or other URL";
-        break;
-
-      case PlaceholderType.RESTRICTED_CHOICE:
-        baseField.type = "combobox";
-        baseField.options =
-          field.options?.map((option) => ({
-            value: option.name,
-            label: option.description,
-          })) || [];
-        baseField.comboboxConfig = {
-          searchable: true,
-          placeholder: `Select ${field.label.toLowerCase()}...`,
-          noOptionsText: "No options available",
-        };
-        break;
-
-      case PlaceholderType.TEXT_PLACEHOLDER:
-      case PlaceholderType.LITERAL:
-        baseField.type = "text";
-        break;
-
-      case PlaceholderType.REPEATABLE_STATEMENT:
-        baseField.type = "array";
-        baseField.arrayConfig = {
-          itemType: "text",
-          itemLabel: field.label,
-          itemPlaceholder: field.placeholder,
-          minItems: field.required ? 1 : 0,
-          addButtonLabel: `Add ${field.label}`,
-          removeButtonLabel: "Remove",
-        };
-        break;
-
-      default:
-        console.warn("Unknown Field Type: ", field);
-    }
+    applyTypeSpecificFieldConfig(field, baseField);
     return baseField;
   });
+}
+
+/**
+ * Convert template statements to Formedible field configurations
+ *
+ * This is an alternative to to the above templateFieldsToFormedible() which presents
+ * all the template output statements in a complete form.
+ */
+export function templateStatementsToFormedible(
+  fields: TemplateField[],
+  statements: Statements,
+): FieldConfig[] {
+  // Go through each statement, create a dynamic field where
+
+  const fieldConfig: FieldConfig[] = [];
+
+  for (const [k, s] of statements.entries()) {
+    const statement = s as Statement;
+
+    const makeFieldFrom = (part: "subject" | "predicate" | "object") => {
+      const objectField = fields.find((f) => f.id === statement[part]);
+      let baseField: FieldConfig;
+      if (objectField) {
+        baseField = {
+          name: objectField.id.replace(/[^a-zA-Z0-9]/g, "_"), // Sanitize name for form
+          type: getFormedibleFieldType(objectField.type as PlaceholderType),
+          label: objectField.label,
+          placeholder: objectField.placeholder,
+          description: objectField.description,
+          required: objectField.required,
+          section: { title: `Statement ${getUriEnd(k)}` },
+        };
+        applyTypeSpecificFieldConfig(objectField, baseField);
+      } else {
+        baseField = {
+          name: getUriEnd(statement[part])!,
+          type: "help", // Should be static text/label
+          label: getUriEnd(statement[part])!,
+          required: false,
+          section: { title: `Statement ${getUriEnd(k)}` },
+          component: FieldWrapper,
+        };
+      }
+      return baseField;
+    };
+    fieldConfig.push(makeFieldFrom("subject"));
+    fieldConfig.push(makeFieldFrom("predicate"));
+    fieldConfig.push(makeFieldFrom("object"));
+  }
+
+  return fieldConfig;
 }
 
 /**
