@@ -8,6 +8,13 @@
       "when": 1762329684264,
       "tag": "0000_shiny_the_hunter",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1766028876642,
+      "tag": "0001_smart_mercury",
+      "breakpoints": true
     }
   ]
 }

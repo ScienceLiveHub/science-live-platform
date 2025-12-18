@@ -1,5 +1,6 @@
 import { createDb } from "@/db";
-import * as authSchema from "@/db/schema/user_auth";
+import { organizationSchema } from "@/db/schema/organization";
+import * as authSchema from "@/db/schema/user";
 import { sendEmail } from "@/email";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
@@ -7,6 +8,7 @@ import {
   createAuthEndpoint,
   createAuthMiddleware,
   openAPI,
+  organization,
 } from "better-auth/plugins";
 import { builtInProviders } from "./built-in-providers";
 import { customProviders } from "./custom-providers";
@@ -126,7 +128,12 @@ export const getAuth = (env: Env) => {
         enabled: true,
       },
     },
-    plugins: [openAPI(), customProviders(env), getSocialProviders()],
+    plugins: [
+      openAPI(),
+      customProviders(env),
+      getSocialProviders(),
+      organization(),
+    ],
     account: {
       accountLinking: {
         // TODO: consider always requiring explicit login to link OIDC accounts if `allowDifferentEmails: true`.
@@ -144,7 +151,7 @@ export const getAuth = (env: Env) => {
     trustedOrigins: formatAllowedOrigins(env),
     database: drizzleAdapter(db as any, {
       provider: "pg",
-      schema: authSchema,
+      schema: { ...authSchema, ...organizationSchema },
     }),
   });
 };

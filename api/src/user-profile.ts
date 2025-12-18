@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { createDb } from "./db";
-import { account, user } from "./db/schema/user_auth";
+import { account, user } from "./db/schema/user";
 
 const app = new Hono<{ Bindings: Env }>();
 
