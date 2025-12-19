@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Navbar01 } from "./components/ui/shadcn-io/navbar-01";
 import { Toaster } from "./components/ui/sonner";
+import AcceptInvitation from "./pages/AcceptInvitation";
 import AccountSettings from "./pages/AccountSettings";
 import AuthPage from "./pages/AuthPage";
 import Demo from "./pages/Demo";
@@ -12,6 +13,7 @@ import { NanopubTest } from "./pages/old/NanopubTest";
 import NanopubTestPage from "./pages/old/NanopubTestPage";
 import { RealNanopubTest } from "./pages/old/RealNanopubTest";
 import { TestNanopubViewer } from "./pages/old/TestNanopubViewer";
+import OrganizationSettings from "./pages/OrganizationSettings";
 import UserProfile from "./pages/UserProfile";
 import { Providers } from "./providers";
 
@@ -28,6 +30,12 @@ function App() {
           <Route path="/account/:pathname" element={<AccountSettings />} />
           <Route path="/user/:userId" element={<UserProfile />} />
           <Route path="/profile" element={<UserProfile />} />
+
+          <Route
+            path="/organization/:pathname"
+            element={<OrganizationSettings />}
+          />
+          <Route path="/accept-invitation" element={<AcceptInvitation />} />
 
           {/* Main Pages - For Demo/Production */}
           <Route path="/" element={<HomePage />} />

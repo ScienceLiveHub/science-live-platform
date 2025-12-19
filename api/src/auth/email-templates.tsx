@@ -1,4 +1,25 @@
-import { EmailTemplate } from "@daveyplate/better-auth-ui/server";
+import { EmailTemplate } from "better-auth-ui/server";
+
+export const orgInviteEmailTemplate = (
+  name: string,
+  baseUrl: string,
+  link: string,
+) =>
+  EmailTemplate({
+    imageUrl: `${baseUrl}/sciencelive-logo-small.webp`,
+    action: "Organization Invitation",
+    content: (
+      <>
+        <p>{`Hello ${name},`}</p>
+        <p>Click the button below to view the invitation.</p>
+      </>
+    ),
+    heading: "Organization Invitation",
+    siteName: "Science Live Platform",
+    baseUrl: baseUrl,
+    url: link,
+    classNames: { button: "bg-pink-500" }, //TODO: not sure these tailwind styles work in the email
+  });
 
 export const verifyEmailTemplate = (
   name: string,
