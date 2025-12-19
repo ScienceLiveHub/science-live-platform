@@ -36,8 +36,8 @@ export function generateCitation(
   const npId = uri.split("/").pop();
 
   const formats = {
-    apa: `${author}. (${year}). <em>${title}</em> [Nanopublication]. ${uri}`,
-    mla: `${author}. "${title}." <em>Nanopublication</em>, ${year}, ${uri}.`,
+    apa: `${author}. (${year}). ${title} [Nanopublication]. ${uri}`,
+    mla: `${author}. "${title}." Nanopublication, ${year}, ${uri}.`,
     chicago: `${author}. "${title}." Nanopublication. ${year}. ${uri}.`,
     bibtex: `@misc{nanopub_${npId},
   author = {${author}},
@@ -99,7 +99,11 @@ export function Citation({ data }: { data?: Metadata }) {
           />
         )}
       </SnippetHeader>
-      <SnippetTabsContent key={selectedCite} value={selectedCite}>
+      <SnippetTabsContent
+        key={selectedCite}
+        value={selectedCite}
+        className="whitespace-normal wrap-break-word"
+      >
         {generateCitation(data, selectedCite)}
       </SnippetTabsContent>
     </Snippet>

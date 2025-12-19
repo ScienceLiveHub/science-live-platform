@@ -83,6 +83,10 @@ export const getAuth = (env: Env) => {
       typeof env.BETTER_AUTH_SECRET === "string"
         ? env.BETTER_AUTH_SECRET
         : undefined,
+    telemetry: {
+      // Already disabled by default but explicitly set it just in case it changes in future
+      enabled: false,
+    },
     socialProviders: builtInProviders(env),
     emailAndPassword: {
       enabled: true,
