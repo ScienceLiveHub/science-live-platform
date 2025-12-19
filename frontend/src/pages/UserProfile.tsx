@@ -27,6 +27,12 @@ interface UserProfileData {
   createdAt: string;
   orcidConnected: boolean;
   orcidId: string | null;
+  organizations: {
+    id: string;
+    name: string;
+    slug: string;
+    logo: string;
+  }[];
   latestContent?: any[];
 }
 
@@ -35,7 +41,6 @@ export default function UserProfile() {
   const [profile, setProfile] = useState<UserProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { data: organizations } = authClient.useListOrganizations();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -237,7 +242,7 @@ export default function UserProfile() {
             <div>
               <h3 className="text-lg font-semibold mb-3">Organizations</h3>
               <div className="flex-col">
-                {organizations?.map((org) => (
+                {profile.organizations?.map((org) => (
                   <>
                     <div className="flex items-center gap-4 m-4">
                       <Avatar className="h-12 w-12">
