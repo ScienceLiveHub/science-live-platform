@@ -50,6 +50,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
           /*"github", "google"*/
         ],
       }}
+      organization={{
+        logo: true,
+      }}
       // Custom auth providers
       genericOAuth={{
         providers: [

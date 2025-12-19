@@ -27,6 +27,12 @@ interface UserProfileData {
   createdAt: string;
   orcidConnected: boolean;
   orcidId: string | null;
+  organizations: {
+    id: string;
+    name: string;
+    slug: string;
+    logo: string;
+  }[];
   latestContent?: any[];
 }
 
@@ -231,6 +237,34 @@ export default function UserProfile() {
                     ORCID Not Connected
                   </Badge>
                 )}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Organizations</h3>
+              <div className="flex-col">
+                {profile.organizations?.map((org) => (
+                  <>
+                    <div className="flex items-center gap-4 m-4">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage
+                          src={org.logo || undefined}
+                          alt={org.name}
+                        />
+                        <AvatarFallback className="text-lg">
+                          {getInitials(org.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h1 className="text-lg">{org.name}</h1>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {org.slug}
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                ))}
               </div>
             </div>
             <div>

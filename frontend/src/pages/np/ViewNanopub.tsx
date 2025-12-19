@@ -18,7 +18,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { shrinkUri, Statement } from "@/lib/rdf";
-import { parseURI as parseUri } from "@/lib/utils";
 import {
   Copy,
   Download,
@@ -31,7 +30,7 @@ import {
   UserCircle,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 /**
  * ViewNanopub
@@ -40,7 +39,6 @@ import { useParams } from "react-router-dom";
  * - Displays graphs (Head, Assertion, Provenance, PubInfo) and triples in a readable format
  *
  * Intended for generic viewing of any nanopub content.
- * TODO: If the nanopub uses a supported Science Live template, then it should render a template-specific view instead.
  */
 
 const MenuItem = ({
@@ -93,11 +91,11 @@ export function ShareMenu({ uri }: { uri: string }) {
 }
 
 export default function ViewNanopub() {
-  const params = useParams();
-  const uri = parseUri(params.uri);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const uri = searchParams.get("uri") || "";
 
   const [inputUri, setInputUri] = useState(uri);
-  const [currentUri, setCurrentUri] = useState(uri);
+  const [currentUri, setCurrentUri] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [store, setStore] = useState<NanopubStore | null>(null);
@@ -130,7 +128,6 @@ export default function ViewNanopub() {
 
     NanopubStore.load(newUri, (st: NanopubStore) => {
       setStore(st);
-      //TODO: update browser URL based on new URI
       setCurrentUri(newUri);
       setLoading(false);
     })
@@ -142,15 +139,23 @@ export default function ViewNanopub() {
       .finally(() => setLoading(false));
   };
 
+  const handleLoadClick = () => {
+    if (!inputUri) return;
+
+    // Just update the browsers URL with the new URI when user clicks Load button
+    // This will in turn trigger the useEffect hook which calls loadNanopubUri
+    const next = new URLSearchParams(searchParams);
+    next.set("uri", inputUri);
+    setSearchParams(next);
+  };
+
   useEffect(() => {
-    // Auto-load default on mount
-    // Note in dev (<Strict> mode) this gets called twice, which is a "feature" not a bug
-    // React does this deliberately to detect any unintended side effects or state mutations.
-    // Devs should always ensure calling it multiple times does not change the page.
-    if (inputUri) {
-      loadNanopubUri(inputUri);
+    // Auto-load when URI changes from URL (browser navigation)
+    if (uri && uri !== currentUri) {
+      loadNanopubUri(uri);
+      setInputUri(uri);
     }
-  }, []);
+  }, [uri, currentUri]);
 
   // otherGraphs should always be empty if its a valid nanopublication, but keep it as a backstop for anomolies
   const otherGraphs = useMemo(() => {
@@ -189,7 +194,7 @@ export default function ViewNanopub() {
           <Button
             className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
             disabled={loading}
-            onClick={() => loadNanopubUri(inputUri)}
+            onClick={handleLoadClick}
           >
             Load
           </Button>

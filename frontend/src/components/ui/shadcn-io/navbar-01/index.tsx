@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/popover";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import { UserButton } from "@daveyplate/better-auth-ui";
+import { OrganizationSwitcher, UserButton } from "@daveyplate/better-auth-ui";
 import { UserCircle } from "lucide-react";
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
@@ -118,6 +118,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
 
     const [isMobile, setIsMobile] = useState(false);
     const containerRef = useRef<HTMLElement>(null);
+    const { data: orgList } = authClient.useListOrganizations();
 
     useEffect(() => {
       const checkWidth = () => {
@@ -266,29 +267,40 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                 Sign In
               </Button>
             ) : (
-              <UserButton
-                size="sm"
-                additionalLinks={[
-                  {
-                    href: "/profile",
-                    icon: <UserCircle />,
-                    label: "Profile",
-                    signedIn: true,
-                  },
-                ]}
-              />
+              <>
+                {!!orgList?.length && (
+                  <OrganizationSwitcher
+                    classNames={{
+                      base: "bg-accent",
+                      trigger: {
+                        base: "bg-muted",
+                        organization: {
+                          subtitle: "hidden",
+                          avatar: { base: "size-6 my-0" },
+                        },
+                        user: { title: "hidden", avatar: { base: "hidden" } },
+                      },
+                      content: {
+                        menuItem: "hidden",
+                        separator: "hidden",
+                      },
+                    }}
+                  />
+                )}
+                <UserButton
+                  size="sm"
+                  additionalLinks={[
+                    {
+                      href: "/profile",
+                      icon: <UserCircle />,
+                      label: "Profile",
+                      signedIn: true,
+                    },
+                  ]}
+                />
+              </>
             )}
-            {/* <Button
-              size="sm"
-              className="text-sm font-medium px-4 h-9 rounded-md shadow-sm"
-              onClick={(e) => {
-                e.preventDefault();
-                if (onCtaClick) onCtaClick();
-              }}
-            >
-              {ctaText}
-            </Button> */}
-            <ModeToggle></ModeToggle>
+            <ModeToggle />
           </div>
         </div>
       </header>

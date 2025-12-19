@@ -30,6 +30,8 @@ export const session = pgTable("session", {
   userAgent: text(),
   createdAt: timestamp().notNull(),
   updatedAt: timestamp().notNull(),
+  activeOrganizationId: text(), // Active organization context
+  activeTeamId: text(), // Active team context
 });
 
 export const account = pgTable("account", {

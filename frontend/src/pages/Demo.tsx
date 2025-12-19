@@ -48,7 +48,7 @@ export default function Demo() {
               className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
               onClick={(e) => {
                 e.preventDefault();
-                navigate("/np/" + encodeURIComponent(inputUri));
+                navigate("/np/?uri=" + encodeURIComponent(inputUri));
               }}
             >
               Load
@@ -60,7 +60,9 @@ export default function Demo() {
               <li className="flex items-start gap-2">
                 <FileCode className="h-4 w-4 mt-1 text-purple-600 dark:text-purple-400" />
                 <NavLink
-                  to={"/np/RA6Cz33icPZrBAummwxw6MwdS-RepX-sUjW_fZz905Rvc"}
+                  to={
+                    "/np/?uri=https://w3id.org/np/RA6Cz33icPZrBAummwxw6MwdS-RepX-sUjW_fZz905Rvc"
+                  }
                   className="text-purple-600 dark:text-purple-400 hover:underline"
                 >
                   Quoting or commenting on a paper
@@ -69,7 +71,7 @@ export default function Demo() {
               <li className="flex items-start gap-2">
                 <FileCode className="h-4 w-4 mt-1 text-purple-600 dark:text-purple-400" />
                 <NavLink
-                  to="/np/RAuoXvJWbbzZsFslswYaajgjeEl-040X6SCQFXHfVtjf0#Garfield"
+                  to="/np/?uri=https://w3id.org/np/RAuoXvJWbbzZsFslswYaajgjeEl-040X6SCQFXHfVtjf0#Garfield"
                   className="text-purple-600 dark:text-purple-400 hover:underline"
                 >
                   Defining a subject: Garfield
@@ -78,7 +80,7 @@ export default function Demo() {
               <li className="flex items-start gap-2">
                 <FileCode className="h-4 w-4 mt-1 text-purple-600 dark:text-purple-400" />
                 <NavLink
-                  to="/np/RAZMzeEoutrEi1xEpf5XSrSpMnvwTONYzMat5TkIqUWY8"
+                  to="/np/?uri=https://w3id.org/np/RAZMzeEoutrEi1xEpf5XSrSpMnvwTONYzMat5TkIqUWY8"
                   className="text-purple-600 dark:text-purple-400 hover:underline"
                 >
                   Stating a fact about a subject: Garfield is a fictional

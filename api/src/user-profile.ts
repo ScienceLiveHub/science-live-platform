@@ -1,7 +1,8 @@
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { createDb } from "./db";
-import { account, user } from "./db/schema/user_auth";
+import { member, organization } from "./db/schema/organization";
+import { account, user } from "./db/schema/user";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -45,6 +46,20 @@ app.get("/:userId", async (c) => {
 
     const orcidConnected = orcidAccount.length > 0;
 
+    // Fetch organizations the user is a member of
+    const userOrganizations = await db
+      .select({
+        id: organization.id,
+        name: organization.name,
+        slug: organization.slug,
+        logo: organization.logo,
+        // membershipCreatedAt: member.createdAt,
+        // role: member.role,
+      })
+      .from(member)
+      .innerJoin(organization, eq(member.organizationId, organization.id))
+      .where(eq(member.userId, userId));
+
     const userProfile = {
       id: userData[0].id,
       name: userData[0].name,
@@ -53,6 +68,14 @@ app.get("/:userId", async (c) => {
       createdAt: userData[0].createdAt,
       orcidConnected,
       orcidId: orcidConnected ? orcidAccount[0].accountId : null,
+      organizations: userOrganizations.map((org) => ({
+        id: org.id,
+        name: org.name,
+        slug: org.slug,
+        logo: org.logo,
+        // membershipCreatedAt: org.membershipCreatedAt,
+        // role: org.role,
+      })),
     };
 
     return c.json(userProfile);
