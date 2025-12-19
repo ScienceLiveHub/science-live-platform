@@ -69,10 +69,7 @@ export class NanopubStore extends N3Store {
    * (Technically this will load any RDF given a URL, not just nanopubs)
    *
    */
-  static async load(
-    url: string,
-    setStore: (store: NanopubStore, prefixes?: any) => void,
-  ) {
+  static async load(url: string) {
     const store = new NanopubStore();
     const prefixes: any = {};
     await fetchQuads(
@@ -83,7 +80,6 @@ export class NanopubStore extends N3Store {
     store.prefixes = prefixes;
     store.extractGraphUris();
     await store.extractMetadata();
-    setStore(store, prefixes);
 
     return store;
   }

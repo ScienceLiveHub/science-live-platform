@@ -62,6 +62,9 @@ function getPlaceholderType(typeUri: string): PlaceholderType {
   if (typeUri.includes("TextPlaceholder")) {
     return PlaceholderType.TEXT_PLACEHOLDER;
   }
+  if (typeUri.includes("LongLiteralPlaceholder")) {
+    return PlaceholderType.LONG_LITERAL;
+  }
   if (typeUri.includes("RepeatableStatement")) {
     return PlaceholderType.REPEATABLE_STATEMENT;
   }
@@ -87,23 +90,17 @@ export class NanopubTemplate extends NanopubStore {
   type: "Assertion" | "Provenance" | "Pubinfo" | "Unlisted" | "Nanopub" =
     "Nanopub";
 
-  static async load(
-    url: string,
-    setStore: (store: NanopubTemplate, prefixes?: any) => void,
-  ) {
+  static async load(url: string) {
     // Call the NanopubStore super-class load() then re-cast as NanopubTemplate and call template-specific init functions
-    const setTemplate = async (store: NanopubStore, prefixes?: any) => {
-      const template = Object.assign(
-        new NanopubTemplate(),
-        store,
-      ) as NanopubTemplate;
+    const template = Object.assign(
+      new NanopubTemplate(),
+      await super.load(url),
+    ) as NanopubTemplate;
 
-      // Perform initialization specific to Templates
-      await template.extractFields();
+    // Perform initialization specific to Templates
+    await template.extractFields();
 
-      setStore(template, prefixes);
-    };
-    return await super.load(url, setTemplate);
+    return template;
   }
 
   /**
@@ -521,6 +518,10 @@ function applyTypeSpecificFieldConfig(
       baseField.type = "text";
       break;
 
+    case PlaceholderType.LONG_LITERAL:
+      baseField.type = "textarea";
+      break;
+
     case PlaceholderType.REPEATABLE_STATEMENT:
       baseField.type = "array";
       baseField.arrayConfig = {
@@ -623,6 +624,8 @@ function getFormedibleFieldType(placeholderType: PlaceholderType): string {
     case PlaceholderType.TEXT_PLACEHOLDER:
     case PlaceholderType.LITERAL:
       return "text";
+    case PlaceholderType.LONG_LITERAL:
+      return "textarea";
     case PlaceholderType.REPEATABLE_STATEMENT:
       return "array";
     default:
@@ -667,6 +670,7 @@ export function generateZodSchema(
 
       case PlaceholderType.TEXT_PLACEHOLDER:
       case PlaceholderType.LITERAL:
+      case PlaceholderType.LONG_LITERAL:
         fieldSchema = regexString(field.regex).min(1, "This field is required");
         break;
 

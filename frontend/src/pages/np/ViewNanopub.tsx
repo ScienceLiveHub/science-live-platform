@@ -126,11 +126,12 @@ export default function ViewNanopub() {
     setError(null);
     setLoading(true);
 
-    NanopubStore.load(newUri, (st: NanopubStore) => {
-      setStore(st);
-      setCurrentUri(newUri);
-      setLoading(false);
-    })
+    NanopubStore.load(newUri)
+      .then((store: NanopubStore) => {
+        setStore(store);
+        setCurrentUri(newUri);
+        setLoading(false);
+      })
       .catch((e: any) => {
         console.error("Failed to load/parse nanopublication:", e);
         setError(e?.message || "Failed to load/parse nanopublication.");
@@ -186,7 +187,7 @@ export default function ViewNanopub() {
         <div className="flex gap-2 w-full md:w-auto">
           <Input
             type="text"
-            className="flex-1 md:w-[520px]"
+            className="flex-1 md:w-130"
             placeholder="Enter URI e.g. https://w3id.org/np/... or http://purl.org/nanopub/..."
             value={inputUri}
             onChange={(e) => setInputUri(e.target.value)}

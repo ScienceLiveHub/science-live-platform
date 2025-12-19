@@ -17,19 +17,19 @@ export default function AnyStatementTemplate({
   templateUri,
 }: DynamicTemplateProps) {
   const [template, setTemplate] = useState<NanopubTemplate | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generatedRdf, setGeneratedRdf] = useState<string>("");
 
   useEffect(() => {
     async function loadTemplate() {
-      if (!templateUri) return;
+      if (!templateUri || loading) return;
 
       try {
         setLoading(true);
         setError(null);
 
-        await NanopubTemplate.load(templateUri, setTemplate);
+        setTemplate(await NanopubTemplate.load(templateUri));
       } catch (err) {
         console.error("Failed to load template:", err);
         setError(
