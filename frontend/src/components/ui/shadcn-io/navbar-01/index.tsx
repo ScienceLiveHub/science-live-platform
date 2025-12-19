@@ -268,7 +268,25 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
               </Button>
             ) : (
               <>
-                {!!orgList?.length && <OrganizationSwitcher size="default" />}
+                {!!orgList?.length && (
+                  <OrganizationSwitcher
+                    classNames={{
+                      base: "bg-accent",
+                      trigger: {
+                        base: "bg-muted",
+                        organization: {
+                          subtitle: "hidden",
+                          avatar: { base: "size-6 my-0" },
+                        },
+                        user: { title: "hidden", avatar: { base: "hidden" } },
+                      },
+                      content: {
+                        menuItem: "hidden",
+                        separator: "hidden",
+                      },
+                    }}
+                  />
+                )}
                 <UserButton
                   size="sm"
                   additionalLinks={[
