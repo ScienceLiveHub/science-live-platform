@@ -7,7 +7,7 @@ import { NanopubStore } from "./nanopub-store";
 import {
   extractSubjectProps,
   extractSubjectsFiltered,
-  fetchQuads,
+  fetchPossibleValuesFromQuads,
   NS,
 } from "./rdf";
 import { makeHash } from "./rdfhasher";
@@ -448,22 +448,10 @@ export class NanopubTemplate extends NanopubStore {
       // );
 
       // Get options for restricted choice placeholders
-      const options: { name: string; description: string; uri?: string }[] = [];
+      let options: { name: string; description: string; uri?: string }[] = [];
 
       if (pv.possibleValuesFrom) {
-        // TODO: multiple fields might use the same possibleValues, better to cache this
-        await fetchQuads(pv.possibleValuesFrom, (q) => {
-          if (
-            q.predicate.equals(NS.RDFS("label")) &&
-            getUriEnd(q.graph.value) === "assertion"
-          ) {
-            options.push({
-              name: q.subject.value,
-              description: q.object.value,
-              uri: q.subject.value, // TODO: is there any point if name is the same?
-            });
-          }
-        });
+        options = await fetchPossibleValuesFromQuads(pv.possibleValuesFrom);
       }
 
       fields.push({

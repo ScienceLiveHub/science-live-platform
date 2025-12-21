@@ -1,6 +1,7 @@
 import * as RDFT from "@rdfjs/types";
 import ky from "ky";
 import { DataFactory, NamedNode, Parser, Quad, Store, Term, Util } from "n3";
+import { getUriEnd } from "./utils";
 
 const { namedNode } = DataFactory;
 const { isNamedNode, isBlankNode: isBlank, isLiteral, prefix } = Util;
@@ -86,6 +87,28 @@ export async function fetchQuads(
       prefixCallback?.(prefix, prefixNode);
     },
   );
+}
+
+/**
+ * fetch a list of from a remote RDF document (e.g. values for a combobox or multi choice).
+ *
+ */
+export async function fetchPossibleValuesFromQuads(url: string) {
+  const options: { name: string; description: string; uri?: string }[] = [];
+
+  await fetchQuads(url, (q) => {
+    if (
+      q.predicate.equals(NS.RDFS("label")) &&
+      getUriEnd(q.graph.value) === "assertion"
+    ) {
+      options.push({
+        name: q.subject.value,
+        description: q.object.value,
+        uri: q.subject.value, // TODO: is there any point if name is the same?
+      });
+    }
+  });
+  return options;
 }
 
 // export type Store = N3Store;

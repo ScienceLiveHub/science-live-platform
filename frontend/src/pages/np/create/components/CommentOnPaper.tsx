@@ -1,14 +1,47 @@
 import { useFormedible } from "@/hooks/use-formedible";
+import { fetchPossibleValuesFromQuads } from "@/lib/rdf";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 
 export default function CommentOnPaper() {
+  const [options, setOptions] = useState<{ value: string; label: string }[]>(
+    [],
+  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadOptions = async () => {
+      try {
+        const fetchedOptions = await fetchPossibleValuesFromQuads(
+          "http://purl.org/np/RAJb-zZdFrNzgwxmMzFstFeKTZAJImhMGNL-IzEJY4kx8",
+        );
+
+        // Transform the fetched data to match the expected format
+        const transformedOptions = fetchedOptions.map((option) => ({
+          value: option.name,
+          label: option.description,
+        }));
+
+        setOptions(transformedOptions);
+        setLoading(false);
+      } catch (err) {
+        console.error("Failed to load comment types:", err);
+        setError("Failed to load comment types. Please try again.");
+        setLoading(false);
+      }
+    };
+
+    loadOptions();
+  }, []);
+
   /**
    * The Schema for types, validation, and error messages
    */
   const schema = z.object({
     citingDoi: z.string(),
-    type: z.enum(["agrees", "support", "sales"]),
+    type: z.string(),
     citedDoi: z.string(),
   });
 
@@ -29,24 +62,13 @@ export default function CommentOnPaper() {
         name: "type",
         type: "combobox",
         label: "How the comment relates to the paper",
-        options: [
-          {
-            value: "agrees",
-            label:
-              "Agrees with - agrees with statements, ideas or conclusions presented in the cited entity",
-          },
-          {
-            value: "support",
-            label:
-              "Cites as authority - cites as something that provides an authoritative description or definiton of the subject under discussion",
-          },
-          { value: "sales", label: "Sales Question" },
-        ],
+        options: options,
+        disabled: loading,
         comboboxConfig: {
           searchable: true,
-          placeholder: "Select subject...",
-          searchPlaceholder: "Search subjects...",
-          noOptionsText: "No subjects found.",
+          placeholder: loading ? "Loading..." : "Select comment type...",
+          searchPlaceholder: "Search comment types...",
+          noOptionsText: error || "No comment types found.",
         },
       },
       {
@@ -62,7 +84,7 @@ export default function CommentOnPaper() {
     formOptions: {
       defaultValues: {
         citingDoi: "",
-        type: "agrees" as const,
+        type: "",
         citedDoi: "",
       },
       onSubmit: async ({ value }) => {
