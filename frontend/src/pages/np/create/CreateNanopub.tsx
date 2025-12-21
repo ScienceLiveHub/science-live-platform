@@ -18,89 +18,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
+import { NanopubTemplate } from "@/lib/nanopub-template";
 import { ChevronsUpDown, FilePlus } from "lucide-react";
-import { ComponentType, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import AIDASentence from "./components/AIDASentence";
-import AnnotateAPaperQuotation from "./components/AnnotateAPaperQuotation";
 import AnyStatementTemplate from "./components/AnyStatementTemplate";
-import CitationWithCiTO from "./components/CitationWithCiTO";
-import CommentOnPaper from "./components/CommentOnPaper";
-import DocumentGeographicalCoverage from "./components/DocumentGeographicalCoverage";
-
-/**
- * Template definition
- */
-export interface NanopubTemplate {
-  uri: string; // Permanent nanopub URI
-  name: string; // Display name
-  description: string; // What this template is for
-  category: string; // Category for grouping
-  icon: string; // Emoji icon (optional)
-  recommended?: boolean; // Show in main menu
-  keywords?: string[]; // For search
-  component?: ComponentType;
-}
-
-/**
- * POPULAR TEMPLATES
- * These appear in the main template selector
- */
-export const POPULAR_TEMPLATES: Record<string, NanopubTemplate> = {
-  "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo": {
-    uri: "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo",
-    name: "Citation with CiTO",
-    description:
-      "Declare citations between papers using Citation Typing Ontology",
-    category: "Citation",
-    icon: "📚",
-    recommended: true,
-    keywords: ["citation", "cito", "reference", "cite"],
-    component: CitationWithCiTO,
-  },
-  "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU": {
-    uri: "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU",
-    name: "Annotate a paper quotation",
-    description: "Annotating a paper quotation with personal interpretation",
-    category: "Annotation",
-    icon: "❝❞",
-    recommended: true,
-    keywords: ["comment", "annotation", "quote", "interpretation"],
-    component: AnnotateAPaperQuotation,
-  },
-  "https://w3id.org/np/RAVEpTdLrX5XrhNl_gnvTaBcjRRSDu_hhZix8gu2HO7jI": {
-    uri: "https://w3id.org/np/RAVEpTdLrX5XrhNl_gnvTaBcjRRSDu_hhZix8gu2HO7jI",
-    name: "Comment on Paper",
-    description: "Add comments, quotes, or evaluations to papers",
-    category: "Annotation",
-    icon: "💬",
-    recommended: true,
-    keywords: ["comment", "annotation", "quote", "review"],
-    component: CommentOnPaper,
-  },
-  "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE": {
-    uri: "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE",
-    name: "AIDA Sentence",
-    description: "Make structured scientific claims following the AIDA model",
-    category: "Scientific",
-    icon: "🔬",
-    recommended: true,
-    keywords: ["aida", "claim", "assertion", "scientific"],
-    component: AIDASentence,
-  },
-  "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao": {
-    uri: "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao",
-    name: "Document geographical coverage",
-    description:
-      "Document the geographical area or region covered by a resercher paper, data, or study.",
-    category: "geographical coverage",
-    icon: "📝",
-    recommended: false,
-    keywords: ["statement", "general", "rdf", "triple"],
-    component: DocumentGeographicalCoverage,
-  },
-};
+import { POPULAR_TEMPLATES } from "./components/templates/registry";
 
 export function Combobox({
   setSelection,
@@ -158,6 +82,7 @@ export default function CreateNanopub() {
   const [inputUri, setInputUri] = useState("");
   const [activeUri, setActiveUri] = useState("");
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
+  const [generatedRdf, setGeneratedRdf] = useState<string>("");
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -206,6 +131,37 @@ export default function CreateNanopub() {
   };
   const Comp = POPULAR_TEMPLATES[selected]?.component;
 
+  const publishNanopub = async (data: any) => {
+    console.log("Data submitted:", data);
+    toast.info("This is only a Demo!", {
+      description: "Publishing features coming soon.",
+    });
+
+    let template: NanopubTemplate;
+    try {
+      template = await NanopubTemplate.load(selected);
+
+      // Apply template to generate RDF
+      if (template) {
+        const rdfString = await template.applyTemplate(data, {
+          orcid: "0000-0000-0000-0001", // TODO: Get from user session
+          name: "Test User", // TODO: Get from user session
+        });
+        setGeneratedRdf(rdfString);
+        console.log("Generated RDF:", rdfString);
+
+        toast.success("Template applied successfully!", {
+          description: "RDF generated and displayed below.",
+        });
+      }
+    } catch (error) {
+      console.error("Error applying template:", error);
+      toast.error("Failed to apply template", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  };
+
   return (
     <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-6xl">
       <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -231,7 +187,10 @@ export default function CreateNanopub() {
           {selected && Comp ? (
             <>
               {isAdvancedMode ? (
-                <AnyStatementTemplate templateUri={selected} />
+                <AnyStatementTemplate
+                  templateUri={selected}
+                  publish={publishNanopub}
+                />
               ) : (
                 <>
                   <div className="font-bold">
@@ -240,13 +199,16 @@ export default function CreateNanopub() {
                   <div className="my-6">
                     {POPULAR_TEMPLATES[selected].description}
                   </div>{" "}
-                  <Comp />
+                  <Comp publish={publishNanopub} />
                 </>
               )}
             </>
           ) : activeUri ? (
             <>
-              <AnyStatementTemplate templateUri={activeUri} />
+              <AnyStatementTemplate
+                templateUri={activeUri}
+                publish={publishNanopub}
+              />
             </>
           ) : (
             <>
@@ -296,6 +258,19 @@ export default function CreateNanopub() {
           )}
         </CardContent>
       </Card>
+      {/* Generated RDF display */}
+      {generatedRdf && (
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold mb-4">
+            Generated RDF (TRIG format)
+          </h3>
+          <div className="bg-muted rounded-lg p-4">
+            <pre className="text-sm whitespace-pre-wrap overflow-x-auto max-h-96 overflow-y-auto">
+              <code>{generatedRdf}</code>
+            </pre>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

@@ -1,16 +1,18 @@
 import { useFormedible } from "@/hooks/use-formedible";
-import { toast } from "sonner";
 import z from "zod";
+import { NanopubTemplateDefComponentProps } from "./registry";
 
-export default function AIDASentence() {
+export default function AIDASentence({
+  publish,
+}: NanopubTemplateDefComponentProps) {
   /**
    * The Schema for types, validation, and error messages
    */
   const schema = z.object({
-    aidaSentence: z.string().min(5, "Sentence is required"),
-    topics: z.string().array().optional(),
-    relatedTo: z.string(),
-    supportedBy: z.string().optional(),
+    aida: z.string().regex(new RegExp("[\S ]{5,500}\.")),
+    topic: z.string().array().optional(), //TODO: guided choice from API
+    project: z.string(), //TODO: guided choice from API
+    dataset: z.url().optional(),
   });
 
   /**
@@ -21,14 +23,14 @@ export default function AIDASentence() {
     schema,
     fields: [
       {
-        name: "aidaSentence",
+        name: "aida",
         type: "textarea",
         label: "Enter your AIDA sentence here (ending with a full stop)",
-        placeholder: "Enter sentence",
+        placeholder: "Enter sentence.",
         required: true,
       },
       {
-        name: "topics",
+        name: "topic",
         type: "text",
         label: "Topics",
         placeholder: "URI of concept or topic the sentence is about",
@@ -36,13 +38,13 @@ export default function AIDASentence() {
         multiple: true,
       },
       {
-        name: "relatedTo",
+        name: "project",
         type: "text",
         label: "Relates to this nanopublication",
         placeholder: "URI of nanopublication for related reasearch project",
       },
       {
-        name: "supportedBy",
+        name: "dataset",
         type: "text",
         label: "Relates to this nanopublication",
         placeholder: "URI of nanopublication for related dataset",
@@ -54,16 +56,13 @@ export default function AIDASentence() {
     expandLabel: "Show",
     formOptions: {
       defaultValues: {
-        aidaSentence: "",
-        topics: [],
-        relatedTo: "",
-        supportedBy: "",
+        aida: "",
+        topic: [],
+        project: "",
+        dataset: "",
       },
-      onSubmit: ({ value }) => {
-        console.log("Data submitted:", value);
-        toast.info("This is only a Demo!", {
-          description: "Publishing features coming soon.",
-        });
+      onSubmit: async ({ value }) => {
+        await publish(value);
       },
     },
   });

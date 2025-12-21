@@ -1,10 +1,12 @@
 import { useFormedible } from "@/hooks/use-formedible";
 import { fetchPossibleValuesFromQuads } from "@/lib/rdf";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import z from "zod";
+import { NanopubTemplateDefComponentProps, validLength } from "./registry";
 
-export default function CommentOnPaper() {
+export default function CommentOnPaper({
+  publish,
+}: NanopubTemplateDefComponentProps) {
   const [options, setOptions] = useState<{ value: string; label: string }[]>(
     [],
   );
@@ -40,9 +42,9 @@ export default function CommentOnPaper() {
    * The Schema for types, validation, and error messages
    */
   const schema = z.object({
-    citingDoi: z.string(),
-    type: z.string(),
-    citedDoi: z.string(),
+    paper: z.url(),
+    relation: z.string(),
+    text: z.string().regex(validLength(0, 500)),
   });
 
   /**
@@ -53,29 +55,29 @@ export default function CommentOnPaper() {
     schema,
     fields: [
       {
-        name: "citingURL",
+        name: "paper",
         type: "text",
         label: "URL of the paper",
         placeholder: "Enter URL",
       },
       {
-        name: "type",
+        name: "relation",
         type: "combobox",
         label: "How the comment relates to the paper",
         options: options,
         disabled: loading,
         comboboxConfig: {
           searchable: true,
-          placeholder: loading ? "Loading..." : "Select comment type...",
-          searchPlaceholder: "Search comment types...",
-          noOptionsText: error || "No comment types found.",
+          placeholder: loading ? "Loading..." : "Select relation...",
+          searchPlaceholder: "Search relations...",
+          noOptionsText: error || "No relations found.",
         },
       },
       {
-        name: "citedDoi",
+        name: "text",
         type: "text",
-        label: "Cited DOI",
-        placeholder: "DOI",
+        label: "Your text (max. 500 characters)",
+        placeholder: "enter text",
       },
     ],
     submitLabel: "Publish",
@@ -83,15 +85,12 @@ export default function CommentOnPaper() {
     expandLabel: "Show",
     formOptions: {
       defaultValues: {
-        citingDoi: "",
-        type: "",
-        citedDoi: "",
+        paper: "",
+        relation: "",
+        text: "",
       },
       onSubmit: async ({ value }) => {
-        console.log("Data submitted:", value);
-        toast.info("This is only a Demo!", {
-          description: "Publishing features coming soon.",
-        });
+        await publish(value);
       },
     },
   });

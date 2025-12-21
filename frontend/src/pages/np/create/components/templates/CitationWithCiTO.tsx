@@ -1,10 +1,12 @@
 import { useFormedible } from "@/hooks/use-formedible";
 import { fetchPossibleValuesFromQuads } from "@/lib/rdf";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import z from "zod";
+import { NanopubTemplateDefComponentProps } from "./registry";
 
-export default function CitationWithCiTO() {
+export default function CitationWithCiTO({
+  publish,
+}: NanopubTemplateDefComponentProps) {
   const [options, setOptions] = useState<{ value: string; label: string }[]>(
     [],
   );
@@ -40,9 +42,9 @@ export default function CitationWithCiTO() {
    * The Schema for types, validation, and error messages
    */
   const schema = z.object({
-    citingDoi: z.string(),
-    type: z.string(),
-    citedDoi: z.string(),
+    article: z.url(),
+    cites: z.string(),
+    cited: z.url(),
   });
 
   /**
@@ -53,13 +55,13 @@ export default function CitationWithCiTO() {
     schema,
     fields: [
       {
-        name: "citingDoi",
+        name: "article",
         type: "text",
         label: "Citing DOI",
         placeholder: "https://doi.org/10... or other URL",
       },
       {
-        name: "type",
+        name: "cites",
         type: "combobox",
         label: "Citation Type",
         options: options,
@@ -72,7 +74,7 @@ export default function CitationWithCiTO() {
         },
       },
       {
-        name: "citedDoi",
+        name: "cited",
         type: "text",
         label: "Cited DOI",
         placeholder: "https://doi.org/10... or other URL",
@@ -83,15 +85,12 @@ export default function CitationWithCiTO() {
     expandLabel: "Show",
     formOptions: {
       defaultValues: {
-        citingDoi: "",
-        type: "",
-        citedDoi: "",
+        article: "",
+        cites: "",
+        cited: "",
       },
       onSubmit: async ({ value }) => {
-        console.log("Data submitted:", value);
-        toast.info("This is only a Demo!", {
-          description: "Publishing features coming soon.",
-        });
+        await publish(value);
       },
     },
   });

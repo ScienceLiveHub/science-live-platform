@@ -9,17 +9,18 @@ import parse from "html-react-parser";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-interface DynamicTemplateProps {
+interface AnyStatementTemplateProps {
   templateUri: string;
+  publish: (data: any) => Promise<void>;
 }
 
 export default function AnyStatementTemplate({
   templateUri,
-}: DynamicTemplateProps) {
+  publish,
+}: AnyStatementTemplateProps) {
   const [template, setTemplate] = useState<NanopubTemplate | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [generatedRdf, setGeneratedRdf] = useState<string>("");
 
   useEffect(() => {
     async function loadTemplate() {
@@ -72,40 +73,8 @@ export default function AnyStatementTemplate({
         {} as Record<string, any>,
       ),
       onSubmit: async ({ value }) => {
-        console.log("Dynamic template submitted:", value);
-        console.log("Template URI:", templateUri);
-        console.log(
-          "Template metadata:",
-          template
-            ? {
-                name: template.metadata.title,
-                description: template.description,
-                fields: template.fields,
-              }
-            : null,
-        );
-
-        try {
-          // Apply template to generate RDF
-          if (template) {
-            const rdfString = await template.applyTemplate(value, {
-              orcid: "0000-0000-0000-0000", // TODO: Get from user session
-              name: "Test User", // TODO: Get from user session
-            });
-            setGeneratedRdf(rdfString);
-            console.log("Generated RDF:", rdfString);
-
-            toast.success("Template applied successfully!", {
-              description: "RDF generated and displayed below.",
-            });
-          }
-        } catch (error) {
-          console.error("Error applying template:", error);
-          toast.error("Failed to apply template", {
-            description:
-              error instanceof Error ? error.message : "Unknown error",
-          });
-        }
+        console.log("🚀 ~ AnyStatementTemplate ~ value:", value);
+        await publish(value);
       },
     },
   });
@@ -148,19 +117,6 @@ export default function AnyStatementTemplate({
       </div>
       {/* Dynamic form */}
       <Form />
-      {/* Generated RDF display */}
-      {generatedRdf && (
-        <div className="mt-8">
-          <h3 className="text-lg font-semibold mb-4">
-            Generated RDF (TRIG format)
-          </h3>
-          <div className="bg-muted rounded-lg p-4">
-            <pre className="text-sm whitespace-pre-wrap overflow-x-auto max-h-96 overflow-y-auto">
-              <code>{generatedRdf}</code>
-            </pre>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
