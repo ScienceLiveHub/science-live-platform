@@ -34,6 +34,7 @@ export enum PlaceholderType {
   //TODO: these dont seem to exist anymore even though they are used in many older templates?
   EXTERNAL_URI = "ExternalUriPlaceholder", // -> map to URI
   TEXT_PLACEHOLDER = "TextPlaceholder", // -> map to LITERAL
+  INTRODUCED_RESOURCE = "IntroducedResource", // -> map to LONG_LITERAL
 }
 
 // Template field definition
@@ -487,6 +488,21 @@ function applyTypeSpecificFieldConfig(
       baseField.placeholder = "https://... or other URL";
       break;
 
+    case PlaceholderType.GUIDED_CHOICE:
+      // TODO: this actually involves a text entry field and an API call, not a combobox
+      baseField.type = "combobox";
+      baseField.options =
+        field.options?.map((option) => ({
+          value: option.name,
+          label: option.description,
+        })) || [];
+      baseField.comboboxConfig = {
+        searchable: true,
+        placeholder: `Select ${field.label.toLowerCase()}...`,
+        noOptionsText: "No options available",
+      };
+      break;
+
     case PlaceholderType.RESTRICTED_CHOICE:
       baseField.type = "combobox";
       baseField.options =
@@ -507,6 +523,7 @@ function applyTypeSpecificFieldConfig(
       break;
 
     case PlaceholderType.LONG_LITERAL:
+    case PlaceholderType.INTRODUCED_RESOURCE:
       baseField.type = "textarea";
       break;
 
@@ -579,6 +596,8 @@ export function templateStatementsToFormedible(
         };
         applyTypeSpecificFieldConfig(objectField, baseField);
       } else {
+        // TODO: this ends up creating something akin to a read-only "label" for this field.
+        //       There should be a much beter way to do this, but it suffices for now
         baseField = {
           name: getUriEnd(statement[part])!,
           type: "help", // Should be static text/label
@@ -607,12 +626,14 @@ function getFormedibleFieldType(placeholderType: PlaceholderType): string {
     case PlaceholderType.EXTERNAL_URI:
     case PlaceholderType.TRUSTY_URI:
       return "url";
+    case PlaceholderType.GUIDED_CHOICE:
     case PlaceholderType.RESTRICTED_CHOICE:
       return "combobox";
     case PlaceholderType.TEXT_PLACEHOLDER:
     case PlaceholderType.LITERAL:
       return "text";
     case PlaceholderType.LONG_LITERAL:
+    case PlaceholderType.INTRODUCED_RESOURCE:
       return "textarea";
     case PlaceholderType.REPEATABLE_STATEMENT:
       return "array";
@@ -649,6 +670,7 @@ export function generateZodSchema(
         fieldSchema = regexUrl(field.regex);
         break;
 
+      case PlaceholderType.GUIDED_CHOICE:
       case PlaceholderType.RESTRICTED_CHOICE:
         fieldSchema = regexString(field.regex);
         if (field.options && field.options.length > 0) {
@@ -659,6 +681,7 @@ export function generateZodSchema(
       case PlaceholderType.TEXT_PLACEHOLDER:
       case PlaceholderType.LITERAL:
       case PlaceholderType.LONG_LITERAL:
+      case PlaceholderType.INTRODUCED_RESOURCE:
         fieldSchema = regexString(field.regex).min(1, "This field is required");
         break;
 
