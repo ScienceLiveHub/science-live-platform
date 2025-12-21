@@ -273,7 +273,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                     classNames={{
                       base: "bg-accent",
                       trigger: {
-                        base: "bg-muted",
+                        base: "text-foreground hover:text-accent-foreground bg-background- dark:bg-muted",
                         organization: {
                           subtitle: "hidden",
                           avatar: { base: "size-6 my-0" },
