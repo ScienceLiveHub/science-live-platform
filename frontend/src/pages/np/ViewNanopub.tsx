@@ -18,6 +18,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { shrinkUri, Statement } from "@/lib/rdf";
+import { extractOrcidId, unique } from "@/lib/utils";
+import ky from "ky";
 import {
   Copy,
   Download,
@@ -27,10 +29,11 @@ import {
   LucideIcon,
   Microscope,
   Share2,
+  User,
   UserCircle,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 /**
  * ViewNanopub
@@ -100,6 +103,11 @@ export default function ViewNanopub() {
   const [error, setError] = useState<string | null>(null);
   const [store, setStore] = useState<NanopubStore | null>(null);
 
+  // Map ORCID iD -> Science Live user id (or null if not found)
+  const [creatorUserIdsByOrcid, setCreatorUserIdsByOrcid] = useState<
+    Record<string, string | null>
+  >({});
+
   // Initialize the labels hook with the store's label cache
   const { getLabel } = useLabels(store?.labelCache);
 
@@ -119,6 +127,42 @@ export default function ViewNanopub() {
     return store?.graphUris.pubinfo
       ? store.getQuads(null, null, null, store?.graphUris.pubinfo)
       : [];
+  }, [store]);
+
+  useEffect(() => {
+    const creators = store?.metadata.creators ?? [];
+    const uniqueOrcids = unique(
+      creators
+        .map((c) => extractOrcidId(c.href ?? ""))
+        .filter((x): x is string => !!x),
+    );
+
+    if (uniqueOrcids.length === 0) {
+      setCreatorUserIdsByOrcid({});
+      return;
+    }
+
+    (async () => {
+      const entries = await Promise.all(
+        uniqueOrcids.map(async (orcidId) => {
+          try {
+            const data = (await ky(
+              `${import.meta.env.VITE_API_URL}/user-profile/orcid/${encodeURIComponent(orcidId)}`,
+              {
+                method: "GET",
+                credentials: "include",
+              },
+            ).json()) as any;
+
+            return [orcidId, data?.userId ?? null] as const;
+          } catch (e) {
+            return [orcidId, null] as const;
+          }
+        }),
+      );
+
+      setCreatorUserIdsByOrcid(Object.fromEntries(entries));
+    })();
   }, [store]);
 
   const loadNanopubUri = (newUri?: string) => {
@@ -219,12 +263,12 @@ export default function ViewNanopub() {
             <>
               {/* Overview */}
               <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
-                <div className="relative">
+                <div className="relative mb-6">
                   <div className="pr-16">
                     <h2 className="text-2xl md:text-3xl font-bold">
                       {store?.metadata.title}
                     </h2>
-                    <div className="font-mono break-all">
+                    {/* <div className="font-mono break-all">
                       <a
                         className="text-purple-600 dark:text-purple-400 hover:underline"
                         href={currentUri}
@@ -233,7 +277,60 @@ export default function ViewNanopub() {
                       >
                         {currentUri}
                       </a>
-                    </div>
+                    </div> */}
+                  </div>
+                  <div>
+                    <span className="">By</span>{" "}
+                    {store?.metadata.creators?.length ? (
+                      <span className="space-x-2">
+                        {store?.metadata.creators.map((c) => {
+                          const orcidId = extractOrcidId(c.href ?? "");
+                          const scienceLiveUserId = orcidId
+                            ? creatorUserIdsByOrcid[orcidId]
+                            : null;
+
+                          return (
+                            <span
+                              key={`${c.name}-${c.href ?? ""}`}
+                              className="inline-flex items-center gap-1"
+                            >
+                              <a
+                                className="text-purple-600 dark:text-purple-400 hover:underline break-all"
+                                href={
+                                  c.href?.startsWith("http")
+                                    ? c.href
+                                    : undefined
+                                }
+                                target={
+                                  c.href?.startsWith("http")
+                                    ? "_blank"
+                                    : undefined
+                                }
+                                rel={
+                                  c.href?.startsWith("http")
+                                    ? "noreferrer"
+                                    : undefined
+                                }
+                              >
+                                {c.name}
+                              </a>
+
+                              {scienceLiveUserId ? (
+                                <Link
+                                  to={`/user/${scienceLiveUserId}`}
+                                  className="text-muted-foreground hover:text-foreground"
+                                  title="View Science Live profile"
+                                >
+                                  <User className="h-4 w-4" />
+                                </Link>
+                              ) : null}
+                            </span>
+                          );
+                        })}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
                   </div>
                   <div className="absolute right-0 top-0">
                     <ShareMenu uri={currentUri} />
@@ -248,34 +345,7 @@ export default function ViewNanopub() {
                       <span className="text-muted-foreground">—</span>
                     )}
                   </div>
-                  <div>
-                    <span className="font-bold">Created by:</span>{" "}
-                    {store?.metadata.creators?.length ? (
-                      <span className="space-x-2">
-                        {store?.metadata.creators.map((c) => (
-                          <a
-                            key={c.name}
-                            className="text-blue-600 hover:underline break-all"
-                            href={
-                              c.href?.startsWith("http") ? c.href : undefined
-                            }
-                            target={
-                              c.href?.startsWith("http") ? "_blank" : undefined
-                            }
-                            rel={
-                              c.href?.startsWith("http")
-                                ? "noreferrer"
-                                : undefined
-                            }
-                          >
-                            {c.name}
-                          </a>
-                        ))}
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground">—</span>
-                    )}
-                  </div>
+
                   <div>
                     <span className="font-bold">Type:</span>{" "}
                     {store?.metadata.types?.length ? (

@@ -117,13 +117,13 @@ export function Combobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[500px] justify-between"
+          className="w-125 justify-between"
         >
           {selected ? POPULAR_TEMPLATES[selected]?.name : "Select template..."}
           <ChevronsUpDown className="opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[500px] p-0">
+      <PopoverContent className="w-125 p-0">
         <Command>
           <CommandInput placeholder="Search template..." className="h-9" />
           <CommandList>

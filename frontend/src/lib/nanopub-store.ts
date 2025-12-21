@@ -1,6 +1,6 @@
 import { fetchQuads, NS, shrinkUri, Statement } from "@/lib/rdf";
 import { DataFactory, Store as N3Store, NamedNode, Term, Util } from "n3";
-import { getUriEnd, isDoiUri, isNanopubUri } from "./utils";
+import { getUriEnd, isDoiUri, isNanopubUri, unique } from "./utils";
 
 const { namedNode } = DataFactory;
 const { isNamedNode } = Util;
@@ -290,8 +290,6 @@ export class NanopubStore extends N3Store {
       null,
       this.graphUris.pubinfo,
     )?.object.value;
-
-    const unique = (arr: string[]) => Array.from(new Set(arr));
 
     const assertionSubjects = this.graphUris.assertion
       ? this.match(null, null, null, namedNode(this.graphUris.assertion))

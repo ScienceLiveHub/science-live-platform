@@ -91,3 +91,12 @@ export function cleanOrcidUri(uri: string) {
     ? uri
     : `https://orcid.org/${uri.replace(/https?:\/\/orcid\.org\//, "")}`;
 }
+
+export function extractOrcidId(href: string): string | null {
+  const match = href.match(/(\d{4}-\d{4}-\d{4}-\d{3}[0-9Xx])/);
+  if (!match) return null;
+  const orcid = match[1];
+  return `${orcid.slice(0, -1)}${orcid.slice(-1).toUpperCase()}`;
+}
+
+export const unique = (arr: string[]) => Array.from(new Set(arr));
