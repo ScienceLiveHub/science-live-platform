@@ -18,13 +18,14 @@ export namespace NS {
   export const XSD = prefix("http://www.w3.org/2001/XMLSchema#");
   export const NP = prefix("http://www.nanopub.org/nschema#");
   export const NPT = prefix("http://w3id.org/np/o/ntemplate/");
+  export const NPTs = prefix("https://w3id.org/np/o/ntemplate/");
   export const NPX = prefix("http://purl.org/nanopub/x/");
   export const DCT = prefix("http://purl.org/dc/terms/");
   export const PROV = prefix("http://www.w3.org/ns/prov#");
   export const FOAF = prefix("http://xmlns.com/foaf/0.1/");
 }
 
-const { RDF, RDFS, XSD, NP, NPT, NPX, DCT, PROV } = NS;
+const { RDF, RDFS, XSD, NP, NPT, NPX, DCT, PROV, FOAF } = NS;
 
 export { Util } from "n3";
 
@@ -36,7 +37,7 @@ export const DEFAULT_PREFIXES: Record<string, string> = {
   ntemplate: NPT("").value,
   dcterms: DCT("").value,
   prov: PROV("").value,
-  foaf: "http://xmlns.com/foaf/0.1/",
+  foaf: FOAF("").value,
   schema: "http://schema.org/",
   dc: "http://purl.org/dc/elements/1.1/",
 };

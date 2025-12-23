@@ -18,7 +18,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
+import { authClient } from "@/lib/auth-client";
 import { NanopubTemplate } from "@/lib/nanopub-template";
+import ky from "ky";
 import { ChevronsUpDown, FilePlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -83,8 +85,38 @@ export default function CreateNanopub() {
   const [activeUri, setActiveUri] = useState("");
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
   const [generatedRdf, setGeneratedRdf] = useState<string>("");
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // Load current user data
+  useEffect(() => {
+    const loadCurrentUser = async () => {
+      try {
+        const { data: session, error: sessionError } =
+          await authClient.getSession();
+
+        if (sessionError || !session?.user) {
+          console.log("No user session found");
+          return;
+        }
+
+        // Fetch current user's full profile data including ORCID
+        const response = await ky(
+          `${import.meta.env.VITE_API_URL}/user-profile/${session.user.id}`,
+        );
+
+        if (response.ok) {
+          const userData = await response.json();
+          setCurrentUser(userData);
+        }
+      } catch (error) {
+        console.error("Error loading current user data:", error);
+      }
+    };
+
+    loadCurrentUser();
+  }, []);
 
   useEffect(() => {
     const templateUri = searchParams.get("template") || "";
@@ -132,10 +164,24 @@ export default function CreateNanopub() {
   const Comp = POPULAR_TEMPLATES[selected]?.component;
 
   const publishNanopub = async (data: any) => {
-    console.log("Data submitted:", data);
-    toast.info("This is only a Demo!", {
-      description: "Publishing features coming soon.",
-    });
+    console.log("Data entered:", data);
+
+    // Check if user is signed in
+    if (!currentUser) {
+      toast.error("Authentication Required", {
+        description: "You need to be signed in to publish nanopublications.",
+      });
+      return;
+    }
+
+    // Check if user has ORCID linked
+    if (!currentUser.orcidConnected || !currentUser.orcidId) {
+      toast.error("ORCID Required", {
+        description:
+          "You need to link your ORCID account in user settings to publish nanopublications.",
+      });
+      return;
+    }
 
     let template: NanopubTemplate;
     try {
@@ -144,8 +190,8 @@ export default function CreateNanopub() {
       // Apply template to generate RDF
       if (template) {
         const rdfString = await template.applyTemplate(data, {
-          orcid: "0000-0000-0000-0001", // TODO: Get from user session
-          name: "Test User", // TODO: Get from user session
+          orcid: currentUser.orcidId,
+          name: currentUser.name,
         });
         setGeneratedRdf(rdfString);
         console.log("Generated RDF:", rdfString);
@@ -159,7 +205,12 @@ export default function CreateNanopub() {
       toast.error("Failed to apply template", {
         description: error instanceof Error ? error.message : "Unknown error",
       });
+      return;
     }
+
+    toast.info("This is only a Demo!", {
+      description: "Publishing features coming soon.",
+    });
   };
 
   return (

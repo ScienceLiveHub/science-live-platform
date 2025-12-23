@@ -99,7 +99,7 @@ export default function AnyTemplate({
     <div className="space-y-6">
       {/* Template header */}
       <div className="font-bold">{template.metadata.title} </div>{" "}
-      <div className="my-6">{parse(template.description)}</div>{" "}
+      <div className="my-6">{parse(template.templateMetadata.description)}</div>{" "}
       <div className="text-sm text-muted-foreground">
         <strong>Template URI:</strong>
         <a

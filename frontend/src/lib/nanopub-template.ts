@@ -34,7 +34,9 @@ export enum PlaceholderType {
   //TODO: these dont seem to exist anymore even though they are used in many older templates?
   EXTERNAL_URI = "ExternalUriPlaceholder", // -> map to URI
   TEXT_PLACEHOLDER = "TextPlaceholder", // -> map to LITERAL
-  INTRODUCED_RESOURCE = "IntroducedResource", // -> map to LONG_LITERAL
+  AUTO_ESCAPE_URI = "AutoEscapeUriPlaceholder", // -> map to LONG_LITERAL
+
+  INTRODUCED_RESOURCE = "IntroducedResource", // TODO: DO NOT INCLUDE as a placeholder, add it as a property of field
 }
 
 // Template field definition
@@ -81,6 +83,12 @@ type Statement = {
 };
 type Statements = Map<string, Statement>;
 
+export type TemplateMetadata = {
+  description: string;
+  targetNanopubType?: string;
+  targetlabelPattern?: string;
+};
+
 export class NanopubTemplate extends NanopubStore {
   /**
    * Fields specific to Templates
@@ -90,6 +98,7 @@ export class NanopubTemplate extends NanopubStore {
   statements: Statements = new Map();
   type: "Assertion" | "Provenance" | "Pubinfo" | "Unlisted" | "Nanopub" =
     "Nanopub";
+  templateMetadata: TemplateMetadata = { description: "-" };
 
   static async load(url: string) {
     // Call the NanopubStore super-class load() then re-cast as NanopubTemplate and call template-specific init functions
@@ -109,12 +118,17 @@ export class NanopubTemplate extends NanopubStore {
    */
   async applyTemplate(
     values: Record<string, string>,
-    metadata: { orcid?: string; name?: string; license?: string },
+    pubdata: {
+      orcid?: string;
+      name?: string;
+      license?: string;
+      baseUri?: string;
+    },
   ) {
     // TODO: Generate trusty URI for the new nanopub
-    const baseUri = "https://w3id.org/np/";
-    const newNanopubUri = baseUri + " /"; // Blank space is the placeholder for the hash later on
-    const newSubUri = `${newNanopubUri} #`; // TODO: latest spec uses / instead of #
+    const baseUri = pubdata.baseUri ?? "https://w3id.org/np/";
+    const newNanopubUri = baseUri; // Blank space is the placeholder for the hash later on
+    const newSubUri = `${newNanopubUri}/`;
 
     // Create a new store for the generated nanopub
     const outputStore = new Store();
@@ -125,6 +139,9 @@ export class NanopubTemplate extends NanopubStore {
       if (uri.startsWith("sub:")) {
         const placeholderName = uri.substring(4); // Remove "sub:" prefix
         return values[placeholderName] || uri; // Replace with value or keep original
+      } else if (uri.startsWith(this.metadata.uri!)) {
+        const placeholderName = getUriEnd(uri);
+        return values[placeholderName!] || uri; // Replace with value or keep original
       }
       return uri;
     };
@@ -135,38 +152,42 @@ export class NanopubTemplate extends NanopubStore {
       return namedNode(replacedValue);
     };
 
+    const outSub = namedNode(newNanopubUri);
+    const assertionGraph = namedNode(newSubUri + "assertion");
+    const provenanceGraph = namedNode(newSubUri + "provenance");
+    const pubinfoGraph = namedNode(newSubUri + "pubinfo");
+
     // 1. Generate Head graph
     const headGraph = namedNode(newSubUri + "Head");
     outputStore.addQuad(
-      namedNode(newNanopubUri),
-      namedNode(NS.RDF("").value + "type"),
-      namedNode(NS.NP("").value + "Nanopublication"),
+      outSub,
+      NS.RDF("type"),
+      NS.NP("Nanopublication"),
       headGraph,
     );
     outputStore.addQuad(
-      namedNode(newNanopubUri),
-      namedNode(NS.NP("").value + "hasAssertion"),
-      namedNode(newSubUri + "assertion"),
+      outSub,
+      NS.NP("hasAssertion"),
+      assertionGraph,
       headGraph,
     );
     outputStore.addQuad(
-      namedNode(newNanopubUri),
-      namedNode(NS.NP("").value + "hasProvenance"),
-      namedNode(newSubUri + "provenance"),
+      outSub,
+      NS.NP("hasProvenance"),
+      provenanceGraph,
       headGraph,
     );
     outputStore.addQuad(
-      namedNode(newNanopubUri),
-      namedNode(NS.NP("").value + "hasPublicationInfo"),
-      namedNode(newSubUri + "pubinfo"),
+      outSub,
+      NS.NP("hasPublicationInfo"),
+      pubinfoGraph,
       headGraph,
     );
 
     // 2. Generate Assertion graph by processing template statements
-    const assertionGraph = namedNode(newSubUri + "assertion");
 
     // Process each statement from the template
-    for (const [statementId, statement] of this.statements) {
+    for (const [_statementId, statement] of this.statements) {
       const subject = createTerm(statement.subject);
       const predicate = createTerm(statement.predicate);
       const object = createTerm(statement.object);
@@ -175,25 +196,23 @@ export class NanopubTemplate extends NanopubStore {
     }
 
     // 3. Generate Provenance graph
-    const provenanceGraph = namedNode(newSubUri + "provenance");
-    if (metadata.orcid) {
+    if (pubdata.orcid) {
       outputStore.addQuad(
-        namedNode(newSubUri + "assertion"),
-        namedNode(NS.PROV("").value + "wasAttributedTo"),
-        namedNode(cleanOrcidUri(metadata.orcid)),
+        assertionGraph,
+        NS.PROV("wasAttributedTo"),
+        namedNode(cleanOrcidUri(pubdata.orcid)),
         provenanceGraph,
       );
     }
 
     // 4. Generate Pubinfo graph
-    const pubinfoGraph = namedNode(newSubUri + "pubinfo");
 
     // Add creator info
-    if (metadata.orcid && metadata.name) {
+    if (pubdata.orcid && pubdata.name) {
       outputStore.addQuad(
-        namedNode(cleanOrcidUri(metadata.orcid)),
-        namedNode(NS.FOAF("").value + "name"),
-        literal(metadata.name),
+        namedNode(cleanOrcidUri(pubdata.orcid)),
+        NS.FOAF("name"),
+        literal(pubdata.name),
         pubinfoGraph,
       );
     }
@@ -201,101 +220,111 @@ export class NanopubTemplate extends NanopubStore {
     // Add signature placeholder (TODO: implement actual signature generation)
     outputStore.addQuad(
       namedNode(newSubUri + "sig"),
-      namedNode(NS.NPX("").value + "hasAlgorithm"),
+      NS.NPX("hasAlgorithm"),
       namedNode("RSA"),
       pubinfoGraph,
     );
     outputStore.addQuad(
       namedNode(newSubUri + "sig"),
-      namedNode(NS.NPX("").value + "hasPublicKey"),
+      NS.NPX("hasPublicKey"),
       literal("TODO: Generate public key"),
       pubinfoGraph,
     );
     outputStore.addQuad(
       namedNode(newSubUri + "sig"),
-      namedNode(NS.NPX("").value + "hasSignature"),
+      NS.NPX("hasSignature"),
       literal("TODO: Generate signature"),
       pubinfoGraph,
     );
     outputStore.addQuad(
       namedNode(newSubUri + "sig"),
-      namedNode(newNanopubUri),
-      namedNode(NS.NPX("").value + "hasSignatureTarget"),
+      outSub,
+      NS.NPX("hasSignatureTarget"),
       pubinfoGraph,
     );
-    if (metadata.orcid) {
+    if (pubdata.orcid) {
       outputStore.addQuad(
         namedNode(newSubUri + "sig"),
-        namedNode(cleanOrcidUri(metadata.orcid)),
-        namedNode(NS.NPX("").value + "signedBy"),
+        NS.NPX("signedBy"),
+        namedNode(cleanOrcidUri(pubdata.orcid)),
         pubinfoGraph,
       );
     }
 
     // Add metadata
-    const now = new Date().toISOString();
-    outputStore.addQuad(
-      namedNode(newNanopubUri),
-      namedNode(NS.DCT("").value + "created"),
-      literal(now, namedNode(NS.XSD("").value + "dateTime")),
-      pubinfoGraph,
-    );
-    if (metadata.orcid) {
+    if (pubdata.orcid) {
       outputStore.addQuad(
-        namedNode(newNanopubUri),
-        namedNode(NS.DCT("").value + "creator"),
-        namedNode(cleanOrcidUri(metadata.orcid)),
+        outSub,
+        NS.DCT("creator"),
+        namedNode(cleanOrcidUri(pubdata.orcid)),
         pubinfoGraph,
       );
     }
+    const now = new Date().toISOString();
     outputStore.addQuad(
-      namedNode(newNanopubUri),
-      namedNode(NS.DCT("").value + "license"),
+      outSub,
+      NS.DCT("created"),
+      literal(now, NS.XSD("dateTime")),
+      pubinfoGraph,
+    );
+    outputStore.addQuad(
+      outSub,
+      NS.DCT("license"),
       namedNode(
-        metadata.license ?? "https://creativecommons.org/licenses/by/4.0/",
+        pubdata.license ?? "https://creativecommons.org/licenses/by/4.0/",
       ),
       pubinfoGraph,
     );
 
     // Add nanopub types from template
-    const templateTypes = this.metadata.types || [];
-    for (const type of templateTypes) {
-      if (type.href) {
-        outputStore.addQuad(
-          namedNode(newNanopubUri),
-          namedNode(NS.NPX("").value + "hasNanopubType"),
-          namedNode(type.href),
-          pubinfoGraph,
-        );
-      }
+    if (this.templateMetadata.targetNanopubType) {
+      outputStore.addQuad(
+        outSub,
+        NS.NPX("hasNanopubType"),
+        namedNode(this.templateMetadata.targetNanopubType),
+        pubinfoGraph,
+      );
     }
 
-    // Add label based on template pattern
-    const labelPattern = this.metadata.title || "Nanopublication";
-    const label = labelPattern.replace(
-      /\$\{([^}]+)\}/g,
-      (match, placeholder) => {
-        return values[placeholder] || match;
-      },
-    );
     outputStore.addQuad(
-      namedNode(newNanopubUri),
-      namedNode(NS.RDFS("").value + "label"),
-      literal(label),
+      outSub,
+      NS.NPX("wasCreatedAt"),
+      namedNode("https://platform.sciencelive4all.org"),
       pubinfoGraph,
     );
+
+    // Add label based on template pattern
+    const label = this.templateMetadata.targetlabelPattern
+      ? this.templateMetadata.targetlabelPattern.replaceAll(
+          /\$\{([^}]+)\}/g,
+          (match, placeholder) => {
+            const value = values[placeholder];
+            if (!value) return match;
+
+            // If the value looks like a URI, use getUriEnd, otherwise use the literal value
+            if (value.startsWith("http")) {
+              return getUriEnd(value) || value;
+            }
+            return value;
+          },
+        )
+      : "NP created using " +
+        (this.metadata.title || "Nanopublication Template");
+
+    outputStore.addQuad(outSub, NS.RDFS("label"), literal(label), pubinfoGraph);
 
     // Add template reference
     const templateUri = this.prefixes["this"] || this.graphUris.head || "";
     if (templateUri) {
       outputStore.addQuad(
-        namedNode(newNanopubUri),
-        namedNode("https://w3id.org/np/o/ntemplate/wasCreatedFromTemplate"),
+        outSub,
+        NS.NPTs("wasCreatedFromTemplate"),
         namedNode(templateUri),
         pubinfoGraph,
       );
     }
 
+    // TODO: or just use DEFAULT_PREFIXES?  Allow user customization? or auto-detect?
     const prefixes = {
       this: newNanopubUri,
       sub: newSubUri,
@@ -314,20 +343,20 @@ export class NanopubTemplate extends NanopubStore {
 
     let trigOutput = "";
     const quads = outputStore.getQuads(null, null, null, null);
-    writer.addQuads(quads);
-
     // Write placeholder RDF
     // TODO: replace the below code block with proper code to output normalized RDF and generate hash
     // ----------------------------------------------------
     const hash = await makeHash(quads);
     const trustyHash = "RA" + hash; // "RA" is the type code for RDF content
-    const actualNanopubUri = `${baseUri}${trustyHash}/`;
-    const actualSubUri = `${baseUri}${trustyHash}#`; // TODO: latest spec uses / instead of #
+    const actualNanopubUri = `${baseUri}${trustyHash}`;
+    const actualSubUri = `${baseUri}${trustyHash}/`;
 
     prefixes.this = actualNanopubUri;
     prefixes.sub = actualSubUri;
 
     writer.addPrefixes(prefixes);
+
+    writer.addQuads(quads);
 
     writer.end((error: any, result: string) => {
       if (error) {
@@ -353,7 +382,7 @@ export class NanopubTemplate extends NanopubStore {
       description: [NS.DCT("description")],
       statements_$array: [NS.NPT("includes"), NS.NPT("hasStatement")],
       targetNanopubType: [NS.NPT("hasTargetNanopubType")],
-      labelPattern: [NS.NPT("hasNanopubLabelPattern")],
+      targetlabelPattern: [NS.NPT("hasNanopubLabelPattern")],
       tags_$array: [NS.NPT("hasTag")],
     };
 
@@ -369,12 +398,11 @@ export class NanopubTemplate extends NanopubStore {
 
     props.statements = props.statements?.sort();
 
-    // Extract template metadata
-    let description = props.description ?? "";
-
     // ---- 2. Get the "Placeholders" and their attributes (user-entered fields)
     const placeholderPropertyMap = {
+      // type: [(q: Quad) => q.object.value.endsWith("Placeholder")],
       type: [NS.RDF("type")],
+      types_$array: [NS.RDF("type")],
       name: [NS.RDFS("label")],
       description: [NS.DCT("description")],
       possibleValuesFrom: [NS.NPT("possibleValuesFrom")],
@@ -384,6 +412,7 @@ export class NanopubTemplate extends NanopubStore {
     };
     type Placeholder = {
       type: string;
+      types: string[];
       name: string;
       description: string;
       possibleValuesFrom: string;
@@ -469,7 +498,11 @@ export class NanopubTemplate extends NanopubStore {
     }
     this.fields = fields;
     this.statements = statements;
-    this.description = description;
+    this.templateMetadata = {
+      description: props.description ?? "-",
+      targetlabelPattern: props.targetlabelPattern,
+      targetNanopubType: props.targetNanopubType,
+    };
   }
 }
 
@@ -482,6 +515,7 @@ function applyTypeSpecificFieldConfig(
 ) {
   switch (field.type) {
     case PlaceholderType.URI:
+    case PlaceholderType.AUTO_ESCAPE_URI:
     case PlaceholderType.EXTERNAL_URI:
     case PlaceholderType.TRUSTY_URI:
       baseField.type = "url";
@@ -586,7 +620,7 @@ export function templateStatementsToFormedible(
       let baseField: FieldConfig;
       if (objectField) {
         baseField = {
-          name: objectField.id.replace(/[^a-zA-Z0-9]/g, "_"), // Sanitize name for form
+          name: getUriEnd(objectField.id) ?? objectField.id, //objectField.id.replace(/[^a-zA-Z0-9]/g, "_"), // Sanitize name for form
           type: getFormedibleFieldType(objectField.type as PlaceholderType),
           label: objectField.label,
           placeholder: objectField.placeholder,
@@ -623,6 +657,7 @@ export function templateStatementsToFormedible(
 function getFormedibleFieldType(placeholderType: PlaceholderType): string {
   switch (placeholderType) {
     case PlaceholderType.URI:
+    case PlaceholderType.AUTO_ESCAPE_URI:
     case PlaceholderType.EXTERNAL_URI:
     case PlaceholderType.TRUSTY_URI:
       return "url";
@@ -655,12 +690,13 @@ export function generateZodSchema(
   const regexUrl = (r?: string) => (r ? z.url().regex(RegExp(r)) : z.url());
 
   for (const field of fields) {
-    const fieldName = field.id.replace(/[^a-zA-Z0-9]/g, "_");
+    const fieldName = getUriEnd(field.id) ?? field.id; //field.id.replace(/[^a-zA-Z0-9]/g, "_");
     let fieldSchema: z.ZodTypeAny;
 
     // Base schema based on type
     switch (field.type) {
       case PlaceholderType.URI:
+      case PlaceholderType.AUTO_ESCAPE_URI:
       case PlaceholderType.EXTERNAL_URI:
         fieldSchema = regexUrl(field.regex);
         break;
