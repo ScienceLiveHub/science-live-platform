@@ -276,7 +276,7 @@ export default function UserProfile() {
                   profile.latestContent?.map((c) => {
                     return (
                       <>
-                        <Link to={"/np/" + getUriEnd(c.np)}>{c.label}</Link>
+                        <Link to={"/np?uri=" + c.np}>{c.label}</Link>
                         <div className="flex items-center gap-2 text-sm group relative w-70">
                           <span className="text-muted-foreground w-auto">
                             {dayjs(c.date).fromNow()}

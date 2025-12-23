@@ -1,7 +1,7 @@
 import * as RDFT from "@rdfjs/types";
 import ky from "ky";
 import { DataFactory, NamedNode, Parser, Quad, Store, Term, Util } from "n3";
-import { getUriEnd } from "./utils";
+import { getNanopubHash, getUriEnd } from "./utils";
 
 const { namedNode } = DataFactory;
 const { isNamedNode, isBlankNode: isBlank, isLiteral, prefix } = Util;
@@ -41,6 +41,8 @@ export const DEFAULT_PREFIXES: Record<string, string> = {
   dc: "http://purl.org/dc/elements/1.1/",
 };
 
+const problematicHosts = ["https://purl.org", "http://purl.org"];
+
 /**
  * fetch the RDF document, parse it (streaming) and run the callback on each quad that it finds.
  *
@@ -54,39 +56,57 @@ export async function fetchQuads(
   const PREFERRED_FORMAT = "application/trig";
 
   // Download RDF
-  const res = await ky(url, {
+  let res = await ky(url, {
     headers: {
       Accept: PREFERRED_FORMAT,
     },
+    redirect: "follow",
+    retry: 2,
+  }).catch(async () => {
+    // Some hosts (e.g. purl.org) dont support CORS headers for calling from js clients in the browser
+    // For those, retry getting the trig directly from known working servers
+    if (problematicHosts.some((host) => url.startsWith(host))) {
+      const hash = getNanopubHash(url);
+      if (hash) {
+        url = `https://registry.knowledgepixels.com/np/${hash}.trig`;
+        return await ky(url, {
+          headers: {
+            Accept: PREFERRED_FORMAT,
+          },
+        });
+      }
+    }
   });
+  if (res) {
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status} ${res.statusText}`);
+    }
 
-  if (!res.ok) {
-    throw new Error(`HTTP ${res.status} ${res.statusText}`);
-  }
-  const text = await res.text();
-  const ct = (res.headers.get("content-type") || "").split(";")[0].trim();
-  if (ct != PREFERRED_FORMAT) {
-    throw new Error(`Expected content-type ${PREFERRED_FORMAT}, got: ${ct}`);
-  }
+    const text = await res.text();
+    const ct = (res.headers.get("content-type") || "").split(";")[0].trim();
+    if (ct != PREFERRED_FORMAT) {
+      throw new Error(`Expected content-type ${PREFERRED_FORMAT}, got: ${ct}`);
+    }
 
-  // Parse the RDF and run the provided callback on each loaded quad, and optionally each prefix
-  const parser = new Parser();
-  parser.parse(
-    text,
-    (error: any, quad: Quad) => {
-      if (error) {
-        throw new Error(
-          `N3 Failed to parse RDF, make sure it is in the TRiG format. ${error}`,
-        );
-      }
-      if (quad) {
-        quadCallback(quad);
-      }
-    },
-    (prefix: string, prefixNode: RDFT.NamedNode) => {
-      prefixCallback?.(prefix, prefixNode);
-    },
-  );
+    // Parse the RDF and run the provided callback on each loaded quad, and optionally each prefix
+    const parser = new Parser();
+    parser.parse(
+      text,
+      (error: any, quad: Quad) => {
+        if (error) {
+          throw new Error(
+            `N3 Failed to parse RDF, make sure it is in the TRiG format. ${error}`,
+          );
+        }
+        if (quad) {
+          quadCallback(quad);
+        }
+      },
+      (prefix: string, prefixNode: RDFT.NamedNode) => {
+        prefixCallback?.(prefix, prefixNode);
+      },
+    );
+  }
 }
 
 /**
@@ -195,6 +215,8 @@ export function extractSubjectProps(
           if (!outputObj[key]) {
             outputObj[key] = [];
           }
+          // TODO: probably should change these to Terms rather than just the value string.
+          // Otherwise, information about the Term type is lost which we may need later on, e.g. when generating RDF from template statements
           outputObj[key].push(quad.object.value);
         } else {
           outputObj[key] = quad.object.value;

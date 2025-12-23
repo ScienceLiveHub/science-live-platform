@@ -73,7 +73,6 @@ export default function AnyStatementTemplate({
         {} as Record<string, any>,
       ),
       onSubmit: async ({ value }) => {
-        console.log("🚀 ~ AnyStatementTemplate ~ value:", value);
         await publish(value);
       },
     },
