@@ -107,7 +107,7 @@ export function AboutSection({ hideTitle }: { hideTitle?: boolean }) {
           <div className="flex items-center">
             <FileInput className="mr-2" /> Example nanopublication:
             <NavLink
-              to="/np/RAuoXvJWbbzZsFslswYaajgjeEl-040X6SCQFXHfVtjf0#Garfield"
+              to="/np/?uri=https://w3id.org/np/RAuoXvJWbbzZsFslswYaajgjeEl-040X6SCQFXHfVtjf0#Garfield"
               className="text-purple-500 hover:underline ml-3"
             >
               Garfield
