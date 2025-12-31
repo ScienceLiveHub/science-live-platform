@@ -1,6 +1,7 @@
 import { FieldWrapper } from "@/components/formedible/fields/base-field-wrapper";
 import * as RDFT from "@rdfjs/types";
 import { DataFactory, Store, Writer } from "n3";
+import { sign } from "nanopub-js";
 import z from "zod";
 import { FieldConfig } from "./formedible/types";
 import { NanopubStore } from "./nanopub-store";
@@ -10,7 +11,6 @@ import {
   fetchPossibleValuesFromQuads,
   NS,
 } from "./rdf";
-import { makeHash } from "./rdfhasher";
 import { cleanOrcidUri, getUriEnd } from "./utils";
 
 const { namedNode, literal } = DataFactory;
@@ -113,22 +113,39 @@ export class NanopubTemplate extends NanopubStore {
     return template;
   }
 
+  static async loadString(rdf: string) {
+    // Call the NanopubStore super-class load() then re-cast as NanopubTemplate and call template-specific init functions
+    const template = Object.assign(
+      new NanopubTemplate(),
+      await super.loadString(rdf),
+    ) as NanopubTemplate;
+
+    // Perform initialization specific to Templates
+    await template.extractFields();
+
+    return template;
+  }
+
   /**
    * Generate a nanopub in trig format, using this template and the specified values for the placeholders
    */
   async applyTemplate(
     values: Record<string, string>,
-    pubdata: {
-      orcid?: string;
-      name?: string;
+    pubData: {
+      orcid: string;
+      name: string;
+      email?: string;
       license?: string;
       baseUri?: string;
+      timestamp?: Date;
+      isExample?: boolean;
     },
+    privateKey: string,
   ) {
     // TODO: Generate trusty URI for the new nanopub
-    const baseUri = pubdata.baseUri ?? "https://w3id.org/np/";
-    const newNanopubUri = baseUri; // Blank space is the placeholder for the hash later on
-    const newSubUri = `${newNanopubUri}/`;
+    const baseUri = pubData.baseUri ?? "https://w3id.org/np/";
+    const newNanopubUri = baseUri + "placeholder"; // Blank space is the placeholder for the hash later on
+    const newSubUri = `${newNanopubUri}`;
 
     // Create a new store for the generated nanopub
     const outputStore = new Store();
@@ -153,12 +170,12 @@ export class NanopubTemplate extends NanopubStore {
     };
 
     const outSub = namedNode(newNanopubUri);
-    const assertionGraph = namedNode(newSubUri + "assertion");
-    const provenanceGraph = namedNode(newSubUri + "provenance");
-    const pubinfoGraph = namedNode(newSubUri + "pubinfo");
+    const assertionGraph = namedNode(newNanopubUri + "assertion");
+    const provenanceGraph = namedNode(newNanopubUri + "provenance");
+    const pubinfoGraph = namedNode(newNanopubUri + "pubinfo");
 
     // 1. Generate Head graph
-    const headGraph = namedNode(newSubUri + "Head");
+    const headGraph = namedNode(newNanopubUri + "Head");
     outputStore.addQuad(
       outSub,
       NS.RDF("type"),
@@ -196,67 +213,52 @@ export class NanopubTemplate extends NanopubStore {
     }
 
     // 3. Generate Provenance graph
-    if (pubdata.orcid) {
+    if (pubData.orcid) {
       outputStore.addQuad(
         assertionGraph,
         NS.PROV("wasAttributedTo"),
-        namedNode(cleanOrcidUri(pubdata.orcid)),
+        namedNode(cleanOrcidUri(pubData.orcid)),
         provenanceGraph,
       );
     }
 
     // 4. Generate Pubinfo graph
 
-    // Add creator info
-    if (pubdata.orcid && pubdata.name) {
+    if (pubData.isExample) {
       outputStore.addQuad(
-        namedNode(cleanOrcidUri(pubdata.orcid)),
-        NS.FOAF("name"),
-        literal(pubdata.name),
+        outSub,
+        NS.RDF("type"),
+        NS.NPX("ExampleNanopub"),
         pubinfoGraph,
       );
     }
 
-    // Add signature placeholder (TODO: implement actual signature generation)
-    outputStore.addQuad(
-      namedNode(newSubUri + "sig"),
-      NS.NPX("hasAlgorithm"),
-      namedNode("RSA"),
-      pubinfoGraph,
-    );
-    outputStore.addQuad(
-      namedNode(newSubUri + "sig"),
-      NS.NPX("hasPublicKey"),
-      literal("TODO: Generate public key"),
-      pubinfoGraph,
-    );
-    outputStore.addQuad(
-      namedNode(newSubUri + "sig"),
-      NS.NPX("hasSignature"),
-      literal("TODO: Generate signature"),
-      pubinfoGraph,
-    );
-    outputStore.addQuad(
-      namedNode(newSubUri + "sig"),
-      outSub,
-      NS.NPX("hasSignatureTarget"),
-      pubinfoGraph,
-    );
-    if (pubdata.orcid) {
+    // Add creator info
+    if (pubData.orcid && pubData.name) {
+      outputStore.addQuad(
+        namedNode(cleanOrcidUri(pubData.orcid)),
+        NS.FOAF("name"),
+        literal(pubData.name),
+        pubinfoGraph,
+      );
+    }
+
+    // Add signedBy, the rest of the sig will be generated later
+    if (pubData.orcid) {
       outputStore.addQuad(
         namedNode(newSubUri + "sig"),
         NS.NPX("signedBy"),
-        namedNode(cleanOrcidUri(pubdata.orcid)),
+        namedNode(cleanOrcidUri(pubData.orcid)),
         pubinfoGraph,
       );
     }
 
     // Add metadata
-    if (pubdata.orcid) {
+    if (pubData.orcid) {
       outputStore.addQuad(
         outSub,
         NS.DCT("creator"),
-        namedNode(cleanOrcidUri(pubdata.orcid)),
+        namedNode(cleanOrcidUri(pubData.orcid)),
         pubinfoGraph,
       );
     }
@@ -264,14 +266,14 @@ export class NanopubTemplate extends NanopubStore {
     outputStore.addQuad(
       outSub,
       NS.DCT("created"),
-      literal(now, NS.XSD("dateTime")),
+      literal(pubData.timestamp?.toISOString() ?? now, NS.XSD("dateTime")),
       pubinfoGraph,
     );
     outputStore.addQuad(
       outSub,
       NS.DCT("license"),
       namedNode(
-        pubdata.license ?? "https://creativecommons.org/licenses/by/4.0/",
+        pubData.license ?? "https://creativecommons.org/licenses/by/4.0/",
       ),
       pubinfoGraph,
     );
@@ -346,13 +348,13 @@ export class NanopubTemplate extends NanopubStore {
     // Write placeholder RDF
     // TODO: replace the below code block with proper code to output normalized RDF and generate hash
     // ----------------------------------------------------
-    const hash = await makeHash(quads);
-    const trustyHash = "RA" + hash; // "RA" is the type code for RDF content
-    const actualNanopubUri = `${baseUri}${trustyHash}`;
-    const actualSubUri = `${baseUri}${trustyHash}/`;
+    // const hash = await makeHash(quads);
+    // const trustyHash = "RA" + hash; // "RA" is the type code for RDF content
+    // const actualNanopubUri = `${baseUri}${trustyHash}`;
+    // const actualSubUri = `${baseUri}${trustyHash}/`;
 
-    prefixes.this = actualNanopubUri;
-    prefixes.sub = actualSubUri;
+    // prefixes.this = actualNanopubUri;
+    // prefixes.sub = actualSubUri;
 
     writer.addPrefixes(prefixes);
 
@@ -364,9 +366,17 @@ export class NanopubTemplate extends NanopubStore {
       }
       trigOutput = result;
     });
+
+    const signed = await sign(
+      trigOutput,
+      privateKey,
+      pubData.orcid,
+      pubData.name,
+    );
+
     // ----------------------------------------------------
 
-    return trigOutput;
+    return signed.signedRdf;
   }
 
   /**

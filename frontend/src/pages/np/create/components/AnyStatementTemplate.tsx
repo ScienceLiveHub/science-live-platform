@@ -6,6 +6,7 @@ import {
   templateStatementsToFormedible,
 } from "@/lib/nanopub-template";
 import parse from "html-react-parser";
+import { ExternalLink } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -101,19 +102,18 @@ export default function AnyStatementTemplate({
   return (
     <div className="space-y-6">
       {/* Template header */}
-      <div className="font-bold">{template.metadata.title} </div>{" "}
-      <div className="my-6">{parse(template.templateMetadata.description)}</div>{" "}
-      <div className="text-sm text-muted-foreground">
-        <strong>Template URI:</strong>
+      <div className="flex font-bold">
+        {template.metadata.title}{" "}
         <a
           href={template.metadata.uri}
           target="_blank"
           rel="noopener noreferrer"
           className="ml-2 text-blue-600 hover:underline"
         >
-          {template.metadata.uri}
+          <ExternalLink />
         </a>
-      </div>
+      </div>{" "}
+      <div className="my-6">{parse(template.templateMetadata.description)}</div>{" "}
       {/* Dynamic form */}
       <Form />
     </div>

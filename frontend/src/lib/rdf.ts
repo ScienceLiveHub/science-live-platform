@@ -89,25 +89,37 @@ export async function fetchQuads(
       throw new Error(`Expected content-type ${PREFERRED_FORMAT}, got: ${ct}`);
     }
 
-    // Parse the RDF and run the provided callback on each loaded quad, and optionally each prefix
-    const parser = new Parser();
-    parser.parse(
-      text,
-      (error: any, quad: Quad) => {
-        if (error) {
-          throw new Error(
-            `N3 Failed to parse RDF, make sure it is in the TRiG format. ${error}`,
-          );
-        }
-        if (quad) {
-          quadCallback(quad);
-        }
-      },
-      (prefix: string, prefixNode: RDFT.NamedNode) => {
-        prefixCallback?.(prefix, prefixNode);
-      },
-    );
+    parseRdf(text, quadCallback, prefixCallback);
   }
+}
+
+/**
+ * Parse the RDF string and run the callback on each quad that it finds.
+ *
+ */
+export async function parseRdf(
+  text: string,
+  quadCallback: (quad: Quad) => void,
+  prefixCallback?: (prefix: string, prefixNode: RDFT.NamedNode) => void,
+) {
+  // Parse the RDF and run the provided callback on each loaded quad, and optionally each prefix
+  const parser = new Parser();
+  parser.parse(
+    text,
+    (error: any, quad: Quad) => {
+      if (error) {
+        throw new Error(
+          `N3 Failed to parse RDF, make sure it is in the TRiG format. ${error}`,
+        );
+      }
+      if (quad) {
+        quadCallback(quad);
+      }
+    },
+    (prefix: string, prefixNode: RDFT.NamedNode) => {
+      prefixCallback?.(prefix, prefixNode);
+    },
+  );
 }
 
 /**

@@ -1,4 +1,4 @@
-import { fetchQuads, NS, shrinkUri, Statement } from "@/lib/rdf";
+import { fetchQuads, NS, parseRdf, shrinkUri, Statement } from "@/lib/rdf";
 import { DataFactory, Store as N3Store, NamedNode, Term, Util } from "n3";
 import { getUriEnd, isDoiUri, isNanopubUri, unique } from "./utils";
 
@@ -74,6 +74,27 @@ export class NanopubStore extends N3Store {
     const prefixes: any = {};
     await fetchQuads(
       url,
+      (quad) => store.add(quad),
+      (prefix, prefixNode) => (prefixes[prefix] = prefixNode.value),
+    );
+    store.prefixes = prefixes;
+    store.extractGraphUris();
+    await store.extractMetadata();
+
+    return store;
+  }
+
+  /**
+   * Load a Nanopublication from a string in RDF format
+   *
+   * (Technically this will load any RDF, not just nanopubs)
+   *
+   */
+  static async loadString(rdf: string) {
+    const store = new NanopubStore();
+    const prefixes: any = {};
+    await parseRdf(
+      rdf,
       (quad) => store.add(quad),
       (prefix, prefixNode) => (prefixes[prefix] = prefixNode.value),
     );

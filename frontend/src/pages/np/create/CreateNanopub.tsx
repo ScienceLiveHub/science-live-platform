@@ -20,6 +20,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { authClient } from "@/lib/auth-client";
 import { NanopubTemplate } from "@/lib/nanopub-template";
+import { EXAMPLE_privateKey } from "@/lib/utils";
 import ky from "ky";
 import { ChevronsUpDown, FilePlus } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -83,7 +84,8 @@ export default function CreateNanopub() {
   const [selected, setSelected] = useState("");
   const [inputUri, setInputUri] = useState("");
   const [activeUri, setActiveUri] = useState("");
-  const [isAdvancedMode, setIsAdvancedMode] = useState(false);
+  // TODO: we hardcode it to advanced mode for now until "friendly UX" is implemented
+  const [isAdvancedMode, setIsAdvancedMode] = useState(true);
   const [generatedRdf, setGeneratedRdf] = useState<string>("");
   const [currentUser, setCurrentUser] = useState<any>(null);
 
@@ -189,12 +191,17 @@ export default function CreateNanopub() {
 
       // Apply template to generate RDF
       if (template) {
-        const rdfString = await template.applyTemplate(data, {
-          orcid: currentUser.orcidId,
-          name: currentUser.name,
-        });
+        const rdfString = await template.applyTemplate(
+          data,
+          {
+            orcid: currentUser.orcidId,
+            name: currentUser.name,
+            isExample: true, //TODO: remove hardcode
+          },
+          EXAMPLE_privateKey, //TODO: remove hardcode. Either use the crypto library or nanopub-js generateKeys()
+        );
         setGeneratedRdf(rdfString);
-        console.log("Generated RDF:", rdfString);
+        console.log("Generated RDF:\n", rdfString);
 
         toast.success("Template applied successfully!", {
           description: "RDF generated and displayed below.",
@@ -220,7 +227,7 @@ export default function CreateNanopub() {
           <FilePlus className="mr-4" />
           CREATE NANOPUBLICATION
         </h1>
-        {selected && Comp && (
+        {selected && false && Comp && (
           <div className="flex items-center gap-2">
             <Label htmlFor="advanced-mode" className="text-sm font-medium">
               Advanced Mode
