@@ -142,9 +142,9 @@ export class NanopubTemplate extends NanopubStore {
     },
     privateKey: string,
   ) {
-    // TODO: Generate trusty URI for the new nanopub
+    // TODO: This is incorrect, see the RDF example here https://vemonet.github.io/nanopub-rs/packages/?h=wasm#sign-nanopubs
     const baseUri = pubData.baseUri ?? "https://w3id.org/np/";
-    const newNanopubUri = baseUri + "placeholder"; // Blank space is the placeholder for the hash later on
+    const newNanopubUri = baseUri;
     const newSubUri = `${newNanopubUri}`;
 
     // Create a new store for the generated nanopub
@@ -316,7 +316,7 @@ export class NanopubTemplate extends NanopubStore {
     outputStore.addQuad(outSub, NS.RDFS("label"), literal(label), pubinfoGraph);
 
     // Add template reference
-    const templateUri = this.prefixes["this"] || this.graphUris.head || "";
+    const templateUri = this.metadata.uri;
     if (templateUri) {
       outputStore.addQuad(
         outSub,
@@ -326,40 +326,12 @@ export class NanopubTemplate extends NanopubStore {
       );
     }
 
-    // TODO: or just use DEFAULT_PREFIXES?  Allow user customization? or auto-detect?
-    const prefixes = {
-      this: newNanopubUri,
-      sub: newSubUri,
-      rdfs: NS.RDFS("").value,
-      xsd: NS.XSD("").value,
-      np: NS.NP("").value,
-      npx: NS.NPX("").value,
-      dcterms: NS.DCT("").value,
-      prov: NS.PROV("").value,
-      foaf: NS.FOAF("").value,
-      orcid: "https://orcid.org/",
-    };
-
     // Serialize to TRIG format
+    // Dont need to add prefixes at this point, they will be sorted out by sign() function
     const writer = new Writer();
-
     let trigOutput = "";
     const quads = outputStore.getQuads(null, null, null, null);
-    // Write placeholder RDF
-    // TODO: replace the below code block with proper code to output normalized RDF and generate hash
-    // ----------------------------------------------------
-    // const hash = await makeHash(quads);
-    // const trustyHash = "RA" + hash; // "RA" is the type code for RDF content
-    // const actualNanopubUri = `${baseUri}${trustyHash}`;
-    // const actualSubUri = `${baseUri}${trustyHash}/`;
-
-    // prefixes.this = actualNanopubUri;
-    // prefixes.sub = actualSubUri;
-
-    writer.addPrefixes(prefixes);
-
     writer.addQuads(quads);
-
     writer.end((error: any, result: string) => {
       if (error) {
         throw new Error(`Failed to serialize TRIG: ${error}`);
@@ -374,9 +346,7 @@ export class NanopubTemplate extends NanopubStore {
       pubData.name,
     );
 
-    // ----------------------------------------------------
-
-    return signed.signedRdf;
+    return signed;
   }
 
   /**

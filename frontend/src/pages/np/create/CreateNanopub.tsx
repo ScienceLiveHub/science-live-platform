@@ -2,6 +2,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Command,
   CommandEmpty,
@@ -23,6 +24,7 @@ import { NanopubTemplate } from "@/lib/nanopub-template";
 import { EXAMPLE_privateKey } from "@/lib/utils";
 import ky from "ky";
 import { ChevronsUpDown, FilePlus } from "lucide-react";
+import { publish } from "nanopub-js";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -88,6 +90,9 @@ export default function CreateNanopub() {
   const [isAdvancedMode, setIsAdvancedMode] = useState(true);
   const [generatedRdf, setGeneratedRdf] = useState<string>("");
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [termsAgreed, setTermsAgreed] = useState(false);
+  const [publishComplete, setPublishComplete] = useState(false);
+  const [publishedUri, setPublishedUri] = useState<string>("");
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -191,7 +196,7 @@ export default function CreateNanopub() {
 
       // Apply template to generate RDF
       if (template) {
-        const rdfString = await template.applyTemplate(
+        const signed = await template.applyTemplate(
           data,
           {
             orcid: currentUser.orcidId,
@@ -200,8 +205,10 @@ export default function CreateNanopub() {
           },
           EXAMPLE_privateKey, //TODO: remove hardcode. Either use the crypto library or nanopub-js generateKeys()
         );
-        setGeneratedRdf(rdfString);
-        console.log("Generated RDF:\n", rdfString);
+        setGeneratedRdf(signed.signedRdf);
+        setPublishedUri(signed.sourceUri);
+        setPublishComplete(false);
+        console.log("Generated RDF:\n", signed);
 
         toast.success("Template applied successfully!", {
           description: "RDF generated and displayed below.",
@@ -320,12 +327,60 @@ export default function CreateNanopub() {
       {generatedRdf && (
         <div className="mt-8">
           <h3 className="text-lg font-semibold mb-4">
-            Generated RDF (TRIG format)
+            Nanopublication (TRIG format)
           </h3>
           <div className="bg-muted rounded-lg p-4">
             <pre className="text-sm whitespace-pre-wrap overflow-x-auto max-h-96 overflow-y-auto">
               <code>{generatedRdf}</code>
             </pre>
+          </div>
+          <div className="mt-4 flex flex-col items-end gap-3">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="terms-checkbox"
+                checked={termsAgreed}
+                onCheckedChange={(checked) => setTermsAgreed(checked === true)}
+              />
+              <Label
+                htmlFor="terms-checkbox"
+                className="text-sm cursor-pointer italic w-md"
+              >
+                I agree to the terms and conditions, and acknowledge that once
+                published, a nanopublication is public and cannot be deleted
+                (although it can be later labelled as retracted)
+              </Label>
+            </div>
+            <Button
+              disabled={!termsAgreed || publishComplete}
+              onClick={async () => {
+                try {
+                  const result = await publish(
+                    generatedRdf,
+                    EXAMPLE_privateKey,
+                    currentUser.orcidId,
+                    currentUser.name,
+                  );
+                  setPublishComplete(true);
+                  toast.success(
+                    "Published as an EXAMPLE nanopub.  A link to it will soon be available on your profile page.",
+                  ); // TODO: hardcoded as example
+                } catch {
+                  toast.error("Something went wrong");
+                }
+              }}
+            >
+              Publish
+            </Button>
+            {publishComplete && publishedUri && (
+              <a
+                href={publishedUri}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-primary hover:underline"
+              >
+                {publishedUri}
+              </a>
+            )}
           </div>
         </div>
       )}

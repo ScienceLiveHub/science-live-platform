@@ -49,7 +49,7 @@ describe("NanopubTemplate.applyTemplate", () => {
   it("should apply template with provided values", async () => {
     const template = await NanopubTemplate.loadString(templateRdf);
 
-    const result = await template.applyTemplate(
+    const { signedRdf: result } = await template.applyTemplate(
       testValues,
       pubdata,
       EXAMPLE_privateKey,
@@ -69,7 +69,7 @@ describe("NanopubTemplate.applyTemplate", () => {
   it("should generate correct nanopub structure with required graphs", async () => {
     const template = await NanopubTemplate.loadString(templateRdf);
 
-    const result = await template.applyTemplate(
+    const { signedRdf: result } = await template.applyTemplate(
       testValues,
       pubdata,
       EXAMPLE_privateKey,
@@ -84,7 +84,7 @@ describe("NanopubTemplate.applyTemplate", () => {
   it("should replace placeholder values correctly", async () => {
     const template = await NanopubTemplate.loadString(templateRdf);
 
-    const result = await template.applyTemplate(
+    const { signedRdf: result } = await template.applyTemplate(
       testValues,
       pubdata,
       EXAMPLE_privateKey,
@@ -105,7 +105,7 @@ describe("NanopubTemplate.applyTemplate", () => {
   it("should include creator information", async () => {
     const template = await NanopubTemplate.loadString(templateRdf);
 
-    const result = await template.applyTemplate(
+    const { signedRdf: result } = await template.applyTemplate(
       testValues,
       pubdata,
       EXAMPLE_privateKey,
@@ -122,7 +122,7 @@ describe("NanopubTemplate.applyTemplate", () => {
   it("should interpolate label pattern correctly", async () => {
     const template = await NanopubTemplate.loadString(templateRdf);
 
-    const result = await template.applyTemplate(
+    const { signedRdf: result } = await template.applyTemplate(
       testValues,
       pubdata,
       EXAMPLE_privateKey,
@@ -151,7 +151,7 @@ describe("NanopubTemplate.applyTemplate", () => {
       license: "https://creativecommons.org/licenses/by/4.0/",
     };
 
-    const result = await template.applyTemplate(
+    const { signedRdf: result } = await template.applyTemplate(
       testValues,
       pubdata,
       EXAMPLE_privateKey,
@@ -192,7 +192,7 @@ describe("NanopubTemplate.applyTemplate", () => {
       timestamp: new Date("2025-01-01T00:00:00.000Z"),
     };
 
-    const result = await template.applyTemplate(
+    const { signedRdf: result } = await template.applyTemplate(
       testValues,
       pubdata,
       EXAMPLE_privateKey,

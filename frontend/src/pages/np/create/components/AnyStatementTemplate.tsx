@@ -60,7 +60,7 @@ export default function AnyStatementTemplate({
     schema,
     layout: { type: "grid", columns: 3 },
     fields,
-    submitLabel: "Publish",
+    submitLabel: "Generate Nanopublication",
     resetOnSubmitSuccess: false,
     collapseLabel: "Hide",
     expandLabel: "Show",
