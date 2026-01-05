@@ -1,7 +1,7 @@
 import { FieldWrapper } from "@/components/formedible/fields/base-field-wrapper";
 import * as RDFT from "@rdfjs/types";
 import { DataFactory, Store, Writer } from "n3";
-import { sign } from "nanopub-js";
+import { DEFAULT_NANOPUB_URI, sign } from "nanopub-js";
 import z from "zod";
 import { FieldConfig } from "./formedible/types";
 import { NanopubStore } from "./nanopub-store";
@@ -142,8 +142,7 @@ export class NanopubTemplate extends NanopubStore {
     },
     privateKey: string,
   ) {
-    // TODO: This is incorrect, see the RDF example here https://vemonet.github.io/nanopub-rs/packages/?h=wasm#sign-nanopubs
-    const baseUri = pubData.baseUri ?? "https://w3id.org/np/";
+    const baseUri = DEFAULT_NANOPUB_URI;
     const newNanopubUri = baseUri;
     const newSubUri = `${newNanopubUri}`;
 
@@ -174,7 +173,7 @@ export class NanopubTemplate extends NanopubStore {
     const provenanceGraph = namedNode(newNanopubUri + "provenance");
     const pubinfoGraph = namedNode(newNanopubUri + "pubinfo");
 
-    // 1. Generate Head graph
+    // ---- 1. HEAD graph, standard: declares RDF type, and points to other three graphs
     const headGraph = namedNode(newNanopubUri + "Head");
     outputStore.addQuad(
       outSub,
@@ -201,7 +200,7 @@ export class NanopubTemplate extends NanopubStore {
       headGraph,
     );
 
-    // 2. Generate Assertion graph by processing template statements
+    // ---- 2. ASSERTION graph, created by processing template statements
 
     // Process each statement from the template
     for (const [_statementId, statement] of this.statements) {
@@ -212,17 +211,18 @@ export class NanopubTemplate extends NanopubStore {
       outputStore.addQuad(subject, predicate, object, assertionGraph);
     }
 
-    // 3. Generate Provenance graph
-    if (pubData.orcid) {
-      outputStore.addQuad(
-        assertionGraph,
-        NS.PROV("wasAttributedTo"),
-        namedNode(cleanOrcidUri(pubData.orcid)),
-        provenanceGraph,
-      );
-    }
+    const orcidNode = namedNode(cleanOrcidUri(pubData.orcid));
 
-    // 4. Generate Pubinfo graph
+    // ---- 3. PROVENANCE graph
+
+    outputStore.addQuad(
+      assertionGraph,
+      NS.PROV("wasAttributedTo"),
+      orcidNode,
+      provenanceGraph,
+    );
+
+    // ---- 4. PUBINFO graph
 
     if (pubData.isExample) {
       outputStore.addQuad(
@@ -234,9 +234,9 @@ export class NanopubTemplate extends NanopubStore {
     }
 
     // Add creator info
-    if (pubData.orcid && pubData.name) {
+    if (pubData.name) {
       outputStore.addQuad(
-        namedNode(cleanOrcidUri(pubData.orcid)),
+        orcidNode,
         NS.FOAF("name"),
         literal(pubData.name),
         pubinfoGraph,
@@ -244,24 +244,16 @@ export class NanopubTemplate extends NanopubStore {
     }
 
     // Add signedBy, the rest of the sig will be generated later
-    if (pubData.orcid) {
-      outputStore.addQuad(
-        namedNode(newSubUri + "sig"),
-        NS.NPX("signedBy"),
-        namedNode(cleanOrcidUri(pubData.orcid)),
-        pubinfoGraph,
-      );
-    }
+    outputStore.addQuad(
+      namedNode(newSubUri + "sig"),
+      NS.NPX("signedBy"),
+      orcidNode,
+      pubinfoGraph,
+    );
 
-    // Add metadata
-    if (pubData.orcid) {
-      outputStore.addQuad(
-        outSub,
-        NS.DCT("creator"),
-        namedNode(cleanOrcidUri(pubData.orcid)),
-        pubinfoGraph,
-      );
-    }
+    outputStore.addQuad(outSub, NS.DCT("creator"), orcidNode, pubinfoGraph);
+
+    // Add other metadata
     const now = new Date().toISOString();
     outputStore.addQuad(
       outSub,
@@ -269,6 +261,7 @@ export class NanopubTemplate extends NanopubStore {
       literal(pubData.timestamp?.toISOString() ?? now, NS.XSD("dateTime")),
       pubinfoGraph,
     );
+    //TODO: should the license default to  CC BY 4.0?
     outputStore.addQuad(
       outSub,
       NS.DCT("license"),

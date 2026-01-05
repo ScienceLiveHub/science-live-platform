@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getUriEnd, getUriFragment, isNanopubUri } from "./utils";
+import { getUriEnd, getUriFragment, isNanopubUri } from "../src/lib/utils";
 
 describe("isNanopubUri", () => {
   it("should return true for valid nanopub URI with 45-character hash", () => {
