@@ -12,7 +12,7 @@ import {
 } from "./rdf";
 import { cleanOrcidUri, getUriEnd } from "./utils";
 
-const { namedNode, literal } = DataFactory;
+const { namedNode, literal, blankNode } = DataFactory;
 
 // Template placeholder types
 // Get these from https://w3id.org/np/o/ntemplate/
@@ -55,8 +55,17 @@ export interface TemplateField {
  * Is this a repeatable statement?
  */
 function isRepeatable(statement: Statement) {
-  return statement.types?.includes(
-    "https://w3id.org/np/o/ntemplate/RepeatableStatement",
+  return statement.types?.some(
+    (t) => t.value === "https://w3id.org/np/o/ntemplate/RepeatableStatement",
+  );
+}
+
+/**
+ * Is this an optional statement?
+ */
+function isOptional(statement: Statement) {
+  return statement.types?.some(
+    (t) => t.value === "https://w3id.org/np/o/ntemplate/OptionalStatement",
   );
 }
 
@@ -84,12 +93,16 @@ function getPlaceholderType(typeUri: string): PlaceholderType {
 
 type Statement = {
   id: string;
-  types?: string[];
-  subject: string;
-  predicate: string;
-  object: string;
+  types?: RDFT.Term[];
+  subject: RDFT.Quad_Subject;
+  predicate: RDFT.Quad_Predicate;
+  object: RDFT.Quad_Object;
 };
 type Statements = Map<string, Statement>;
+
+function termValue(term: RDFT.Term): string {
+  return term.value;
+}
 
 export type TemplateMetadata = {
   description: string;
@@ -175,13 +188,74 @@ export class NanopubTemplate extends NanopubStore {
       return uri;
     };
 
-    // Helper function to create a statement and terms with placeholder replacement
-    const createTerm = (
-      placeholderId: string,
+    const shouldPlaceholderBeLiteral = (placeholderId: string): boolean => {
+      const placeholderField = this.fields.find((f) => f.id === placeholderId);
+      const placeholderType = placeholderField?.type as
+        | PlaceholderType
+        | undefined;
+      return (
+        placeholderType === PlaceholderType.LITERAL ||
+        placeholderType === PlaceholderType.LONG_LITERAL ||
+        placeholderType === PlaceholderType.TEXT_PLACEHOLDER ||
+        placeholderType === PlaceholderType.VALUE
+      );
+    };
+
+    const createLiteralFromTemplate = (t: RDFT.Literal) => {
+      if (t.language) return literal(t.value, t.language);
+      if (t.datatype) return literal(t.value, namedNode(t.datatype.value));
+      return literal(t.value);
+    };
+
+    const createSubjectTerm = (
+      templateTerm: RDFT.Quad_Subject,
       values: Record<string, string>,
-    ): RDFT.NamedNode<string> => {
+    ): RDFT.Quad_Subject => {
+      if (templateTerm.termType === "BlankNode") {
+        return blankNode(templateTerm.value);
+      }
+
+      const placeholderId = templateTerm.value;
       const replacedValue = getPlaceholderValue(placeholderId, values);
+      if (shouldPlaceholderBeLiteral(placeholderId)) {
+        throw new Error(
+          `Placeholder '${placeholderId}' is a literal placeholder but is used as a subject`,
+        );
+      }
       return namedNode(replacedValue);
+    };
+
+    const createPredicateTerm = (
+      templateTerm: RDFT.Quad_Predicate,
+      values: Record<string, string>,
+    ): RDFT.Quad_Predicate => {
+      const placeholderId = templateTerm.value;
+      const replacedValue = getPlaceholderValue(placeholderId, values);
+      if (shouldPlaceholderBeLiteral(placeholderId)) {
+        throw new Error(
+          `Placeholder '${placeholderId}' is a literal placeholder but is used as a predicate`,
+        );
+      }
+      return namedNode(replacedValue);
+    };
+
+    const createObjectTerm = (
+      templateTerm: RDFT.Quad_Object,
+      values: Record<string, string>,
+    ): RDFT.Quad_Object => {
+      if (templateTerm.termType === "Literal") {
+        return createLiteralFromTemplate(templateTerm);
+      }
+
+      if (templateTerm.termType === "BlankNode") {
+        return blankNode(templateTerm.value);
+      }
+
+      const placeholderId = templateTerm.value;
+      const replacedValue = getPlaceholderValue(placeholderId, values);
+      return shouldPlaceholderBeLiteral(placeholderId)
+        ? literal(replacedValue)
+        : namedNode(replacedValue);
     };
 
     const outSub = namedNode(newNanopubUri);
@@ -189,7 +263,8 @@ export class NanopubTemplate extends NanopubStore {
     const provenanceGraph = namedNode(newNanopubUri + "provenance");
     const pubinfoGraph = namedNode(newNanopubUri + "pubinfo");
 
-    // ---- 1. HEAD graph, standard: declares RDF type, and points to other three graphs
+    // ---- 1. HEAD graph, standard: declares RDF type, and points to the other three graphs
+
     const headGraph = namedNode(newNanopubUri + "Head");
     outputStore.addQuad(
       outSub,
@@ -221,9 +296,9 @@ export class NanopubTemplate extends NanopubStore {
     // Process each statement from the template
     for (const [statementId, statement] of this.statements) {
       const addStatement = (s: Statement, values: Record<string, string>) => {
-        const subject = createTerm(s.subject, values);
-        const predicate = createTerm(s.predicate, values);
-        const object = createTerm(s.object, values);
+        const subject = createSubjectTerm(s.subject, values);
+        const predicate = createPredicateTerm(s.predicate, values);
+        const object = createObjectTerm(s.object, values);
         outputStore.addQuad(subject, predicate, object, assertionGraph);
       };
       const statementName = getUriEnd(statementId) || statement.id;
@@ -445,6 +520,7 @@ export class NanopubTemplate extends NanopubStore {
       statementsPropertyMap,
       (q) => (props.statements as string[])?.includes(q.subject.value),
       this.graphUris.assertion,
+      true,
     );
 
     // ---- 4. match up properties of statements to contained placeholders
@@ -453,10 +529,7 @@ export class NanopubTemplate extends NanopubStore {
       // It's optional if it appears only in optional statements and doesn't appear in any non-optional statements
       const required = Object.values(statements).some(
         (q: Statement) =>
-          q.object === pk &&
-          q.types?.includes(
-            "https://w3id.org/np/o/ntemplate/OptionalStatement",
-          ),
+          termValue(q.object as unknown as RDFT.Term) === pk && isOptional(q),
       );
 
       // Get options for restricted choice placeholders
@@ -597,7 +670,8 @@ export function templateStatementsToFormedible(
     const statement = s as Statement;
 
     const makeFieldFrom = (part: "subject" | "predicate" | "object") => {
-      const objectField = fields.find((f) => f.id === statement[part]);
+      const v = termValue(statement[part] as unknown as RDFT.Term);
+      const objectField = fields.find((f) => f.id === v);
       let baseField: FieldConfig;
       if (objectField) {
         baseField = {
@@ -619,7 +693,7 @@ export function templateStatementsToFormedible(
           type: "static",
           label: part,
           required: false,
-          defaultValue: statement[part],
+          defaultValue: v,
           section: { title: `Statement ${getUriEnd(k)}` },
           // component: FieldWrapper,
         };

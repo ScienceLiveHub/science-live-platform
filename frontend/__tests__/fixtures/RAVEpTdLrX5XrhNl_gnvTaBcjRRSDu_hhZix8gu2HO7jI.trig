@@ -1,0 +1,78 @@
+@prefix ns1: <http://purl.org/np/> .
+@prefix this: <http://purl.org/np/RAVEpTdLrX5XrhNl_gnvTaBcjRRSDu_hhZix8gu2HO7jI> .
+@prefix sub: <http://purl.org/np/RAVEpTdLrX5XrhNl_gnvTaBcjRRSDu_hhZix8gu2HO7jI#> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix nt: <https://w3id.org/np/o/ntemplate/> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix orcid: <https://orcid.org/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+
+sub:Head {
+  this: a np:Nanopublication;
+    np:hasAssertion sub:assertion;
+    np:hasProvenance sub:provenance;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+  dct:creator rdfs:label "is written by - connects an agent (left) to a thing the agent created (right)" .
+  
+  sub:assertion a nt:AssertionTemplate;
+    dct:description "Such a nanopublication includes a text that refers to an existing paper or other document, such as stating an agreement or a correction. The reference to the existing paper is based on the <a href=\"https://sparontologies.github.io/cito/current/cito.html\" target=\"_blank\">Citation Typing Ontology (CiTO)</a>.";
+    rdfs:label "Commenting on or evaluating a paper (using CiTO)";
+    nt:hasNanopubLabelPattern "${relation} ${paper}";
+    nt:hasStatement sub:st1, sub:st2, sub:st3;
+    nt:hasTag "Comments";
+    nt:hasTargetNanopubType <http://purl.org/spar/cito/cites> .
+  
+  sub:paper a nt:UriPlaceholder;
+    rdfs:label "URL of paper" .
+  
+  sub:relation a nt:RestrictedChoicePlaceholder;
+    rdfs:label "choose relation";
+    nt:possibleValuesFrom ns1:RAJb-zZdFrNzgwxmMzFstFeKTZAJImhMGNL-IzEJY4kx8 .
+  
+  sub:st1 rdf:object nt:CREATOR;
+    rdf:predicate dct:creator;
+    rdf:subject nt:ASSERTION .
+  
+  sub:st2 rdf:object sub:paper;
+    rdf:predicate sub:relation;
+    rdf:subject nt:ASSERTION .
+  
+  sub:st3 rdf:object sub:text;
+    rdf:predicate rdfs:comment;
+    rdf:subject nt:ASSERTION .
+  
+  sub:text a nt:LongLiteralPlaceholder;
+    rdfs:label "your text (max. 500 characters)";
+    nt:hasRegex "[\\s\\S]{0,500}" .
+  
+  rdfs:comment rdfs:label "has the text - states a comment (right) about a thing (left)" .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo orcid:0000-0002-1267-0234 .
+}
+
+sub:pubinfo {
+  sub:sig npx:hasAlgorithm "RSA";
+    npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCjDGQCS1S+SRnERDuYDXOugdYUP0efEquHJEEHAbU/uLzBVlga89zqrNPCS7fBE6lArBUWEmT8eLKdMapyqvAzI1J3jUWTMhDJF+XFBkUiuiFfNSc4vJJcmi0yujtnuzXsRIG202jyaP4f5ULoskFwaZOSBZJfiE0dsB3D7DTIAQIDAQAB";
+    npx:hasSignature "gMPUT0+n5KRQAcLz47HgWw9WvixJHR5GV6LSt999u5dzzxXWGBhkSbllcUPAgkK3L+X+9dQF739ImrYgj4K0yrA1BeBBtkqZ5oQX7Q5zAagJEhpxo0gdt0c82SCuYFhvZiyprdM/Ur7nyFTsqVaBpJSSoylxZdtrcU1oFTeKFwc=";
+    npx:hasSignatureTarget this: .
+  
+  this: dct:created "2023-08-15T13:53:33.424Z"^^xsd:dateTime;
+    dct:creator orcid:0000-0002-1267-0234;
+    dct:license <https://creativecommons.org/licenses/by/4.0/>;
+    npx:supersedes ns1:RANWGVogb5j_VQ6A4nabA34_-zkZTRYNYtItRJXGf2TVQ;
+    rdfs:label "Template: Commenting on or evaluating a paper (using CiTO)";
+    nt:wasCreatedFromProvenanceTemplate ns1:RANwQa4ICWS5SOjw7gp99nBpXBasapwtZF1fIM3H2gYTM;
+    nt:wasCreatedFromPubinfoTemplate ns1:RAA2MfqdBCzmz9yVWjKLXNbyfBNcwsMmOqcNUxkk1maIM,
+      ns1:RAh1gm83JiG5M6kDxXhaYT1l49nCzyrckMvTzcPn-iv90, ns1:RAjpBMlw3owYhJUBo3DtsuDlXsNAJ8cnGeWAutDVjuAuI;
+    nt:wasCreatedFromTemplate ns1:RANjqEfLnGSzLuq0heRSXN0psYWW0oX4v3W8w7osb3xfs .
+}
+

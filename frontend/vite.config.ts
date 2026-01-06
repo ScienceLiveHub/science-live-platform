@@ -35,14 +35,8 @@ export default defineConfig(({ mode }) => {
     },
     optimizeDeps: {
       // Don't pre-bundle WASM modules
-      exclude: [
-        "nanopub-js",
-      ],
-      include: [
-        "react",
-        "react-dom",
-        "react-router-dom",
-      ],
+      exclude: ["nanopub-js"],
+      include: ["react", "react-dom", "react-router-dom"],
       // Force optimization even for large dependencies
       esbuildOptions: {
         target: "esnext",

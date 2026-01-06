@@ -183,7 +183,7 @@ export function shrinkUri(
 }
 
 /**
- * Extract all the properties of a subject from the graph.
+ * Extract all the properties of a subject from the graph (properties as string values, or nodes if returnNodes = true).
  *
  * - Supports multiple predicates mapping to the same property (hence predicates are specified in an array).
  * - Supports strings and arrays of strings for properties (props with the suffix `_$array` are treated as arrays).
@@ -208,6 +208,7 @@ export function extractSubjectProps(
   sub: NamedNode,
   propertyMap: Record<string, (NamedNode | ((q: Quad) => boolean))[]>,
   graphUri?: string | null,
+  returnNodes = false,
 ) {
   const outputObj: any = {};
   store.forEach((quad) => {
@@ -228,11 +229,9 @@ export function extractSubjectProps(
           if (!outputObj[key]) {
             outputObj[key] = [];
           }
-          // TODO: probably should change these to Terms rather than just the value string.
-          // Otherwise, information about the Term type is lost which we may need later on, e.g. when generating RDF from template statements
-          outputObj[key].push(quad.object.value);
+          outputObj[key].push(returnNodes ? quad.object : quad.object.value);
         } else {
-          outputObj[key] = quad.object.value;
+          outputObj[key] = returnNodes ? quad.object : quad.object.value;
         }
       }
     }
@@ -252,6 +251,7 @@ export function extractSubjects(
   predicate?: string | null,
   object?: string | null,
   graphUri?: string | null,
+  returnNodes = false,
 ) {
   const outputObj: Map<string, any> = new Map();
   store.forSubjects(
@@ -259,7 +259,13 @@ export function extractSubjects(
       // let fragment = getUriFragment(sub.value);
       outputObj.set(
         /*fragment ??*/ sub.value,
-        extractSubjectProps(store, namedNode(sub.value), propertyMap),
+        extractSubjectProps(
+          store,
+          namedNode(sub.value),
+          propertyMap,
+          undefined,
+          returnNodes,
+        ),
       );
     },
     predicate ?? null,
@@ -277,6 +283,7 @@ export function extractSubjectsFiltered(
   propertyMap: Record<string, (NamedNode | ((q: Quad) => boolean))[]>,
   filter: (q: RDFT.Quad) => boolean,
   graphUri?: string | null,
+  returnNodes = false,
 ) {
   const outputObj: Map<string, any> = new Map();
 
@@ -288,7 +295,13 @@ export function extractSubjectsFiltered(
   filtered?.forEach((sub) => {
     outputObj.set(
       sub,
-      extractSubjectProps(store, namedNode(sub), propertyMap, graphUri),
+      extractSubjectProps(
+        store,
+        namedNode(sub),
+        propertyMap,
+        graphUri,
+        returnNodes,
+      ),
     );
   });
 
