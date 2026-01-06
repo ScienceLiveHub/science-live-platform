@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -12,10 +12,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
 import type { ComboboxFieldSpecificProps } from "@/lib/formedible/types";
+import { cn } from "@/lib/utils";
+import { Check, ChevronsUpDown } from "lucide-react";
+import React, { useState } from "react";
 import { FieldWrapper } from "./base-field-wrapper";
 
 export const ComboboxField: React.FC<ComboboxFieldSpecificProps> = ({
@@ -46,7 +46,7 @@ export const ComboboxField: React.FC<ComboboxFieldSpecificProps> = ({
   });
 
   const selectedOption = normalizedOptions.find(
-    (option) => option.value === value
+    (option) => option.value === value,
   );
 
   const onSelect = (selectedValue: string) => {
@@ -62,7 +62,7 @@ export const ComboboxField: React.FC<ComboboxFieldSpecificProps> = ({
   const triggerClassName = cn(
     "w-full justify-between",
     inputClassName,
-    hasErrors ? "border-destructive" : ""
+    hasErrors ? "border-destructive" : "",
   );
 
   const displayPlaceholder =
@@ -114,7 +114,7 @@ export const ComboboxField: React.FC<ComboboxFieldSpecificProps> = ({
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",
-                        value === option.value ? "opacity-100" : "opacity-0"
+                        value === option.value ? "opacity-100" : "opacity-0",
                       )}
                     />
                     {option.label}

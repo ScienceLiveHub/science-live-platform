@@ -1,30 +1,30 @@
 "use client";
-import React, { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, GripVertical } from "lucide-react";
 import type { ArrayFieldProps } from "@/lib/formedible/types";
-import { FieldWrapper } from "./base-field-wrapper";
-import { NestedFieldRenderer } from "./shared-field-renderer";
 import {
-  DndContext,
   closestCenter,
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
   KeyboardSensor,
   PointerSensor,
+  UniqueIdentifier,
   useSensor,
   useSensors,
-  DragEndEvent,
-  DragStartEvent,
-  DragOverlay,
-  UniqueIdentifier,
 } from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
   useSortable,
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { GripVertical, Plus, Trash2 } from "lucide-react";
+import React, { useCallback, useMemo, useState } from "react";
+import { FieldWrapper } from "./base-field-wrapper";
+import { NestedFieldRenderer } from "./shared-field-renderer";
 
 // Sortable item component
 interface SortableItemProps {
@@ -119,7 +119,7 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
 
   const value = useMemo(
     () => (fieldApi.state?.value as unknown[]) || [],
-    [fieldApi.state?.value]
+    [fieldApi.state?.value],
   );
 
   const {
@@ -164,7 +164,7 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
       CustomItemComponent,
       itemProps,
       objectConfig,
-    ]
+    ],
   );
 
   const addItem = useCallback(() => {
@@ -182,7 +182,7 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
       fieldApi.handleChange(newValue);
       fieldApi.handleBlur();
     },
-    [value, minItems, fieldApi]
+    [value, minItems, fieldApi],
   );
 
   const updateItem = useCallback(
@@ -191,7 +191,7 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
       newValue[index] = newItemValue;
       fieldApi.handleChange(newValue);
     },
-    [value, fieldApi]
+    [value, fieldApi],
   );
 
   // DnD Kit state and handlers
@@ -207,40 +207,43 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   // Create unique IDs for each array item
   const itemIds = useMemo(
     () => value.map((_, index) => `array-item-${index}`),
-    [value]
+    [value],
   );
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
     setActiveId(active.id);
-    
+
     // Extract index from ID
-    const index = parseInt(active.id.toString().split('-').pop() || '0');
+    const index = parseInt(active.id.toString().split("-").pop() || "0");
     setDraggedItemIndex(index);
   }, []);
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
 
-    if (active.id !== over?.id && sortable) {
-      const oldIndex = itemIds.indexOf(active.id.toString());
-      const newIndex = itemIds.indexOf(over!.id.toString());
-      
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newValue = arrayMove(value, oldIndex, newIndex);
-        fieldApi.handleChange(newValue);
+      if (active.id !== over?.id && sortable) {
+        const oldIndex = itemIds.indexOf(active.id.toString());
+        const newIndex = itemIds.indexOf(over!.id.toString());
+
+        if (oldIndex !== -1 && newIndex !== -1) {
+          const newValue = arrayMove(value, oldIndex, newIndex);
+          fieldApi.handleChange(newValue);
+        }
       }
-    }
 
-    setActiveId(null);
-    setDraggedItemIndex(null);
-  }, [itemIds, value, fieldApi, sortable]);
+      setActiveId(null);
+      setDraggedItemIndex(null);
+    },
+    [itemIds, value, fieldApi, sortable],
+  );
 
   // Create a mock field API for each item
   const createItemFieldApi = useCallback(
@@ -260,7 +263,7 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
         form: fieldApi.form,
       };
     },
-    [name, value, updateItem, fieldApi]
+    [name, value, updateItem, fieldApi],
   );
 
   const canAddMore = value.length < maxItems;
@@ -269,7 +272,7 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
   // Render the dragged item for overlay
   const renderDraggedItem = useCallback(() => {
     if (draggedItemIndex === null) return null;
-    
+
     return (
       <div className="flex items-start gap-2 p-3 border rounded-lg bg-card shadow-lg opacity-90">
         {sortable && (
@@ -287,19 +290,17 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
             }
           />
         </div>
-        {canRemove && (
-          <div className="mt-2 h-8 w-8 p-0" />
-        )}
+        {canRemove && <div className="mt-2 h-8 w-8 p-0" />}
       </div>
     );
   }, [
-    draggedItemIndex, 
-    sortable, 
-    createItemFieldConfig, 
-    createItemFieldApi, 
-    fieldApi.form, 
-    value, 
-    canRemove
+    draggedItemIndex,
+    sortable,
+    createItemFieldConfig,
+    createItemFieldApi,
+    fieldApi.form,
+    value,
+    canRemove,
   ]);
 
   return (
@@ -318,7 +319,7 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <SortableContext 
+          <SortableContext
             items={itemIds}
             strategy={verticalListSortingStrategy}
             disabled={!sortable || isDisabled}
@@ -356,10 +357,8 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
               )}
             </div>
           </SortableContext>
-          
-          <DragOverlay>
-            {activeId ? renderDraggedItem() : null}
-          </DragOverlay>
+
+          <DragOverlay>{activeId ? renderDraggedItem() : null}</DragOverlay>
         </DndContext>
 
         {canAddMore && (

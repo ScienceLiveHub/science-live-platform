@@ -1,7 +1,7 @@
 "use client";
-import React from "react";
-import { cn } from "@/lib/utils";
 import type { FormGridProps } from "@/lib/formedible/types";
+import { cn } from "@/lib/utils";
+import React from "react";
 
 export interface GridItemProps {
   gridColumn?: number;
@@ -21,7 +21,7 @@ export const GridItem: React.FC<GridItemProps> = ({
   children,
 }) => {
   const gridStyles: React.CSSProperties = {};
-  
+
   if (gridArea) {
     gridStyles.gridArea = gridArea;
   } else {
@@ -47,11 +47,7 @@ export const GridItem: React.FC<GridItemProps> = ({
     }
   }
 
-  return (
-    <div style={gridStyles}>
-      {children}
-    </div>
-  );
+  return <div style={gridStyles}>{children}</div>;
 };
 
 export const FormGrid: React.FC<FormGridProps> = ({
@@ -64,7 +60,7 @@ export const FormGrid: React.FC<FormGridProps> = ({
   // Filter out null, undefined, and false children to prevent empty grid cells
   const validChildren = React.Children.toArray(children).filter(
     // @ts-expect-error raf de ta mr2
-    (child) => child !== null && child !== undefined && child !== false
+    (child) => child !== null && child !== undefined && child !== false,
   );
   // If no valid children, render nothing
   if (validChildren.length === 0) {
@@ -87,10 +83,10 @@ export const FormGrid: React.FC<FormGridProps> = ({
     "10": "gap-10",
     "11": "gap-11",
     "12": "gap-12",
-    "sm": "gap-2",
-    "md": "gap-4",
-    "lg": "gap-6",
-    "xl": "gap-8",
+    sm: "gap-2",
+    md: "gap-4",
+    lg: "gap-6",
+    xl: "gap-8",
   };
 
   const gridColsClasses = {
@@ -119,7 +115,7 @@ export const FormGrid: React.FC<FormGridProps> = ({
           "lg:grid-cols-4": actualColumns >= 4 && columns >= 4,
         }
       : gridColsClasses[actualColumns as keyof typeof gridColsClasses],
-    className
+    className,
   );
 
   return <div className={gridClasses}>{validChildren}</div>;

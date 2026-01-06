@@ -1,9 +1,9 @@
-import React from "react";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { PaperclipIcon, XIcon, UploadCloudIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import type { BaseFieldProps } from "@/lib/formedible/types";
+import { cn } from "@/lib/utils";
+import { PaperclipIcon, UploadCloudIcon, XIcon } from "lucide-react";
+import React from "react";
 import { FieldWrapper } from "./base-field-wrapper";
 
 interface FileUploadFieldSpecificProps extends BaseFieldProps {
@@ -100,7 +100,7 @@ export const FileUploadField: React.FC<FileUploadFieldSpecificProps> = ({
               hasErrors
                 ? "border-destructive hover:border-destructive"
                 : "border-muted-foreground/50",
-              isDisabled && "opacity-50 cursor-not-allowed"
+              isDisabled && "opacity-50 cursor-not-allowed",
             )}
             disabled={isDisabled}
           >

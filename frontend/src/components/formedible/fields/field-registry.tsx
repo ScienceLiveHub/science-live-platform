@@ -1,30 +1,30 @@
-'use client';
-import React from 'react';
-import type { BaseFieldProps } from '@/lib/formedible/types';
+"use client";
+import type { BaseFieldProps } from "@/lib/formedible/types";
+import React from "react";
 
 // Import all field components
-import { TextField } from './text-field';
-import { TextareaField } from './textarea-field';
-import { NumberField } from './number-field';
-import { SelectField } from './select-field';
-import { MultiSelectField } from './multi-select-field';
-import { CheckboxField } from './checkbox-field';
-import { SwitchField } from './switch-field';
-import { RadioField } from './radio-field';
-import { SliderField } from './slider-field';
-import { DateField } from './date-field';
-import { RatingField } from './rating-field';
-import { PhoneField } from './phone-field';
-import { ColorPickerField } from './color-picker-field';
-import { FileUploadField } from './file-upload-field';
-import { ArrayField } from './array-field';
-import { AutocompleteField } from './autocomplete-field';
-import { DurationPickerField } from './duration-picker-field';
-import { LocationPickerField } from './location-picker-field';
-import { MaskedInputField } from './masked-input-field';
-import { ObjectField } from './object-field';
-import { ComboboxField } from './combobox-field';
-import { MultiComboboxField } from './multicombobox-field';
+import { ArrayField } from "./array-field";
+import { AutocompleteField } from "./autocomplete-field";
+import { CheckboxField } from "./checkbox-field";
+import { ColorPickerField } from "./color-picker-field";
+import { ComboboxField } from "./combobox-field";
+import { DateField } from "./date-field";
+import { DurationPickerField } from "./duration-picker-field";
+import { FileUploadField } from "./file-upload-field";
+import { LocationPickerField } from "./location-picker-field";
+import { MaskedInputField } from "./masked-input-field";
+import { MultiSelectField } from "./multi-select-field";
+import { MultiComboboxField } from "./multicombobox-field";
+import { NumberField } from "./number-field";
+import { ObjectField } from "./object-field";
+import { PhoneField } from "./phone-field";
+import { RadioField } from "./radio-field";
+import { RatingField } from "./rating-field";
+import { SelectField } from "./select-field";
+import { SliderField } from "./slider-field";
+import { SwitchField } from "./switch-field";
+import { TextField } from "./text-field";
+import { TextareaField } from "./textarea-field";
 
 // Type-safe field component registry with flexible props
 export interface FieldComponentProps extends BaseFieldProps {
@@ -66,7 +66,7 @@ export const getFieldComponent = (type: string): FieldComponent | null => {
 // Helper function to create properly typed field props
 export const createFieldProps = (
   baseProps: BaseFieldProps,
-  additionalProps: Record<string, unknown> = {}
+  additionalProps: Record<string, unknown> = {},
 ): FieldComponentProps => {
   return {
     ...baseProps,

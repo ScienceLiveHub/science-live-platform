@@ -1,8 +1,8 @@
 "use client";
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import { Check, X, Loader2 } from "lucide-react";
 import type { InlineValidationWrapperProps } from "@/lib/formedible/types";
+import { cn } from "@/lib/utils";
+import { Check, Loader2, X } from "lucide-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 export const InlineValidationWrapper: React.FC<
   InlineValidationWrapperProps
@@ -52,13 +52,13 @@ export const InlineValidationWrapper: React.FC<
         });
       }
     },
-    [enabled, asyncValidator]
+    [enabled, asyncValidator],
   );
 
   // Debounced validation function
   const debouncedValidate = useMemo(
     () => debounce(validateValue, debounceMs),
-    [validateValue, debounceMs]
+    [validateValue, debounceMs],
   );
 
   // Trigger validation when value changes
@@ -149,7 +149,7 @@ export const InlineValidationWrapper: React.FC<
             "text-xs mt-1 flex items-center gap-1",
             hasErrors || validationState.isValid === false
               ? "text-destructive"
-              : "text-muted-foreground"
+              : "text-muted-foreground",
           )}
         >
           {typeof validationMessage === "string"
@@ -164,7 +164,7 @@ export const InlineValidationWrapper: React.FC<
 // Debounce utility function
 function debounce<T extends (...args: any[]) => any>(
   func: T,
-  wait: number
+  wait: number,
 ): (...args: Parameters<T>) => void {
   let timeout: ReturnType<typeof setTimeout>;
 

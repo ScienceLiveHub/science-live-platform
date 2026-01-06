@@ -1,10 +1,9 @@
 "use client";
-import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 import type { TextFieldSpecificProps } from "@/lib/formedible/types";
+import { cn } from "@/lib/utils";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FieldWrapper } from "./base-field-wrapper";
-
 
 export const TextField: React.FC<TextFieldSpecificProps> = ({
   fieldApi,
@@ -20,11 +19,12 @@ export const TextField: React.FC<TextFieldSpecificProps> = ({
   const name = fieldApi.name;
   const value = fieldApi.state?.value as string | number | undefined;
   const isDisabled = fieldApi.form?.state?.isSubmitting ?? false;
-  const hasErrors = fieldApi.state?.meta?.isTouched && fieldApi.state?.meta?.errors?.length > 0;
+  const hasErrors =
+    fieldApi.state?.meta?.isTouched && fieldApi.state?.meta?.errors?.length > 0;
 
   // Datalist state
   const [datalistOptions, setDatalistOptions] = useState<string[]>(
-    datalist?.options || []
+    datalist?.options || [],
   );
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
   const [lastQuery, setLastQuery] = useState("");
@@ -66,7 +66,7 @@ export const TextField: React.FC<TextFieldSpecificProps> = ({
         setIsLoadingOptions(false);
       }
     },
-    [datalist, lastQuery]
+    [datalist, lastQuery],
   );
 
   // Debounced effect for async options
@@ -86,7 +86,7 @@ export const TextField: React.FC<TextFieldSpecificProps> = ({
   // Generate unique datalist id
   const datalistId = useMemo(
     () => (datalist ? `${name}-datalist` : undefined),
-    [name, datalist]
+    [name, datalist],
   );
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,7 +100,7 @@ export const TextField: React.FC<TextFieldSpecificProps> = ({
   const computedInputClassName = cn(
     inputClassName,
     hasErrors ? "border-destructive" : "",
-    isLoadingOptions ? "pr-8" : ""
+    isLoadingOptions ? "pr-8" : "",
   );
 
   return (

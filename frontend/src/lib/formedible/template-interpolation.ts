@@ -1,14 +1,14 @@
-export type TemplateFormatter = 
-  | 'uppercase' 
-  | 'lowercase' 
-  | 'capitalize' 
-  | 'titlecase'
-  | 'pluralize'
-  | 'number'
-  | 'currency'
-  | 'date'
-  | 'time'
-  | 'datetime';
+export type TemplateFormatter =
+  | "uppercase"
+  | "lowercase"
+  | "capitalize"
+  | "titlecase"
+  | "pluralize"
+  | "number"
+  | "currency"
+  | "date"
+  | "time"
+  | "datetime";
 
 // Configuration for formatters
 export interface FormatterConfig {
@@ -18,7 +18,7 @@ export interface FormatterConfig {
   };
   date?: {
     locale?: string;
-    format?: 'short' | 'medium' | 'long' | 'full';
+    format?: "short" | "medium" | "long" | "full";
   };
   pluralize?: {
     singular?: string;
@@ -64,12 +64,12 @@ export function extractTemplateDependencies(template: string): string[] {
 function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
   try {
     // Handle array indexing and property access
-    const keys = path.split(/[.\[]/).map(key => key.replace(/\]$/, ''));
+    const keys = path.split(/[.\[]/).map((key) => key.replace(/\]$/, ""));
     let current: any = obj;
 
     for (const key of keys) {
       if (current == null) return undefined;
-      
+
       // Handle numeric array indices
       if (/^\d+$/.test(key)) {
         current = current[parseInt(key, 10)];
@@ -92,76 +92,87 @@ function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
  * @returns Formatted value
  */
 function applyFormatter(
-  value: unknown, 
-  formatter: string, 
-  config?: FormatterConfig
+  value: unknown,
+  formatter: string,
+  config?: FormatterConfig,
 ): string {
-  if (value == null) return '';
-  
+  if (value == null) return "";
+
   const stringValue = String(value);
 
   switch (formatter) {
-    case 'uppercase':
+    case "uppercase":
       return stringValue.toUpperCase();
-      
-    case 'lowercase':
+
+    case "lowercase":
       return stringValue.toLowerCase();
-      
-    case 'capitalize':
-      return stringValue.charAt(0).toUpperCase() + stringValue.slice(1).toLowerCase();
-      
-    case 'titlecase':
-      return stringValue.replace(/\w\S*/g, (txt: string) => 
-        txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase()
+
+    case "capitalize":
+      return (
+        stringValue.charAt(0).toUpperCase() + stringValue.slice(1).toLowerCase()
       );
-      
-    case 'pluralize':
-      const num = typeof value === 'number' ? value : parseInt(stringValue, 10);
+
+    case "titlecase":
+      return stringValue.replace(
+        /\w\S*/g,
+        (txt: string) =>
+          txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase(),
+      );
+
+    case "pluralize":
+      const num = typeof value === "number" ? value : parseInt(stringValue, 10);
       if (isNaN(num)) return stringValue;
-      
-      const { singular = '', plural = stringValue + 's' } = config?.pluralize || {};
+
+      const { singular = "", plural = stringValue + "s" } =
+        config?.pluralize || {};
       return num === 1 ? singular || stringValue : plural;
-      
-    case 'number':
-      const numValue = typeof value === 'number' ? value : parseFloat(stringValue);
+
+    case "number":
+      const numValue =
+        typeof value === "number" ? value : parseFloat(stringValue);
       return isNaN(numValue) ? stringValue : numValue.toLocaleString();
-      
-    case 'currency':
-      const currencyValue = typeof value === 'number' ? value : parseFloat(stringValue);
+
+    case "currency":
+      const currencyValue =
+        typeof value === "number" ? value : parseFloat(stringValue);
       if (isNaN(currencyValue)) return stringValue;
-      
-      const { currency = 'USD', locale = 'en-US' } = config?.currency || {};
+
+      const { currency = "USD", locale = "en-US" } = config?.currency || {};
       return new Intl.NumberFormat(locale, {
-        style: 'currency',
+        style: "currency",
         currency,
       }).format(currencyValue);
-      
-    case 'date':
+
+    case "date":
       const dateValue = value instanceof Date ? value : new Date(stringValue);
       if (isNaN(dateValue.getTime())) return stringValue;
-      
-      const { locale: dateLocale = 'en-US', format = 'medium' } = config?.date || {};
+
+      const { locale: dateLocale = "en-US", format = "medium" } =
+        config?.date || {};
       const formatOptions: Intl.DateTimeFormatOptions = {
-        short: { dateStyle: 'short' as const },
-        medium: { dateStyle: 'medium' as const },
-        long: { dateStyle: 'long' as const },
-        full: { dateStyle: 'full' as const },
-      }[format] || { dateStyle: 'medium' as const };
-      
-      return new Intl.DateTimeFormat(dateLocale, formatOptions).format(dateValue);
-      
-    case 'time':
+        short: { dateStyle: "short" as const },
+        medium: { dateStyle: "medium" as const },
+        long: { dateStyle: "long" as const },
+        full: { dateStyle: "full" as const },
+      }[format] || { dateStyle: "medium" as const };
+
+      return new Intl.DateTimeFormat(dateLocale, formatOptions).format(
+        dateValue,
+      );
+
+    case "time":
       const timeValue = value instanceof Date ? value : new Date(stringValue);
       if (isNaN(timeValue.getTime())) return stringValue;
-      
+
       return timeValue.toLocaleTimeString();
-      
-    case 'datetime':
-      const datetimeValue = value instanceof Date ? value : new Date(stringValue);
+
+    case "datetime":
+      const datetimeValue =
+        value instanceof Date ? value : new Date(stringValue);
       if (isNaN(datetimeValue.getTime())) return stringValue;
-      
+
       return datetimeValue.toLocaleString();
-      
+
     default:
       return stringValue;
   }
@@ -177,32 +188,36 @@ function applyFormatter(
 export function interpolateTemplate(
   template: string,
   values: Record<string, unknown>,
-  options: TemplateOptions = {}
+  options: TemplateOptions = {},
 ): string {
-  const { formatters, fallbackValue = '', strict = false } = options;
+  const { formatters, fallbackValue = "", strict = false } = options;
 
   return template.replace(/\{\{([^}]+)\}\}/g, (match, content) => {
     try {
       const trimmedContent = content.trim();
-      
+
       // Split by pipe to separate field path from formatter
-      const [fieldPath, formatterName] = trimmedContent.split('|').map((s: string) => s.trim());
-      
+      const [fieldPath, formatterName] = trimmedContent
+        .split("|")
+        .map((s: string) => s.trim());
+
       // Get the value from the form values
       const value = getNestedValue(values, fieldPath);
-      
+
       if (value == null) {
         if (strict) {
-          throw new Error(`Template field '${fieldPath}' not found in form values`);
+          throw new Error(
+            `Template field '${fieldPath}' not found in form values`,
+          );
         }
         return fallbackValue;
       }
-      
+
       // Apply formatter if specified
       if (formatterName) {
         return applyFormatter(value, formatterName, formatters);
       }
-      
+
       return String(value);
     } catch (error) {
       if (strict) {
@@ -233,26 +248,26 @@ export function isTemplate(str: string): boolean {
 export function resolveDynamicText(
   value: string | ((values: Record<string, unknown>) => string) | undefined,
   formValues: Record<string, unknown>,
-  options?: TemplateOptions
+  options?: TemplateOptions,
 ): string | undefined {
   if (!value) return undefined;
-  
-  if (typeof value === 'function') {
+
+  if (typeof value === "function") {
     try {
       return value(formValues);
     } catch (error) {
-      console.warn('Error executing dynamic text function:', error);
-      return options?.fallbackValue || '';
+      console.warn("Error executing dynamic text function:", error);
+      return options?.fallbackValue || "";
     }
   }
-  
-  if (typeof value === 'string') {
+
+  if (typeof value === "string") {
     if (isTemplate(value)) {
       return interpolateTemplate(value, formValues, options);
     }
     return value;
   }
-  
+
   return undefined;
 }
 
@@ -262,14 +277,14 @@ export function resolveDynamicText(
  * @returns Array of field names that this value depends on
  */
 export function getDynamicTextDependencies(
-  value: string | ((values: Record<string, unknown>) => string) | undefined
+  value: string | ((values: Record<string, unknown>) => string) | undefined,
 ): string[] {
   if (!value) return [];
-  
-  if (typeof value === 'string' && isTemplate(value)) {
+
+  if (typeof value === "string" && isTemplate(value)) {
     return extractTemplateDependencies(value);
   }
-  
+
   // For functions, we can't easily determine dependencies
   // Return empty array and rely on broader form subscription
   return [];

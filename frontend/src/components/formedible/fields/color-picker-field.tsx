@@ -1,10 +1,10 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { Palette, Check } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import type { ColorPickerFieldSpecificProps } from "@/lib/formedible/types";
+import { cn } from "@/lib/utils";
+import { Check, Palette } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 import { FieldWrapper } from "./base-field-wrapper";
 
 const DEFAULT_PRESETS = [
@@ -179,7 +179,7 @@ export const ColorPickerField: React.FC<ColorPickerFieldSpecificProps> = ({
               className={cn(
                 "w-12 h-10 p-0 border-2",
                 fieldApi.state?.meta?.errors.length ? "border-destructive" : "",
-                inputClassName
+                inputClassName,
               )}
               onClick={() => setIsOpen(!isOpen)}
               disabled={isDisabled}
@@ -217,7 +217,7 @@ export const ColorPickerField: React.FC<ColorPickerFieldSpecificProps> = ({
             placeholder={"#000000"}
             className={cn(
               "flex-1",
-              fieldApi.state?.meta?.errors.length ? "border-destructive" : ""
+              fieldApi.state?.meta?.errors.length ? "border-destructive" : "",
             )}
             disabled={isDisabled}
           />
@@ -238,7 +238,7 @@ export const ColorPickerField: React.FC<ColorPickerFieldSpecificProps> = ({
                       "w-8 h-8 rounded border-2 hover:scale-110 transition-transform",
                       normalizedValue.toLowerCase() === color.toLowerCase()
                         ? "border-primary ring-2 ring-primary ring-offset-2"
-                        : "border-muted hover:border-primary"
+                        : "border-muted hover:border-primary",
                     )}
                     style={{ backgroundColor: color }}
                     onClick={() => handleColorSelect(color)}

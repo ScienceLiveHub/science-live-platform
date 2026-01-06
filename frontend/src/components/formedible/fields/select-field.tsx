@@ -1,14 +1,14 @@
-import React from 'react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { cn } from '@/lib/utils';
-import type { BaseFieldProps } from '@/lib/formedible/types';
-import { FieldWrapper } from './base-field-wrapper';
+} from "@/components/ui/select";
+import type { BaseFieldProps } from "@/lib/formedible/types";
+import { cn } from "@/lib/utils";
+import React from "react";
+import { FieldWrapper } from "./base-field-wrapper";
 
 interface SelectFieldSpecificProps extends BaseFieldProps {
   options: Array<{ value: string; label: string }> | string[];
@@ -25,9 +25,10 @@ export const SelectField: React.FC<SelectFieldSpecificProps> = ({
   options = [],
 }) => {
   const name = fieldApi.name;
-  const value = (fieldApi.state?.value as string) || '';
+  const value = (fieldApi.state?.value as string) || "";
   const isDisabled = fieldApi.form?.state?.isSubmitting ?? false;
-  const hasErrors = fieldApi.state?.meta?.isTouched && fieldApi.state?.meta?.errors?.length > 0;
+  const hasErrors =
+    fieldApi.state?.meta?.isTouched && fieldApi.state?.meta?.errors?.length > 0;
 
   const onValueChange = (value: string) => {
     fieldApi.handleChange(value);
@@ -39,7 +40,7 @@ export const SelectField: React.FC<SelectFieldSpecificProps> = ({
 
   const computedInputClassName = cn(
     inputClassName,
-    hasErrors ? "border-destructive" : ""
+    hasErrors ? "border-destructive" : "",
   );
 
   return (
@@ -51,11 +52,7 @@ export const SelectField: React.FC<SelectFieldSpecificProps> = ({
       labelClassName={labelClassName}
       wrapperClassName={wrapperClassName}
     >
-      <Select
-        value={value}
-        onValueChange={onValueChange}
-        disabled={isDisabled}
-      >
+      <Select value={value} onValueChange={onValueChange} disabled={isDisabled}>
         <SelectTrigger
           id={name + "-trigger"}
           onBlur={onBlur}
@@ -65,8 +62,10 @@ export const SelectField: React.FC<SelectFieldSpecificProps> = ({
         </SelectTrigger>
         <SelectContent>
           {options.map((option, index) => {
-            const optionValue = typeof option === 'string' ? option : option.value;
-            const optionLabel = typeof option === 'string' ? option : option.label;
+            const optionValue =
+              typeof option === "string" ? option : option.value;
+            const optionLabel =
+              typeof option === "string" ? option : option.label;
             return (
               <SelectItem key={optionValue + index} value={optionValue}>
                 {optionLabel}

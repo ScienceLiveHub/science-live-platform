@@ -1,8 +1,6 @@
 "use client";
-import React, { useState } from "react";
-import type { BaseFieldProps, DurationConfig } from "@/lib/formedible/types";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -10,7 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { BaseFieldProps, DurationConfig } from "@/lib/formedible/types";
 import { cn } from "@/lib/utils";
+import React, { useState } from "react";
 
 interface DurationPickerFieldProps extends BaseFieldProps {
   durationConfig?: DurationConfig;
@@ -43,7 +43,7 @@ const formatOutput = (
   hours: number,
   minutes: number,
   seconds: number,
-  format: string
+  format: string,
 ) => {
   const totalSeconds = hours * 3600 + minutes * 60 + seconds;
 
@@ -114,7 +114,7 @@ export const DurationPickerField: React.FC<DurationPickerFieldProps> = ({
     onChange: (value: number) => void,
     max: number,
     unit: string,
-    show: boolean
+    show: boolean,
   ) => {
     if (!show) return null;
 
@@ -185,21 +185,21 @@ export const DurationPickerField: React.FC<DurationPickerFieldProps> = ({
             handleHoursChange,
             maxHours,
             "hours",
-            format.includes("h")
+            format.includes("h"),
           )}
           {renderTimeInput(
             minutes,
             handleMinutesChange,
             maxMinutes,
             "minutes",
-            format.includes("m")
+            format.includes("m"),
           )}
           {renderTimeInput(
             seconds,
             handleSecondsChange,
             maxSeconds,
             "seconds",
-            format.includes("s")
+            format.includes("s"),
           )}
         </div>
 
@@ -217,10 +217,10 @@ export const DurationPickerField: React.FC<DurationPickerFieldProps> = ({
             {format === "hms"
               ? "1h 30m 45s"
               : format === "hm"
-              ? "1h 30m"
-              : format === "ms"
-              ? "30m 45s"
-              : `${format} only`}
+                ? "1h 30m"
+                : format === "ms"
+                  ? "30m 45s"
+                  : `${format} only`}
           </div>
         </div>
 

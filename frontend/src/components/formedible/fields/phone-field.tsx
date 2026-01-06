@@ -1,10 +1,10 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import type { PhoneFieldSpecificProps } from "@/lib/formedible/types";
 import { cn } from "@/lib/utils";
 import { ChevronDown, Phone } from "lucide-react";
-import type { PhoneFieldSpecificProps } from "@/lib/formedible/types";
+import React, { useEffect, useState } from "react";
 import { FieldWrapper } from "./base-field-wrapper";
 
 // Common country codes and their formatting
@@ -89,7 +89,7 @@ export const PhoneField: React.FC<PhoneFieldSpecificProps> = ({
 
   const availableCountries = allowedCountries
     ? Object.entries(COUNTRY_CODES).filter(([code]) =>
-        allowedCountries.includes(code)
+        allowedCountries.includes(code),
       )
     : Object.entries(COUNTRY_CODES);
 
@@ -107,7 +107,7 @@ export const PhoneField: React.FC<PhoneFieldSpecificProps> = ({
         ([_, country]) => {
           const countryDigits = extractDigits(country.code);
           return digits.startsWith(countryDigits);
-        }
+        },
       );
 
       if (matchingCountry) {
@@ -162,7 +162,7 @@ export const PhoneField: React.FC<PhoneFieldSpecificProps> = ({
 
     const exampleNumber = formatPhoneNumber(
       "1234567890",
-      currentCountry.format
+      currentCountry.format,
     );
     return format === "international"
       ? `${currentCountry.code} ${exampleNumber}`
@@ -187,7 +187,7 @@ export const PhoneField: React.FC<PhoneFieldSpecificProps> = ({
               variant="outline"
               className={cn(
                 "rounded-r-none border-r-0 px-3 h-10 min-w-[80px]",
-                hasErrors ? "border-destructive" : ""
+                hasErrors ? "border-destructive" : "",
               )}
               onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
               disabled={isDisabled}
@@ -213,7 +213,7 @@ export const PhoneField: React.FC<PhoneFieldSpecificProps> = ({
                     className={cn(
                       "w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground",
                       "flex items-center gap-3",
-                      selectedCountry === code ? "bg-accent" : ""
+                      selectedCountry === code ? "bg-accent" : "",
                     )}
                     onClick={() => handleCountryChange(code)}
                   >
@@ -239,7 +239,7 @@ export const PhoneField: React.FC<PhoneFieldSpecificProps> = ({
             className={cn(
               "rounded-l-none flex-1",
               hasErrors ? "border-destructive" : "",
-              inputClassName
+              inputClassName,
             )}
             disabled={isDisabled}
           />

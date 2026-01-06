@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -13,11 +14,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { X, ChevronDown, Check } from "lucide-react";
 import type { MultiComboboxFieldSpecificProps } from "@/lib/formedible/types";
+import { cn } from "@/lib/utils";
+import { Check, ChevronDown, X } from "lucide-react";
+import React, { useRef, useState } from "react";
 import { FieldWrapper } from "./base-field-wrapper";
 
 export const MultiComboboxField: React.FC<MultiComboboxFieldSpecificProps> = ({
@@ -44,7 +44,7 @@ export const MultiComboboxField: React.FC<MultiComboboxFieldSpecificProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const normalizedOptions = options.map((option) =>
-    typeof option === "string" ? { value: option, label: option } : option
+    typeof option === "string" ? { value: option, label: option } : option,
   );
 
   type DisplayOption = {
@@ -102,7 +102,7 @@ export const MultiComboboxField: React.FC<MultiComboboxFieldSpecificProps> = ({
               aria-expanded={isOpen}
               className={cn(
                 "w-full justify-start min-h-10 h-auto px-3 py-2",
-                fieldApi.state?.meta?.errors.length ? "border-destructive" : ""
+                fieldApi.state?.meta?.errors.length ? "border-destructive" : "",
               )}
               disabled={isDisabled}
             >
@@ -142,7 +142,7 @@ export const MultiComboboxField: React.FC<MultiComboboxFieldSpecificProps> = ({
             <Command
               filter={(value, search) => {
                 const option = displayOptions.find(
-                  (opt) => opt.value === value
+                  (opt) => opt.value === value,
                 );
                 return option?.label
                   .toLowerCase()
@@ -182,7 +182,7 @@ export const MultiComboboxField: React.FC<MultiComboboxFieldSpecificProps> = ({
                             : "",
                           option.isCreateOption
                             ? "font-medium text-primary"
-                            : ""
+                            : "",
                         )}
                         disabled={isDisabledOption}
                       >

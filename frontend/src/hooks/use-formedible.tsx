@@ -1,57 +1,57 @@
 "use client";
-import React, { useState, useMemo, memo, useRef } from "react";
-import { useForm } from "@tanstack/react-form";
-import type { AnyFormApi, AnyFieldApi } from "@tanstack/react-form";
-import { cn } from "@/lib/utils";
-import type {
-  FormedibleFormApi,
-  FieldComponentProps,
-  BaseFieldProps,
-  FieldConfig,
-  FormProps,
-  ConditionalFieldsSubscriptionProps,
-  FieldConditionalRendererProps,
-  UseFormedibleOptions,
-  SectionRendererProps,
-  LayoutConfig,
-  FormGridProps,
-  AnalyticsContext,
-} from "@/lib/formedible/types";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { ArrayField } from "@/components/formedible/fields/array-field";
+import { AutocompleteField } from "@/components/formedible/fields/autocomplete-field";
+import { CheckboxField } from "@/components/formedible/fields/checkbox-field";
+import { ColorPickerField } from "@/components/formedible/fields/color-picker-field";
+import { ComboboxField } from "@/components/formedible/fields/combobox-field";
+import { DateField } from "@/components/formedible/fields/date-field";
+import { DurationPickerField } from "@/components/formedible/fields/duration-picker-field";
+import { FieldHelp } from "@/components/formedible/fields/field-help";
+import { FileUploadField } from "@/components/formedible/fields/file-upload-field";
+import { InlineValidationWrapper } from "@/components/formedible/fields/inline-validation-wrapper";
+import { LocationPickerField } from "@/components/formedible/fields/location-picker-field";
+import { MaskedInputField } from "@/components/formedible/fields/masked-input-field";
+import { MultiSelectField } from "@/components/formedible/fields/multi-select-field";
+import { MultiComboboxField } from "@/components/formedible/fields/multicombobox-field";
+import { NumberField } from "@/components/formedible/fields/number-field";
+import { ObjectField } from "@/components/formedible/fields/object-field";
+import { PhoneField } from "@/components/formedible/fields/phone-field";
+import { RadioField } from "@/components/formedible/fields/radio-field";
+import { RatingField } from "@/components/formedible/fields/rating-field";
+import { SelectField } from "@/components/formedible/fields/select-field";
+import { SliderField } from "@/components/formedible/fields/slider-field";
+import { SwitchField } from "@/components/formedible/fields/switch-field";
 import { TextField } from "@/components/formedible/fields/text-field";
 import { TextareaField } from "@/components/formedible/fields/textarea-field";
-import { SelectField } from "@/components/formedible/fields/select-field";
-import { CheckboxField } from "@/components/formedible/fields/checkbox-field";
-import { SwitchField } from "@/components/formedible/fields/switch-field";
-import { NumberField } from "@/components/formedible/fields/number-field";
-import { DateField } from "@/components/formedible/fields/date-field";
-import { SliderField } from "@/components/formedible/fields/slider-field";
-import { FileUploadField } from "@/components/formedible/fields/file-upload-field";
-import { ArrayField } from "@/components/formedible/fields/array-field";
-import { RadioField } from "@/components/formedible/fields/radio-field";
-import { FormTabs } from "@/components/formedible/layout/form-tabs";
-import { MultiSelectField } from "@/components/formedible/fields/multi-select-field";
-import { ColorPickerField } from "@/components/formedible/fields/color-picker-field";
-import { RatingField } from "@/components/formedible/fields/rating-field";
-import { PhoneField } from "@/components/formedible/fields/phone-field";
-import { LocationPickerField } from "@/components/formedible/fields/location-picker-field";
-import { DurationPickerField } from "@/components/formedible/fields/duration-picker-field";
-import { AutocompleteField } from "@/components/formedible/fields/autocomplete-field";
-import { MaskedInputField } from "@/components/formedible/fields/masked-input-field";
-import { ObjectField } from "@/components/formedible/fields/object-field";
-import { ComboboxField } from "@/components/formedible/fields/combobox-field";
-import { MultiComboboxField } from "@/components/formedible/fields/multicombobox-field";
-import { InlineValidationWrapper } from "@/components/formedible/fields/inline-validation-wrapper";
-import { FieldHelp } from "@/components/formedible/fields/field-help";
 import { FormGrid, GridItem } from "@/components/formedible/layout/form-grid";
+import { FormTabs } from "@/components/formedible/layout/form-tabs";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { resolveDynamicText } from "@/lib/formedible/template-interpolation";
+import type {
+  AnalyticsContext,
+  BaseFieldProps,
+  ConditionalFieldsSubscriptionProps,
+  FieldComponentProps,
+  FieldConditionalRendererProps,
+  FieldConfig,
+  FormedibleFormApi,
+  FormGridProps,
+  FormProps,
+  LayoutConfig,
+  SectionRendererProps,
+  UseFormedibleOptions,
+} from "@/lib/formedible/types";
+import { cn } from "@/lib/utils";
+import type { AnyFieldApi, AnyFormApi } from "@tanstack/react-form";
+import { useForm } from "@tanstack/react-form";
+import React, { memo, useMemo, useRef, useState } from "react";
 
 // Utility function to scroll to top of a specific form
 const scrollToTop = (
   htmlFormRef: React.RefObject<HTMLFormElement | null>,
   smooth = true,
-  enabled = true
+  enabled = true,
 ) => {
   if (typeof window !== "undefined" && htmlFormRef.current && enabled) {
     // Check if form is already in view to prevent unnecessary jumping
@@ -70,7 +70,7 @@ const scrollToTop = (
 // TanStack Form Best Practice: Reusable subscription component for conditional fields
 
 const ConditionalFieldsSubscription = <
-  TFormValues extends Record<string, unknown> = Record<string, unknown>
+  TFormValues extends Record<string, unknown> = Record<string, unknown>,
 >({
   form,
   fields: _fields,
@@ -167,7 +167,7 @@ const DefaultProgressComponent: React.FC<{
       )}
       <Progress value={value} className="h-2" />
     </div>
-  )
+  ),
 );
 
 DefaultProgressComponent.displayName = "DefaultProgressComponent";
@@ -208,7 +208,7 @@ const SectionRenderer: React.FC<
 }) => {
   const { section, groups } = sectionData;
   const [isExpanded, setIsExpanded] = React.useState(
-    section?.defaultExpanded !== false
+    section?.defaultExpanded !== false,
   );
 
   // Subscribe to form values for dynamic text resolution - always at top level
@@ -236,7 +236,7 @@ const SectionRenderer: React.FC<
           return false;
         }
         return true;
-      })
+      }),
     );
   }, [groups, form]);
 
@@ -249,11 +249,11 @@ const SectionRenderer: React.FC<
             if (!form) return true;
             const currentValues = form.state.values;
             return !field.conditional || field.conditional(currentValues);
-          }
+          },
         );
 
         return visibleGroupFields.map((field) => ({ ...field, groupKey }));
-      }
+      },
     );
 
     // If layout is specified and is grid, use FormGrid
@@ -288,7 +288,7 @@ const SectionRenderer: React.FC<
           className={cn(
             "flex flex-wrap",
             layout.gap ? `gap-${layout.gap}` : "gap-4",
-            layout.className
+            layout.className,
           )}
         >
           {allVisibleFields.map((field) => (
@@ -308,7 +308,7 @@ const SectionRenderer: React.FC<
               if (!form) return true;
               const currentValues = form.state.values;
               return !field.conditional || field.conditional(currentValues);
-            }
+            },
           );
 
           // Don't render empty groups
@@ -320,7 +320,7 @@ const SectionRenderer: React.FC<
               className={cn(
                 groupKey !== "default"
                   ? "p-4 border rounded-lg bg-muted/20"
-                  : ""
+                  : "",
               )}
             >
               {groupKey !== "default" && (
@@ -387,7 +387,7 @@ const SectionRenderer: React.FC<
 };
 
 export function useFormedible<TFormValues extends Record<string, unknown>>(
-  options: UseFormedibleOptions<TFormValues>
+  options: UseFormedibleOptions<TFormValues>,
 ) {
   const {
     fields = [],
@@ -522,7 +522,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
 
           // Check conditional sections
           const conditionalSection = conditionalSections.find((section) =>
-            section.fields.includes(field.name)
+            section.fields.includes(field.name),
           );
 
           if (conditionalSection) {
@@ -535,7 +535,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
         return hasVisibleFields;
       });
     },
-    [fieldsByPage, pages, conditionalSections]
+    [fieldsByPage, pages, conditionalSections],
   );
 
   // Group fields by tabs
@@ -603,7 +603,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
       setCrossFieldErrors(errors);
       return errors;
     },
-    [crossFieldValidation]
+    [crossFieldValidation],
   );
 
   // Async validation function
@@ -661,7 +661,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
         }
       }, asyncConfig.debounceMs || 500);
     },
-    [asyncValidation]
+    [asyncValidation],
   );
 
   // Setup form with schema validation if provided
@@ -677,7 +677,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
       }) => {
         // Run cross-field validation before submit
         const crossFieldErrors = validateCrossFields(
-          props.value as Partial<TFormValues>
+          props.value as Partial<TFormValues>,
         );
         if (Object.keys(crossFieldErrors).length > 0) {
           throw new Error("Cross-field validation failed");
@@ -701,23 +701,23 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
         let result: unknown;
         if (formOptions.onSubmit) {
           // try {
-            result = await formOptions.onSubmit(props);
+          result = await formOptions.onSubmit(props);
 
-            // Mark form as completed to prevent abandonment tracking
-            formCompletedRef.current = true;
+          // Mark form as completed to prevent abandonment tracking
+          formCompletedRef.current = true;
 
-            // Track submission performance after successful completion
-            if (analytics) {
-              const processingTime = Date.now() - submissionStartTime;
-              const context = analyticsContextRef.current;
-              context.performanceMetrics.submissionMetrics.processingTime =
-                processingTime;
-              analytics.onSubmissionPerformance?.(
-                Date.now() - context.startTime,
-                context.performanceMetrics.submissionMetrics.validationTime,
-                processingTime
-              );
-            }
+          // Track submission performance after successful completion
+          if (analytics) {
+            const processingTime = Date.now() - submissionStartTime;
+            const context = analyticsContextRef.current;
+            context.performanceMetrics.submissionMetrics.processingTime =
+              processingTime;
+            analytics.onSubmissionPerformance?.(
+              Date.now() - context.startTime,
+              context.performanceMetrics.submissionMetrics.validationTime,
+              processingTime,
+            );
+          }
           // } catch (error) {
           //   // Re-throw the error after analytics
           //   throw error;
@@ -728,7 +728,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
         clearStorage();
 
         // Reset form on successful submit if option is enabled
-        if (formRef.current) {
+        if (resetOnSubmitSuccess && formRef.current) {
           formRef.current?.reset();
         }
         return result;
@@ -753,7 +753,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
         value?: unknown;
         errors?: string[];
         isValid?: boolean;
-      }
+      },
     ) => {
       const context = analyticsContextRef.current;
       const timestamp = Date.now();
@@ -790,7 +790,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
           analytics?.onFieldChange?.(
             fieldName,
             additionalData?.value,
-            timestamp
+            timestamp,
           );
           break;
 
@@ -800,7 +800,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
             analytics?.onFieldError?.(
               fieldName,
               additionalData.errors,
-              timestamp
+              timestamp,
             );
           }
           break;
@@ -814,13 +814,13 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
             analytics?.onFieldComplete?.(
               fieldName,
               additionalData.isValid,
-              additionalData.timeSpent
+              additionalData.timeSpent,
             );
           }
           break;
       }
     },
-    [analytics]
+    [analytics],
   );
 
   const trackTabChange = React.useCallback(
@@ -873,7 +873,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
       const tabFields = fieldsByTab[fromTab] || [];
       fromTabState.totalFields = tabFields.length;
       fromTabState.fieldsCompleted = tabFields.filter(
-        (field) => context.fieldInteractions[field.name]?.isCompleted
+        (field) => context.fieldInteractions[field.name]?.isCompleted,
       ).length;
       fromTabState.completionPercentage =
         fromTabState.totalFields > 0
@@ -893,7 +893,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
         hasErrors: fromTabState.hasErrors,
       });
     },
-    [analytics, fieldsByTab, form]
+    [analytics, fieldsByTab, form],
   );
 
   const trackPageChange = React.useCallback(
@@ -923,7 +923,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
       // Update page completion metrics
       pageState.totalFields = pageFields.length;
       pageState.fieldsCompleted = pageFields.filter(
-        (field) => context.fieldInteractions[field.name]?.isCompleted
+        (field) => context.fieldInteractions[field.name]?.isCompleted,
       ).length;
       pageState.completionPercentage =
         pageState.totalFields > 0
@@ -952,14 +952,14 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
         completionPercentage: pageState.completionPercentage,
       });
     },
-    [analytics, fieldsByPage, form]
+    [analytics, fieldsByPage, form],
   );
 
   // Track visible pages using a ref to avoid circular dependencies
   const visiblePagesRef = React.useRef<number[]>(
     Object.keys(fieldsByPage)
       .map(Number)
-      .sort((a, b) => a - b)
+      .sort((a, b) => a - b),
   );
 
   // Update visible pages when form values change (without causing re-renders)
@@ -1020,8 +1020,8 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
           ? Object.fromEntries(
               Object.entries(values as Record<string, unknown>).filter(
                 ([key]) =>
-                  !(persistence.exclude && persistence.exclude.includes(key))
-              )
+                  !(persistence.exclude && persistence.exclude.includes(key)),
+              ),
             )
           : values;
 
@@ -1031,13 +1031,13 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
             values: filteredValues,
             timestamp: Date.now(),
             currentPage,
-          })
+          }),
         );
       } catch (error) {
         console.warn("Failed to save form data to storage:", error);
       }
     },
-    [persistence, currentPage]
+    [persistence, currentPage],
   );
 
   const clearStorage = React.useCallback(() => {
@@ -1081,7 +1081,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
           } catch (error) {
             console.warn(`Failed to restore field value for ${key}:`, error);
           }
-        }
+        },
       );
 
       // Restore current page if it was saved
@@ -1202,7 +1202,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
               // Update previous value
               previousValues.current[fieldName] = value;
             }
-          }
+          },
         );
       });
       unsubscribers.push(fieldChangeUnsubscribe);
@@ -1237,7 +1237,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
       Object.values(asyncValidationAbortControllers.current).forEach(
         (controller) => {
           controller.abort();
-        }
+        },
       );
     });
 
@@ -1282,7 +1282,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
 
         const totalFields = fieldsLength;
         const completedFields = Object.values(context.fieldInteractions).filter(
-          (field) => field && field.isCompleted
+          (field) => field && field.isCompleted,
         ).length;
         const completionPercentage =
           totalFields > 0 ? (completedFields / totalFields) * 100 : 0;
@@ -1552,7 +1552,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
         setActiveTab(newTabId);
         analyticsContextRef.current.currentTab = newTabId;
       },
-      [activeTab]
+      [activeTab],
     );
 
     // Initialize first tab start time
@@ -1590,14 +1590,14 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
     const resolveOptions = React.useCallback(
       (
         options: FieldConfig["options"],
-        currentValues: Record<string, unknown>
+        currentValues: Record<string, unknown>,
       ) => {
         if (typeof options === "function") {
           return options(currentValues);
         }
         return options;
       },
-      []
+      [],
     );
 
     const renderField = React.useCallback(
@@ -1678,21 +1678,21 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
                           // Resolve options (static or dynamic)
                           const resolvedOptions = resolveOptions(
                             options,
-                            currentValues
+                            currentValues,
                           );
 
                           // Resolve dynamic text properties
                           const resolvedLabel = resolveDynamicText(
                             label,
-                            currentValues
+                            currentValues,
                           );
                           const resolvedPlaceholder = resolveDynamicText(
                             placeholder,
-                            currentValues
+                            currentValues,
                           );
                           const resolvedDescription = resolveDynamicText(
                             description,
-                            currentValues
+                            currentValues,
                           );
 
                           // Debug log for description
@@ -1734,7 +1734,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
                             ? resolvedOptions.map((opt) =>
                                 typeof opt === "string"
                                   ? { value: opt, label: opt }
-                                  : opt
+                                  : opt,
                               )
                             : [];
 
@@ -1821,7 +1821,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
                                     ...autocompleteConfig,
                                     options: resolveOptions(
                                       autocompleteConfig.options,
-                                      currentValues
+                                      currentValues,
                                     ),
                                   }
                                 : undefined;
@@ -1895,7 +1895,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
           </form.Field>
         );
       },
-      [resolveOptions]
+      [resolveOptions],
     );
 
     const renderTabContent = React.useCallback(
@@ -1911,12 +1911,12 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
               // Filter fields based on conditional sections using subscribed values
               const visibleFields = tabFields.filter((field) => {
                 const conditionalSection = conditionalSections.find((section) =>
-                  section.fields.includes(field.name)
+                  section.fields.includes(field.name),
                 );
 
                 if (conditionalSection) {
                   return conditionalSection.condition(
-                    currentValues as TFormValues
+                    currentValues as TFormValues,
                   );
                 }
 
@@ -1924,24 +1924,38 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
               });
 
               // Group fields by section and group
-              const groupedFields = visibleFields.reduce((acc, field) => {
-                const sectionKey = field.section?.title || "default";
-                const groupKey = field.group || "default";
+              const groupedFields = visibleFields.reduce(
+                (acc, field) => {
+                  const sectionKey = field.section?.title || "default";
+                  const groupKey = field.group || "default";
 
-                if (!acc[sectionKey]) {
-                  acc[sectionKey] = {
-                    section: field.section,
-                    groups: {},
-                  };
-                }
+                  if (!acc[sectionKey]) {
+                    acc[sectionKey] = {
+                      section: field.section,
+                      groups: {},
+                    };
+                  }
 
-                if (!acc[sectionKey].groups[groupKey]) {
-                  acc[sectionKey].groups[groupKey] = [];
-                }
+                  if (!acc[sectionKey].groups[groupKey]) {
+                    acc[sectionKey].groups[groupKey] = [];
+                  }
 
-                acc[sectionKey].groups[groupKey].push(field);
-                return acc;
-              }, {} as Record<string, { section?: { title?: string; description?: string; collapsible?: boolean; defaultExpanded?: boolean }; groups: Record<string, FieldConfig[]> }>);
+                  acc[sectionKey].groups[groupKey].push(field);
+                  return acc;
+                },
+                {} as Record<
+                  string,
+                  {
+                    section?: {
+                      title?: string;
+                      description?: string;
+                      collapsible?: boolean;
+                      defaultExpanded?: boolean;
+                    };
+                    groups: Record<string, FieldConfig[]>;
+                  }
+                >,
+              );
 
               const renderSection = (
                 sectionKey: string,
@@ -1953,7 +1967,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
                     defaultExpanded?: boolean;
                   };
                   groups: Record<string, FieldConfig[]>;
-                }
+                },
               ) => (
                 <SectionRenderer
                   key={sectionKey}
@@ -1972,16 +1986,16 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
               return sectionsToRender.length === 1 &&
                 sectionsToRender[0][0] === "default"
                 ? sectionsToRender[0][1].groups.default?.map(
-                    (field: FieldConfig) => renderField(field)
+                    (field: FieldConfig) => renderField(field),
                   )
                 : sectionsToRender.map(([sectionKey, sectionData]) =>
-                    renderSection(sectionKey, sectionData)
+                    renderSection(sectionKey, sectionData),
                   );
             }}
           </ConditionalFieldsSubscription>
         );
       },
-      [renderField]
+      [renderField],
     );
 
     const renderPageContent = React.useCallback(() => {
@@ -2016,12 +2030,12 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
             // Filter fields based on conditional sections using subscribed values
             const visibleFields = currentFields.filter((field) => {
               const conditionalSection = conditionalSections.find((section) =>
-                section.fields.includes(field.name)
+                section.fields.includes(field.name),
               );
 
               if (conditionalSection) {
                 return conditionalSection.condition(
-                  currentValues as TFormValues
+                  currentValues as TFormValues,
                 );
               }
 
@@ -2029,24 +2043,38 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
             });
 
             // Group fields by section and group
-            const groupedFields = visibleFields.reduce((acc, field) => {
-              const sectionKey = field.section?.title || "default";
-              const groupKey = field.group || "default";
+            const groupedFields = visibleFields.reduce(
+              (acc, field) => {
+                const sectionKey = field.section?.title || "default";
+                const groupKey = field.group || "default";
 
-              if (!acc[sectionKey]) {
-                acc[sectionKey] = {
-                  section: field.section,
-                  groups: {},
-                };
-              }
+                if (!acc[sectionKey]) {
+                  acc[sectionKey] = {
+                    section: field.section,
+                    groups: {},
+                  };
+                }
 
-              if (!acc[sectionKey].groups[groupKey]) {
-                acc[sectionKey].groups[groupKey] = [];
-              }
+                if (!acc[sectionKey].groups[groupKey]) {
+                  acc[sectionKey].groups[groupKey] = [];
+                }
 
-              acc[sectionKey].groups[groupKey].push(field);
-              return acc;
-            }, {} as Record<string, { section?: { title?: string; description?: string; collapsible?: boolean; defaultExpanded?: boolean }; groups: Record<string, FieldConfig[]> }>);
+                acc[sectionKey].groups[groupKey].push(field);
+                return acc;
+              },
+              {} as Record<
+                string,
+                {
+                  section?: {
+                    title?: string;
+                    description?: string;
+                    collapsible?: boolean;
+                    defaultExpanded?: boolean;
+                  };
+                  groups: Record<string, FieldConfig[]>;
+                }
+              >,
+            );
 
             const renderSection = (
               sectionKey: string,
@@ -2058,7 +2086,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
                   defaultExpanded?: boolean;
                 };
                 groups: Record<string, FieldConfig[]>;
-              }
+              },
             ) => (
               <SectionRenderer
                 key={sectionKey}
@@ -2107,10 +2135,10 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
                 {sectionsToRender.length === 1 &&
                 sectionsToRender[0][0] === "default"
                   ? sectionsToRender[0][1].groups.default?.map(
-                      (field: FieldConfig) => renderField(field)
+                      (field: FieldConfig) => renderField(field),
                     )
                   : sectionsToRender.map(([sectionKey, sectionData]) =>
-                      renderSection(sectionKey, sectionData)
+                      renderSection(sectionKey, sectionData),
                     )}
               </PageComponent>
             );
@@ -2164,8 +2192,8 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
                     {loading
                       ? "Loading..."
                       : isSubmitting
-                      ? "Submitting..."
-                      : submitLabel}
+                        ? "Submitting..."
+                        : submitLabel}
                   </SubmitButton>
                 </div>
               );
@@ -2198,7 +2226,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
                   disabled={isFirstPage || disabled || loading}
                   className={cn(
                     isFirstPage ? "invisible" : "",
-                    buttonClassName
+                    buttonClassName,
                   )}
                 >
                   {previousLabel}
@@ -2212,16 +2240,16 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
                   }
                   className={cn(
                     "px-8",
-                    isLastPage ? submitButtonClassName : buttonClassName
+                    isLastPage ? submitButtonClassName : buttonClassName,
                   )}
                 >
                   {loading && isLastPage
                     ? "Loading..."
                     : isSubmitting && isLastPage
-                    ? "Submitting..."
-                    : isLastPage
-                    ? submitLabel
-                    : nextLabel}
+                      ? "Submitting..."
+                      : isLastPage
+                        ? submitLabel
+                        : nextLabel}
                 </SubmitButton>
               </div>
             );

@@ -1,26 +1,30 @@
 "use client";
+import { resolveDynamicText } from "@/lib/formedible/template-interpolation";
+import type { FieldComponentProps, FieldConfig } from "@/lib/formedible/types";
 import type { AnyFieldApi, AnyFormApi } from "@tanstack/react-form";
 import React from "react";
-import type { FieldComponentProps, FieldConfig } from "@/lib/formedible/types";
-import { resolveDynamicText } from "@/lib/formedible/template-interpolation";
+import { ArrayField } from "./array-field";
+import { AutocompleteField } from "./autocomplete-field";
+import { CheckboxField } from "./checkbox-field";
+import { ColorPickerField } from "./color-picker-field";
+import { ComboboxField } from "./combobox-field";
+import { DateField } from "./date-field";
+import { DurationPickerField } from "./duration-picker-field";
+import { FileUploadField } from "./file-upload-field";
+import { LocationPickerField } from "./location-picker-field";
+import { MaskedInputField } from "./masked-input-field";
+import { MultiSelectField } from "./multi-select-field";
+import { MultiComboboxField } from "./multicombobox-field";
+import { NumberField } from "./number-field";
+import { ObjectField } from "./object-field";
+import { PhoneField } from "./phone-field";
+import { RadioField } from "./radio-field";
+import { RatingField } from "./rating-field";
+import { SelectField } from "./select-field";
+import { SliderField } from "./slider-field";
+import { SwitchField } from "./switch-field";
 import { TextField } from "./text-field";
 import { TextareaField } from "./textarea-field";
-import { SelectField } from "./select-field";
-import { CheckboxField } from "./checkbox-field";
-import { SwitchField } from "./switch-field";
-import { NumberField } from "./number-field";
-import { DateField } from "./date-field";
-import { SliderField } from "./slider-field";
-import { FileUploadField } from "./file-upload-field";
-import { RadioField } from "./radio-field";
-import { MultiSelectField } from "./multi-select-field";
-import { ColorPickerField } from "./color-picker-field";
-import { RatingField } from "./rating-field";
-import { PhoneField } from "./phone-field";
-import { LocationPickerField } from "./location-picker-field";
-import { DurationPickerField } from "./duration-picker-field";
-import { AutocompleteField } from "./autocomplete-field";
-import { MaskedInputField } from "./masked-input-field";
 
 export const FIELD_TYPE_COMPONENTS: Record<string, React.ComponentType<any>> = {
   text: TextField,
@@ -30,6 +34,8 @@ export const FIELD_TYPE_COMPONENTS: Record<string, React.ComponentType<any>> = {
   tel: TextField,
   textarea: TextareaField,
   select: SelectField,
+  combobox: ComboboxField,
+  multicombobox: MultiComboboxField,
   checkbox: CheckboxField,
   switch: SwitchField,
   number: NumberField,
@@ -48,7 +54,7 @@ export const FIELD_TYPE_COMPONENTS: Record<string, React.ComponentType<any>> = {
 };
 
 export const NestedFieldRenderer = <
-  TFormValues extends Record<string, unknown>
+  TFormValues extends Record<string, unknown>,
 >({
   fieldConfig,
   fieldApi,
@@ -86,6 +92,8 @@ export const NestedFieldRenderer = <
     phoneConfig,
     colorConfig,
     multiSelectConfig,
+    comboboxConfig,
+    multiComboboxConfig,
     locationConfig,
     durationConfig,
     autocompleteConfig,
@@ -121,20 +129,18 @@ export const NestedFieldRenderer = <
 
   function renderActualField() {
     if (type === "array") {
-      const ArrayField = require("./array-field").ArrayField;
       return (
         <ArrayField
           fieldApi={fieldApi}
           label={resolvedLabel}
           description={resolvedDescription}
           placeholder={resolvedPlaceholder}
-          arrayConfig={arrayConfig}
+          arrayConfig={arrayConfig!}
         />
       );
     }
 
     if (type === "object") {
-      const ObjectField = require("./object-field").ObjectField;
       return (
         <ObjectField
           fieldApi={fieldApi}
@@ -154,10 +160,10 @@ export const NestedFieldRenderer = <
       options && resolveOptions
         ? resolveOptions(options, subscribedValues)
         : Array.isArray(options)
-        ? options.map((opt) =>
-            typeof opt === "string" ? { value: opt, label: opt } : opt
-          )
-        : [];
+          ? options.map((opt) =>
+              typeof opt === "string" ? { value: opt, label: opt } : opt,
+            )
+          : [];
 
     const baseProps: FieldComponentProps = {
       fieldApi,
@@ -175,6 +181,16 @@ export const NestedFieldRenderer = <
 
     if (type === "select" || type === "radio" || type === "multiSelect") {
       props.options = resolvedOptionsList;
+    }
+
+    if (type === "combobox") {
+      props.options = resolvedOptionsList;
+      props.comboboxConfig = comboboxConfig;
+    }
+
+    if (type === "multicombobox") {
+      props.options = resolvedOptionsList;
+      props.multiComboboxConfig = multiComboboxConfig;
     }
 
     if (["text", "email", "password", "url", "tel"].includes(type)) {
@@ -195,7 +211,7 @@ export const NestedFieldRenderer = <
               ...autocompleteConfig,
               options: resolveOptions(
                 autocompleteConfig.options,
-                subscribedValues
+                subscribedValues,
               ),
             }
           : autocompleteConfig;
@@ -216,7 +232,7 @@ export const NestedFieldRenderer = <
 };
 
 export interface SharedFieldRendererProps<
-  TFormValues extends Record<string, unknown>
+  TFormValues extends Record<string, unknown>,
 > {
   fieldConfig: FieldConfig & {
     crossFieldError?: string;
@@ -230,12 +246,12 @@ export interface SharedFieldRendererProps<
   currentValues?: TFormValues;
   resolveOptions?: (
     options: FieldConfig["options"],
-    currentValues: TFormValues
+    currentValues: TFormValues,
   ) => { value: string; label: string }[];
 }
 
 export const SharedFieldRenderer = <
-  TFormValues extends Record<string, unknown>
+  TFormValues extends Record<string, unknown>,
 >({
   fieldConfig,
   fieldApi,
@@ -272,6 +288,8 @@ export const SharedFieldRenderer = <
     phoneConfig,
     colorConfig,
     multiSelectConfig,
+    comboboxConfig,
+    multiComboboxConfig,
     locationConfig,
     durationConfig,
     autocompleteConfig,
@@ -306,7 +324,7 @@ export const SharedFieldRenderer = <
 
   if (type === "array" || type === "object") {
     console.warn(
-      `SharedFieldRenderer: ${type} fields should handle their own rendering to avoid circular dependencies`
+      `SharedFieldRenderer: ${type} fields should handle their own rendering to avoid circular dependencies`,
     );
     return null;
   }
@@ -318,10 +336,10 @@ export const SharedFieldRenderer = <
     options && resolveOptions
       ? resolveOptions(options, subscribedValues)
       : Array.isArray(options)
-      ? options.map((opt) =>
-          typeof opt === "string" ? { value: opt, label: opt } : opt
-        )
-      : [];
+        ? options.map((opt) =>
+            typeof opt === "string" ? { value: opt, label: opt } : opt,
+          )
+        : [];
 
   const baseProps: FieldComponentProps = {
     fieldApi,
@@ -339,6 +357,16 @@ export const SharedFieldRenderer = <
 
   if (type === "select" || type === "radio" || type === "multiSelect") {
     props.options = resolvedOptionsList;
+  }
+
+  if (type === "combobox") {
+    props.options = resolvedOptionsList;
+    props.comboboxConfig = comboboxConfig;
+  }
+
+  if (type === "multicombobox") {
+    props.options = resolvedOptionsList;
+    props.multiComboboxConfig = multiComboboxConfig;
   }
 
   if (["text", "email", "password", "url", "tel"].includes(type)) {
@@ -359,7 +387,7 @@ export const SharedFieldRenderer = <
             ...autocompleteConfig,
             options: resolveOptions(
               autocompleteConfig.options,
-              subscribedValues
+              subscribedValues,
             ),
           }
         : autocompleteConfig;

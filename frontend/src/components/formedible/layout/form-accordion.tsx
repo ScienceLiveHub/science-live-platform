@@ -1,49 +1,49 @@
 "use client";
-import React from "react";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { cn } from "@/lib/utils";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import type { FormAccordionProps } from "@/lib/formedible/types";
-
+import { cn } from "@/lib/utils";
+import React from "react";
 
 export const FormAccordion: React.FC<FormAccordionProps> = ({
   children,
   sections,
-  type = 'single',
+  type = "single",
   className,
 }) => {
   return (
     <div className={cn("space-y-4", className)}>
       {children}
-      
-      {type === 'single' ? (
-        <Accordion 
-          type="single" 
-          defaultValue={sections.find(s => s.defaultOpen)?.id}
+
+      {type === "single" ? (
+        <Accordion
+          type="single"
+          defaultValue={sections.find((s) => s.defaultOpen)?.id}
           collapsible
         >
           {sections.map((section) => (
             <AccordionItem key={section.id} value={section.id}>
               <AccordionTrigger>{section.title}</AccordionTrigger>
               <AccordionContent>
-                <div className="space-y-4">
-                  {section.content}
-                </div>
+                <div className="space-y-4">{section.content}</div>
               </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
       ) : (
-        <Accordion 
-          type="multiple" 
-          defaultValue={sections.filter(s => s.defaultOpen).map(s => s.id)}
+        <Accordion
+          type="multiple"
+          defaultValue={sections.filter((s) => s.defaultOpen).map((s) => s.id)}
         >
           {sections.map((section) => (
             <AccordionItem key={section.id} value={section.id}>
               <AccordionTrigger>{section.title}</AccordionTrigger>
               <AccordionContent>
-                <div className="space-y-4">
-                  {section.content}
-                </div>
+                <div className="space-y-4">{section.content}</div>
               </AccordionContent>
             </AccordionItem>
           ))}

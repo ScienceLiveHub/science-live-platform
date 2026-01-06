@@ -1,11 +1,11 @@
-import React from "react";
-import type { AnyFieldApi } from "@tanstack/react-form";
 import type {
-  FormApi,
-  ValidationError,
-  FormState,
   AnyFormApi,
+  FormApi,
+  FormState,
+  ValidationError,
 } from "@tanstack/form-core";
+import type { AnyFieldApi } from "@tanstack/react-form";
+import React from "react";
 import { z } from "zod";
 
 // Strict type definitions for better type safety
@@ -30,7 +30,7 @@ export interface TypedFormState<TFormData = Record<string, unknown>> {
 
 export interface TypedFormSubscriptionSelector<
   TFormData = Record<string, unknown>,
-  TSelected = unknown
+  TSelected = unknown,
 > {
   (
     state: FormState<
@@ -45,7 +45,7 @@ export interface TypedFormSubscriptionSelector<
       undefined,
       undefined,
       undefined
-    >
+    >,
   ): TSelected;
 }
 
@@ -182,7 +182,7 @@ export interface ObjectConfig {
       | string[]
       | Array<{ value: string; label: string }>
       | ((
-          values: Record<string, unknown>
+          values: Record<string, unknown>,
         ) => string[] | Array<{ value: string; label: string }>);
     min?: number;
     max?: number;
@@ -241,20 +241,20 @@ export interface DateFieldProps extends BaseFieldProps {
     disabledDates?: Date[];
     showTime?: boolean;
     timeFormat?: string;
-    
+
     // Days of week restrictions (0=Sunday, 6=Saturday)
     disabledDaysOfWeek?: number[];
-    
-    // Date range restrictions  
+
+    // Date range restrictions
     disabledDateRanges?: Array<{
       from: Date;
       to: Date;
     }>;
-    
+
     // Past/Future restrictions
     disablePastDates?: boolean;
     disableFutureDates?: boolean;
-    
+
     // Custom disable function (with optional form values access)
     disableDate?: (date: Date, formValues?: Record<string, any>) => boolean;
   };
@@ -626,17 +626,17 @@ export interface FormAnalytics {
   onFieldChange?: (
     fieldName: string,
     value: unknown,
-    timestamp: number
+    timestamp: number,
   ) => void;
   onFieldComplete?: (
     fieldName: string,
     isValid: boolean,
-    timeSpent: number
+    timeSpent: number,
   ) => void;
   onFieldError?: (
     fieldName: string,
     errors: string[],
-    timestamp: number
+    timestamp: number,
   ) => void;
 
   // Form-level analytics
@@ -648,7 +648,7 @@ export interface FormAnalytics {
       currentPage?: number;
       currentTab?: string;
       lastActiveField?: string;
-    }
+    },
   ) => void;
   onFormReset?: (timestamp: number, reason?: string) => void;
 
@@ -657,23 +657,23 @@ export interface FormAnalytics {
     fromPage: number,
     toPage: number,
     timeSpent: number,
-    pageValidationState?: { hasErrors: boolean; completionPercentage: number }
+    pageValidationState?: { hasErrors: boolean; completionPercentage: number },
   ) => void;
   onPageComplete?: (
     pageNumber: number,
     timeSpent: number,
     fieldsCompleted: number,
-    totalFields: number
+    totalFields: number,
   ) => void;
   onPageAbandon?: (
     pageNumber: number,
     completionPercentage: number,
-    timeSpent: number
+    timeSpent: number,
   ) => void;
   onPageValidationError?: (
     pageNumber: number,
     errors: Record<string, string[]>,
-    timestamp: number
+    timestamp: number,
   ) => void;
 
   // Tab-level analytics (for tabbed forms)
@@ -681,23 +681,23 @@ export interface FormAnalytics {
     fromTab: string,
     toTab: string,
     timeSpent: number,
-    tabCompletionState?: { completionPercentage: number; hasErrors: boolean }
+    tabCompletionState?: { completionPercentage: number; hasErrors: boolean },
   ) => void;
   onTabComplete?: (
     tabId: string,
     timeSpent: number,
     fieldsCompleted: number,
-    totalFields: number
+    totalFields: number,
   ) => void;
   onTabAbandon?: (
     tabId: string,
     completionPercentage: number,
-    timeSpent: number
+    timeSpent: number,
   ) => void;
   onTabValidationError?: (
     tabId: string,
     errors: Record<string, string[]>,
-    timestamp: number
+    timestamp: number,
   ) => void;
   onTabFirstVisit?: (tabId: string, timestamp: number) => void;
 
@@ -705,17 +705,17 @@ export interface FormAnalytics {
   onRenderPerformance?: (
     componentName: string,
     renderTime: number,
-    rerenderCount: number
+    rerenderCount: number,
   ) => void;
   onValidationPerformance?: (
     fieldName: string,
     validationType: "sync" | "async",
-    duration: number
+    duration: number,
   ) => void;
   onSubmissionPerformance?: (
     submissionTime: number,
     validationTime: number,
-    processingTime: number
+    processingTime: number,
   ) => void;
 }
 
@@ -850,7 +850,7 @@ export interface LocationConfig {
         southwest: { lat: number; lng: number };
       };
       [key: string]: any;
-    }
+    },
   ) => Promise<LocationSearchResult[]>;
 
   // User-defined reverse geocoding function
@@ -949,7 +949,7 @@ export interface DurationConfig {
 export interface AutocompleteConfig {
   options?: string[] | { value: string; label: string }[];
   asyncOptions?: (
-    query: string
+    query: string,
   ) => Promise<string[] | { value: string; label: string }[]>;
   debounceMs?: number;
   minChars?: number;
@@ -969,7 +969,7 @@ export interface MaskedInputConfig {
   keepCharPositions?: boolean;
   pipe?: (
     conformedValue: string,
-    config: unknown
+    config: unknown,
   ) => false | string | { value: string; indexesOfPipedChars: number[] };
 }
 
@@ -1118,7 +1118,7 @@ export interface FormProps {
 }
 
 export interface ConditionalFieldsSubscriptionProps<
-  TFormValues extends Record<string, unknown> = Record<string, unknown>
+  TFormValues extends Record<string, unknown> = Record<string, unknown>,
 > {
   form: any;
   fields: FieldConfig[];
@@ -1232,31 +1232,31 @@ export interface UseFormedibleOptions<TFormValues> {
   // Form-level event handlers
   onFormReset?: (
     e: React.FormEvent,
-    formApi: FormedibleFormApi<TFormValues>
+    formApi: FormedibleFormApi<TFormValues>,
   ) => void;
   onFormInput?: (
     e: React.FormEvent,
-    formApi: FormedibleFormApi<TFormValues>
+    formApi: FormedibleFormApi<TFormValues>,
   ) => void;
   onFormInvalid?: (
     e: React.FormEvent,
-    formApi: FormedibleFormApi<TFormValues>
+    formApi: FormedibleFormApi<TFormValues>,
   ) => void;
   onFormKeyDown?: (
     e: React.KeyboardEvent,
-    formApi: FormedibleFormApi<TFormValues>
+    formApi: FormedibleFormApi<TFormValues>,
   ) => void;
   onFormKeyUp?: (
     e: React.KeyboardEvent,
-    formApi: FormedibleFormApi<TFormValues>
+    formApi: FormedibleFormApi<TFormValues>,
   ) => void;
   onFormFocus?: (
     e: React.FocusEvent,
-    formApi: FormedibleFormApi<TFormValues>
+    formApi: FormedibleFormApi<TFormValues>,
   ) => void;
   onFormBlur?: (
     e: React.FocusEvent,
-    formApi: FormedibleFormApi<TFormValues>
+    formApi: FormedibleFormApi<TFormValues>,
   ) => void;
   // Advanced validation features
   crossFieldValidation?: {
@@ -1316,7 +1316,7 @@ export interface FieldConfig {
     | string[]
     | { value: string; label: string }[]
     | ((
-        values: Record<string, unknown>
+        values: Record<string, unknown>,
       ) => string[] | { value: string; label: string }[]);
   min?: number;
   max?: number;

@@ -1,9 +1,9 @@
 "use client";
-import React from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { cn } from "@/lib/utils";
 import type { RadioFieldSpecificProps } from "@/lib/formedible/types";
+import { cn } from "@/lib/utils";
+import React from "react";
 import { FieldWrapper } from "./base-field-wrapper";
 
 export const RadioField: React.FC<RadioFieldSpecificProps> = ({
@@ -23,7 +23,7 @@ export const RadioField: React.FC<RadioFieldSpecificProps> = ({
     fieldApi.state?.meta?.isTouched && fieldApi.state?.meta?.errors?.length > 0;
 
   const normalizedOptions = options.map((option) =>
-    typeof option === "string" ? { value: option, label: option } : option
+    typeof option === "string" ? { value: option, label: option } : option,
   );
 
   const onValueChange = (value: string) => {
@@ -52,7 +52,7 @@ export const RadioField: React.FC<RadioFieldSpecificProps> = ({
           direction === "horizontal"
             ? "flex flex-wrap gap-6"
             : "flex flex-col space-y-2",
-          inputClassName
+          inputClassName,
         )}
       >
         {normalizedOptions.map((option, index) => (

@@ -1,7 +1,3 @@
-import React from "react";
-import { format, parseISO } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -9,8 +5,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import type { DateFieldProps } from "@/lib/formedible/types";
 import { buildDisabledMatchers } from "@/lib/formedible/date";
+import type { DateFieldProps } from "@/lib/formedible/types";
+import { cn } from "@/lib/utils";
+import { format, parseISO } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import React from "react";
 import { FieldWrapper } from "./base-field-wrapper";
 
 export const DateField: React.FC<DateFieldProps> = ({
@@ -31,7 +31,7 @@ export const DateField: React.FC<DateFieldProps> = ({
 
   // Subscribe to form values for dynamic date restrictions
   const [formValues, setFormValues] = React.useState(
-    fieldApi.form?.state?.values || {}
+    fieldApi.form?.state?.values || {},
   );
 
   React.useEffect(() => {
@@ -47,20 +47,23 @@ export const DateField: React.FC<DateFieldProps> = ({
     ? value instanceof Date
       ? value
       : typeof value === "string"
-      ? parseISO(value)
-      : undefined
+        ? parseISO(value)
+        : undefined
     : undefined;
 
   // Build disabled matchers from dateConfig with access to form values
   const disabledMatchers = React.useMemo(() => {
     // If disableDate is a function that needs form values, call it with form values
     let enhancedDateConfig = dateConfig;
-    if (dateConfig?.disableDate && typeof dateConfig.disableDate === 'function') {
+    if (
+      dateConfig?.disableDate &&
+      typeof dateConfig.disableDate === "function"
+    ) {
       // Create a wrapper that provides form values to the disable function
       const originalDisableDate = dateConfig.disableDate;
       enhancedDateConfig = {
         ...dateConfig,
-        disableDate: (date: Date) => originalDisableDate(date, formValues)
+        disableDate: (date: Date) => originalDisableDate(date, formValues),
       };
     }
 
@@ -82,7 +85,7 @@ export const DateField: React.FC<DateFieldProps> = ({
     "w-full justify-start text-left font-normal",
     !selectedDate && "text-muted-foreground",
     hasErrors ? "border-destructive" : "",
-    inputClassName
+    inputClassName,
   );
 
   return (

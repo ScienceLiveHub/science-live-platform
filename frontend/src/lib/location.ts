@@ -6,7 +6,7 @@ import type {
 export const builtInProviders = {
   nominatim: async (
     query: string,
-    options: any = {}
+    options: any = {},
   ): Promise<LocationSearchResult[]> => {
     const endpoint =
       options.endpoint || "https://nominatim.openstreetmap.org/search";
@@ -54,7 +54,7 @@ export const builtInProviders = {
   nominatimReverse: async (
     lat: number,
     lng: number,
-    options: any = {}
+    options: any = {},
   ): Promise<LocationValue> => {
     const endpoint =
       options.endpoint || "https://nominatim.openstreetmap.org/reverse";
@@ -89,7 +89,7 @@ export const builtInProviders = {
 export function formatCoordinates(
   lat: number,
   lng: number,
-  format: "decimal" | "dms" = "decimal"
+  format: "decimal" | "dms" = "decimal",
 ): string {
   if (format === "decimal") {
     return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
@@ -105,7 +105,7 @@ export function formatCoordinates(
     const lngDir = lng >= 0 ? "E" : "W";
 
     return `${latDeg}°${latMin}'${latSec.toFixed(
-      2
+      2,
     )}"${latDir} ${lngDeg}°${lngMin}'${lngSec.toFixed(2)}"${lngDir}`;
   }
 }
@@ -149,7 +149,7 @@ export const defaultMapRenderer = (params: {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
-    }
+    },
   );
 
   osmTileLayer.addTo(leafletMap);

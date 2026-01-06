@@ -1,9 +1,8 @@
-import React from 'react';
-import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
-import type { TextareaFieldSpecificProps } from '@/lib/formedible/types';
-import { FieldWrapper } from './base-field-wrapper';
-
+import { Textarea } from "@/components/ui/textarea";
+import type { TextareaFieldSpecificProps } from "@/lib/formedible/types";
+import { cn } from "@/lib/utils";
+import React from "react";
+import { FieldWrapper } from "./base-field-wrapper";
 
 export const TextareaField: React.FC<TextareaFieldSpecificProps> = ({
   fieldApi,
@@ -16,9 +15,10 @@ export const TextareaField: React.FC<TextareaFieldSpecificProps> = ({
   rows = 3,
 }) => {
   const name = fieldApi.name;
-  const value = (fieldApi.state?.value as string) || '';
+  const value = (fieldApi.state?.value as string) || "";
   const isDisabled = fieldApi.form?.state?.isSubmitting ?? false;
-  const hasErrors = fieldApi.state?.meta?.isTouched && fieldApi.state?.meta?.errors?.length > 0;
+  const hasErrors =
+    fieldApi.state?.meta?.isTouched && fieldApi.state?.meta?.errors?.length > 0;
 
   const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     fieldApi.handleChange(e.target.value);
@@ -30,7 +30,7 @@ export const TextareaField: React.FC<TextareaFieldSpecificProps> = ({
 
   const computedInputClassName = cn(
     inputClassName,
-    hasErrors ? "border-destructive" : ""
+    hasErrors ? "border-destructive" : "",
   );
 
   return (

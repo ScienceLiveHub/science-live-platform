@@ -1,8 +1,8 @@
 "use client";
-import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import type { FormStepperProps } from "@/lib/formedible/types";
+import { cn } from "@/lib/utils";
+import React, { useState } from "react";
 
 export const FormStepper: React.FC<FormStepperProps> = ({
   children,
@@ -89,14 +89,14 @@ export const FormStepper: React.FC<FormStepperProps> = ({
                     !isStepCompleted(index) &&
                     "border-muted-foreground text-muted-foreground",
                   canGoToStep(index) && "cursor-pointer hover:border-primary",
-                  !canGoToStep(index) && "cursor-not-allowed opacity-50"
+                  !canGoToStep(index) && "cursor-not-allowed opacity-50",
                 )}
               >
                 {isStepCompleted(index)
                   ? "✓"
                   : showStepNumbers
-                  ? index + 1
-                  : "○"}
+                    ? index + 1
+                    : "○"}
               </button>
 
               <div className="mt-2 text-center">
@@ -104,7 +104,7 @@ export const FormStepper: React.FC<FormStepperProps> = ({
                   className={cn(
                     "text-sm font-medium",
                     isStepActive(index) && "text-primary",
-                    !isStepActive(index) && "text-muted-foreground"
+                    !isStepActive(index) && "text-muted-foreground",
                   )}
                 >
                   {step.title}
@@ -127,7 +127,7 @@ export const FormStepper: React.FC<FormStepperProps> = ({
               <div
                 className={cn(
                   "flex-1 h-0.5 mx-4",
-                  isStepCompleted(index) ? "bg-primary" : "bg-muted"
+                  isStepCompleted(index) ? "bg-primary" : "bg-muted",
                 )}
               />
             )}

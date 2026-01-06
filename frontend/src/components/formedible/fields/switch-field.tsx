@@ -1,8 +1,8 @@
-import React from "react";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
 import type { BaseFieldProps } from "@/lib/formedible/types";
+import { cn } from "@/lib/utils";
+import React from "react";
 import { FieldWrapper } from "./base-field-wrapper";
 
 export const SwitchField: React.FC<BaseFieldProps> = ({
@@ -50,7 +50,7 @@ export const SwitchField: React.FC<BaseFieldProps> = ({
             htmlFor={name}
             className={cn(
               "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
-              labelClassName
+              labelClassName,
             )}
           >
             {label}

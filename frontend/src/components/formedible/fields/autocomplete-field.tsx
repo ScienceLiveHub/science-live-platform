@@ -1,10 +1,10 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
-import type { BaseFieldProps } from "@/lib/formedible/types";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import type { BaseFieldProps } from "@/lib/formedible/types";
 import { cn } from "@/lib/utils";
+import React, { useEffect, useRef, useState } from "react";
 import { FieldWrapper } from "./base-field-wrapper";
 
 interface AutocompleteOption {
@@ -46,7 +46,7 @@ export const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
 
   const [inputValue, setInputValue] = useState(fieldApi.state?.value || "");
   const [filteredOptions, setFilteredOptions] = useState<AutocompleteOption[]>(
-    []
+    [],
   );
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,10 +58,10 @@ export const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
 
   // Normalize options to consistent format
   const normalizeOptions = (
-    opts: string[] | AutocompleteOption[]
+    opts: string[] | AutocompleteOption[],
   ): AutocompleteOption[] => {
     return opts.map((opt) =>
-      typeof opt === "string" ? { value: opt, label: opt } : opt
+      typeof opt === "string" ? { value: opt, label: opt } : opt,
     );
   };
 
@@ -75,11 +75,11 @@ export const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
         .filter(
           (option) =>
             option.label.toLowerCase().includes(query.toLowerCase()) ||
-            option.value.toLowerCase().includes(query.toLowerCase())
+            option.value.toLowerCase().includes(query.toLowerCase()),
         )
         .slice(0, maxResults);
     },
-    [minChars, options, maxResults]
+    [minChars, options, maxResults],
   );
 
   // Handle async options
@@ -99,7 +99,7 @@ export const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
         setIsLoading(false);
       }
     },
-    [asyncOptions, minChars, maxResults]
+    [asyncOptions, minChars, maxResults],
   );
 
   // Debounced search
@@ -164,7 +164,7 @@ export const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
       case "ArrowDown":
         e.preventDefault();
         setHighlightedIndex((prev) =>
-          prev < filteredOptions.length - 1 ? prev + 1 : prev
+          prev < filteredOptions.length - 1 ? prev + 1 : prev,
         );
         break;
       case "ArrowUp":
@@ -291,7 +291,7 @@ export const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
                     className={cn(
                       "w-full text-left px-3 py-2 text-sm rounded-sm transition-colors",
                       "hover:bg-muted focus:bg-muted focus:outline-none",
-                      highlightedIndex === index && "bg-muted"
+                      highlightedIndex === index && "bg-muted",
                     )}
                     onClick={() => handleOptionSelect(option)}
                     onMouseEnter={() => setHighlightedIndex(index)}

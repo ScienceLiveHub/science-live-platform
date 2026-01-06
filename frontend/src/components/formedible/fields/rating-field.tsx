@@ -1,8 +1,8 @@
 "use client";
-import React, { useState } from "react";
-import { cn } from "@/lib/utils";
-import { Star, Heart, ThumbsUp } from "lucide-react";
 import type { RatingFieldSpecificProps } from "@/lib/formedible/types";
+import { cn } from "@/lib/utils";
+import { Heart, Star, ThumbsUp } from "lucide-react";
+import React, { useState } from "react";
 import { FieldWrapper } from "./base-field-wrapper";
 
 const ICON_COMPONENTS = {
@@ -62,7 +62,7 @@ export const RatingField: React.FC<RatingFieldSpecificProps> = ({
 
   const shouldShowFilled = (
     index: number,
-    isHalf: boolean = false
+    isHalf: boolean = false,
   ): boolean => {
     const ratingValue = getRatingValue(index, isHalf);
     const currentValue = hoverValue !== null ? hoverValue : value;
@@ -113,7 +113,7 @@ export const RatingField: React.FC<RatingFieldSpecificProps> = ({
                   "relative transition-all duration-150 hover:scale-110",
                   isDisabled
                     ? "cursor-not-allowed opacity-50"
-                    : "cursor-pointer"
+                    : "cursor-pointer",
                 )}
                 onClick={() =>
                   !isDisabled && handleRatingClick(getRatingValue(index, false))
@@ -136,9 +136,9 @@ export const RatingField: React.FC<RatingFieldSpecificProps> = ({
                       ? icon === "star"
                         ? "fill-yellow-400 text-yellow-400"
                         : icon === "heart"
-                        ? "fill-red-500 text-red-500"
-                        : "fill-blue-500 text-blue-500"
-                      : "text-muted-foreground hover:text-muted-foreground/80"
+                          ? "fill-red-500 text-red-500"
+                          : "fill-blue-500 text-blue-500"
+                      : "text-muted-foreground hover:text-muted-foreground/80",
                   )}
                 />
 
@@ -154,8 +154,8 @@ export const RatingField: React.FC<RatingFieldSpecificProps> = ({
                         icon === "star"
                           ? "fill-yellow-400 text-yellow-400"
                           : icon === "heart"
-                          ? "fill-red-500 text-red-500"
-                          : "fill-blue-500 text-blue-500"
+                            ? "fill-red-500 text-red-500"
+                            : "fill-blue-500 text-blue-500",
                       )}
                     />
                   </div>
@@ -168,7 +168,7 @@ export const RatingField: React.FC<RatingFieldSpecificProps> = ({
                   type="button"
                   className={cn(
                     "absolute inset-0 w-1/2 transition-all duration-150",
-                    isDisabled ? "cursor-not-allowed" : "cursor-pointer"
+                    isDisabled ? "cursor-not-allowed" : "cursor-pointer",
                   )}
                   onClick={() =>
                     !isDisabled &&
@@ -191,7 +191,7 @@ export const RatingField: React.FC<RatingFieldSpecificProps> = ({
               type="button"
               className={cn(
                 "ml-2 text-xs text-muted-foreground hover:text-foreground transition-colors",
-                isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
               )}
               onClick={() => !isDisabled && handleRatingClick(0)}
               disabled={isDisabled}

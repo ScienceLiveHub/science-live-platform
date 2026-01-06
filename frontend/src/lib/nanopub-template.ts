@@ -1,4 +1,3 @@
-import { FieldWrapper } from "@/components/formedible/fields/base-field-wrapper";
 import * as RDFT from "@rdfjs/types";
 import { DataFactory, Store, Writer } from "n3";
 import { DEFAULT_NANOPUB_URI, sign } from "nanopub-js";
@@ -50,6 +49,15 @@ export interface TemplateField {
   placeholder?: string;
   multiple?: boolean; // For repeatable statements
   regex?: string; // For zod validation
+}
+
+/**
+ * Is this a repeatable statement?
+ */
+function isRepeatable(statement: Statement) {
+  return statement.types?.includes(
+    "https://w3id.org/np/o/ntemplate/RepeatableStatement",
+  );
 }
 
 /**
@@ -130,7 +138,7 @@ export class NanopubTemplate extends NanopubStore {
    * Generate a nanopub in trig format, using this template and the specified values for the placeholders
    */
   async applyTemplate(
-    values: Record<string, string>,
+    placeholderValues: Record<string, string>,
     pubData: {
       orcid: string;
       name: string;
@@ -150,21 +158,29 @@ export class NanopubTemplate extends NanopubStore {
     const outputStore = new Store();
 
     // Helper function to replace placeholders in URIs
-    const replacePlaceholder = (uri: string): string => {
+    const getPlaceholderValue = (
+      uri: string,
+      values: Record<string, string>,
+    ): string => {
       // Replace sub: placeholders with values
       if (uri.startsWith("sub:")) {
         const placeholderName = uri.substring(4); // Remove "sub:" prefix
-        return values[placeholderName] || uri; // Replace with value or keep original
+        const v = values[placeholderName];
+        return typeof v === "string" ? v : uri; // Replace with value or keep original
       } else if (uri.startsWith(this.metadata.uri!)) {
-        const placeholderName = getUriEnd(uri);
-        return values[placeholderName!] || uri; // Replace with value or keep original
+        const placeholderName = getUriEnd(uri)!;
+        const v = values[placeholderName];
+        return typeof v === "string" ? v : uri; // Replace with value or keep original
       }
       return uri;
     };
 
-    // Helper function to create a term with placeholder replacement
-    const createTerm = (value: string): RDFT.NamedNode<string> => {
-      const replacedValue = replacePlaceholder(value);
+    // Helper function to create a statement and terms with placeholder replacement
+    const createTerm = (
+      placeholderId: string,
+      values: Record<string, string>,
+    ): RDFT.NamedNode<string> => {
+      const replacedValue = getPlaceholderValue(placeholderId, values);
       return namedNode(replacedValue);
     };
 
@@ -203,12 +219,24 @@ export class NanopubTemplate extends NanopubStore {
     // ---- 2. ASSERTION graph, created by processing template statements
 
     // Process each statement from the template
-    for (const [_statementId, statement] of this.statements) {
-      const subject = createTerm(statement.subject);
-      const predicate = createTerm(statement.predicate);
-      const object = createTerm(statement.object);
-
-      outputStore.addQuad(subject, predicate, object, assertionGraph);
+    for (const [statementId, statement] of this.statements) {
+      const addStatement = (s: Statement, values: Record<string, string>) => {
+        const subject = createTerm(s.subject, values);
+        const predicate = createTerm(s.predicate, values);
+        const object = createTerm(s.object, values);
+        outputStore.addQuad(subject, predicate, object, assertionGraph);
+      };
+      const statementName = getUriEnd(statementId) || statement.id;
+      if (
+        isRepeatable(statement) &&
+        Array.isArray(placeholderValues[statementName])
+      ) {
+        for (const values of placeholderValues[statementName]) {
+          addStatement(statement, values);
+        }
+      } else {
+        addStatement(statement, placeholderValues);
+      }
     }
 
     const orcidNode = namedNode(cleanOrcidUri(pubData.orcid));
@@ -293,7 +321,7 @@ export class NanopubTemplate extends NanopubStore {
       ? this.templateMetadata.targetlabelPattern.replaceAll(
           /\$\{([^}]+)\}/g,
           (match, placeholder) => {
-            const value = values[placeholder];
+            const value = placeholderValues[placeholder];
             if (!value) return match;
 
             // If the value looks like a URI, use getUriEnd, otherwise use the literal value
@@ -431,25 +459,6 @@ export class NanopubTemplate extends NanopubStore {
           ),
       );
 
-      // test using https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo
-
-      // TODO: Check whether repeatable
-      // It's repeatable if its part of a repeatable statement
-      // if multiple placeholders are part of the same statement, they should be grouped together when part of the multiple or just follow statements?
-
-      // // Check if it's part of a repeatable statement
-      // const repeatableQuad = assertionQuads.find(
-      //   (quad) =>
-      //     quad.subject.value.includes("st") &&
-      //     quad.object.value === fieldId &&
-      //     assertionQuads.some(
-      //       (stQuad) =>
-      //         stQuad.subject.equals(quad.subject) &&
-      //         stQuad.predicate.equals(NS.RDF("type")) &&
-      //         stQuad.object.equals(NS.NPT("RepeatableStatement")),
-      //     ),
-      // );
-
       // Get options for restricted choice placeholders
       let options: { name: string; description: string; uri?: string }[] = [];
 
@@ -464,9 +473,7 @@ export class NanopubTemplate extends NanopubStore {
         description: pv.description,
         regex: pv.hasRegex,
         options: options?.length > 0 ? options : undefined,
-        // multiple: !!repeatableQuad,
-        required, // Placeholders are required by default
-        // placeholder: `Enter ${label.toLowerCase()}`,
+        required, // Placeholders are required by default, so if this is undefined, its still required
       });
     }
     this.fields = fields;
@@ -550,6 +557,7 @@ function applyTypeSpecificFieldConfig(
       console.warn("Unknown Field Type: ", field);
   }
 }
+
 /**
  * Convert template fields to Formedible field configurations
  */
@@ -593,7 +601,7 @@ export function templateStatementsToFormedible(
       let baseField: FieldConfig;
       if (objectField) {
         baseField = {
-          name: getUriEnd(objectField.id) ?? objectField.id, //objectField.id.replace(/[^a-zA-Z0-9]/g, "_"), // Sanitize name for form
+          name: getUriEnd(objectField.id) ?? objectField.id,
           type: getFormedibleFieldType(objectField.type as PlaceholderType),
           label: objectField.label,
           placeholder: objectField.placeholder,
@@ -601,24 +609,54 @@ export function templateStatementsToFormedible(
           required: objectField.required,
           section: { title: `Statement ${getUriEnd(k)}` },
         };
+
         applyTypeSpecificFieldConfig(objectField, baseField);
       } else {
-        // TODO: this ends up creating something akin to a read-only "label" for this field.
-        //       There should be a much beter way to do this, but it suffices for now
+        // Render constant values (non-placeholders) as a read-only field.
+        // Use a stable, prefixed name to avoid collisions with placeholder names.
         baseField = {
-          name: getUriEnd(statement[part])!,
-          type: "help", // Should be static text/label
-          label: getUriEnd(statement[part])!,
+          name: `_const_${getUriEnd(k) ?? k}_${part}`,
+          type: "static",
+          label: part,
           required: false,
+          defaultValue: statement[part],
           section: { title: `Statement ${getUriEnd(k)}` },
-          component: FieldWrapper,
+          // component: FieldWrapper,
         };
       }
       return baseField;
     };
-    fieldConfig.push(makeFieldFrom("subject"));
-    fieldConfig.push(makeFieldFrom("predicate"));
-    fieldConfig.push(makeFieldFrom("object"));
+
+    const formedibleFields = [
+      makeFieldFrom("subject"),
+      makeFieldFrom("predicate"),
+      makeFieldFrom("object"),
+    ];
+
+    // If statement was detected as repeatable (a RepeatableStatement),
+    // render it as an array field
+    if (isRepeatable(statement)) {
+      let repeatableField: FieldConfig;
+      repeatableField = {
+        type: "array",
+        name: getUriEnd(k) ?? "statement",
+        section: { title: `Statement ${getUriEnd(k)}` },
+        gridColumnSpan: 3,
+        defaultValue: [],
+        arrayConfig: {
+          defaultValue: {},
+          minItems: 1,
+          itemType: "object",
+          itemLabel: "Item",
+          objectConfig: {
+            fields: formedibleFields,
+          },
+        },
+      };
+      fieldConfig.push(repeatableField);
+    } else {
+      fieldConfig.push(...formedibleFields);
+    }
   }
 
   return fieldConfig;

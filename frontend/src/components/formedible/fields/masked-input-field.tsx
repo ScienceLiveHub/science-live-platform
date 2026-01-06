@@ -1,9 +1,9 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
-import type { BaseFieldProps } from "@/lib/formedible/types";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import type { BaseFieldProps } from "@/lib/formedible/types";
 import { cn } from "@/lib/utils";
+import React, { useEffect, useRef, useState } from "react";
 
 interface MaskedInputFieldProps extends BaseFieldProps {
   maskedInputConfig?: {
@@ -14,7 +14,7 @@ interface MaskedInputFieldProps extends BaseFieldProps {
     keepCharPositions?: boolean;
     pipe?: (
       conformedValue: string,
-      config: unknown
+      config: unknown,
     ) => false | string | { value: string; indexesOfPipedChars: number[] };
   };
 }
@@ -118,7 +118,7 @@ export const MaskedInputField: React.FC<MaskedInputFieldProps> = ({
 
       return maskedValue;
     },
-    [mask, guide, showMask, pipe, displayValue]
+    [mask, guide, showMask, pipe, displayValue],
   );
 
   // Initialize from field value

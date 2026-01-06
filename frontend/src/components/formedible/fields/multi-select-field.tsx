@@ -1,12 +1,12 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import React, { useEffect, useRef, useState } from "react";
 
-import { cn } from "@/lib/utils";
-import { X, ChevronDown, Check } from "lucide-react";
 import type { MultiSelectFieldSpecificProps } from "@/lib/formedible/types";
+import { cn } from "@/lib/utils";
+import { Check, ChevronDown, X } from "lucide-react";
 import { FieldWrapper } from "./base-field-wrapper";
 
 export const MultiSelectField: React.FC<MultiSelectFieldSpecificProps> = ({
@@ -34,14 +34,14 @@ export const MultiSelectField: React.FC<MultiSelectFieldSpecificProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const normalizedOptions = options.map((option) =>
-    typeof option === "string" ? { value: option, label: option } : option
+    typeof option === "string" ? { value: option, label: option } : option,
   );
 
   // Filter options based on search query
   const filteredOptions = normalizedOptions.filter(
     (option) =>
       option.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      option.value.toLowerCase().includes(searchQuery.toLowerCase())
+      option.value.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // Add create option if enabled and query doesn't match existing options
@@ -51,7 +51,7 @@ export const MultiSelectField: React.FC<MultiSelectFieldSpecificProps> = ({
     !normalizedOptions.some(
       (opt) =>
         opt.value.toLowerCase() === searchQuery.toLowerCase() ||
-        opt.label.toLowerCase() === searchQuery.toLowerCase()
+        opt.label.toLowerCase() === searchQuery.toLowerCase(),
     ) &&
     !selectedValues.includes(searchQuery.trim());
 
@@ -142,7 +142,7 @@ export const MultiSelectField: React.FC<MultiSelectFieldSpecificProps> = ({
               "min-h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
               "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
               fieldApi.state?.meta?.errors.length ? "border-destructive" : "",
-              isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-text"
+              isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-text",
             )}
             onClick={() => {
               if (!isDisabled) {
@@ -200,7 +200,7 @@ export const MultiSelectField: React.FC<MultiSelectFieldSpecificProps> = ({
               <ChevronDown
                 className={cn(
                   "h-4 w-4 text-muted-foreground transition-transform ml-auto",
-                  isOpen ? "rotate-180" : ""
+                  isOpen ? "rotate-180" : "",
                 )}
               />
             </div>
@@ -221,7 +221,7 @@ export const MultiSelectField: React.FC<MultiSelectFieldSpecificProps> = ({
                       label: string;
                       isCreateOption?: boolean;
                     },
-                    index
+                    index,
                   ) => {
                     const isSelected = selectedValues.includes(option.value);
                     const isDisabled =
@@ -238,7 +238,7 @@ export const MultiSelectField: React.FC<MultiSelectFieldSpecificProps> = ({
                           isDisabled ? "opacity-50 cursor-not-allowed" : "",
                           option.isCreateOption
                             ? "font-medium text-primary"
-                            : ""
+                            : "",
                         )}
                         onClick={() =>
                           !isDisabled && handleSelect(option.value)
@@ -249,7 +249,7 @@ export const MultiSelectField: React.FC<MultiSelectFieldSpecificProps> = ({
                         {isSelected && <Check className="h-4 w-4" />}
                       </button>
                     );
-                  }
+                  },
                 )
               )}
             </div>

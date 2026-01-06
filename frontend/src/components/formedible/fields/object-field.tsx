@@ -1,10 +1,10 @@
 "use client";
-import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { resolveDynamicText } from "@/lib/formedible/template-interpolation";
 import type { BaseFieldProps, ObjectFieldProps } from "@/lib/formedible/types";
+import React from "react";
 import { FieldWrapper } from "./base-field-wrapper";
 import { NestedFieldRenderer } from "./shared-field-renderer";
-import { resolveDynamicText } from "@/lib/formedible/template-interpolation";
 
 export const ObjectField: React.FC<ObjectFieldProps> = ({
   fieldApi,
@@ -14,12 +14,12 @@ export const ObjectField: React.FC<ObjectFieldProps> = ({
   ...wrapperProps
 }) => {
   const [isExpanded, setIsExpanded] = React.useState(
-    objectConfig?.defaultExpanded !== false
+    objectConfig?.defaultExpanded !== false,
   );
 
   // Subscribe to form values for dynamic text resolution
   const [subscribedValues, setSubscribedValues] = React.useState(
-    fieldApi.form?.state?.values || {}
+    fieldApi.form?.state?.values || {},
   );
 
   React.useEffect(() => {
@@ -59,7 +59,7 @@ export const ObjectField: React.FC<ObjectFieldProps> = ({
     const fieldValue = fieldApi.state?.value?.[subFieldConfig.name] || "";
     const mockFieldApi = createMockFieldApi(
       subFieldConfig.name,
-      fieldValue
+      fieldValue,
     ) as unknown as BaseFieldProps["fieldApi"];
 
     return (
@@ -110,11 +110,11 @@ export const ObjectField: React.FC<ObjectFieldProps> = ({
                     {isExpanded
                       ? resolveDynamicText(
                           objectConfig?.collapseLabel || "Collapse",
-                          subscribedValues
+                          subscribedValues,
                         )
                       : resolveDynamicText(
                           objectConfig?.expandLabel || "Expand",
-                          subscribedValues
+                          subscribedValues,
                         )}
                   </button>
                 )}
@@ -169,11 +169,11 @@ export const ObjectField: React.FC<ObjectFieldProps> = ({
                     {isExpanded
                       ? resolveDynamicText(
                           objectConfig?.collapseLabel || "Collapse",
-                          subscribedValues
+                          subscribedValues,
                         )
                       : resolveDynamicText(
                           objectConfig?.expandLabel || "Expand",
-                          subscribedValues
+                          subscribedValues,
                         )}
                   </button>
                 )}
