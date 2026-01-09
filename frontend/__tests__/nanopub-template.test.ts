@@ -14,8 +14,34 @@ describe("NanopubTemplate.applyTemplate", () => {
           cites: "http://purl.org/spar/cito/usesDataFrom",
           cited: "https://doi.org/10.1126/science.aar3646",
         },
+        {
+          article: "https://doi.org/10.99999999",
+          unrelated: "Some unrelated form data that should be EXCLUDED",
+          st01: { article: "Another red-herring, which should be EXCLUDED" },
+          st02: [
+            {
+              unrelated2: "https://exclude.this.data",
+              article: "https://doi.org/10.99999999",
+              cites: "http://purl.org/spar/cito/citesAsMetadataDocument",
+              cited: "https://doi.org/10.11111111",
+            },
+            {
+              article: "https://doi.org/10.33333333",
+              cites: "http://purl.org/spar/cito/agreesWith",
+              cited: "https://doi.org/10.44444444",
+            },
+            {
+              article: "https://doi.org/10.99999999",
+              cites: "http://purl.org/spar/cito/usesDataFrom",
+              cited: "https://doi.org/10.44444444",
+            },
+          ],
+        },
       ],
-      outputs: ["RAX_4tWT-applyTemplate_expected_output_1.trig"],
+      outputs: [
+        "RAX_4tWT-applyTemplate_expected_output_1.trig",
+        "RAX_4tWT-applyTemplate_expected_output_2.trig",
+      ],
     },
     {
       input: "RAVEpTdLrX5XrhNl_gnvTaBcjRRSDu_hhZix8gu2HO7jI.trig",
@@ -130,5 +156,19 @@ describe("NanopubTemplate.applyTemplate", () => {
       /rdfs:comment\s+<This is a test comment \(literal\)>/,
     );
     expect(result).toMatch(loadedFixtures[fixturesSets[1].outputs[0]]);
+  });
+
+  it("should work with repeatable statements and exclude data not related to a statement", async () => {
+    const template = await NanopubTemplate.loadString(
+      loadedFixtures[fixturesSets[0].input],
+    );
+
+    const { signedRdf: result } = await template.applyTemplate(
+      fixturesSets[0].params[1],
+      pubdata,
+      EXAMPLE_privateKey,
+    );
+
+    expect(result).toMatch(loadedFixtures[fixturesSets[0].outputs[1]]);
   });
 });

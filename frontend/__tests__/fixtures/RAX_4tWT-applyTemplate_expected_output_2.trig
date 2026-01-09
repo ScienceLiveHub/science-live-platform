@@ -1,0 +1,60 @@
+PREFIX this: <https://w3id.org/np/RAnajTOzA6Fj1gwQcbBx24RLtGNI4THEiIBqo9jfVvU94>
+PREFIX sub: <https://w3id.org/np/RAnajTOzA6Fj1gwQcbBx24RLtGNI4THEiIBqo9jfVvU94/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX np: <http://www.nanopub.org/nschema#>
+PREFIX npx: <http://purl.org/nanopub/x/>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX pav: <http://purl.org/pav/>
+PREFIX schema: <https://schema.org/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX orcid: <https://orcid.org/>
+PREFIX biolink: <https://w3id.org/biolink/vocab/>
+PREFIX infores: <https://w3id.org/biolink/infores/>
+
+GRAPH sub:Head {
+  <https://w3id.org/np/RAnajTOzA6Fj1gwQcbBx24RLtGNI4THEiIBqo9jfVvU94> a np:Nanopublication;
+    np:hasAssertion sub:assertion;
+    np:hasProvenance sub:provenance;
+    np:hasPublicationInfo sub:pubinfo.
+}
+
+GRAPH sub:assertion {
+  <https://doi.org/10.33333333>
+    <http://purl.org/spar/cito/agreesWith> <https://doi.org/10.44444444>.
+
+  <https://doi.org/10.99999999> a <http://purl.org/spar/fabio/ScholarlyWork>;
+    <http://purl.org/spar/cito/citesAsMetadataDocument> <https://doi.org/10.11111111>;
+    <http://purl.org/spar/cito/usesDataFrom> <https://doi.org/10.44444444>.
+}
+
+GRAPH sub:provenance {
+  sub:assertion
+    prov:wasAttributedTo orcid:0000-9999-1234-9999.
+}
+
+GRAPH sub:pubinfo {
+  orcid:0000-9999-1234-9999
+    foaf:name "Test User1".
+
+  <https://w3id.org/np/RAnajTOzA6Fj1gwQcbBx24RLtGNI4THEiIBqo9jfVvU94>
+    dcterms:created "2025-01-01T00:00:00.000Z"^^xsd:dateTime;
+    dcterms:creator orcid:0000-9999-1234-9999;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/>;
+    npx:hasNanopubType <http://purl.org/spar/cito/cites>;
+    npx:wasCreatedAt <https://platform.sciencelive4all.org>;
+    rdfs:label "Citations for: 10.99999999";
+    <https://w3id.org/np/o/ntemplate/wasCreatedFromTemplate> <https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo>.
+
+  sub:sig
+    npx:hasAlgorithm "RSA";
+    npx:hasPublicKey "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzUBHKF13IXaU5u9U4nYcq9QTCafI2HlYO/6C25hOVjidIYpUh/25or8sAfh6Ezq+v97aYp8NAcLNjNpv+yy5w2mnmAeUQtg6A9gSgWuPfcjh2t6xjBjof74sghjiW4xTyDZTIbCM7K/sL5LR8NCXJX1udPJR5rnY80df+gdzj3W4+l8NvdlRyEbdlncgpjxHPP98787snEN8bFEZzMUaAHRaiH+Yj99KZ/bqj/hMda1GmeJW61PALjT8rN34iDw1U2ILIeGpWPyHGL3eTgr59rsOC6F3fyWW/RCbktSmCvb/w0YqwnZb0jYeIcuVBO/5zYJlw7d8WIw38zmDf/DfYQIDAQAB";
+    npx:hasSignature "vUo/v2l53QtdrotcPivnZ7bv2bd1BaDY5J/VkOela3ibVk3lvKFs+VbMZtT48TjY+4c3cx6MRL1QO2PlymsQ7JSHGh6WOKjgdS2oZqwnsdx8GxVAi3tnXMlcjw0HzqtKR2pW4dd2+5LgkN2Z4VYYnXQlm1AyNBh5Fxpp6eabMpzBkaOmwj1TJYKrGri7WIforDJjx+jDD/g1mqgGM8/rhKwNawjRULbPRAiTLhx7yG70bDQcBRYH4rkTWVya9NwC026AgWk7epu9ns5Oc8U7jaZsgNl5j8jFfXHx+nk5z5/IzhHCk/gt3xUdgJGtkKWFj1A45cTwCm8YEHhynCw1Ww==";
+    npx:hasSignatureTarget <https://w3id.org/np/RAnajTOzA6Fj1gwQcbBx24RLtGNI4THEiIBqo9jfVvU94>;
+    npx:signedBy orcid:0000-9999-1234-9999.
+}
