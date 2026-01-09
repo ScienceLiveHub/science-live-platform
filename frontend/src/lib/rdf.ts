@@ -126,7 +126,7 @@ export async function parseRdf(
  * Publish the (already signed) nanopub RDF to the server
  * Defaults to a production server.
  *
- * e.g. Prod: https://np.knowledgepixels.com/
+ * e.g. Prod: https://registry.knowledgepixels.com/
  * e.g. Test: https://test.registry.knowledgepixels.com/np/ (TEST_NANOPUB_REGISTRY_URL)
  * Currently, publishing to the test server validates the RDF and returns OK but the
  * nanopub isnt created on the network.  This may change in future.
@@ -134,7 +134,7 @@ export async function parseRdf(
  */
 export async function publishRdf(
   rdf: string,
-  server: string = "https://np.knowledgepixels.com/",
+  server: string = "https://registry.knowledgepixels.com/",
 ): Promise<{ response: Response }> {
   const res = await ky(server, {
     method: "POST",
