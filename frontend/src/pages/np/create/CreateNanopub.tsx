@@ -21,10 +21,10 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { authClient } from "@/lib/auth-client";
 import { NanopubTemplate } from "@/lib/nanopub-template";
+import { publishRdf } from "@/lib/rdf";
 import { EXAMPLE_privateKey } from "@/lib/utils";
 import ky from "ky";
 import { ChevronsUpDown, FilePlus } from "lucide-react";
-import { publish } from "nanopub-js";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -354,12 +354,8 @@ export default function CreateNanopub() {
               disabled={!termsAgreed || publishComplete}
               onClick={async () => {
                 try {
-                  const result = await publish(
-                    generatedRdf,
-                    EXAMPLE_privateKey,
-                    currentUser.orcidId,
-                    currentUser.name,
-                  );
+                  await publishRdf(generatedRdf);
+
                   setPublishComplete(true);
                   toast.success(
                     "Published as an EXAMPLE nanopub.  A link to it will soon be available on your profile page.",

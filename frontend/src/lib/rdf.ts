@@ -123,6 +123,36 @@ export async function parseRdf(
 }
 
 /**
+ * Publish the (already signed) nanopub RDF to the server
+ * Defaults to a production server.
+ *
+ * e.g. Prod: https://np.knowledgepixels.com/
+ * e.g. Test: https://test.registry.knowledgepixels.com/np/ (TEST_NANOPUB_REGISTRY_URL)
+ * Currently, publishing to the test server validates the RDF and returns OK but the
+ * nanopub isnt created on the network.  This may change in future.
+ *
+ */
+export async function publishRdf(
+  rdf: string,
+  server: string = "https://np.knowledgepixels.com/",
+): Promise<{ response: Response }> {
+  const res = await ky(server, {
+    method: "POST",
+    headers: { "Content-Type": "application/trig" },
+    body: rdf,
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(
+      `Nanopub publish failed: ${res.status} ${res.statusText}\n${text}`,
+    );
+  }
+
+  return { response: res };
+}
+
+/**
  * fetch a list of from a remote RDF document (e.g. values for a combobox or multi choice).
  *
  */
