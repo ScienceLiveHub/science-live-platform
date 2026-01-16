@@ -1,7 +1,7 @@
 import * as RDFT from "@rdfjs/types";
 import ky from "ky";
 import { DataFactory, NamedNode, Parser, Quad, Store, Term, Util } from "n3";
-import { getNanopubHash, getUriEnd } from "./utils";
+import { getNanopubHash, getUriEnd } from "./uri";
 
 const { namedNode } = DataFactory;
 const { isNamedNode, isBlankNode: isBlank, isLiteral, prefix } = Util;

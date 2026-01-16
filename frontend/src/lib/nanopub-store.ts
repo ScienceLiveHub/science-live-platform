@@ -1,6 +1,6 @@
-import { fetchQuads, NS, parseRdf, shrinkUri, Statement } from "@/lib/rdf";
 import { DataFactory, Store as N3Store, NamedNode, Term, Util } from "n3";
-import { getUriEnd, isDoiUri, isNanopubUri, unique } from "./utils";
+import { fetchQuads, NS, parseRdf, shrinkUri, Statement } from "./rdf";
+import { getUriEnd, isDoiUri, isNanopubUri, unique } from "./uri";
 
 const { namedNode } = DataFactory;
 const { isNamedNode } = Util;
@@ -50,9 +50,6 @@ export const COMMON_LABELS: Record<string, string> = {
 
 /**
  * This class adds some dev-friendly convenience on top of the specs-compatible N3.Store.
- *
- * TODO: Much of it is specific to Nanopublications, so consider renaming it to NanopubStore
- *       and conform to Nanopublications spec.
  *
  */
 export class NanopubStore extends N3Store {

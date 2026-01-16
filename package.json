@@ -4,7 +4,8 @@
   "private": true,
   "workspaces": [
     "frontend",
-    "api"
+    "api",
+    "zotero"
   ],
   "scripts": {
     "dev": "npm run dev --workspace=frontend",

@@ -10,7 +10,7 @@ import {
   fetchPossibleValuesFromQuads,
   NS,
 } from "./rdf";
-import { cleanOrcidUri, getUriEnd } from "./utils";
+import { cleanOrcidUri, getUriEnd } from "./uri";
 
 const { namedNode, literal, blankNode } = DataFactory;
 

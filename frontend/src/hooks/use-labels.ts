@@ -1,6 +1,6 @@
 import { COMMON_LABELS } from "@/lib/nanopub-store";
 import { fetchQuads, NS, shrinkUri } from "@/lib/rdf";
-import { isDoiUri } from "@/lib/utils";
+import { isDoiUri } from "@/lib/uri";
 import ky from "ky";
 import { NamedNode, Term, Util } from "n3";
 import { useCallback, useState } from "react";

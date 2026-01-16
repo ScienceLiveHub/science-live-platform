@@ -22,7 +22,7 @@ import { Switch } from "@/components/ui/switch";
 import { authClient } from "@/lib/auth-client";
 import { NanopubTemplate } from "@/lib/nanopub-template";
 import { publishRdf } from "@/lib/rdf";
-import { EXAMPLE_privateKey } from "@/lib/utils";
+import { EXAMPLE_privateKey } from "@/lib/uri";
 import ky from "ky";
 import { ChevronsUpDown, FilePlus } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -221,10 +221,6 @@ export default function CreateNanopub() {
       });
       return;
     }
-
-    toast.info("This is only a Demo!", {
-      description: "Publishing features coming soon.",
-    });
   };
 
   return (

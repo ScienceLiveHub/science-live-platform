@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
 import { usersLatestNanopubs } from "@/lib/queries";
-import { getUriEnd } from "@/lib/utils";
+import { getUriEnd } from "@/lib/uri";
 import { SiOrcid } from "@icons-pack/react-simple-icons";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";

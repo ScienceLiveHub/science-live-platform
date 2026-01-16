@@ -18,7 +18,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { shrinkUri, Statement } from "@/lib/rdf";
-import { extractOrcidId, unique } from "@/lib/utils";
+import { extractOrcidId, unique } from "@/lib/uri";
 import ky from "ky";
 import {
   Copy,
