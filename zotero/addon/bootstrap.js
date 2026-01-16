@@ -29,8 +29,7 @@ async function startup({ id, version, resourceURI, rootURI }, reason) {
 
   /**
    * Polyfills for Zotero addon sandbox environment
-   * Specifically, the n3 npm package used in NanopubStore had issues without this
-
+   * Specifically, the n3 and showdown npm packages had issues without this
    * -------------------------------------------------------------------------
    */
   if (typeof window === "undefined") {
@@ -61,6 +60,32 @@ async function startup({ id, version, resourceURI, rootURI }, reason) {
     }
     ctx.AbortController = AbortControllerPolyfill;
     ctx.AbortSignal = AbortSignalPolyfill;
+  }
+  if (typeof console === "undefined") {
+    console = {
+      warn: function (msg) {},
+      log: function (msg) {},
+      error: function (msg) {},
+      trace: function (msg) {},
+      group: function (msg) {},
+      groupEnd: function (msg) {},
+    };
+    ctx.console = console;
+  }
+  // Adapted from https://github.com/feross/queue-microtask/blob/master/index.js
+  if (typeof queueMicrotask === "function") {
+    ctx.queueMicrotask = queueMicrotask.bind(
+      typeof window !== "undefined" ? window : global,
+    );
+  } else {
+    // reuse resolved promise, and allocate it lazily
+    let promise;
+    ctx.queueMicrotask = (cb) =>
+      (promise || (promise = Promise.resolve())).then(cb).catch((err) =>
+        setTimeout(() => {
+          throw err;
+        }, 0),
+      );
   }
   /**
    * -------------------------------------------------------------------------

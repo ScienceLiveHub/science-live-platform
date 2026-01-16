@@ -13,6 +13,35 @@ type GraphUris = {
   pubinfo?: string;
 };
 
+type CitationFormats = "apa" | "mla" | "chicago" | "bibtex" | string;
+
+/**
+ * Generate citation in different formats
+ */
+export function generateCitation(
+  data?: Metadata,
+  format: CitationFormats = "apa",
+) {
+  const author = data?.creators?.[0]?.name || "Unknown Author";
+  const year = data?.created ? new Date(data.created).getFullYear() : "n.d.";
+  const title = data?.title || "Untitled Nanopublication";
+  const uri = data?.uri;
+
+  if (!uri) return "";
+
+  // Extract just the nanopub ID for cleaner display
+  const npId = uri.split("/").pop();
+
+  const formats = {
+    apa: `${author}. (${year}). ${title} [Nanopublication]. ${uri}`,
+    mla: `${author}. "${title}." Nanopublication, ${year}, ${uri}.`,
+    chicago: `${author}. "${title}." Nanopublication. ${year}. ${uri}.`,
+    bibtex: `@misc{nanopub_${npId},\n  author = {${author}},\n  title = {${title}},\n  year = {${year}},\n  howpublished = {Nanopublication},\n  url = {${uri}}\n}`,
+  };
+
+  return formats[format as keyof typeof formats] || formats.apa;
+}
+
 export type Metadata = {
   created?: string | null;
   creators?: { name: string; href?: string }[];
@@ -324,5 +353,103 @@ export class NanopubStore extends N3Store {
       license: license,
       uri: this.prefixes["this"],
     };
+  }
+
+  /**
+   * Get the citation as a string.
+   */
+  getCitation(format: CitationFormats = "apa") {
+    return generateCitation(this.metadata, format);
+  }
+
+  /**
+   * Output nanopublication as a markdown string.
+   */
+  toMarkdownString() {
+    const title = this.metadata.title ?? "Untitled Nanopublication";
+    const creators = this.metadata.creators?.length
+      ? this.metadata.creators
+          .map((creator) =>
+            creator.href ? `[${creator.name}](${creator.href})` : creator.name,
+          )
+          .join(", ")
+      : "Unknown";
+    const published = this.metadata.created
+      ? new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(
+          new Date(this.metadata.created),
+        )
+      : "Unknown";
+    const type = this.metadata.types?.[0]?.name ?? "Unknown";
+    const license = this.metadata.license
+      ? (() => {
+          const label =
+            this.findInternalLabel(namedNode(this.metadata.license!)) ??
+            getUriEnd(this.metadata.license!) ??
+            this.metadata.license!;
+          return `[${label}](${this.metadata.license})`;
+        })()
+      : "Unknown";
+    const citation = this.getCitation();
+    const sourceUri = this.metadata.uri;
+    const exploreLink = sourceUri
+      ? `https://platform.sciencelive4all.org/np/?uri=${encodeURIComponent(sourceUri)}`
+      : undefined;
+
+    const assertionGraph = this.graphUris.assertion
+      ? namedNode(this.graphUris.assertion)
+      : null;
+    const assertionStatements = assertionGraph
+      ? this.match(null, null, null, assertionGraph).toArray()
+      : [];
+    const assertionBulletPoints = assertionStatements.length
+      ? assertionStatements.map((statement) => {
+          const subject = this.formatTermMarkdown(statement.subject);
+          const predicate = this.formatTermMarkdown(statement.predicate);
+          const object = this.formatTermMarkdown(statement.object);
+          return `- ${subject} ${predicate} ${object}`;
+        })
+      : ["- _No assertions found._"];
+
+    const formattedLines = [
+      `# Nanopub: ${title}`,
+      "",
+      ...assertionBulletPoints,
+      "",
+      `**Created by:** ${creators}`,
+      "",
+      `**Published:** ${published}`,
+      "",
+      `**Type:** \`${type}\``,
+      "",
+      `**License:** ${license}`,
+      "",
+      citation,
+      "",
+      `**Source:** [${sourceUri}](${sourceUri})`,
+      "",
+      `[Explore on Science Live](${exploreLink})`,
+    ];
+
+    return formattedLines.join("\n");
+  }
+
+  private formatTermMarkdown(
+    term:
+      | Term
+      | Statement["subject"]
+      | Statement["predicate"]
+      | Statement["object"],
+  ) {
+    if (term.termType === "NamedNode") {
+      const label = this.findInternalLabel(term as NamedNode) ?? term.value;
+      return `[${label}](${term.value})`;
+    }
+
+    if (term.termType === "Literal") {
+      const lang = term.language ? `@${term.language}` : "";
+      return `"${term.value}"${lang}`;
+    }
+
+    return term.value;
   }
 }

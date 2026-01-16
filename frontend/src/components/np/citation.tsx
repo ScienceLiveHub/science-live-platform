@@ -7,7 +7,7 @@ import {
   SnippetTabsList,
   SnippetTabsTrigger,
 } from "@/components/ui/shadcn-io/snippet";
-import { Metadata } from "@/lib/nanopub-store";
+import { generateCitation, Metadata } from "@/lib/nanopub-store";
 import {
   Book,
   Code2,
@@ -17,39 +17,6 @@ import {
   Quote,
 } from "lucide-react";
 import { useState } from "react";
-
-/**
- * Generate citation in different formats
- */
-export function generateCitation(
-  data?: Metadata,
-  format: keyof typeof citationTypes = "apa",
-) {
-  const author = data?.creators?.[0].name || "Unknown Author";
-  const year = data?.created ? new Date(data.created).getFullYear() : "n.d.";
-  const title = data?.title || "Untitled Nanopublication";
-  const uri = data?.uri;
-
-  if (!uri) return "";
-
-  // Extract just the nanopub ID for cleaner display
-  const npId = uri.split("/").pop();
-
-  const formats = {
-    apa: `${author}. (${year}). ${title} [Nanopublication]. ${uri}`,
-    mla: `${author}. "${title}." Nanopublication, ${year}, ${uri}.`,
-    chicago: `${author}. "${title}." Nanopublication. ${year}. ${uri}.`,
-    bibtex: `@misc{nanopub_${npId},
-  author = {${author}},
-  title = {${title}},
-  year = {${year}},
-  howpublished = {Nanopublication},
-  url = {${uri}}
-}`,
-  };
-
-  return formats[format as keyof typeof formats] || formats.apa;
-}
 
 export const citationTypes: Record<
   string,
@@ -74,7 +41,8 @@ export const citationTypes: Record<
 };
 
 export function Citation({ data }: { data?: Metadata }) {
-  const [selectedCite, setSelectedCite] = useState("apa");
+  const [selectedCite, setSelectedCite] =
+    useState<keyof typeof citationTypes>("apa");
 
   return (
     <Snippet onValueChange={setSelectedCite} value={selectedCite}>
