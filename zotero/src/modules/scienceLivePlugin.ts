@@ -102,6 +102,7 @@ export class ScienceLivePlugin {
             `chrome://${addon.data.config.addonRef}/content/createNanopub.xhtml`,
             "",
             "chrome,dialog=no,modal=no,centerscreen,resizable,width=900,height=700",
+            k,
           );
         },
       })),

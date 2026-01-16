@@ -45,11 +45,14 @@ function getInjectedPref(key: string): string | undefined {
   }
 }
 
-function CreateNanopub(props: { profile: EmbeddedPublisherProfile }) {
+function CreateNanopub(props: {
+  profile: EmbeddedPublisherProfile;
+  templateUri: string;
+}) {
   return (
     <React.StrictMode>
       <CreateNanopubEmbedded
-        templateUri={DEFAULT_TEMPLATE_URI}
+        templateUri={props.templateUri}
         profile={props.profile}
         publishServer={"https://registry.knowledgepixels.com/"}
         onPublished={async ({ uri }) => {
@@ -89,6 +92,7 @@ window.addEventListener("load", () => {
 
     createRoot(el).render(
       <CreateNanopub
+        templateUri={getInjectedPref("templateUri") ?? DEFAULT_TEMPLATE_URI}
         profile={{
           // This dialog UI is hosted inside an <iframe> (content context).
           // We can't reliably access Zotero chrome globals like Zotero.Prefs from here,

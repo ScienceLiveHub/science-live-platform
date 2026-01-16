@@ -1,13 +1,12 @@
-// Bridge Zotero prefs (chrome window) -> content iframe via query parameters.
-//
-// The React bundle is loaded inside createNanopub.html (content context) where Zotero globals
-// like Zotero.Prefs are not reliably available. This script runs in the parent chrome dialog
-// context and injects prefs into the iframe src.
+/**
+ * Bridge Zotero prefs (chrome window) -> content iframe via query parameters.
+ *
+ * This file runs in Zotero chrome/XUL context where Zotero globals are still available.
+ * It injects them as query parameters into the iframe which runs in a seperate browser
+ * context where React components can run seamlessly without Zotero context limitations.
+ */
 
 /* global Zotero, window, document, console, URLSearchParams */
-
-// This file runs in Zotero chrome/XUL context, not a normal browser environment.
-// eslint-disable-next-line no-undef
 
 window.addEventListener("load", () => {
   try {
@@ -17,15 +16,11 @@ window.addEventListener("load", () => {
     // In some Zotero dialog contexts the global Zotero object isn't injected on `window`,
     // but it *is* available on the opener (main Zotero window).
     // `typeof` guards are important here: in some contexts `window`/`Zotero` may not be present.
-    // eslint-disable-next-line no-undef
     const ZoteroGlobal =
-      // eslint-disable-next-line no-undef
       (typeof Zotero !== "undefined" && Zotero) ||
-      // eslint-disable-next-line no-undef
       (typeof window !== "undefined" &&
         window.opener &&
         window.opener.Zotero) ||
-      // eslint-disable-next-line no-undef
       (typeof window !== "undefined" && window.top && window.top.Zotero);
 
     const baseSrc =
@@ -35,13 +30,14 @@ window.addEventListener("load", () => {
     // Keep these keys in sync with the plugin pref names.
     // (They are stored under the pref prefix from package.json: extensions.zotero.sciencelive)
     const name =
-      (ZoteroGlobal && ZoteroGlobal.Prefs && ZoteroGlobal.Prefs.get
-        ? ZoteroGlobal.Prefs.get("extensions.zotero.sciencelive.name", true)
-        : "") + "";
+      ZoteroGlobal?.Prefs?.get("extensions.zotero.sciencelive.name", true) ??
+      "";
     const orcid =
-      (ZoteroGlobal && ZoteroGlobal.Prefs && ZoteroGlobal.Prefs.get
-        ? ZoteroGlobal.Prefs.get("extensions.zotero.sciencelive.orcid", true)
-        : "") + "";
+      ZoteroGlobal?.Prefs?.get("extensions.zotero.sciencelive.orcid", true) ??
+      "";
+
+    // The URI of the template, passed in via optional args of openDialog()
+    const templateUri = window.arguments[0];
 
     if (!name && !orcid) {
       console.warn(
@@ -52,6 +48,7 @@ window.addEventListener("load", () => {
     const params = new URLSearchParams();
     if (name) params.set("name", name);
     if (orcid) params.set("orcid", orcid);
+    if (templateUri) params.set("templateUri", templateUri);
 
     iframe.setAttribute(
       "src",
