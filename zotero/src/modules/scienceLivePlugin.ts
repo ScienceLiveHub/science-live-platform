@@ -1,5 +1,3 @@
-// FIXME: complete the implementations for all menu items
-
 import { getLocaleID, getString } from "../utils/locale";
 import { TEMPLATE_METADATA } from "../../../frontend/src/pages/np/create/components/templates/registry-metadata";
 
@@ -26,7 +24,7 @@ function alert(title: string, text: string) {
   Services.prompt.alert(win, title, text);
 }
 
-export class NanopubPluginFactory {
+export class ScienceLivePlugin {
   static makeId = (key: string) =>
     `${addon.data.config.addonRef}-editor-menu-${key}`;
 
@@ -93,9 +91,9 @@ export class NanopubPluginFactory {
       tag: "menu",
       label: getString("menuitem-create-nanopub-label"),
       icon: "chrome://zotero/skin/20/universal/plus.svg",
-      children: Object.values(TEMPLATE_METADATA).map((t) => ({
+      children: Object.entries(TEMPLATE_METADATA).map(([k, v]) => ({
         tag: "menuitem",
-        label: `${t.icon} ${t.name}`,
+        label: `${v.icon} ${v.name}`,
         commandListener: (ev) => {
           ev?.stopPropagation?.();
           // Open an independent window (dialog=no) so it's resizable and non-modal.
@@ -117,13 +115,7 @@ export class NanopubPluginFactory {
       icon: "chrome://zotero/skin/20/universal/add-file.svg",
       commandListener: (ev) => {
         ev?.stopPropagation?.();
-        // Open an independent window (dialog=no) so it's resizable and non-modal.
-        const win = Zotero.getMainWindow();
-        win.openDialog(
-          `chrome://${addon.data.config.addonRef}/content/createNanopub.xhtml`,
-          "",
-          "chrome,dialog=no,modal=no,centerscreen,resizable,width=900,height=700",
-        );
+        this.importNanopubByUrl();
       },
     });
 
@@ -254,8 +246,7 @@ export class NanopubPluginFactory {
 
       for (const uri of nanopubUris) {
         try {
-          // TODO: implement display
-          // await Zotero.Nanopub.displayModule.displayFromUri(targetItem, uri);
+          await addon.data.displayModule.displayFromUri(targetItem, uri);
           successCount++;
           progressWin.createLine({
             text: `✓ Imported ${successCount}/${nanopubUris.length}`,
@@ -322,11 +313,7 @@ export class NanopubPluginFactory {
       }
 
       // Use display module to create standalone item
-      // TODO: implement display
-      // await Zotero.Nanopub.displayModule.importAsStandaloneItem(
-      //   url,
-      //   collectionID,
-      // );
+      await addon.data.displayModule.importAsStandaloneItem(url, collectionID);
 
       alert(
         "Success",

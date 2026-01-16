@@ -1,4 +1,4 @@
-import { NanopubPluginFactory } from "./modules/nanopub";
+import { ScienceLivePlugin } from "./modules/scienceLivePlugin";
 import { getString, initLocale } from "./utils/locale";
 import { createZToolkit } from "./utils/ztoolkit";
 
@@ -11,9 +11,9 @@ async function onStartup() {
 
   initLocale();
 
-  NanopubPluginFactory.registerPrefs();
+  ScienceLivePlugin.registerPrefs();
 
-  NanopubPluginFactory.registerNotifier();
+  ScienceLivePlugin.registerNotifier();
 
   await Promise.all(
     Zotero.getMainWindows().map((win) => onMainWindowLoad(win)),
@@ -32,9 +32,9 @@ async function onMainWindowLoad(win: _ZoteroTypes.MainWindow): Promise<void> {
     `${addon.data.config.addonRef}-mainWindow.ftl`,
   );
 
-  NanopubPluginFactory.registerRightClickMenu(win);
+  ScienceLivePlugin.registerRightClickMenu(win);
 
-  NanopubPluginFactory.registerWindowMenu();
+  ScienceLivePlugin.registerWindowMenu();
 }
 
 async function onMainWindowUnload(win: Window): Promise<void> {

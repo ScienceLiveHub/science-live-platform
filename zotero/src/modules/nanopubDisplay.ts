@@ -1,5 +1,3 @@
-// FIXME: This file is mainly a paste of the old plugin and needs fixing
-
 import { Converter } from "showdown";
 import { NanopubStore } from "../../../frontend/src/lib/nanopub-store";
 
@@ -97,11 +95,17 @@ export class NanopubDisplay {
       item.setField("title", `Science Live: ${np.metadata.title}`);
       item.setField("url", nanopubUri);
       item.setField("accessDate", new Date().toISOString().split("T")[0]);
-      // Try to extract author/date from parsed data if available
-      item.setCreator(
-        0,
-        Zotero.Utilities.cleanAuthor(np.metadata.creators[0].name!, "author"),
-      );
+      const primaryCreator = np.metadata.creators?.[0];
+      if (primaryCreator?.name) {
+        const cleanedCreator = Zotero.Utilities.cleanAuthor(
+          primaryCreator.name,
+          "author",
+        );
+        item.setCreator(0, {
+          ...cleanedCreator,
+          creatorType: "author",
+        });
+      }
       item.setField("date", np.metadata.created!);
       // Add to collection if specified
       if (collectionID) {
