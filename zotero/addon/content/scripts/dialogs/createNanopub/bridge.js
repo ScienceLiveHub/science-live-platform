@@ -29,17 +29,15 @@ window.addEventListener("load", () => {
 
     // Keep these keys in sync with the plugin pref names.
     // (They are stored under the pref prefix from package.json: extensions.zotero.sciencelive)
-    const name =
-      ZoteroGlobal?.Prefs?.get("extensions.zotero.sciencelive.name", true) ??
-      "";
-    const orcid =
-      ZoteroGlobal?.Prefs?.get("extensions.zotero.sciencelive.orcid", true) ??
-      "";
+    const name = ZoteroGlobal?.Prefs?.get("__prefsPrefix__.name", true) ?? "";
+    const orcid = ZoteroGlobal?.Prefs?.get("__prefsPrefix__.orcid", true) ?? "";
+    const privateKey =
+      ZoteroGlobal?.Prefs?.get("__prefsPrefix__.privateKey", true) ?? "";
 
     // The URI of the template, passed in via optional args of openDialog()
     const templateUri = window.arguments[0];
 
-    if (!name && !orcid) {
+    if (!name && !orcid && !privateKey) {
       console.warn(
         "[createNanopub] prefs injection: Zotero.Prefs not available on this window; tried window, opener, top",
       );
@@ -48,6 +46,7 @@ window.addEventListener("load", () => {
     const params = new URLSearchParams();
     if (name) params.set("name", name);
     if (orcid) params.set("orcid", orcid);
+    if (privateKey) params.set("privateKey", privateKey);
     if (templateUri) params.set("templateUri", templateUri);
 
     iframe.setAttribute(

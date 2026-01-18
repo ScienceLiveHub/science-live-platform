@@ -99,7 +99,7 @@ window.addEventListener("load", () => {
           // so the chrome parent window injects prefs into the iframe src querystring.
           name: getInjectedPref("name") ?? DEFAULT_PROFILE.name,
           orcid: getInjectedPref("orcid") ?? DEFAULT_PROFILE.orcid,
-          privateKey: EXAMPLE_privateKey,
+          privateKey: getInjectedPref("privateKey") ?? EXAMPLE_privateKey,
         }}
       />,
     );

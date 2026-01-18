@@ -9,6 +9,7 @@ declare namespace _ZoteroTypes {
     PluginPrefsMap: {
       "name": string;
       "orcid": string;
+      "privateKey": string;
     };
   }
 }

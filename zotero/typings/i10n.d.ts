@@ -14,6 +14,7 @@ export type FluentMessageId =
   | 'pref-help-sign'
   | 'pref-name'
   | 'pref-orcid'
+  | 'pref-private-key'
   | 'pref-title'
   | 'prefs-title'
   | 'startup-begin'
