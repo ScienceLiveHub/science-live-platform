@@ -30,6 +30,7 @@
     "update-deps": "npm update --save"
   },
   "dependencies": {
+    "@nanopub/nanopub-js": "^0.1.0",
     "showdown": "^2.1.0",
     "zotero-plugin-toolkit": "^5.1.0-beta.13"
   },

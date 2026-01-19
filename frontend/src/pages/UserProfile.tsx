@@ -7,12 +7,12 @@ import { authClient } from "@/lib/auth-client";
 import { usersLatestNanopubs } from "@/lib/queries";
 import { getUriEnd } from "@/lib/uri";
 import { SiOrcid } from "@icons-pack/react-simple-icons";
+import { NanopubClient } from "@nanopub/nanopub-js";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import relativeTime from "dayjs/plugin/relativeTime";
 import ky from "ky";
 import { Calendar, CheckCircle, ExternalLink, User } from "lucide-react";
-import { NanopubClient } from "nanopub-js";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -91,10 +91,12 @@ export default function UserProfile() {
 
         if (data.orcidConnected && data.orcidId) {
           const client = new NanopubClient();
-
-          data.latestContent = await client.querySparql(
+          const result = await client.querySparql(
             usersLatestNanopubs(data.orcidId),
+            "json",
           );
+
+          data.latestContent = typeof result === "string" ? [result] : result;
         }
         setProfile(data);
       } catch (err) {

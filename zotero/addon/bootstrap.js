@@ -30,6 +30,9 @@ async function startup({ id, version, resourceURI, rootURI }, reason) {
   /**
    * Polyfills for Zotero addon sandbox environment
    * Specifically, the n3 and showdown npm packages had issues without this
+   *
+   * TODO: Currently just the bare minimum to get things working, come back and check
+   *       that these are implemented propery
    * -------------------------------------------------------------------------
    */
   if (typeof window === "undefined") {

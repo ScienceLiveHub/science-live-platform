@@ -1,6 +1,6 @@
+import { DEFAULT_NANOPUB_URI, sign } from "@nanopub/nanopub-js";
 import * as RDFT from "@rdfjs/types";
 import { DataFactory, Store, Writer } from "n3";
-import { DEFAULT_NANOPUB_URI, sign } from "nanopub-js";
 import z from "zod";
 import { FieldConfig } from "./formedible/types";
 import { NanopubStore } from "./nanopub-store";
