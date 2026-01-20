@@ -2,10 +2,12 @@ import { useFormedible } from "@/hooks/use-formedible";
 import { fetchPossibleValuesFromQuads } from "@/lib/rdf";
 import { useEffect, useState } from "react";
 import z from "zod";
-import { NanopubTemplateDefComponentProps, validLength } from "./registry";
+import { NanopubTemplateDefComponentProps } from "./component-registry";
+import { validLength } from "./registry";
 
 export default function CommentOnPaper({
   publish,
+  prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
   const [options, setOptions] = useState<{ value: string; label: string }[]>(
     [],
@@ -80,7 +82,7 @@ export default function CommentOnPaper({
         placeholder: "enter text",
       },
     ],
-    submitLabel: "Publish",
+    submitLabel: "Generate Nanopublication",
     collapseLabel: "Hide",
     expandLabel: "Show",
     formOptions: {
@@ -88,6 +90,7 @@ export default function CommentOnPaper({
         paper: "",
         relation: "",
         text: "",
+        ...prefilledData,
       },
       onSubmit: async ({ value }) => {
         await publish(value);

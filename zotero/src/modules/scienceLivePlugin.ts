@@ -583,6 +583,7 @@ export class ScienceLivePlugin {
         "quotation-end": quoteEnd,
         comment: annotationComment,
         paper: pageLabel,
+        quoteType: quoteEnd ? "ends" : "whole",
       };
       // Open the form with pre-filled data
       const win = Zotero.getMainWindow();
@@ -607,7 +608,7 @@ export class ScienceLivePlugin {
    */
   private static processQuoteText(text: string): {
     quoteStart: string;
-    quoteEnd: string;
+    quoteEnd?: string;
   } {
     if (!text || text.length <= 500) {
       return { quoteStart: text, quoteEnd: "" };
@@ -633,7 +634,7 @@ export class ScienceLivePlugin {
 
     const sentences = remainingText.split(/(?<=[.!?])\s+/);
     const quoteEnd =
-      sentences.length > 0 ? sentences[sentences.length - 1].trim() : "";
+      sentences.length > 0 ? sentences[sentences.length - 1].trim() : undefined;
 
     return { quoteStart, quoteEnd };
   }

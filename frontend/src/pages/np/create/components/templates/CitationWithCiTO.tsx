@@ -2,10 +2,11 @@ import { useFormedible } from "@/hooks/use-formedible";
 import { fetchPossibleValuesFromQuads } from "@/lib/rdf";
 import { useEffect, useState } from "react";
 import z from "zod";
-import { NanopubTemplateDefComponentProps } from "./registry";
+import { NanopubTemplateDefComponentProps } from "./component-registry";
 
 export default function CitationWithCiTO({
   publish,
+  prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
   const [options, setOptions] = useState<{ value: string; label: string }[]>(
     [],
@@ -80,7 +81,7 @@ export default function CitationWithCiTO({
         placeholder: "https://doi.org/10... or other URL",
       },
     ],
-    submitLabel: "Publish",
+    submitLabel: "Generate Nanopublication",
     collapseLabel: "Hide",
     expandLabel: "Show",
     formOptions: {
@@ -88,6 +89,7 @@ export default function CitationWithCiTO({
         article: "",
         cites: "",
         cited: "",
+        ...prefilledData,
       },
       onSubmit: async ({ value }) => {
         await publish(value);

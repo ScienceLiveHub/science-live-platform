@@ -18,8 +18,8 @@ import { createRoot } from "react-dom/client";
 // Reuse the app's existing embedded nanopub creator UI.
 // NOTE: This file runs in Zotero's chrome dialog context.
 import { Toaster } from "../../../../frontend/src/components/ui/sonner";
-import CreateNanopubEmbedded from "../../../../frontend/src/pages/np/create/CreateNanopubEmbedded";
 import { EXAMPLE_privateKey } from "../../../../frontend/src/lib/uri";
+import NanopubEditor from "../../../../frontend/src/pages/np/create/NanopubEditor";
 
 declare const Services: any;
 
@@ -72,9 +72,9 @@ window.addEventListener("load", () => {
 
     createRoot(el).render(
       <React.StrictMode>
-        <CreateNanopubEmbedded
+        <NanopubEditor
           templateUri={getInjectedPref("templateUri") ?? DEFAULT_TEMPLATE_URI}
-          profile={{
+          identity={{
             // This dialog UI is hosted inside an <iframe> (content context).
             // We can't reliably access Zotero chrome globals like Zotero.Prefs from here,
             // so the chrome parent window injects prefs into the iframe src querystring.
@@ -96,6 +96,7 @@ window.addEventListener("load", () => {
             }
           }}
           prefilledData={prefilledData}
+          embedded={true}
         />
         <Toaster />
       </React.StrictMode>,

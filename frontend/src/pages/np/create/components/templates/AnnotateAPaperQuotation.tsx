@@ -1,23 +1,21 @@
 import { useFormedible } from "@/hooks/use-formedible";
 import z from "zod";
-import {
-  NanopubTemplateDefComponentProps,
-  validDoi,
-  validLength,
-} from "./registry";
+import { NanopubTemplateDefComponentProps } from "./component-registry";
+import { validDoi } from "./registry";
 
 export default function AnnotateAPaperQuotation({
   publish,
+  prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
   /**
    * The Schema for types, validation, and error messages
    */
   const schema = z.object({
-    paper: z.string().regex(validDoi), // The "https://doi.org/" prefix is prepended when published.
+    paper: z.string().regex(validDoi, "Enter a valid DOI starting with '10.'"), // The "https://doi.org/" prefix is prepended when published.
     quoteType: z.enum(["whole", "ends"]),
-    quotation: z.string().regex(validLength(5, 500)),
-    "quotation-end": z.string().regex(validLength(5, 500)).optional(),
-    comment: z.string().regex(validLength(5, 800)),
+    quotation: z.string().min(5).max(500),
+    "quotation-end": z.string().min(5).max(500).optional(),
+    comment: z.string().min(5).max(500),
   });
 
   /**
@@ -72,7 +70,7 @@ export default function AnnotateAPaperQuotation({
         textareaConfig: {},
       },
     ],
-    submitLabel: "Publish",
+    submitLabel: "Generate Nanopublication",
     collapseLabel: "Hide",
     expandLabel: "Show",
     formOptions: {
@@ -81,6 +79,7 @@ export default function AnnotateAPaperQuotation({
         quoteType: "whole",
         quotation: "",
         comment: "",
+        ...prefilledData,
       },
       onSubmit: async ({ value }) => {
         value.paper = "https://doi.org/" + value.paper;

@@ -1,13 +1,11 @@
 import { useFormedible } from "@/hooks/use-formedible";
 import z from "zod";
-import {
-  NanopubTemplateDefComponentProps,
-  validDoi,
-  validLength,
-} from "./registry";
+import { NanopubTemplateDefComponentProps } from "./component-registry";
+import { validDoi, validLength } from "./registry";
 
 export default function DocumentGeographicalCoverage({
   publish,
+  prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
   /**
    * The Schema for types, validation, and error messages
@@ -116,7 +114,7 @@ export default function DocumentGeographicalCoverage({
         textareaConfig: {},
       },
     ],
-    submitLabel: "Publish",
+    submitLabel: "Generate Nanopublication",
     collapseLabel: "Hide",
     expandLabel: "Show",
     formOptions: {
@@ -127,6 +125,7 @@ export default function DocumentGeographicalCoverage({
         location: "",
         "location-label": "",
         comment: "",
+        ...prefilledData,
       },
       onSubmit: async ({ value }) => {
         await publish(value);

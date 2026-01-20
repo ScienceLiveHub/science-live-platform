@@ -56,7 +56,7 @@ export default function AnyTemplate({
   const { Form } = useFormedible({
     schema,
     fields,
-    submitLabel: "Publish",
+    submitLabel: "Generate Nanopublication",
     resetOnSubmitSuccess: false,
     collapseLabel: "Hide",
     expandLabel: "Show",
