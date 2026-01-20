@@ -45,6 +45,8 @@ async function ensureProfilePrefs() {
       "Setup Science Live Nanopub Profile",
       "The Science Live Nanopub extension requires initial setup, which involves entering your name, ORCID, and a RSA signing key.\nThese can be later changed in Zotero Settings.\n\nEnter your name:",
       nameInput,
+      "",
+      { value: false },
     );
 
     if (!result) return;
@@ -77,16 +79,48 @@ async function ensureProfilePrefs() {
     const result = prompts.prompt(
       win,
       "Setup Science Live Nanopub Profile",
-      "Paste your RSA secret signing key below.\ne.g.\n   -----BEGIN RSA PRIVATE KEY-----\n   ABCD...\n   -----END PRIVATE KEY-----\n\n(To generate a new one, use https://cryptotools.net/rsagen or type `openssl genrsa` in your terminal)",
+      "Paste your RSA secret signing key below if you have one.\ne.g.\n   -----BEGIN RSA PRIVATE KEY-----\n   ABCD...\n   -----END PRIVATE KEY-----\n\nYou can also leave it blank and press OK to have Zotero generate one for you, or generate one yourself using https://cryptotools.net/rsagen or type `openssl genrsa` in your terminal.",
       privateKeyInput,
       "",
       { value: false },
     );
 
+    // If cancelled, return
     if (!result) return;
-    const trimmed = privateKeyInput.value.trim();
-    if (trimmed) {
-      setPref("privateKey", trimmed);
+
+    let pemKey = privateKeyInput.value.trim();
+
+    if (pemKey.length === 0) {
+      try {
+        // If no key is entered, generate a new one
+        const keyPair = await crypto.subtle.generateKey(
+          {
+            name: "RSASSA-PKCS1-v1_5",
+            modulusLength: 4096,
+            publicExponent: new Uint8Array([1, 0, 1]),
+            hash: "SHA-512",
+          },
+          true,
+          ["sign", "verify"],
+        );
+        // nanopub-rs has issues parsing the signature if it isn't in this exact PEM format
+        // including the line wrapping at 64 characters wide
+        pemKey = `-----BEGIN PRIVATE KEY-----\n${btoa(
+          String.fromCharCode(
+            ...new Uint8Array(
+              await crypto.subtle.exportKey("pkcs8", keyPair.privateKey),
+            ),
+          ),
+        ).replace(/(.{64})/g, "$1\n")}\n-----END PRIVATE KEY-----`;
+      } catch {
+        ztoolkit.log(
+          "ERROR: Something went wrong while generating a new key, try manually entering it in settings",
+        );
+      }
+    }
+
+    if (pemKey) {
+      setPref("privateKey", pemKey);
     }
   }
 }
