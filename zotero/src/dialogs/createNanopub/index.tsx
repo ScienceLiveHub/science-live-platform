@@ -18,15 +18,13 @@ import { createRoot } from "react-dom/client";
 // Reuse the app's existing embedded nanopub creator UI.
 // NOTE: This file runs in Zotero's chrome dialog context.
 import { Toaster } from "../../../../frontend/src/components/ui/sonner";
-import CreateNanopubEmbedded, {
-  EmbeddedPublisherProfile,
-} from "../../../../frontend/src/pages/np/create/CreateNanopubEmbedded";
+import CreateNanopubEmbedded from "../../../../frontend/src/pages/np/create/CreateNanopubEmbedded";
 import { EXAMPLE_privateKey } from "../../../../frontend/src/lib/uri";
 
 declare const Services: any;
 
 const DEFAULT_TEMPLATE_URI =
-  "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo";
+  "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU"; // Annotating a paper quotation
 
 // Placeholder profile for now (first step: show the UI in Zotero).
 // You can later replace this with a proper profile stored in plugin prefs.
@@ -43,34 +41,6 @@ function getInjectedPref(key: string): string | undefined {
   } catch {
     return undefined;
   }
-}
-
-function CreateNanopub(props: {
-  profile: EmbeddedPublisherProfile;
-  templateUri: string;
-}) {
-  return (
-    <React.StrictMode>
-      <CreateNanopubEmbedded
-        templateUri={props.templateUri}
-        profile={props.profile}
-        publishServer={"https://registry.knowledgepixels.com/"}
-        onPublished={async ({ uri }) => {
-          // Best-effort feedback in Zotero.
-          try {
-            Services.prompt.alert(
-              null,
-              "Nanopublication Published",
-              `Published nanopublication:\n\n${uri}`,
-            );
-          } catch {
-            // ignore
-          }
-        }}
-      />
-      <Toaster />
-    </React.StrictMode>
-  );
 }
 
 window.addEventListener("load", () => {
@@ -90,18 +60,45 @@ window.addEventListener("load", () => {
       el.textContent = "Loading…";
     }
 
+    const prefilledDataString = getInjectedPref("prefilledData");
+    let prefilledData;
+    try {
+      prefilledData = prefilledDataString
+        ? JSON.parse(prefilledDataString)
+        : undefined;
+    } catch {
+      console.log("[createNanopub] Invalid prefilledData passed");
+    }
+
     createRoot(el).render(
-      <CreateNanopub
-        templateUri={getInjectedPref("templateUri") ?? DEFAULT_TEMPLATE_URI}
-        profile={{
-          // This dialog UI is hosted inside an <iframe> (content context).
-          // We can't reliably access Zotero chrome globals like Zotero.Prefs from here,
-          // so the chrome parent window injects prefs into the iframe src querystring.
-          name: getInjectedPref("name") ?? DEFAULT_PROFILE.name,
-          orcid: getInjectedPref("orcid") ?? DEFAULT_PROFILE.orcid,
-          privateKey: getInjectedPref("privateKey") ?? EXAMPLE_privateKey,
-        }}
-      />,
+      <React.StrictMode>
+        <CreateNanopubEmbedded
+          templateUri={getInjectedPref("templateUri") ?? DEFAULT_TEMPLATE_URI}
+          profile={{
+            // This dialog UI is hosted inside an <iframe> (content context).
+            // We can't reliably access Zotero chrome globals like Zotero.Prefs from here,
+            // so the chrome parent window injects prefs into the iframe src querystring.
+            name: getInjectedPref("name") ?? DEFAULT_PROFILE.name,
+            orcid: getInjectedPref("orcid") ?? DEFAULT_PROFILE.orcid,
+            privateKey: getInjectedPref("privateKey") ?? EXAMPLE_privateKey,
+          }}
+          publishServer={"https://registry.knowledgepixels.com/"}
+          onPublished={async ({ uri }) => {
+            // Best-effort feedback in Zotero.
+            try {
+              Services.prompt.alert(
+                null,
+                "Nanopublication Published",
+                `Published nanopublication:\n\n${uri}`,
+              );
+            } catch {
+              // ignore
+            }
+          }}
+          prefilledData={prefilledData}
+        />
+        <Toaster />
+      </React.StrictMode>,
     );
     console.log("[createNanopub] React render() called");
   } catch (e) {

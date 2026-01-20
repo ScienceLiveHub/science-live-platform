@@ -13,11 +13,13 @@ import { toast } from "sonner";
 interface AnyStatementTemplateProps {
   templateUri: string;
   publish: (data: any) => Promise<void>;
+  prefilledData?: any;
 }
 
 export default function AnyStatementTemplate({
   templateUri,
   publish,
+  prefilledData = {},
 }: AnyStatementTemplateProps) {
   const [template, setTemplate] = useState<NanopubTemplate | null>(null);
   const [loading, setLoading] = useState(false);
@@ -83,6 +85,7 @@ export default function AnyStatementTemplate({
           {} as Record<string, any>,
         ),
         isExampleNanopub: true,
+        ...prefilledData,
       },
       onSubmit: async ({ value }) => {
         await publish(value);

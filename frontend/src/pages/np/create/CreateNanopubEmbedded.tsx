@@ -28,8 +28,10 @@ export default function CreateNanopubEmbedded(props: {
     signedRdf: string;
     publishResponseText?: string;
   }) => void | Promise<void>;
+  prefilledData?: any;
 }) {
-  const { templateUri, profile, publishServer, onPublished } = props;
+  const { templateUri, profile, publishServer, onPublished, prefilledData } =
+    props;
 
   const [generatedRdf, setGeneratedRdf] = useState<string>("");
   const [termsAgreed, setTermsAgreed] = useState(false);
@@ -104,6 +106,7 @@ export default function CreateNanopubEmbedded(props: {
       <AnyStatementTemplate
         templateUri={templateUri}
         publish={generateNanopub}
+        prefilledData={prefilledData}
       />
 
       {generatedRdf && (

@@ -27,8 +27,6 @@ window.addEventListener("load", () => {
       iframe.getAttribute("src") ||
       "chrome://__addonRef__/content/createNanopub.html";
 
-    // Keep these keys in sync with the plugin pref names.
-    // (They are stored under the pref prefix from package.json: extensions.zotero.sciencelive)
     const name = ZoteroGlobal?.Prefs?.get("__prefsPrefix__.name", true) ?? "";
     const orcid = ZoteroGlobal?.Prefs?.get("__prefsPrefix__.orcid", true) ?? "";
     const privateKey =
@@ -36,6 +34,7 @@ window.addEventListener("load", () => {
 
     // The URI of the template, passed in via optional args of openDialog()
     const templateUri = window.arguments[0];
+    const prefilledData = window.arguments[1];
 
     if (!name && !orcid && !privateKey) {
       console.warn(
@@ -48,14 +47,16 @@ window.addEventListener("load", () => {
     if (orcid) params.set("orcid", orcid);
     if (privateKey) params.set("privateKey", privateKey);
     if (templateUri) params.set("templateUri", templateUri);
+    // Everything must be passed as strings, so convert objects to string
+    if (prefilledData)
+      params.set("prefilledData", JSON.stringify(prefilledData));
 
+    // Set or append the params to the iframe query string
     iframe.setAttribute(
       "src",
       params.toString() ? baseSrc + "?" + params.toString() : baseSrc,
     );
   } catch (e) {
-    // Best-effort only; the iframe will fall back to defaults.
-    // Visible in Zotero error console (Tools → Developer → Error Console)
     console.error("[createNanopub] failed to inject prefs into iframe", e);
   }
 });

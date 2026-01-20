@@ -25,6 +25,28 @@ function alert(title: string, text: string) {
 }
 
 export class ScienceLivePlugin {
+  // Create Nanopublication menu and dynamically generated submenus(from predefined TEMPLATE_METADATA)
+  static createNanopubMenu = () => ({
+    tag: "menu",
+    label: getString("menuitem-create-nanopub-label"),
+    icon: "chrome://zotero/skin/20/universal/plus.svg",
+    children: Object.entries(TEMPLATE_METADATA).map(([k, v]) => ({
+      tag: "menuitem",
+      label: `${v.icon} ${v.name}`,
+      commandListener: (ev: any) => {
+        ev?.stopPropagation?.();
+        // Open an independent window (dialog=no) so it's resizable and non-modal.
+        const win = Zotero.getMainWindow();
+        win.openDialog(
+          `chrome://${addon.data.config.addonRef}/content/createNanopub.xhtml`,
+          "",
+          "chrome,dialog=no,modal=no,centerscreen,resizable,width=900,height=700",
+          k,
+        );
+      },
+    })),
+  });
+
   static makeId = (key: string) =>
     `${addon.data.config.addonRef}-editor-menu-${key}`;
 
@@ -86,27 +108,11 @@ export class ScienceLivePlugin {
       tag: "menuseparator",
     });
 
-    // Create Nanopublication > [submenu-items] (from predefined TEMPLATE_METADATA)
-    ztoolkit.Menu.register("item", {
-      tag: "menu",
-      label: getString("menuitem-create-nanopub-label"),
-      icon: "chrome://zotero/skin/20/universal/plus.svg",
-      children: Object.entries(TEMPLATE_METADATA).map(([k, v]) => ({
-        tag: "menuitem",
-        label: `${v.icon} ${v.name}`,
-        commandListener: (ev) => {
-          ev?.stopPropagation?.();
-          // Open an independent window (dialog=no) so it's resizable and non-modal.
-          const win = Zotero.getMainWindow();
-          win.openDialog(
-            `chrome://${addon.data.config.addonRef}/content/createNanopub.xhtml`,
-            "",
-            "chrome,dialog=no,modal=no,centerscreen,resizable,width=900,height=700",
-            k,
-          );
-        },
-      })),
-    });
+    // Create Nanopublication > [submenu-items]
+    ztoolkit.Menu.register(
+      "item",
+      ScienceLivePlugin.createNanopubMenu() as any,
+    );
 
     // Attach Nanopublication...
     ztoolkit.Menu.register("item", {
@@ -133,6 +139,9 @@ export class ScienceLivePlugin {
     });
   }
 
+  /**
+   * Register File menu items
+   */
   @logged
   static registerWindowMenu() {
     // File > ----- (Separator)
@@ -159,8 +168,48 @@ export class ScienceLivePlugin {
         this.importNanopubByUrl();
       },
     });
+
+    // Create Nanopublication > [submenu-items]
+    ztoolkit.Menu.register(
+      "menuFile",
+      ScienceLivePlugin.createNanopubMenu() as any,
+    );
   }
 
+  /**
+   * Register Reader/annotation menu items
+   */
+  @logged
+  static registerReaderMenu() {
+    ztoolkit.log("ReaderIntegration: Registering PDF reader integration...");
+
+    if (!Zotero.Reader) {
+      ztoolkit.log("ReaderIntegration: Zotero.Reader not available");
+      return;
+    }
+
+    if (!Zotero.Reader.registerEventListener) {
+      ztoolkit.log(
+        "ReaderIntegration: Zotero.Reader.registerEventListener not available",
+      );
+      return;
+    }
+
+    // ztoolkit doesnt seem to include Reader event listener, so use Zotero
+    // object, and remember to unregister it eventually as well.
+
+    // Dynamically adds "Create Nanopublication" to annotation context menu
+    // (each time it is right-clicked)
+    Zotero.Reader.registerEventListener(
+      "createAnnotationContextMenu",
+      this.handleAnnotationContextMenu.bind(this),
+      addon.data.config.addonID,
+    );
+  }
+
+  /**
+   * Register Preferences panel in Settings
+   */
   @logged
   static registerPrefs() {
     Zotero.PreferencePanes.register({
@@ -169,6 +218,44 @@ export class ScienceLivePlugin {
       label: getString("prefs-title"),
       image: `chrome://${addon.data.config.addonRef}/content/icons/favicon.png`,
     });
+  }
+
+  /**
+   * Reader Annotation menu handler
+   *
+   * This runs each time an Annotation is right-clicked, and dynamically appends
+   * the plugin-specific menu items
+   */
+  static handleAnnotationContextMenu(
+    event: _ZoteroTypes.Reader.EventParams<"createAnnotationContextMenu">,
+  ) {
+    try {
+      ztoolkit.log("ReaderIntegration: Annotation context menu triggered");
+
+      const { reader, params, append } = event;
+
+      const annotationIds = params.ids || [];
+      ztoolkit.log(
+        `ReaderIntegration: Annotation IDs: ${JSON.stringify(annotationIds)}`,
+      );
+
+      if (annotationIds.length === 0) {
+        ztoolkit.log("ReaderIntegration: No annotations selected");
+        return;
+      }
+
+      append({
+        label: "✨ Create Nanopublication from Annotation",
+        onCommand: async () => {
+          ztoolkit.log("ReaderIntegration: Menu item clicked");
+          await this.createNanopubFromAnnotation(reader, annotationIds[0]);
+        },
+      });
+
+      ztoolkit.log("ReaderIntegration: Menu item added");
+    } catch (err: any) {
+      ztoolkit.log("ReaderIntegration: Error in context menu handler:", err);
+    }
   }
 
   /**
@@ -383,6 +470,190 @@ export class ScienceLivePlugin {
     } catch (err: any) {
       ztoolkit.log("Import failed:", err);
       alert("Error", `Failed to import nanopublication: ${err.message}`);
+    }
+  }
+
+  /**
+   * Create nanopublication from an annotation
+   */
+  private static async createNanopubFromAnnotation(
+    reader: any,
+    annotationKey: string,
+  ) {
+    try {
+      ztoolkit.log(
+        `ReaderIntegration: Creating nanopub from annotation key: ${annotationKey}`,
+      );
+
+      let annotationItem: any = null;
+
+      // First try as an ID (number)
+      if (!isNaN(Number(annotationKey))) {
+        annotationItem = await Zotero.Items.getAsync(Number(annotationKey));
+        ztoolkit.log(
+          `ReaderIntegration: Tried as ID, found: ${!!annotationItem}`,
+        );
+      }
+
+      // If not found, try to find it via the reader's PDF item using the key
+      if (!annotationItem && reader.itemID) {
+        ztoolkit.log(
+          `ReaderIntegration: Trying via reader.itemID: ${reader.itemID}`,
+        );
+        const pdfItem = await Zotero.Items.getAsync(reader.itemID);
+        if (pdfItem) {
+          const annotations = pdfItem.getAnnotations();
+          ztoolkit.log(
+            `ReaderIntegration: PDF has ${annotations.length} annotations`,
+          );
+          annotationItem = annotations.find(
+            (a: any) => a.key === annotationKey || a.id == annotationKey,
+          );
+          ztoolkit.log(
+            `ReaderIntegration: Found via key match: ${!!annotationItem}`,
+          );
+        }
+      }
+
+      // Try one more approach - get by key directly
+      if (!annotationItem) {
+        try {
+          const libraryID = Zotero.Libraries.userLibraryID;
+          annotationItem = await Zotero.Items.getByLibraryAndKeyAsync(
+            libraryID,
+            annotationKey,
+          );
+          ztoolkit.log(
+            `ReaderIntegration: Tried getByLibraryAndKeyAsync, found: ${!!annotationItem}`,
+          );
+        } catch (e) {
+          ztoolkit.log(
+            `ReaderIntegration: getByLibraryAndKeyAsync failed: ${e}`,
+          );
+        }
+      }
+
+      if (!annotationItem) {
+        ztoolkit.log(
+          "ReaderIntegration: Annotation not found for key: " + annotationKey,
+        );
+        alert("Error", "Annotation not found. Please try again.");
+        return;
+      }
+
+      // Get annotation data
+      const annotationType = annotationItem.annotationType;
+      const annotationText = annotationItem.annotationText || "";
+      const annotationComment = annotationItem.annotationComment || "";
+      const pageLabel = annotationItem.annotationPageLabel || "";
+
+      ztoolkit.log(`ReaderIntegration: Annotation type: ${annotationType}`);
+      ztoolkit.log(
+        `ReaderIntegration: Annotation text length: ${annotationText.length}`,
+      );
+      ztoolkit.log(
+        `ReaderIntegration: Annotation comment length: ${annotationComment.length}`,
+      );
+
+      // Get the PDF item and parent item
+      const pdfItem = annotationItem.parentItem;
+      if (!pdfItem) {
+        ztoolkit.log("ReaderIntegration: PDF item not found");
+        alert("Error", "PDF item not found");
+        return;
+      }
+
+      const parentItem = pdfItem.parentItem;
+      if (!parentItem) {
+        ztoolkit.log("ReaderIntegration: Parent item not found");
+        alert("Error", "Parent item not found");
+        return;
+      }
+
+      ztoolkit.log(
+        `ReaderIntegration: Parent item: ${parentItem.getField("title")}`,
+      );
+
+      // Process the quote text
+      const { quoteStart, quoteEnd } = this.processQuoteText(annotationText);
+
+      // Prepare annotation data for the form
+      const annotationData = {
+        quotation: quoteStart,
+        "quotation-end": quoteEnd,
+        comment: annotationComment,
+        paper: pageLabel,
+      };
+      // Open the form with pre-filled data
+      const win = Zotero.getMainWindow();
+      win.openDialog(
+        `chrome://${addon.data.config.addonRef}/content/createNanopub.xhtml`,
+        "",
+        "chrome,dialog=no,modal=no,centerscreen,resizable,width=900,height=700",
+        "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU", // Annotate a paper quotation
+        annotationData,
+      );
+    } catch (err: any) {
+      ztoolkit.log(
+        "ReaderIntegration: Failed to create nanopub from annotation:",
+        err,
+      );
+      alert("Error", `Failed to create nanopublication:\n${err.message}`);
+    }
+  }
+
+  /**
+   * Process quote text - split if > 500 characters
+   */
+  private static processQuoteText(text: string): {
+    quoteStart: string;
+    quoteEnd: string;
+  } {
+    if (!text || text.length <= 500) {
+      return { quoteStart: text, quoteEnd: "" };
+    }
+
+    const firstPart = text.substring(0, 500);
+    const lastSentenceEnd = Math.max(
+      firstPart.lastIndexOf(". "),
+      firstPart.lastIndexOf("! "),
+      firstPart.lastIndexOf("? "),
+    );
+
+    let quoteStart: string;
+    let remainingText: string;
+
+    if (lastSentenceEnd > 200) {
+      quoteStart = text.substring(0, lastSentenceEnd + 1).trim();
+      remainingText = text.substring(lastSentenceEnd + 1).trim();
+    } else {
+      quoteStart = firstPart.trim();
+      remainingText = text.substring(500).trim();
+    }
+
+    const sentences = remainingText.split(/(?<=[.!?])\s+/);
+    const quoteEnd =
+      sentences.length > 0 ? sentences[sentences.length - 1].trim() : "";
+
+    return { quoteStart, quoteEnd };
+  }
+
+  /**
+   * Additional cleanup on shutdown.
+   *
+   * Note: Anything registered anywhere through a ztoolkit Manager (e.g. ztoolkit.Menu.register)
+   * will already be cleaned up by ztoolkit.unregisterAll(), so only include cleanup of other
+   * items (e.g. Zotero.Reader.register) which dont explicitly state they are called automatically
+   * (e.g. Zotero.PreferencePanes.unregister states that it is already called automatically)
+   */
+  static unregister() {
+    try {
+      Zotero.Reader.unregisterEventListener(
+        "createAnnotationContextMenu",
+        this.handleAnnotationContextMenu.bind(this),
+      );
+    } catch (err: any) {
+      ztoolkit.log("ReaderIntegration: Failed to unregister:", err);
     }
   }
 }
