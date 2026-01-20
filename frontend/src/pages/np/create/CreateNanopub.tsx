@@ -4,7 +4,7 @@ import { EXAMPLE_privateKey } from "@/lib/uri";
 import ky from "ky";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import NanopubEditor from "./NanopubEditor";
+import NanopubEditor from "./components/NanopubEditor";
 
 export default function CreateNanopub() {
   const [templateUri, setTemplateUri] = useState<string | null>(null);

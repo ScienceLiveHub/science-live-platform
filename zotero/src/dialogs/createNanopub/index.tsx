@@ -19,7 +19,7 @@ import { createRoot } from "react-dom/client";
 // NOTE: This file runs in Zotero's chrome dialog context.
 import { Toaster } from "../../../../frontend/src/components/ui/sonner";
 import { EXAMPLE_privateKey } from "../../../../frontend/src/lib/uri";
-import NanopubEditor from "../../../../frontend/src/pages/np/create/NanopubEditor";
+import NanopubEditor from "../../../../frontend/src/pages/np/create/components/NanopubEditor";
 
 declare const Services: any;
 

@@ -1,12 +1,9 @@
 "use client";
 
-import { ChevronsUpDown, FilePlus } from "lucide-react";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { Badge } from "../../../components/ui/badge";
-import { Button } from "../../../components/ui/button";
-import { Card, CardContent } from "../../../components/ui/card";
-import { Checkbox } from "../../../components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Command,
   CommandEmpty,
@@ -14,19 +11,22 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "../../../components/ui/command";
-import { Input } from "../../../components/ui/input";
-import { Label } from "../../../components/ui/label";
+} from "@/components/ui/command";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "../../../components/ui/popover";
-import { Switch } from "../../../components/ui/switch";
-import { NanopubTemplate } from "../../../lib/nanopub-template";
-import { publishRdf } from "../../../lib/rdf";
-import AnyStatementTemplate from "./components/AnyStatementTemplate";
-import { POPULAR_TEMPLATES } from "./components/templates/registry";
+} from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
+import { NanopubTemplate } from "@/lib/nanopub-template";
+import { publishRdf } from "@/lib/rdf";
+import { ChevronsUpDown, FilePlus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import AnyStatementTemplate from "./AnyStatementTemplate";
+import { POPULAR_TEMPLATES } from "./templates/registry";
 
 export interface NanopubEditorProps {
   /**
