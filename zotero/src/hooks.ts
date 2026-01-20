@@ -79,7 +79,7 @@ async function ensureProfilePrefs() {
     const result = prompts.prompt(
       win,
       "Setup Science Live Nanopub Profile",
-      "Paste your RSA secret signing key below if you have one.\ne.g.\n   -----BEGIN RSA PRIVATE KEY-----\n   ABCD...\n   -----END PRIVATE KEY-----\n\nYou can also leave it blank and press OK to have Zotero generate one for you, or generate one yourself using https://cryptotools.net/rsagen or type `openssl genrsa` in your terminal.",
+      "Paste your RSA secret signing key below if you have one.\ne.g.\n   -----BEGIN PRIVATE KEY-----\n   ABCD...\n   -----END PRIVATE KEY-----\n\nYou can also leave it blank and press OK to have Zotero generate one for you, or generate one yourself using https://cryptotools.net/rsagen or type `openssl genrsa` in your terminal.",
       privateKeyInput,
       "",
       { value: false },
