@@ -12,5 +12,12 @@ export default zotero({
         "@typescript-eslint/no-unused-vars": "off",
       },
     },
+    {
+      languageOptions: {
+        parserOptions: {
+          tsconfigRootDir: import.meta.dirname,
+        },
+      },
+    },
   ],
 });
