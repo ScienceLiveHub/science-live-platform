@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - zotero-sciencelive-v**
+      - v**-zotero
 
 permissions:
   contents: write
@@ -11,7 +11,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  create-release:
+  zotero-release:
     uses: zotero-plugin-dev/workflows/.github/workflows/release-plugin.yml@main
     # You can customize any of the inputs here.
     # If you omit an input, its default value will be used.
