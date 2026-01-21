@@ -5,10 +5,6 @@ on:
     tags:
       - zotero-sciencelive-v**
 
-defaults:
-  run:
-    working-directory: ./zotero
-
 permissions:
   contents: write
   issues: write
@@ -23,3 +19,4 @@ jobs:
       build: "npm run build"
       release: "npm run release"
     secrets: inherit
+    working-directory: ./zotero
