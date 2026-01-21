@@ -69,28 +69,6 @@ function isOptional(statement: Statement) {
   );
 }
 
-/**
- * Convert nanopub placeholder type to enum
- */
-function getPlaceholderType(typeUri: string): PlaceholderType {
-  if (typeUri.includes("ExternalUriPlaceholder")) {
-    return PlaceholderType.EXTERNAL_URI;
-  }
-  if (typeUri.includes("RestrictedChoicePlaceholder")) {
-    return PlaceholderType.RESTRICTED_CHOICE;
-  }
-  if (typeUri.includes("TextPlaceholder")) {
-    return PlaceholderType.TEXT_PLACEHOLDER;
-  }
-  if (typeUri.includes("LongLiteralPlaceholder")) {
-    return PlaceholderType.LONG_LITERAL;
-  }
-  if (typeUri.includes("RepeatableStatement")) {
-    return PlaceholderType.REPEATABLE_STATEMENT;
-  }
-  return PlaceholderType.LITERAL; // Default
-}
-
 type Statement = {
   id: string;
   types?: RDFT.Term[];
@@ -710,8 +688,7 @@ export function templateStatementsToFormedible(
     // If statement was detected as repeatable (a RepeatableStatement),
     // render it as an array field
     if (isRepeatable(statement)) {
-      let repeatableField: FieldConfig;
-      repeatableField = {
+      const repeatableField: FieldConfig = {
         type: "array",
         name: getUriEnd(k) ?? "statement",
         section: { title: `Statement ${getUriEnd(k)}` },

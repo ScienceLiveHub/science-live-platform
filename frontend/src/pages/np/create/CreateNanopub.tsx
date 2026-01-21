@@ -7,10 +7,9 @@ import { useSearchParams } from "react-router-dom";
 import NanopubEditor from "./components/NanopubEditor";
 
 export default function CreateNanopub() {
-  const [templateUri, setTemplateUri] = useState<string | null>(null);
-  const [currentUser, setCurrentUser] = useState<any>(null);
-
   const [searchParams, setSearchParams] = useSearchParams();
+  const templateUri = searchParams.get("template") || null;
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   // Load current user data
   useEffect(() => {
@@ -41,14 +40,7 @@ export default function CreateNanopub() {
     loadCurrentUser();
   }, []);
 
-  // Sync state with URL params
-  useEffect(() => {
-    const uri = searchParams.get("template");
-    setTemplateUri(uri || null);
-  }, [searchParams]);
-
   const handleTemplateChange = (uri: string | null) => {
-    setTemplateUri(uri);
     const next = new URLSearchParams(searchParams);
     if (uri) {
       next.set("template", uri);
@@ -67,12 +59,13 @@ export default function CreateNanopub() {
     : null;
 
   return (
-    <main>
+    <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-6xl">
       <NanopubEditor
+        key={templateUri ?? "default"}
         identity={identity}
         templateUri={templateUri}
         onTemplateUriChange={handleTemplateChange}
-        embedded={true}
+        embedded={false}
       />
     </main>
   );

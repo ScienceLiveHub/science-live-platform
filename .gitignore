@@ -58,3 +58,4 @@ frontend/public/wasm/
 # Local files that should be ignored
 .ignore
 .temp
+*.tsbuildinfo

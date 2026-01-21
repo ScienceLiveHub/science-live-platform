@@ -177,7 +177,7 @@ export const NestedFieldRenderer = <
       multiple,
     };
 
-    let props: FieldComponentProps = { ...baseProps };
+    const props: FieldComponentProps = { ...baseProps };
 
     if (type === "select" || type === "radio" || type === "multiSelect") {
       props.options = resolvedOptionsList;
@@ -353,7 +353,7 @@ export const SharedFieldRenderer = <
     multiple,
   };
 
-  let props: FieldComponentProps = { ...baseProps };
+  const props: FieldComponentProps = { ...baseProps };
 
   if (type === "select" || type === "radio" || type === "multiSelect") {
     props.options = resolvedOptionsList;

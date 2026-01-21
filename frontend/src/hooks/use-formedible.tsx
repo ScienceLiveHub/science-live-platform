@@ -736,6 +736,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
     }),
   };
 
+  // @ts-expect-error due to the dynamic generation of formConfig above
   const form = useForm(formConfig);
 
   // Store form reference for the onSubmit callback

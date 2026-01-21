@@ -16,10 +16,9 @@ import { ItemSeparator } from "@/components/ui/item";
 import { SnippetCopyButton } from "@/components/ui/shadcn-io/snippet";
 import { Spinner } from "@/components/ui/spinner";
 import { useLabels } from "@/hooks/use-labels";
-import { NanopubStore } from "@/lib/nanopub-store";
+import { useNanopub } from "@/hooks/use-nanopub";
 import { shrinkUri, Statement } from "@/lib/rdf";
-import { extractOrcidId, unique } from "@/lib/uri";
-import ky from "ky";
+import { extractOrcidId } from "@/lib/uri";
 import {
   Copy,
   Download,
@@ -98,18 +97,14 @@ export default function ViewNanopub() {
   const uri = searchParams.get("uri") || "";
 
   const [inputUri, setInputUri] = useState(uri);
-  const [currentUri, setCurrentUri] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [store, setStore] = useState<NanopubStore | null>(null);
-
-  // Map ORCID iD -> Science Live user id (or null if not found)
-  const [creatorUserIdsByOrcid, setCreatorUserIdsByOrcid] = useState<
-    Record<string, string | null>
-  >({});
+  const { store, loading, error, creatorUserIdsByOrcid } = useNanopub(uri);
 
   // Initialize the labels hook with the store's label cache
   const { getLabel } = useLabels(store?.labelCache);
+
+  useEffect(() => {
+    setInputUri(uri);
+  }, [uri]);
 
   const assertionStatements = useMemo(() => {
     return store?.graphUris.assertion
@@ -129,61 +124,6 @@ export default function ViewNanopub() {
       : [];
   }, [store]);
 
-  useEffect(() => {
-    const creators = store?.metadata.creators ?? [];
-    const uniqueOrcids = unique(
-      creators
-        .map((c) => extractOrcidId(c.href ?? ""))
-        .filter((x): x is string => !!x),
-    );
-
-    if (uniqueOrcids.length === 0) {
-      setCreatorUserIdsByOrcid({});
-      return;
-    }
-
-    (async () => {
-      const entries = await Promise.all(
-        uniqueOrcids.map(async (orcidId) => {
-          try {
-            const data = (await ky(
-              `${import.meta.env.VITE_API_URL}/user-profile/orcid/${encodeURIComponent(orcidId)}`,
-              {
-                method: "GET",
-                credentials: "include",
-              },
-            ).json()) as any;
-
-            return [orcidId, data?.userId ?? null] as const;
-          } catch (e) {
-            return [orcidId, null] as const;
-          }
-        }),
-      );
-
-      setCreatorUserIdsByOrcid(Object.fromEntries(entries));
-    })();
-  }, [store]);
-
-  const loadNanopubUri = (newUri?: string) => {
-    if (!newUri) return;
-    setError(null);
-    setLoading(true);
-
-    NanopubStore.load(newUri)
-      .then((store: NanopubStore) => {
-        setStore(store);
-        setCurrentUri(newUri);
-        setLoading(false);
-      })
-      .catch((e: any) => {
-        console.error("Failed to load/parse nanopublication:", e);
-        setError(e?.message || "Failed to load/parse nanopublication.");
-        setStore(null);
-      })
-      .finally(() => setLoading(false));
-  };
-
   const handleLoadClick = () => {
     if (!inputUri) return;
 
@@ -194,17 +134,8 @@ export default function ViewNanopub() {
     setSearchParams(next);
   };
 
-  useEffect(() => {
-    // Auto-load when URI changes from URL (browser navigation)
-    if (uri && uri !== currentUri) {
-      loadNanopubUri(uri);
-      setInputUri(uri);
-    }
-  }, [uri, currentUri]);
-
   // otherGraphs should always be empty if its a valid nanopublication, but keep it as a backstop for anomolies
   const otherGraphs = useMemo(() => {
-    store?.filter;
     // Exclude known graphs
     const known = new Set(
       [
@@ -219,7 +150,7 @@ export default function ViewNanopub() {
       return !known.has(q.graph.value);
     });
     return entries;
-  }, [store?.graphUris]);
+  }, [store]);
 
   return (
     <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-6xl">
@@ -257,7 +188,7 @@ export default function ViewNanopub() {
           {error}
         </div>
       )}
-      {currentUri ? (
+      {uri ? (
         <>
           {!loading && !error && (
             <>
@@ -271,11 +202,11 @@ export default function ViewNanopub() {
                     {/* <div className="font-mono break-all">
                       <a
                         className="text-purple-600 dark:text-purple-400 hover:underline"
-                        href={currentUri}
+                        href={uri}
                         target="_blank"
                         rel="noreferrer"
                       >
-                        {currentUri}
+                        {uri}
                       </a>
                     </div> */}
                   </div>
@@ -333,15 +264,15 @@ export default function ViewNanopub() {
                     )}
                   </div>
                   <div className="absolute right-0 top-0">
-                    <ShareMenu uri={currentUri} />
+                    <ShareMenu uri={uri} />
                   </div>
                 </div>
                 <div className="mt-1 text-sm space-y-1">
                   <div>
                     <span className="font-bold">Published:</span>{" "}
-                    {new Date(
-                      store?.metadata.created!,
-                    ).toLocaleDateString() || (
+                    {store?.metadata.created ? (
+                      new Date(store.metadata.created).toLocaleDateString()
+                    ) : (
                       <span className="text-muted-foreground">—</span>
                     )}
                   </div>

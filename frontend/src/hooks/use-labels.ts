@@ -7,7 +7,7 @@ import { useCallback, useState } from "react";
 
 const { isNamedNode } = Util;
 
-export let kyInstance = ky.create({
+export const kyInstance = ky.create({
   referrerPolicy: "origin-when-cross-origin",
 });
 

@@ -68,7 +68,7 @@ describe("NanopubTemplate.applyTemplate", () => {
   beforeAll(async () => {
     // Load fixture files (input and outputs)
     const fixturesDir = join(__dirname, "fixtures");
-    for (const [k, v] of Object.entries(fixturesSets)) {
+    for (const [, v] of Object.entries(fixturesSets)) {
       loadedFixtures[v.input] = await readFile(
         join(fixturesDir, v.input),
         "utf-8",

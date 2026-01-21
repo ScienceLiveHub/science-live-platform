@@ -23,7 +23,7 @@ import { Switch } from "@/components/ui/switch";
 import { NanopubTemplate } from "@/lib/nanopub-template";
 import { publishRdf } from "@/lib/rdf";
 import { ChevronsUpDown, FilePlus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import AnyStatementTemplate from "./AnyStatementTemplate";
 import { POPULAR_TEMPLATES } from "./templates/registry";
@@ -145,26 +145,24 @@ export default function NanopubEditor({
   const [publishedUri, setPublishedUri] = useState<string | null>(null);
 
   // Derived state to determine if we are using a predefined template
-  // NOTE: In embedded mode, we force AnyStatementTemplate to avoid loading
-  // rich components that might have incompatible imports (e.g. @/ aliases)
   const isPredefined = templateUri && POPULAR_TEMPLATES[templateUri];
   const TemplateComp = isPredefined
     ? POPULAR_TEMPLATES[templateUri]?.component
     : undefined;
 
   // Reset internal state when template changes
-  useEffect(() => {
-    setGeneratedRdf("");
-    setPublishComplete(false);
-    setPublishedUri(null);
-    setTermsAgreed(false);
-    // If it's a custom URI (not predefined), sync inputUri
-    if (templateUri && !POPULAR_TEMPLATES[templateUri]) {
-      setInputUri(templateUri);
-    } else {
-      setInputUri(null);
-    }
-  }, [templateUri]);
+  // useEffect(() => {
+  //   setGeneratedRdf("");
+  //   setPublishComplete(false);
+  //   setPublishedUri(null);
+  //   setTermsAgreed(false);
+  //   // If it's a custom URI (not predefined), sync inputUri
+  //   if (templateUri && !POPULAR_TEMPLATES[templateUri]) {
+  //     setInputUri(templateUri);
+  //   } else {
+  //     setInputUri(null);
+  //   }
+  // }, [templateUri]);
 
   const handleLoadCustomTemplate = () => {
     const uri = inputUri?.trim();

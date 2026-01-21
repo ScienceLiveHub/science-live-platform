@@ -4,7 +4,7 @@ import { getUriEnd, isDoiUri, isNanopubUri, unique } from "./uri";
 
 const { namedNode } = DataFactory;
 const { isNamedNode } = Util;
-const { RDF, RDFS, XSD, NP, NPT, NPX, DCT, PROV, FOAF } = NS;
+const { RDF, RDFS, NP, NPX, DCT } = NS;
 
 type GraphUris = {
   head?: string;
@@ -290,10 +290,10 @@ export class NanopubStore extends N3Store {
       };
     });
     // Also check prov:wasAttributedTo in provenance
-    const provCreators = this.matchPredicate(
-      PROV("wasAttributedTo"),
-      this.graphUris.provenance,
-    ).map((q) => q.object.value);
+    // const provCreators = this.matchPredicate(
+    //   PROV("wasAttributedTo"),
+    //   this.graphUris.provenance,
+    // ).map((q) => q.object.value);
 
     // Find all applicable "types" "classes" and "tags" for this nanopub
     const types: any = [];

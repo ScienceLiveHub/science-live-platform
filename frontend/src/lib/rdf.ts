@@ -4,7 +4,7 @@ import { DataFactory, NamedNode, Parser, Quad, Store, Term, Util } from "n3";
 import { getNanopubHash, getUriEnd } from "./uri";
 
 const { namedNode } = DataFactory;
-const { isNamedNode, isBlankNode: isBlank, isLiteral, prefix } = Util;
+const { prefix } = Util;
 
 /**
  * Convenience functions for working with RDF data using n3
@@ -12,20 +12,20 @@ const { isNamedNode, isBlankNode: isBlank, isLiteral, prefix } = Util;
  */
 
 // Common Namespaces
-export namespace NS {
-  export const RDF = prefix("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-  export const RDFS = prefix("http://www.w3.org/2000/01/rdf-schema#");
-  export const XSD = prefix("http://www.w3.org/2001/XMLSchema#");
-  export const NP = prefix("http://www.nanopub.org/nschema#");
-  export const NPT = prefix("http://w3id.org/np/o/ntemplate/");
-  export const NPTs = prefix("https://w3id.org/np/o/ntemplate/");
-  export const NPX = prefix("http://purl.org/nanopub/x/");
-  export const DCT = prefix("http://purl.org/dc/terms/");
-  export const PROV = prefix("http://www.w3.org/ns/prov#");
-  export const FOAF = prefix("http://xmlns.com/foaf/0.1/");
-}
+export const NS = {
+  RDF: prefix("http://www.w3.org/1999/02/22-rdf-syntax-ns#"),
+  RDFS: prefix("http://www.w3.org/2000/01/rdf-schema#"),
+  XSD: prefix("http://www.w3.org/2001/XMLSchema#"),
+  NP: prefix("http://www.nanopub.org/nschema#"),
+  NPT: prefix("http://w3id.org/np/o/ntemplate/"),
+  NPTs: prefix("https://w3id.org/np/o/ntemplate/"),
+  NPX: prefix("http://purl.org/nanopub/x/"),
+  DCT: prefix("http://purl.org/dc/terms/"),
+  PROV: prefix("http://www.w3.org/ns/prov#"),
+  FOAF: prefix("http://xmlns.com/foaf/0.1/"),
+};
 
-const { RDF, RDFS, XSD, NP, NPT, NPX, DCT, PROV, FOAF } = NS;
+const { RDF, RDFS, XSD, NP, NPT, DCT, PROV, FOAF } = NS;
 
 export { Util } from "n3";
 
@@ -57,13 +57,13 @@ export async function fetchQuads(
   const PREFERRED_FORMAT = "application/trig";
 
   // Download RDF
-  let res = await ky(url, {
+  const res = await ky(url, {
     headers: {
       Accept: PREFERRED_FORMAT,
     },
     redirect: "follow",
     retry: 2,
-  }).catch(async () => {
+  }).catch(async (error) => {
     // Some hosts (e.g. purl.org) dont support CORS headers for calling from js clients in the browser
     // For those, retry getting the trig directly from known working servers
     if (problematicHosts.some((host) => url.startsWith(host))) {
@@ -77,6 +77,7 @@ export async function fetchQuads(
         });
       }
     }
+    throw error;
   });
   if (res) {
     if (!res.ok) {
@@ -244,7 +245,7 @@ export function extractSubjectProps(
   store.forEach((quad) => {
     if (!graphUri || quad.graph.value === graphUri) {
       if (quad.subject.equals(sub)) {
-        const mappedKey = Object.entries(propertyMap).find(([k, maps]) => {
+        const mappedKey = Object.entries(propertyMap).find(([, maps]) => {
           return maps.some((map) => {
             if (typeof map === "function") {
               return map(quad as Quad);
@@ -343,9 +344,7 @@ export function extractSubjectsFiltered(
  * TODO: this is not a good solution. Ideally the templates and nanopubs which miss-use http/https should be fixed
  */
 export function termsAreEqual(a: Term, b: Term) {
-  const a_id = a?.id?.replace("https://", "http://");
   const a_value = a?.value?.replace("https://", "http://");
-  const b_id = b?.id?.replace("https://", "http://");
   const b_value = b?.value?.replace("https://", "http://");
-  return a?.termType === b?.termType && a_id === b_id && a_value === b_value;
+  return a?.termType === b?.termType && a_value === b_value;
 }
