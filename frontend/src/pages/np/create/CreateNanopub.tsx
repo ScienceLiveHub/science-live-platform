@@ -66,6 +66,7 @@ export default function CreateNanopub() {
         templateUri={templateUri}
         onTemplateUriChange={handleTemplateChange}
         embedded={false}
+        demoMode={true} // TODO: currently hard coded as demo for web app
       />
     </main>
   );

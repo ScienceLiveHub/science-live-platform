@@ -74,6 +74,11 @@ export interface NanopubEditorProps {
    * Currently used to hide the header if needed, but we might want to keep it.
    */
   embedded?: boolean;
+
+  /**
+   * If true, forces ExampleNanopublication property for generated RDF.
+   */
+  demoMode?: boolean;
 }
 
 export function TemplateCombobox({
@@ -135,6 +140,7 @@ export default function NanopubEditor({
   publishServer,
   onPublished,
   embedded = false,
+  demoMode = false,
 }: NanopubEditorProps) {
   // Local state for the "custom URI" input (when not using predefined template)
   const [inputUri, setInputUri] = useState<string | null>(null);
@@ -149,20 +155,6 @@ export default function NanopubEditor({
   const TemplateComp = isPredefined
     ? POPULAR_TEMPLATES[templateUri]?.component
     : undefined;
-
-  // Reset internal state when template changes
-  // useEffect(() => {
-  //   setGeneratedRdf("");
-  //   setPublishComplete(false);
-  //   setPublishedUri(null);
-  //   setTermsAgreed(false);
-  //   // If it's a custom URI (not predefined), sync inputUri
-  //   if (templateUri && !POPULAR_TEMPLATES[templateUri]) {
-  //     setInputUri(templateUri);
-  //   } else {
-  //     setInputUri(null);
-  //   }
-  // }, [templateUri]);
 
   const handleLoadCustomTemplate = () => {
     const uri = inputUri?.trim();
@@ -191,7 +183,7 @@ export default function NanopubEditor({
         {
           orcid: identity.orcid,
           name: identity.name,
-          isExample: data?.isExampleNanopub === true, // Checkbox in AnyStatementTemplate
+          isExample: demoMode || data?.isExampleNanopub === true, // Checkbox in AnyStatementTemplate
         },
         identity.privateKey,
       );
@@ -291,7 +283,10 @@ export default function NanopubEditor({
                 <AnyStatementTemplate
                   templateUri={templateUri}
                   publish={publishNanopub}
-                  prefilledData={prefilledData}
+                  prefilledData={{
+                    ...(prefilledData ?? {}),
+                    isExampleNanopub: demoMode,
+                  }}
                 />
               )}
             </>

@@ -414,7 +414,9 @@ export interface MultiSelectFieldSpecificProps extends BaseFieldProps {
 }
 
 export interface ComboboxFieldSpecificProps extends BaseFieldProps {
-  options: Array<{ value: string; label: string }> | string[];
+  options:
+    | Array<{ value: string; label: string; description?: string }>
+    | string[];
   comboboxConfig?: {
     searchable?: boolean;
     placeholder?: string;

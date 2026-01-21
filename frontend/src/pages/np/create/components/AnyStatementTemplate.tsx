@@ -84,7 +84,7 @@ export default function AnyStatementTemplate({
           },
           {} as Record<string, any>,
         ),
-        isExampleNanopub: true,
+        isExampleNanopub: false,
         ...prefilledData,
       },
       onSubmit: async ({ value }) => {
