@@ -1,86 +1,48 @@
 "use client";
 import { ComponentType } from "react";
-import AIDASentence from "./AIDASentence";
-import AnnotateAPaperQuotation from "./AnnotateAPaperQuotation";
-import CitationWithCiTO from "./CitationWithCiTO";
-import CommentOnPaper from "./CommentOnPaper";
-import DocumentGeographicalCoverage from "./DocumentGeographicalCoverage";
+import {
+  TEMPLATE_COMPONENTS,
+  type NanopubTemplateDefComponentProps,
+} from "./component-registry";
+import {
+  TEMPLATE_METADATA,
+  type NanopubTemplateMetadata,
+} from "./registry-metadata";
 
 /**
  * Validation regex helpers
  */
 export const validLength = (min: number, max: number) =>
-  new RegExp(`"[\s\S]{${min},${max}}"`);
+  new RegExp(`^[\\s\\S]{${min},${max}}$`);
 
-export const validDoi = new RegExp("10.(\d)+/(\S)+");
-
-export interface NanopubTemplateDefComponentProps {
-  publish: (data: any) => Promise<void>;
-}
+export const validDoi = new RegExp(
+  /^(?:10\.1002\/[^\s]+|10\.\d{4,9}\/[-._;()\/:A-Z0-9]+)$/i,
+);
 
 /**
  * Definition for a pre-defined popular template
+ * Note: NanopubTemplateDefComponentProps is imported from component-registry
  */
-export interface NanopubTemplateDef {
-  name: string; // Display name
-  description: string; // What this template is for
-  category: string; // Category for grouping
-  icon: string; // Emoji icon (optional)
-  recommended?: boolean; // Show in main menu
-  keywords?: string[]; // For search
+export interface NanopubTemplateDef extends NanopubTemplateMetadata {
   component?: ComponentType<NanopubTemplateDefComponentProps>;
 }
 
 /**
  * POPULAR TEMPLATES metadata
  * These appear in the main template selector
+ *
+ * Note: Component is only available in frontend context.
+ * Other workspaces should import TEMPLATE_METADATA directly to avoid
+ * bundling React components they don't need.
  */
-export const POPULAR_TEMPLATES: Record<string, NanopubTemplateDef> = {
-  "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo": {
-    name: "Citation with CiTO",
-    description:
-      "Declare citations between papers using Citation Typing Ontology",
-    category: "Citation",
-    icon: "📚",
-    recommended: true,
-    keywords: ["citation", "cito", "reference", "cite"],
-    component: CitationWithCiTO,
-  },
-  "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU": {
-    name: "Annotate a paper quotation",
-    description: "Annotating a paper quotation with personal interpretation",
-    category: "Annotation",
-    icon: "❝❞",
-    recommended: true,
-    keywords: ["comment", "annotation", "quote", "interpretation"],
-    component: AnnotateAPaperQuotation,
-  },
-  "https://w3id.org/np/RAVEpTdLrX5XrhNl_gnvTaBcjRRSDu_hhZix8gu2HO7jI": {
-    name: "Comment on Paper",
-    description: "Add comments, quotes, or evaluations to papers",
-    category: "Annotation",
-    icon: "💬",
-    recommended: true,
-    keywords: ["comment", "annotation", "quote", "review"],
-    component: CommentOnPaper,
-  },
-  "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE": {
-    name: "AIDA Sentence",
-    description: "Make structured scientific claims following the AIDA model",
-    category: "Scientific",
-    icon: "🔬",
-    recommended: true,
-    keywords: ["aida", "claim", "assertion", "scientific"],
-    component: AIDASentence,
-  },
-  "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao": {
-    name: "Document geographical coverage",
-    description:
-      "Document the geographical area or region covered by a resercher paper, data, or study.",
-    category: "geographical coverage",
-    icon: "📝",
-    recommended: false,
-    keywords: ["statement", "general", "rdf", "triple"],
-    component: DocumentGeographicalCoverage,
-  },
-};
+export const POPULAR_TEMPLATES: Record<string, NanopubTemplateDef> =
+  Object.entries(TEMPLATE_METADATA).reduce(
+    (acc, [key, meta]) => {
+      acc[key] = {
+        ...meta,
+        component: TEMPLATE_COMPONENTS[key], // Component mapping only in frontend
+      };
+      return acc;
+    },
+    {} as Record<string, NanopubTemplateDef>,
+  );

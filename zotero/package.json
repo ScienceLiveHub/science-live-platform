@@ -1,0 +1,66 @@
+{
+  "name": "zotero-sciencelive",
+  "type": "module",
+  "version": "0.2.0",
+  "description": "Science Live plugin for Zotero - Create nanopublications from Zotero items and link them to your bibliography",
+  "config": {
+    "addonName": "Science Live",
+    "addonID": "nanopub-plugin@sciencelivehub.com",
+    "addonRef": "sciencelive",
+    "addonInstance": "ScienceLive",
+    "prefsPrefix": "extensions.zotero.sciencelive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ScienceLiveHub/science-live-platform.git"
+  },
+  "author": "ScienceLiveHub <contact@vitenhub.no>",
+  "bugs": {
+    "url": "https://github.com/ScienceLiveHub/science-live-platform/issues"
+  },
+  "homepage": "https://sciencelive4all.org/zotero-nanopub-plugin/",
+  "scripts": {
+    "start": "npm run build:embedded-css && zotero-plugin serve",
+    "build": "npm run build:embedded-css && zotero-plugin build && tsc --noEmit",
+    "build:embedded-css": "cd ../frontend && npm run build:embedded-css && cp ./dist-embedded-css/sciencelive.css ../zotero/addon/content/styles/sciencelive.css",
+    "lint:check": "prettier --check . && eslint .",
+    "lint:fix": "prettier --write . && eslint . --fix",
+    "release": "zotero-plugin release",
+    "test": "zotero-plugin test",
+    "update-deps": "npm update --save"
+  },
+  "dependencies": {
+    "@nanopub/nanopub-js": "^0.1.0",
+    "showdown": "^2.1.0",
+    "zotero-plugin-toolkit": "^5.1.0-beta.13"
+  },
+  "devDependencies": {
+    "@types/chai": "^5.2.3",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^24.10.9",
+    "@types/showdown": "^2.0.6",
+    "@zotero-plugin/eslint-config": "^0.6.7",
+    "chai": "^6.2.2",
+    "eslint": "^9.39.2",
+    "mocha": "^11.7.5",
+    "prettier": "^3.8.0",
+    "typescript": "^5.9.3",
+    "zotero-plugin-scaffold": "^0.8.2",
+    "zotero-types": "^4.1.0-beta.8"
+  },
+  "prettier": {
+    "printWidth": 80,
+    "tabWidth": 2,
+    "endOfLine": "lf",
+    "overrides": [
+      {
+        "files": [
+          "*.xhtml"
+        ],
+        "options": {
+          "htmlWhitespaceSensitivity": "css"
+        }
+      }
+    ]
+  }
+}

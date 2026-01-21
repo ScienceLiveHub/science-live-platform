@@ -10,7 +10,7 @@ export const DEFAULT_SENDER =
   "Science Live Platform <noreply@sciencelive4all.org>";
 
 export function sendEmail(
-  env: any,
+  env: Env,
   data: Omit<CreateEmailOptions, "from"> & { from?: string },
 ) {
   data.from = data.from ?? DEFAULT_SENDER;

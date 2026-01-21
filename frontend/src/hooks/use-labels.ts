@@ -1,13 +1,13 @@
 import { COMMON_LABELS } from "@/lib/nanopub-store";
 import { fetchQuads, NS, shrinkUri } from "@/lib/rdf";
-import { isDoiUri } from "@/lib/utils";
+import { isDoiUri } from "@/lib/uri";
 import ky from "ky";
 import { NamedNode, Term, Util } from "n3";
 import { useCallback, useState } from "react";
 
 const { isNamedNode } = Util;
 
-export let kyInstance = ky.create({
+export const kyInstance = ky.create({
   referrerPolicy: "origin-when-cross-origin",
 });
 

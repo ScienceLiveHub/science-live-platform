@@ -1,6 +1,6 @@
+import { DEFAULT_NANOPUB_URI, sign } from "@nanopub/nanopub-js";
 import * as RDFT from "@rdfjs/types";
 import { DataFactory, Store, Writer } from "n3";
-import { DEFAULT_NANOPUB_URI, sign } from "nanopub-js";
 import z from "zod";
 import { FieldConfig } from "./formedible/types";
 import { NanopubStore } from "./nanopub-store";
@@ -10,7 +10,7 @@ import {
   fetchPossibleValuesFromQuads,
   NS,
 } from "./rdf";
-import { cleanOrcidUri, getUriEnd } from "./utils";
+import { cleanOrcidUri, getUriEnd } from "./uri";
 
 const { namedNode, literal, blankNode } = DataFactory;
 
@@ -67,28 +67,6 @@ function isOptional(statement: Statement) {
   return statement.types?.some(
     (t) => t.value === "https://w3id.org/np/o/ntemplate/OptionalStatement",
   );
-}
-
-/**
- * Convert nanopub placeholder type to enum
- */
-function getPlaceholderType(typeUri: string): PlaceholderType {
-  if (typeUri.includes("ExternalUriPlaceholder")) {
-    return PlaceholderType.EXTERNAL_URI;
-  }
-  if (typeUri.includes("RestrictedChoicePlaceholder")) {
-    return PlaceholderType.RESTRICTED_CHOICE;
-  }
-  if (typeUri.includes("TextPlaceholder")) {
-    return PlaceholderType.TEXT_PLACEHOLDER;
-  }
-  if (typeUri.includes("LongLiteralPlaceholder")) {
-    return PlaceholderType.LONG_LITERAL;
-  }
-  if (typeUri.includes("RepeatableStatement")) {
-    return PlaceholderType.REPEATABLE_STATEMENT;
-  }
-  return PlaceholderType.LITERAL; // Default
 }
 
 type Statement = {
@@ -710,8 +688,7 @@ export function templateStatementsToFormedible(
     // If statement was detected as repeatable (a RepeatableStatement),
     // render it as an array field
     if (isRepeatable(statement)) {
-      let repeatableField: FieldConfig;
-      repeatableField = {
+      const repeatableField: FieldConfig = {
         type: "array",
         name: getUriEnd(k) ?? "statement",
         section: { title: `Statement ${getUriEnd(k)}` },

@@ -1,9 +1,10 @@
 import { useFormedible } from "@/hooks/use-formedible";
 import z from "zod";
-import { NanopubTemplateDefComponentProps } from "./registry";
+import { NanopubTemplateDefComponentProps } from "./component-registry";
 
 export default function AIDASentence({
   publish,
+  prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
   /**
    * The Schema for types, validation, and error messages
@@ -51,7 +52,7 @@ export default function AIDASentence({
         required: false,
       },
     ],
-    submitLabel: "Publish",
+    submitLabel: "Generate Nanopublication",
     collapseLabel: "Hide",
     expandLabel: "Show",
     formOptions: {
@@ -60,6 +61,7 @@ export default function AIDASentence({
         topic: [],
         project: "",
         dataset: "",
+        ...prefilledData,
       },
       onSubmit: async ({ value }) => {
         await publish(value);

@@ -2,7 +2,7 @@ import { readFile } from "fs/promises";
 import { join } from "path";
 import { beforeAll, describe, expect, it } from "vitest";
 import { NanopubTemplate } from "../src/lib/nanopub-template";
-import { EXAMPLE_privateKey } from "../src/lib/utils";
+import { EXAMPLE_privateKey } from "../src/lib/uri";
 
 describe("NanopubTemplate.applyTemplate", () => {
   const fixturesSets: { input: string; params: any[]; outputs: string[] }[] = [
@@ -68,7 +68,7 @@ describe("NanopubTemplate.applyTemplate", () => {
   beforeAll(async () => {
     // Load fixture files (input and outputs)
     const fixturesDir = join(__dirname, "fixtures");
-    for (const [k, v] of Object.entries(fixturesSets)) {
+    for (const [, v] of Object.entries(fixturesSets)) {
       loadedFixtures[v.input] = await readFile(
         join(fixturesDir, v.input),
         "utf-8",

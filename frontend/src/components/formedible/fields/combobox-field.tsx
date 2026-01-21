@@ -97,7 +97,7 @@ export const ComboboxField: React.FC<ComboboxFieldSpecificProps> = ({
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start">
+        <PopoverContent className="w-screen max-w-5xl p-0" align="start">
           <Command>
             {searchable && (
               <CommandInput placeholder={searchPlaceholder} className="h-9" />
@@ -107,17 +107,41 @@ export const ComboboxField: React.FC<ComboboxFieldSpecificProps> = ({
               <CommandGroup>
                 {normalizedOptions.map((option) => (
                   <CommandItem
+                    className="grid"
                     key={option.value}
                     value={option.label}
                     onSelect={() => onSelect(option.value)}
                   >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        value === option.value ? "opacity-100" : "opacity-0",
-                      )}
-                    />
-                    {option.label}
+                    {option.description ? (
+                      <>
+                        <span className="flex font-bold">
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              value === option.value
+                                ? "opacity-100"
+                                : "opacity-0",
+                            )}
+                          />
+                          {option.label}
+                        </span>
+                        <span className="ml-8 font-light wrap-break-word">
+                          {option.description}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="flex">
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            value === option.value
+                              ? "opacity-100"
+                              : "opacity-0",
+                          )}
+                        />
+                        {option.label}
+                      </span>
+                    )}
                   </CommandItem>
                 ))}
               </CommandGroup>

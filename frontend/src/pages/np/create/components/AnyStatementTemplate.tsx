@@ -13,11 +13,13 @@ import { toast } from "sonner";
 interface AnyStatementTemplateProps {
   templateUri: string;
   publish: (data: any) => Promise<void>;
+  prefilledData?: any;
 }
 
 export default function AnyStatementTemplate({
   templateUri,
   publish,
+  prefilledData = {},
 }: AnyStatementTemplateProps) {
   const [template, setTemplate] = useState<NanopubTemplate | null>(null);
   const [loading, setLoading] = useState(false);
@@ -59,20 +61,32 @@ export default function AnyStatementTemplate({
   const { Form } = useFormedible({
     schema,
     layout: { type: "grid", columns: 3 },
-    fields,
+    fields: [
+      ...fields,
+      {
+        name: "isExampleNanopub",
+        type: "checkbox",
+        label: "Create as an Example Nanopub (for testing and demo purposes)",
+        gridColumnSpan: 2,
+      },
+    ],
     submitLabel: "Generate Nanopublication",
     resetOnSubmitSuccess: false,
     collapseLabel: "Hide",
     expandLabel: "Show",
     formOptions: {
-      defaultValues: fields.reduce(
-        (acc, field) => {
-          acc[field.name] =
-            field.defaultValue || (field.type === "array" ? [] : "");
-          return acc;
-        },
-        {} as Record<string, any>,
-      ),
+      defaultValues: {
+        ...fields.reduce(
+          (acc, field) => {
+            acc[field.name] =
+              field.defaultValue || (field.type === "array" ? [] : "");
+            return acc;
+          },
+          {} as Record<string, any>,
+        ),
+        isExampleNanopub: false,
+        ...prefilledData,
+      },
       onSubmit: async ({ value }) => {
         await publish(value);
       },

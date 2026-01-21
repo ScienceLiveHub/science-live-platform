@@ -2,10 +2,11 @@ import { useFormedible } from "@/hooks/use-formedible";
 import { fetchPossibleValuesFromQuads } from "@/lib/rdf";
 import { useEffect, useState } from "react";
 import z from "zod";
-import { NanopubTemplateDefComponentProps, validLength } from "./registry";
+import { NanopubTemplateDefComponentProps } from "./component-registry";
 
 export default function CommentOnPaper({
   publish,
+  prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
   const [options, setOptions] = useState<{ value: string; label: string }[]>(
     [],
@@ -20,11 +21,14 @@ export default function CommentOnPaper({
           "http://purl.org/np/RAJb-zZdFrNzgwxmMzFstFeKTZAJImhMGNL-IzEJY4kx8",
         );
 
-        // Transform the fetched data to match the expected format
-        const transformedOptions = fetchedOptions.map((option) => ({
-          value: option.name,
-          label: option.description,
-        }));
+        const transformedOptions = fetchedOptions.map((option) => {
+          const split = option.description.split("-");
+          return {
+            value: option.name,
+            label: split[0],
+            description: split[1],
+          };
+        });
 
         setOptions(transformedOptions);
         setLoading(false);
@@ -44,7 +48,7 @@ export default function CommentOnPaper({
   const schema = z.object({
     paper: z.url(),
     relation: z.string(),
-    text: z.string().regex(validLength(0, 500)),
+    text: z.string().max(500),
   });
 
   /**
@@ -59,6 +63,7 @@ export default function CommentOnPaper({
         type: "text",
         label: "URL of the paper",
         placeholder: "Enter URL",
+        required: true,
       },
       {
         name: "relation",
@@ -72,15 +77,17 @@ export default function CommentOnPaper({
           searchPlaceholder: "Search relations...",
           noOptionsText: error || "No relations found.",
         },
+        required: true,
       },
       {
         name: "text",
-        type: "text",
+        type: "textarea",
         label: "Your text (max. 500 characters)",
-        placeholder: "enter text",
+        placeholder: "Enter text",
+        required: true,
       },
     ],
-    submitLabel: "Publish",
+    submitLabel: "Generate Nanopublication",
     collapseLabel: "Hide",
     expandLabel: "Show",
     formOptions: {
@@ -88,6 +95,7 @@ export default function CommentOnPaper({
         paper: "",
         relation: "",
         text: "",
+        ...prefilledData,
       },
       onSubmit: async ({ value }) => {
         await publish(value);

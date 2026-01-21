@@ -1,0 +1,15 @@
+{
+  "extends": "zotero-types/entries/sandbox/",
+  "include": [
+    "src",
+    "typings",
+    "../frontend/src/pages/np/create/components/templates/registry-metadata.ts",
+    "../frontend/src/lib/nanopub-store.ts",
+    "../frontend/src/lib/uri.ts",
+    "../frontend/src/lib/rdf.ts"
+  ],
+  "exclude": ["build", "addon", "src/dialogs"],
+  "compilerOptions": {
+    "jsx": "react-jsx"
+  }
+}

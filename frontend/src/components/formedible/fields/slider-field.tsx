@@ -81,7 +81,9 @@ export const SliderField: React.FC<SliderFieldSpecificProps> = ({
       : label;
 
   // Generate unique ID for this slider instance
-  const sliderId = `slider-${name}-${Math.random().toString(36).substring(2, 9)}`;
+  const [sliderId] = React.useState(
+    () => `slider-${name}-${Math.random().toString(36).substring(2, 9)}`,
+  );
 
   // Calculate current color based on slider value
   const getCurrentColor = () => {
