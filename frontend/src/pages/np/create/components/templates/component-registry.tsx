@@ -6,6 +6,7 @@
 import { ComponentType } from "react";
 import AnnotateAPaperQuotation from "./AnnotateAPaperQuotation";
 import CitationWithCiTO from "./CitationWithCiTO";
+import CommentOnPaper from "./CommentOnPaper";
 
 export interface NanopubTemplateDefComponentProps {
   publish: (data: any) => Promise<void>;
@@ -27,8 +28,8 @@ export const TEMPLATE_COMPONENTS: Record<
     CitationWithCiTO,
   "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU":
     AnnotateAPaperQuotation,
-  // "https://w3id.org/np/RAVEpTdLrX5XrhNl_gnvTaBcjRRSDu_hhZix8gu2HO7jI":
-  //   CommentOnPaper,
+  "https://w3id.org/np/RAVEpTdLrX5XrhNl_gnvTaBcjRRSDu_hhZix8gu2HO7jI":
+    CommentOnPaper,
   // "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE":
   //   AIDASentence,
   // "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao":
