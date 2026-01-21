@@ -1,7 +1,7 @@
 import { useFormedible } from "@/hooks/use-formedible";
 import { fetchPossibleValuesFromQuads } from "@/lib/rdf";
 import { useEffect, useState } from "react";
-import z from "zod";
+import z, { object } from "zod";
 import { NanopubTemplateDefComponentProps } from "./component-registry";
 
 export default function CitationWithCiTO({
@@ -21,11 +21,14 @@ export default function CitationWithCiTO({
           "https://w3id.org/np/RAZt5kzfoJg2m4dMRdMm2SP6JeUDD_GMzSq9xyRPMgP5k",
         );
 
-        // Transform the fetched data to match the expected format
-        const transformedOptions = fetchedOptions.map((option) => ({
-          value: option.name,
-          label: option.description,
-        }));
+        const transformedOptions = fetchedOptions.map((option) => {
+          const split = option.description.split("-");
+          return {
+            value: option.name,
+            label: split[0],
+            description: split[1],
+          };
+        });
 
         setOptions(transformedOptions);
         setLoading(false);
@@ -44,8 +47,7 @@ export default function CitationWithCiTO({
    */
   const schema = z.object({
     article: z.url(),
-    cites: z.string(),
-    cited: z.url(),
+    st02: z.array(object({ cites: z.string(), cited: z.url() })),
   });
 
   /**
@@ -58,27 +60,52 @@ export default function CitationWithCiTO({
       {
         name: "article",
         type: "text",
-        label: "Citing DOI",
+        label: "Identifier for the citing paper or other scholarly work",
         placeholder: "https://doi.org/10... or other URL",
       },
       {
-        name: "cites",
-        type: "combobox",
-        label: "Citation Type",
-        options: options,
-        disabled: loading,
-        comboboxConfig: {
-          searchable: true,
-          placeholder: loading ? "Loading..." : "Select citation type...",
-          searchPlaceholder: "Search citation types...",
-          noOptionsText: error || "No citation types found.",
+        type: "array",
+        name: "st02",
+        section: {
+          title: "List citations",
         },
-      },
-      {
-        name: "cited",
-        type: "text",
-        label: "Cited DOI",
-        placeholder: "https://doi.org/10... or other URL",
+        gridColumnSpan: 3,
+        defaultValue: [],
+        arrayConfig: {
+          defaultValue: {},
+          minItems: 1,
+          itemType: "object",
+          objectConfig: {
+            fields: [
+              {
+                name: "cites",
+                type: "combobox",
+                label: "Citation Type",
+                options: options,
+                disabled: loading,
+                comboboxConfig: {
+                  searchable: true,
+                  placeholder: loading
+                    ? "Loading..."
+                    : "Select citation type...",
+                  searchPlaceholder: "Search citation types...",
+                  noOptionsText: error || "No citation types found.",
+                },
+              },
+              {
+                name: "cited",
+                type: "url",
+                label:
+                  "DOI (https://doi.org/10...) or other URL of the cited article",
+                placeholder: "https://... or other URL",
+                required: false,
+                section: {
+                  title: "Statement st02",
+                },
+              },
+            ],
+          },
+        },
       },
     ],
     submitLabel: "Generate Nanopublication",
@@ -92,6 +119,10 @@ export default function CitationWithCiTO({
         ...prefilledData,
       },
       onSubmit: async ({ value }) => {
+        value.st02 = (value.st02 as Array<any>).map((v) => ({
+          ...v,
+          article: value.article,
+        }));
         await publish(value);
       },
     },

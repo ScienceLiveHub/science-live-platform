@@ -5,6 +5,7 @@
 
 import { ComponentType } from "react";
 import AnnotateAPaperQuotation from "./AnnotateAPaperQuotation";
+import CitationWithCiTO from "./CitationWithCiTO";
 
 export interface NanopubTemplateDefComponentProps {
   publish: (data: any) => Promise<void>;
@@ -22,8 +23,8 @@ export const TEMPLATE_COMPONENTS: Record<
   // TODO: We have currently disabled most custom templates until they have been updated
   //       to support the latest functionality of the generic template UI
 
-  // "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo":
-  //   CitationWithCiTO,
+  "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo":
+    CitationWithCiTO,
   "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU":
     AnnotateAPaperQuotation,
   // "https://w3id.org/np/RAVEpTdLrX5XrhNl_gnvTaBcjRRSDu_hhZix8gu2HO7jI":
