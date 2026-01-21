@@ -35,6 +35,7 @@ window.addEventListener("load", () => {
     // The URI of the template, passed in via optional args of openDialog()
     const templateUri = window.arguments[0];
     const prefilledData = window.arguments[1];
+    const darkMode = window.arguments[2];
 
     if (!name && !orcid && !privateKey) {
       console.warn(
@@ -50,7 +51,7 @@ window.addEventListener("load", () => {
     // Everything must be passed as strings, so convert objects to string
     if (prefilledData)
       params.set("prefilledData", JSON.stringify(prefilledData));
-
+    if (darkMode) params.set("dark", "true");
     // Set or append the params to the iframe query string
     iframe.setAttribute(
       "src",

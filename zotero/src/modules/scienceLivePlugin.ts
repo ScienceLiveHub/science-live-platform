@@ -24,6 +24,17 @@ function alert(title: string, text: string) {
   Services.prompt.alert(win, title, text);
 }
 
+function isDarkMode(win?: _ZoteroTypes.MainWindow) {
+  // TODO: To handle changes in darkmode, use something like this:
+  // const mediaQuery = win.matchMedia("(prefers-color-scheme: dark)");
+  // mediaQuery.addEventListener("change", (e) => {
+  //   const newIsDarkMode = e.matches;
+  //   // Handle theme change
+  // });
+  win = win ?? Zotero.getMainWindow();
+  return !!win.matchMedia("(prefers-color-scheme: dark)")?.matches;
+}
+
 export class ScienceLivePlugin {
   // Create Nanopublication menu and dynamically generated submenus(from predefined TEMPLATE_METADATA)
   static createNanopubMenu = () => ({
@@ -37,11 +48,14 @@ export class ScienceLivePlugin {
         ev?.stopPropagation?.();
         // Open an independent window (dialog=no) so it's resizable and non-modal.
         const win = Zotero.getMainWindow();
+        const dark = isDarkMode(win);
         win.openDialog(
           `chrome://${addon.data.config.addonRef}/content/createNanopub.xhtml`,
           "",
           "chrome,dialog=no,modal=no,centerscreen,resizable,width=900,height=700",
           k,
+          null,
+          dark,
         );
       },
     })),
@@ -587,12 +601,14 @@ export class ScienceLivePlugin {
       };
       // Open the form with pre-filled data
       const win = Zotero.getMainWindow();
+      const dark = isDarkMode(win);
       win.openDialog(
         `chrome://${addon.data.config.addonRef}/content/createNanopub.xhtml`,
         "",
         "chrome,dialog=no,modal=no,centerscreen,resizable,width=900,height=700",
         "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU", // Annotate a paper quotation
         annotationData,
+        dark,
       );
     } catch (err: any) {
       ztoolkit.log(

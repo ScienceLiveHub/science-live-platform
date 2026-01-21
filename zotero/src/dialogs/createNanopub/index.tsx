@@ -49,6 +49,12 @@ window.addEventListener("load", () => {
     // so we can diagnose when the dialog is blank.
     console.log("[createNanopub] dialog script loaded");
 
+    if (getInjectedPref("dark") === "true") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+
     const el = document.getElementById("root");
     if (!el) {
       console.error("[createNanopub] #root not found");
