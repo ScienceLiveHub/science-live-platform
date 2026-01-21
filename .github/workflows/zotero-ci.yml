@@ -12,6 +12,10 @@ on:
       - "zotero/**"
       - ".github/workflows/zotero-ci.yml"
 
+defaults:
+  run:
+    working-directory: ./zotero
+
 jobs:
   lint:
     runs-on: ubuntu-latest
