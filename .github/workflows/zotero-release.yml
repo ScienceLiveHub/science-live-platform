@@ -16,7 +16,6 @@ jobs:
     # You can customize any of the inputs here.
     # If you omit an input, its default value will be used.
     with:
-      build: "npm run build"
-      release: "npm run release"
+      build: "cd zotero && npm run build"
+      release: "cd zotero && npm run release"
     secrets: inherit
-    working-directory: ./zotero
