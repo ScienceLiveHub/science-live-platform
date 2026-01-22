@@ -20,7 +20,9 @@
     "ghcr.io/jsburckhardt/devcontainer-features/opencode:1": {},
     "ghcr.io/devcontainers-community/npm-features/prettier:1": {},
     "ghcr.io/devcontainers-extra/features/micro:1": {},
-    "ghcr.io/devcontainers-extra/features/localtunnel-npm": {}
+    "ghcr.io/devcontainers-extra/features/localtunnel-npm": {},
+    "ghcr.io/dhoeric/features/act:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
   "postCreateCommand": "bash scripts/devcontainer-setup.sh",
   "customizations": {
@@ -39,6 +41,7 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "mhutchie.git-graph",
+        "chakrounanas.turbo-console-log",
         "bradlc.vscode-tailwindcss",
         /* Roo Code is my preferred agentic coding assistant in vscode */
         "RooVeterinaryInc.roo-cline",

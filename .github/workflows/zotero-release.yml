@@ -1,9 +1,10 @@
-name: Release
+# Creates a release for zotero plugin, currently only manually triggered
+
+name: Zotero Plugin Release
 
 on:
-  push:
-    tags:
-      - v**-zotero
+  workflow_dispatch:
+    description: Create a new release from the latest main, the version will be based on contents of zotero/package.json
 
 permissions:
   contents: write
@@ -12,9 +13,17 @@ permissions:
 
 jobs:
   zotero-release:
+    # https://github.com/zotero-plugin-dev/workflows/blob/main/.github/workflows/release-plugin.yml
+    # We use the above linked workflow, which will:
+    #  - Setup JS
+    #  - Build plugin
+    #  - Release plugin on Github
+    #    - Tag the latest main with the version from package.json (fails if already exists), and also move the `release` tag there
+    #    - Create a (pre)release on Github and attach the build xpi and source code
+    #    - Create a secondary release under tag `release` to host update(-beta).json
+    #    - Create a comment for the release using apexskier/github-release-commenter
+    #  - Post a comment in related issues and close them using apexskier/github-release-commenter
     uses: zotero-plugin-dev/workflows/.github/workflows/release-plugin.yml@main
-    # You can customize any of the inputs here.
-    # If you omit an input, its default value will be used.
     with:
       build: "cd zotero && npm run build"
       release: "cd zotero && npm run release"
