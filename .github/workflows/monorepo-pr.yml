@@ -25,10 +25,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        working-directory: ./frontend
         run: npm ci
 
       - name: Lint
@@ -43,6 +42,10 @@ jobs:
         working-directory: ./frontend
         run: npm run check
 
+      - name: Test
+        working-directory: ./frontend
+        run: npm run test
+
   api-check:
     name: API Checks
     runs-on: ubuntu-latest
@@ -55,10 +58,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
-          cache-dependency-path: api/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        working-directory: ./api
         run: npm ci
 
       - name: Lint
@@ -68,6 +70,10 @@ jobs:
       - name: Typecheck
         working-directory: ./api
         run: npx tsc --noEmit
+
+      - name: Copy wrangler config
+        working-directory: ./api
+        run: cp wrangler.jsonc.example wrangler.jsonc
 
       - name: Build
         working-directory: ./api
@@ -85,10 +91,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
-          cache-dependency-path: zotero/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        working-directory: ./zotero
         run: npm ci
 
       - name: Lint

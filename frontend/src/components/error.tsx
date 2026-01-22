@@ -29,7 +29,7 @@ function ErrorComponent({ error, resetErrorBoundary }: FallbackProps) {
               Go to Home
             </button>
             <button
-              onClick={resetErrorBoundary}
+              onClick={() => resetErrorBoundary()}
               className="px-6 py-3 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
             >
               Try Again
@@ -41,19 +41,21 @@ function ErrorComponent({ error, resetErrorBoundary }: FallbackProps) {
   }
 
   return (
-    <div className="min-h-[200px] flex items-center justify-center p-8 bg-red-50 rounded-lg border border-red-100">
+    <div className="min-h-50 flex items-center justify-center p-8 bg-red-50 rounded-lg border border-red-100">
       <div className="text-center">
         <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
         <h2 className="text-xl font-semibold text-red-700 mb-2">
           Something went wrong
         </h2>
-        <p className="text-red-600">{error.message}</p>
+        <p className="text-red-600">
+          {error instanceof Error ? error.message : String(error)}
+        </p>
         <pre className="text-justify w-full p-4 overflow-x-auto text-gray-700 mb-2">
-          <code>{error.stack}</code>
+          <code>{error instanceof Error ? error.stack : null}</code>
         </pre>
 
         <button
-          onClick={resetErrorBoundary}
+          onClick={() => resetErrorBoundary()}
           className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
         >
           Try again

@@ -7,9 +7,4 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  test: {
-    globals: true,
-    // Use a browser environment for testing as this is more like the actual app
-    environment: "jsdom",
-  },
 });

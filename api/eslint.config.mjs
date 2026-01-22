@@ -1,11 +1,13 @@
 import js from "@eslint/js";
+import { defineConfig } from "eslint/config";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
-export default tseslint(
-  { ignores: ["dist", "node_modules", "coverage", ".wrangler"] },
+export default defineConfig([
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
   {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    ignores: ["dist", "node_modules", "coverage", ".wrangler"],
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
       ecmaVersion: 2022,
@@ -22,4 +24,4 @@ export default tseslint(
       "@typescript-eslint/no-explicit-any": "warn",
     },
   },
-);
+]);
