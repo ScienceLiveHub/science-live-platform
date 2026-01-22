@@ -2,6 +2,7 @@
   "name": "science-live-platform",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "workspaces": [
     "frontend",
     "api",

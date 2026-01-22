@@ -1,7 +1,7 @@
 {
   "name": "Science Live Platform",
   /* Node v22 is current default. This image also includes yarn classic and pnpm */
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:22-bookworm",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:22-trixie",
   "workspaceFolder": "/workspaces/science-live-platform",
   "remoteUser": "node",
   "runArgs": [
@@ -14,6 +14,7 @@
   "mounts": [],
   "forwardPorts": [],
   "features": {
+    /* See https://containers.dev/features */
     /* Default to fish shell, remove if you prefer bash */
     "ghcr.io/meaningful-ooo/devcontainer-features/fish:2": {},
     "ghcr.io/devcontainers-extra/features/cloudflare-wrangler:1": {},
@@ -21,8 +22,14 @@
     "ghcr.io/devcontainers-community/npm-features/prettier:1": {},
     "ghcr.io/devcontainers-extra/features/micro:1": {},
     "ghcr.io/devcontainers-extra/features/localtunnel-npm": {},
-    "ghcr.io/dhoeric/features/act:1": {},
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    /* Docker is needed to use `act`. Prefer `docker-outside-of-docker` over
+     * `docker-in-docker` as the later causes issues with GUI/display.
+     * Use normal docker rather than moby, as it is better supported in trixie.
+     */
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "moby": false
+    },
+    "ghcr.io/dhoeric/features/act:1": {}
   },
   "postCreateCommand": "bash scripts/devcontainer-setup.sh",
   "customizations": {
