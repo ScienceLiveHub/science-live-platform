@@ -58,19 +58,11 @@ export function isNanopubUri(uri: string) {
 }
 
 export function getNanopubHash(uri: string) {
-  // TODO: align with spec https://trustyuri.net/
-  // TODO: might not be prefixed with /np/ before could be anything e.g. /sciencelive/ or /sl/np. etc,
-  //       could be any non-Base64 char before module code and hash "R...."
-  // TODO: valid "module codes" are currently FA, RA, RB according to spec
-  const npIndex = uri?.search("/np/R");
-  const hash = uri?.substring(npIndex + 4);
-
-  return npIndex &&
-    hash &&
-    hash.match(new RegExp("^[A-Za-z0-9_-]+$")) &&
-    hash.length === 45
-    ? hash
-    : undefined;
+  // Spec: https://github.com/trustyuri/trustyuri-spec
+  // TODO: Could be any non-Base64 char before module code and hash "R....", not just a '/'
+  return typeof uri !== "string"
+    ? undefined
+    : uri.match(/\/(RA|RB|FA)([A-Za-z0-9_-]{43})$/)?.[2];
 }
 
 export function isDoiUri(uri: string) {
