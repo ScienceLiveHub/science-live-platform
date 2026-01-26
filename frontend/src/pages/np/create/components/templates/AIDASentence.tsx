@@ -65,8 +65,8 @@ export default function AIDASentence({
     project: z
       .string()
       .refine(isNanopubUri, "Must be a valid Nanopublication URI"),
-    dataset: z.array(z.url()).optional(),
-    publication: z.array(z.url()).optional(),
+    dataset: z.url().optional(),
+    publication: z.url().optional(),
   });
 
   /**
@@ -120,23 +120,15 @@ export default function AIDASentence({
       },
       {
         name: "dataset",
-        type: "array",
-        label: "Supported by dataset(s)",
-        arrayConfig: {
-          minItems: 0,
-          itemType: "text",
-          itemPlaceholder: "URI of related published dataset",
-        },
+        type: "text",
+        label: "Supported by dataset",
+        placeholder: "URI of related published dataset",
       },
       {
         name: "publication",
-        type: "array",
-        label: "Supported by publication(s)",
-        arrayConfig: {
-          minItems: 0,
-          itemType: "text",
-          itemPlaceholder: "URI of related scholarly work (e.g. publication)",
-        },
+        type: "text",
+        label: "Supported by publication",
+        placeholder: "URI of related scholarly work (e.g. publication)",
       },
     ],
     submitLabel: "Generate Nanopublication",
@@ -151,12 +143,6 @@ export default function AIDASentence({
       onSubmit: async ({ value }) => {
         value.st1 = value.topic?.map((t: Record<string, string>) => ({
           topic: t.uri,
-        }));
-        value.st2 = value.dataset?.map((d: Record<string, string>) => ({
-          dataset: d,
-        }));
-        value.st3 = value.publication?.map((p: Record<string, string>) => ({
-          publication: p,
         }));
         await publish(value);
       },

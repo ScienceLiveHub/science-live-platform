@@ -54,6 +54,47 @@ describe("NanopubTemplate.applyTemplate", () => {
       ],
       outputs: ["RAVEpTdL-applyTemplate_expected_output.trig"],
     },
+    {
+      input: "RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE.trig",
+      params: [
+        {
+          aida: "There are approximately 50 non-active volcanic cones in Auckland, as of 2025.",
+          project:
+            "https://example.oreo/RAUdtPsR9brjCBo8RC7vNIbofxnOAJH3Qxk1SAs1TL7jw",
+          topic: [
+            {
+              uri: "https://should.not.show.in.output",
+              label: "Ignored",
+              description: "Should be ignored",
+            },
+          ],
+          st1: [
+            {
+              topic: "http://www.wikidata.org/entity/Q726917",
+            },
+            {
+              topic: "http://www.wikidata.org/entity/Q8072",
+            },
+            {
+              topic: "http://www.wikidata.org/entity/Q7692360",
+            },
+          ],
+          st2: [
+            {
+              dataset: "https://should.not.show.in.output",
+            },
+          ],
+          st3: [
+            {
+              publication: "https://should.not.show.in.output",
+            },
+          ],
+          dataset: "https://abcdefg.oreo/ds1",
+          publication: "https://en.wikipedia.org/wiki/Auckland_volcanic_field",
+        },
+      ],
+      outputs: ["RA4fmfVF-applyTemplate_expected_output.trig"],
+    },
   ];
 
   const loadedFixtures: Record<string, string> = {};
@@ -170,5 +211,18 @@ describe("NanopubTemplate.applyTemplate", () => {
     );
 
     expect(result).toMatch(loadedFixtures[fixturesSets[0].outputs[1]]);
+  });
+  it("should correctly output placeholder prefixes, AutoEscapeUriPlaceholder and IntroducedResource", async () => {
+    const template = await NanopubTemplate.loadString(
+      loadedFixtures[fixturesSets[2].input],
+    );
+
+    const { signedRdf: result } = await template.generateNanopublication(
+      fixturesSets[2].params[0],
+      pubdata,
+      EXAMPLE_privateKey,
+    );
+
+    expect(result).toMatch(loadedFixtures[fixturesSets[2].outputs[0]]);
   });
 });
