@@ -17,6 +17,7 @@ import { SnippetCopyButton } from "@/components/ui/shadcn-io/snippet";
 import { Spinner } from "@/components/ui/spinner";
 import { useLabels } from "@/hooks/use-labels";
 import { useNanopub } from "@/hooks/use-nanopub";
+import { NanopubStore } from "@/lib/nanopub-store";
 import { shrinkUri, Statement } from "@/lib/rdf";
 import { extractOrcidId } from "@/lib/uri";
 import {
@@ -37,8 +38,12 @@ import { Link, useSearchParams } from "react-router-dom";
 /**
  * ViewNanopub
  *
- * - View a nanopub fetched from the given URI, in a friendly way
- * - Displays graphs (Head, Assertion, Provenance, PubInfo) and triples in a readable format
+ * - Render a nanopub in a user-friendly way.
+ * - Pass in a nanopub `store`, otherwise it will look in the `uri` query
+ *   paraneter and fetch it.  Failing that, show a text field where the user
+ *   can enter a URI themselves.
+ * - Displays graphs (Head, Assertion, Provenance, PubInfo) and triples in a
+ *   readable format.
  *
  * Intended for generic viewing of any nanopub content.
  */
@@ -92,12 +97,18 @@ export function ShareMenu({ uri }: { uri: string }) {
   );
 }
 
-export default function ViewNanopub() {
+export default function ViewNanopub({
+  store: propStore,
+}: {
+  store?: NanopubStore;
+} = {}) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const uri = searchParams.get("uri") || "";
+  const uri = searchParams.get("uri") || propStore?.metadata.uri || "";
 
   const [inputUri, setInputUri] = useState(uri);
-  const { store, loading, error, creatorUserIdsByOrcid } = useNanopub(uri);
+  const { store, loading, error, creatorUserIdsByOrcid } = useNanopub(
+    propStore || uri,
+  );
 
   // Initialize the labels hook with the store's label cache
   const { getLabel } = useLabels(store?.labelCache);
@@ -154,28 +165,30 @@ export default function ViewNanopub() {
 
   return (
     <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-6xl">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h1 className="flex items-center text-xl text-muted-foreground font-black">
-          <FileCode className="mr-4" />
-          VIEW NANOPUBLICATION
-        </h1>
-        <div className="flex gap-2 w-full md:w-auto">
-          <Input
-            type="text"
-            className="flex-1 md:w-130"
-            placeholder="Enter URI e.g. https://w3id.org/np/... or http://purl.org/nanopub/..."
-            value={inputUri}
-            onChange={(e) => setInputUri(e.target.value)}
-          />
-          <Button
-            className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
-            disabled={loading}
-            onClick={handleLoadClick}
-          >
-            Load
-          </Button>
+      {!propStore && (
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <h1 className="flex items-center text-xl text-muted-foreground font-black">
+            <FileCode className="mr-4" />
+            VIEW NANOPUBLICATION
+          </h1>
+          <div className="flex gap-2 w-full md:w-auto">
+            <Input
+              type="text"
+              className="flex-1 md:w-130"
+              placeholder="Enter URI e.g. https://w3id.org/np/... or http://purl.org/nanopub/..."
+              value={inputUri}
+              onChange={(e) => setInputUri(e.target.value)}
+            />
+            <Button
+              className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
+              disabled={loading}
+              onClick={handleLoadClick}
+            >
+              Load
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Status / Errors */}
       {loading && (
@@ -263,9 +276,11 @@ export default function ViewNanopub() {
                       <span className="text-muted-foreground">—</span>
                     )}
                   </div>
-                  <div className="absolute right-0 top-0">
-                    <ShareMenu uri={uri} />
-                  </div>
+                  {!propStore && (
+                    <div className="absolute right-0 top-0">
+                      <ShareMenu uri={uri} />
+                    </div>
+                  )}
                 </div>
                 <div className="mt-1 text-sm space-y-1">
                   <div>
@@ -313,9 +328,7 @@ export default function ViewNanopub() {
                   </div>
                 </div>
               </div>
-
-              <Citation data={store?.metadata} />
-
+              {!propStore && <Citation data={store?.metadata} />}
               {/* Sections */}
               <section className="space-y-4">
                 <GraphSection

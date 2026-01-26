@@ -50,6 +50,7 @@
         "mhutchie.git-graph",
         "chakrounanas.turbo-console-log",
         "bradlc.vscode-tailwindcss",
+        "vitest.explorer",
         /* Roo Code is my preferred agentic coding assistant in vscode */
         "RooVeterinaryInc.roo-cline",
         "sst-dev.opencode",

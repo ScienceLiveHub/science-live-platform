@@ -10,7 +10,9 @@ interface UseNanopubResult {
   creatorUserIdsByOrcid: Record<string, string | null>;
 }
 
-export function useNanopub(uri: string): UseNanopubResult {
+export function useNanopub(
+  uriOrStore: string | NanopubStore | undefined,
+): UseNanopubResult {
   const [store, setStore] = useState<NanopubStore | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +21,7 @@ export function useNanopub(uri: string): UseNanopubResult {
   >({});
 
   useEffect(() => {
-    if (!uri) {
+    if (!uriOrStore) {
       setStore(null);
       setError(null);
       return;
@@ -33,7 +35,14 @@ export function useNanopub(uri: string): UseNanopubResult {
 
     const load = async () => {
       try {
-        const newStore = await NanopubStore.load(uri);
+        let newStore: NanopubStore;
+
+        if (typeof uriOrStore === "string") {
+          newStore = await NanopubStore.load(uriOrStore);
+        } else {
+          newStore = uriOrStore;
+        }
+
         if (!mounted) return;
 
         setStore(newStore);
@@ -84,7 +93,7 @@ export function useNanopub(uri: string): UseNanopubResult {
     return () => {
       mounted = false;
     };
-  }, [uri]);
+  }, [uriOrStore]);
 
   return { store, loading, error, creatorUserIdsByOrcid };
 }
