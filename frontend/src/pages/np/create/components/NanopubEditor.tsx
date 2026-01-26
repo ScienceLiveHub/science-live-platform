@@ -303,6 +303,9 @@ export default function NanopubEditor({
                   <div className="my-6">
                     {POPULAR_TEMPLATES[templateUri].description}
                   </div>
+                  <div className="my-8 text-muted-foreground">
+                    {POPULAR_TEMPLATES[templateUri].moreDescription}
+                  </div>
                   <TemplateComp
                     publish={publishNanopub}
                     prefilledData={prefilledData}

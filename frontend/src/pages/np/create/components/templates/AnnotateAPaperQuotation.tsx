@@ -18,10 +18,6 @@ export default function AnnotateAPaperQuotation({
     comment: z.string().min(5).max(500),
   });
 
-  /**
-   * Construct the form component using Formedible
-   * See manual builder: https://formedible.dev/builder or AI tool https://formedible.dev/ai-builder
-   */
   const { Form } = useFormedible({
     schema,
     fields: [
@@ -58,7 +54,7 @@ export default function AnnotateAPaperQuotation({
         description: "Use when quoting beginning and end of a longer passage",
         placeholder: "The exact quotation from the paper",
         textareaConfig: {},
-        conditional: (values: any) => values.quoteType === "ends",
+        conditional: (values) => values.quoteType === "ends",
       },
       {
         name: "comment",
@@ -82,7 +78,6 @@ export default function AnnotateAPaperQuotation({
         ...prefilledData,
       },
       onSubmit: async ({ value }) => {
-        value.paper = "https://doi.org/" + value.paper;
         await publish(value);
       },
     },

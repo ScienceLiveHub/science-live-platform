@@ -47,13 +47,9 @@ export default function CitationWithCiTO({
    */
   const schema = z.object({
     article: z.url(),
-    st02: z.array(object({ cites: z.string(), cited: z.url() })),
+    st02: z.array(object({ cites: z.string(), cited: z.url() })).optional(),
   });
 
-  /**
-   * Construct the form component using Formedible
-   * See manual builder: https://formedible.dev/builder or AI tool https://formedible.dev/ai-builder
-   */
   const { Form } = useFormedible({
     schema,
     fields: [
@@ -114,15 +110,10 @@ export default function CitationWithCiTO({
     formOptions: {
       defaultValues: {
         article: "",
-        cites: "",
-        cited: "",
+        st02: [],
         ...prefilledData,
       },
       onSubmit: async ({ value }) => {
-        value.st02 = (value.st02 as Array<any>).map((v) => ({
-          ...v,
-          article: value.article,
-        }));
         await publish(value);
       },
     },

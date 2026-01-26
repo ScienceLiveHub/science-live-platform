@@ -1,7 +1,7 @@
 import { useFormedible } from "@/hooks/use-formedible";
 import z from "zod";
 import { NanopubTemplateDefComponentProps } from "./component-registry";
-import { validDoi, validLength } from "./registry";
+import { validDoi } from "./registry";
 
 export default function DocumentGeographicalCoverage({
   publish,
@@ -13,14 +13,14 @@ export default function DocumentGeographicalCoverage({
   const schema = z.object({
     paper: z.string().regex(validDoi),
     quoteType: z.enum(["whole", "ends"]),
-    quotation: z.string().regex(validLength(5, 500)),
-    "quotation-end": z.string().regex(validLength(5, 500)).optional(),
+    quotation: z.string().min(5).max(500),
+    "quotation-end": z.string().min(5).max(500).optional(),
     location: z.string(), // Actually a local URI (intoduced resource), so a suffix to current URI
     "location-label": z.string(),
     geometry: z.string().optional(), // Actually a local URI (intoduced resource), so a suffix to current URI
-    wkt: z.string().regex(validLength(5, 1500)).optional(),
-    bbox: z.string().regex(validLength(5, 1500)).optional(),
-    comment: z.string().regex(validLength(5, 1000)),
+    wkt: z.string().min(5).max(1500).optional(),
+    bbox: z.string().min(5).max(1500).optional(),
+    comment: z.string().min(5).max(1000),
   });
 
   /**
@@ -63,7 +63,7 @@ export default function DocumentGeographicalCoverage({
         description: "Use when quoting beginning and end of a longer passage",
         placeholder: "The exact quotation from the paper",
         textareaConfig: {},
-        conditional: (values: any) => values.quoteType === "ends",
+        conditional: (values) => values.quoteType === "ends",
       },
       {
         name: "location",

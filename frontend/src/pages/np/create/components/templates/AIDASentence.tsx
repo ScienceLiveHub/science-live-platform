@@ -67,12 +67,11 @@ export default function AIDASentence({
       .refine(isNanopubUri, "Must be a valid Nanopublication URI"),
     dataset: z.url().optional(),
     publication: z.url().optional(),
+    // This placeholder is needed because we translate from `topic` (compatible with
+    // ApiComboboxMultipleExpandable) to `st1` (compatible with generateNanopublication())
+    st1: z.array(z.object<{ topic: string }>()).optional(),
   });
 
-  /**
-   * Construct the form component using Formedible
-   * See manual builder: https://formedible.dev/builder or AI tool https://formedible.dev/ai-builder
-   */
   const { Form } = useFormedible({
     schema,
     fields: [
@@ -141,6 +140,7 @@ export default function AIDASentence({
         ...prefilledData,
       },
       onSubmit: async ({ value }) => {
+        // convert to make it work correctly with generateNanopublication()
         value.st1 = value.topic?.map((t: Record<string, string>) => ({
           topic: t.uri,
         }));
