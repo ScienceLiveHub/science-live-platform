@@ -130,7 +130,7 @@ describe("NanopubTemplate.applyTemplate", () => {
       loadedFixtures[fixturesSets[0].input],
     );
 
-    const { signedRdf: result } = await template.applyTemplate(
+    const { signedRdf: result } = await template.generateNanopublication(
       fixturesSets[0].params[0],
       pubdata,
       EXAMPLE_privateKey,
@@ -144,7 +144,7 @@ describe("NanopubTemplate.applyTemplate", () => {
       loadedFixtures[fixturesSets[1].input],
     );
 
-    const { signedRdf: result } = await template.applyTemplate(
+    const { signedRdf: result } = await template.generateNanopublication(
       fixturesSets[1].params[0],
       pubdata,
       EXAMPLE_privateKey,
@@ -163,7 +163,7 @@ describe("NanopubTemplate.applyTemplate", () => {
       loadedFixtures[fixturesSets[0].input],
     );
 
-    const { signedRdf: result } = await template.applyTemplate(
+    const { signedRdf: result } = await template.generateNanopublication(
       fixturesSets[0].params[1],
       pubdata,
       EXAMPLE_privateKey,

@@ -54,6 +54,7 @@ export function getUriEnd(uri: string) {
  *
  */
 export function isNanopubUri(uri: string) {
+  // TODO: actually check that it is a valid URI as well? e.g. z.url()
   return !!getNanopubHash(uri);
 }
 

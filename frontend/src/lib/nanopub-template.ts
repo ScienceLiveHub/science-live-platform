@@ -1,6 +1,6 @@
 import { DEFAULT_NANOPUB_URI, sign } from "@nanopub/nanopub-js";
 import * as RDFT from "@rdfjs/types";
-import { DataFactory, Store, Writer } from "n3";
+import { DataFactory, Quad, Store, Writer } from "n3";
 import z from "zod";
 import { FieldConfig } from "./formedible/types";
 import { NanopubStore } from "./nanopub-store";
@@ -10,13 +10,13 @@ import {
   fetchPossibleValuesFromQuads,
   NS,
 } from "./rdf";
-import { cleanOrcidUri, getUriEnd } from "./uri";
+import { cleanOrcidUri, getUriEnd, isNanopubUri } from "./uri";
 
 const { namedNode, literal, blankNode } = DataFactory;
 
 // Template placeholder types
 // Get these from https://w3id.org/np/o/ntemplate/
-// NOTE: some templates use https://w3id.org/np/o/ntemplate/latest/PlaceholderType, others do not have /latest/ in the path
+// NOTE: some templates use https://w3id.org/np/o/ntemplate/PlaceholderType, others do not have /latest/ in the path
 export enum PlaceholderType {
   GUIDED_CHOICE = "GuidedChoicePlaceholder",
   LITERAL = "LiteralPlaceholder",
@@ -26,16 +26,13 @@ export enum PlaceholderType {
   TRUSTY_URI = "TrustyUriPlaceholder",
   URI = "UriPlaceholder",
   VALUE = "ValuePlaceholder",
-  REPEATABLE_STATEMENT = "RepeatableStatement",
 
   PLACEHOLDER = "Placeholder", // The super class, don't use this
 
   //TODO: these dont seem to exist anymore even though they are used in many older templates?
   EXTERNAL_URI = "ExternalUriPlaceholder", // -> map to URI
   TEXT_PLACEHOLDER = "TextPlaceholder", // -> map to LITERAL
-  AUTO_ESCAPE_URI = "AutoEscapeUriPlaceholder", // -> map to LONG_LITERAL
-
-  INTRODUCED_RESOURCE = "IntroducedResource", // TODO: DO NOT INCLUDE as a placeholder, add it as a property of field
+  AUTO_ESCAPE_URI = "AutoEscapeUriPlaceholder", // -> map to LONG_LITERAL, but should be URL escaped
 }
 
 // Template field definition
@@ -43,12 +40,15 @@ export interface TemplateField {
   id: string; // e.g., "sub:article", "sub:cited"
   label: string; // Human-readable label from rdfs:label
   type: string;
+  types: string[];
   required?: boolean;
   description?: string;
   options?: { name: string; description: string; uri?: string }[]; // For restricted choice placeholders
   placeholder?: string;
-  multiple?: boolean; // For repeatable statements
+  // TODO: how can we dynamically handle repeatable statements at the field level?
+  // multiple?: boolean; // For repeatable statements
   regex?: string; // For zod validation
+  prefix?: string; // Optional prefix to append to value when applying template
 }
 
 /**
@@ -128,7 +128,7 @@ export class NanopubTemplate extends NanopubStore {
   /**
    * Generate a nanopub in trig format, using this template and the specified values for the placeholders
    */
-  async applyTemplate(
+  async generateNanopublication(
     placeholderValues: Record<string, string>,
     pubData: {
       orcid: string;
@@ -148,22 +148,28 @@ export class NanopubTemplate extends NanopubStore {
     // Create a new store for the generated nanopub
     const outputStore = new Store();
 
-    // Helper function to replace placeholders in URIs
-    const getPlaceholderValue = (
+    // Helper function to correctly format values outputted to generated nanopub
+    const formatValue = (
       uri: string,
       values: Record<string, string>,
     ): string => {
-      // Replace sub: placeholders with values
+      let placeholderName = uri;
       if (uri.startsWith("sub:")) {
-        const placeholderName = uri.substring(4); // Remove "sub:" prefix
-        const v = values[placeholderName];
-        return typeof v === "string" ? v : uri; // Replace with value or keep original
+        placeholderName = uri.substring(4); // Remove "sub:" prefix
       } else if (uri.startsWith(this.metadata.uri!)) {
-        const placeholderName = getUriEnd(uri)!;
-        const v = values[placeholderName];
-        return typeof v === "string" ? v : uri; // Replace with value or keep original
+        placeholderName = getUriEnd(uri)!; // Remove template URI prefix
       }
-      return uri;
+      // Look up placeholder value
+      let outputValue = values[placeholderName] || uri;
+      // Add any field-specific augmentations (prefix etc)
+      const placeholderField = this.fields.find((f) => f.id === uri);
+      if (placeholderField?.type === PlaceholderType.AUTO_ESCAPE_URI) {
+        outputValue = encodeURI(outputValue);
+      }
+      if (placeholderField?.prefix) {
+        outputValue = `${placeholderField.prefix}${outputValue}`;
+      }
+      return outputValue;
     };
 
     const shouldPlaceholderBeLiteral = (placeholderId: string): boolean => {
@@ -194,13 +200,13 @@ export class NanopubTemplate extends NanopubStore {
       }
 
       const placeholderId = templateTerm.value;
-      const replacedValue = getPlaceholderValue(placeholderId, values);
+      const formattedValue = formatValue(placeholderId, values);
       if (shouldPlaceholderBeLiteral(placeholderId)) {
         throw new Error(
           `Placeholder '${placeholderId}' is a literal placeholder but is used as a subject`,
         );
       }
-      return namedNode(replacedValue);
+      return namedNode(formattedValue);
     };
 
     const createPredicateTerm = (
@@ -208,13 +214,13 @@ export class NanopubTemplate extends NanopubStore {
       values: Record<string, string>,
     ): RDFT.Quad_Predicate => {
       const placeholderId = templateTerm.value;
-      const replacedValue = getPlaceholderValue(placeholderId, values);
+      const formattedValue = formatValue(placeholderId, values);
       if (shouldPlaceholderBeLiteral(placeholderId)) {
         throw new Error(
           `Placeholder '${placeholderId}' is a literal placeholder but is used as a predicate`,
         );
       }
-      return namedNode(replacedValue);
+      return namedNode(formattedValue);
     };
 
     const createObjectTerm = (
@@ -230,10 +236,10 @@ export class NanopubTemplate extends NanopubStore {
       }
 
       const placeholderId = templateTerm.value;
-      const replacedValue = getPlaceholderValue(placeholderId, values);
+      const formattedValue = formatValue(placeholderId, values);
       return shouldPlaceholderBeLiteral(placeholderId)
-        ? literal(replacedValue)
-        : namedNode(replacedValue);
+        ? literal(formattedValue)
+        : namedNode(formattedValue);
     };
 
     const outSub = namedNode(newNanopubUri);
@@ -285,7 +291,7 @@ export class NanopubTemplate extends NanopubStore {
         Array.isArray(placeholderValues[statementName])
       ) {
         for (const values of placeholderValues[statementName]) {
-          addStatement(statement, values);
+          addStatement(statement, { ...placeholderValues, ...values });
         }
       } else {
         addStatement(statement, placeholderValues);
@@ -333,6 +339,22 @@ export class NanopubTemplate extends NanopubStore {
     );
 
     outputStore.addQuad(outSub, NS.DCT("creator"), orcidNode, pubinfoGraph);
+
+    // For each field of type IntroducedResource, the generated nanopub should introduce them
+    const introducedFields = this.fields.filter((f) =>
+      f.types?.includes(NS.NPTs("IntroducedResource").value),
+    );
+    for (const f of introducedFields) {
+      const statementName = getUriEnd(f.id) || f.id;
+      if (placeholderValues[statementName]) {
+        outputStore.addQuad(
+          outSub,
+          NS.NPX("introduces"),
+          namedNode(formatValue(f.id, placeholderValues)),
+          pubinfoGraph,
+        );
+      }
+    }
 
     // Add other metadata
     const now = new Date().toISOString();
@@ -454,8 +476,8 @@ export class NanopubTemplate extends NanopubStore {
 
     // ---- 2. Get the "Placeholders" and their attributes (user-entered fields)
     const placeholderPropertyMap = {
-      // type: [(q: Quad) => q.object.value.endsWith("Placeholder")],
-      type: [NS.RDF("type")],
+      placeholderType: [(q: Quad) => q.object.value.endsWith("Placeholder")],
+      // type: [NS.RDF("type")],
       types_$array: [NS.RDF("type")],
       name: [NS.RDFS("label")],
       description: [NS.DCT("description")],
@@ -465,7 +487,7 @@ export class NanopubTemplate extends NanopubStore {
       hasPrefixLabel: [NS.NPT("hasPrefixLabel")],
     };
     type Placeholder = {
-      type: string;
+      placeholderType: string;
       types: string[];
       name: string;
       description: string;
@@ -520,9 +542,11 @@ export class NanopubTemplate extends NanopubStore {
       fields.push({
         id: pk,
         label: pv.name,
-        type: getUriEnd(pv.type) ?? pv.type,
+        type: getUriEnd(pv.placeholderType) ?? pv.placeholderType,
+        types: pv.types,
         description: pv.description,
         regex: pv.hasRegex,
+        prefix: pv.hasPrefix,
         options: options?.length > 0 ? options : undefined,
         required, // Placeholders are required by default, so if this is undefined, its still required
       });
@@ -588,21 +612,21 @@ function applyTypeSpecificFieldConfig(
       break;
 
     case PlaceholderType.LONG_LITERAL:
-    case PlaceholderType.INTRODUCED_RESOURCE:
       baseField.type = "textarea";
       break;
 
-    case PlaceholderType.REPEATABLE_STATEMENT:
-      baseField.type = "array";
-      baseField.arrayConfig = {
-        itemType: "text",
-        itemLabel: field.label,
-        itemPlaceholder: field.placeholder,
-        minItems: field.required ? 1 : 0,
-        addButtonLabel: `Add ${field.label}`,
-        removeButtonLabel: "Remove",
-      };
-      break;
+    // TODO: how can we dynamically handle repeatable statements at the field level?
+    // case PlaceholderType.REPEATABLE_STATEMENT:
+    //   baseField.type = "array";
+    //   baseField.arrayConfig = {
+    //     itemType: "text",
+    //     itemLabel: field.label,
+    //     itemPlaceholder: field.placeholder,
+    //     minItems: field.required ? 1 : 0,
+    //     addButtonLabel: `Add ${field.label}`,
+    //     removeButtonLabel: "Remove",
+    //   };
+    //   break;
 
     default:
       console.warn("Unknown Field Type: ", field);
@@ -730,10 +754,7 @@ function getFormedibleFieldType(placeholderType: PlaceholderType): string {
     case PlaceholderType.LITERAL:
       return "text";
     case PlaceholderType.LONG_LITERAL:
-    case PlaceholderType.INTRODUCED_RESOURCE:
       return "textarea";
-    case PlaceholderType.REPEATABLE_STATEMENT:
-      return "array";
     default:
       return "text";
   }
@@ -750,6 +771,10 @@ export function generateZodSchema(
   const regexString = (r?: string) =>
     r ? z.string().regex(RegExp(r)) : z.string();
   const regexUrl = (r?: string) => (r ? z.url().regex(RegExp(r)) : z.url());
+  const regexTrustyUri = (r?: string) =>
+    r
+      ? z.url().regex(RegExp(r)).refine(isNanopubUri)
+      : z.url().refine(isNanopubUri);
 
   for (const field of fields) {
     const fieldName = getUriEnd(field.id) ?? field.id; //field.id.replace(/[^a-zA-Z0-9]/g, "_");
@@ -764,8 +789,7 @@ export function generateZodSchema(
         break;
 
       case PlaceholderType.TRUSTY_URI:
-        // TODO: for trusty URI, we should do additional validation
-        fieldSchema = regexUrl(field.regex);
+        fieldSchema = regexTrustyUri(field.regex);
         break;
 
       case PlaceholderType.GUIDED_CHOICE:
@@ -779,23 +803,17 @@ export function generateZodSchema(
       case PlaceholderType.TEXT_PLACEHOLDER:
       case PlaceholderType.LITERAL:
       case PlaceholderType.LONG_LITERAL:
-      case PlaceholderType.INTRODUCED_RESOURCE:
         fieldSchema = regexString(field.regex).min(1, "This field is required");
         break;
 
-      case PlaceholderType.REPEATABLE_STATEMENT:
-        fieldSchema = z.array(regexString(field.regex)).default([]);
-        break;
+      // TODO: how can we dynamically handle repeatable statements at the field level?
 
       default:
         fieldSchema = regexString(field.regex);
     }
 
     // Make optional if not required
-    if (
-      !field.required &&
-      field.type !== PlaceholderType.REPEATABLE_STATEMENT
-    ) {
+    if (!field.required) {
       fieldSchema = fieldSchema.optional();
     }
 

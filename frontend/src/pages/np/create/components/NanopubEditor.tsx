@@ -178,7 +178,7 @@ export default function NanopubEditor({
     // Generate/Sign
     try {
       const template = await NanopubTemplate.load(templateUri!);
-      const signed = await template.applyTemplate(
+      const signed = await template.generateNanopublication(
         data,
         {
           orcid: identity.orcid,
