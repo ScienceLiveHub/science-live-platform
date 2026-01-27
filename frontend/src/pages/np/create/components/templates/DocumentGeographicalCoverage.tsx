@@ -1,3 +1,7 @@
+import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
+import { MapGeometrySelector } from "@/components/map-geometry";
+import { Label } from "@/components/ui/label";
+import { PlaceAutocomplete } from "@/components/ui/place-autocomplete";
 import { useFormedible } from "@/hooks/use-formedible";
 import { validDoi, validUriPlaceholder } from "@/lib/validation";
 import z from "zod";
@@ -16,8 +20,8 @@ export default function DocumentGeographicalCoverage({
     quotation: z.string().min(5).max(500),
     "quotation-end": z.string().min(5).max(500).optional(),
     location: validUriPlaceholder, // Actually a local URI (introduced resource), so a suffix to current URI
-    "location-label": z.string(),
-    geometry: z.string().optional(), // Actually a local URI (intoduced resource), so a suffix to current URI
+    "location-label": z.string().nonempty(),
+    geometry: validUriPlaceholder.optional(), // Actually a local URI (introduced resource), so a suffix to current URI
     wkt: z.string().min(5).max(1500).optional(),
     bbox: z.string().min(5).max(1500).optional(),
     comment: z.string().min(5).max(1000),
@@ -62,6 +66,31 @@ export default function DocumentGeographicalCoverage({
         conditional: (values) => values.quoteType === "ends",
       },
       {
+        name: "search",
+        type: "text",
+        label: "Location search",
+        component: ({ fieldApi }) => (
+          <>
+            <Label>Search for a location or enter manually below</Label>
+            <div>
+              <PlaceAutocomplete
+                onPlaceSelect={(feature) => {
+                  fieldApi.form.setFieldValue(
+                    "location",
+                    feature.properties.osm_value,
+                  );
+                  fieldApi.form.setFieldValue(
+                    "location-label",
+                    feature.properties.name,
+                  );
+                  // TODO: ideally this should also set the geometry WKT and/or show on the map.
+                }}
+              />
+            </div>
+          </>
+        ),
+      },
+      {
         name: "location",
         type: "text",
         label: "Short ID for location",
@@ -78,38 +107,51 @@ export default function DocumentGeographicalCoverage({
         placeholder: "e.g. 'Northern Europe', 'Amazon Basin'",
         required: true,
       },
+      // TODO: this is required for wkt, but not for bbox.
+      // It can possibly be hidden and filled by code, based on map area selection
       {
         name: "geometry",
         type: "text",
         label: "Short ID for geometry",
         placeholder: "",
-        required: true,
       },
       {
         name: "wkt",
         type: "text",
         label: "Geometry as Well-known Text (WKT)",
         placeholder: "e.g. POINT(2.3 48.9) or POLYGON((...)) etc",
-        required: true,
+        // Component from https://shadcn-map.vercel.app/
+        component: ({ fieldApi }) => (
+          <>
+            <Label>Mark area geometry</Label>
+            <MapGeometrySelector
+              onWktChange={(wkt) => {
+                fieldApi.setValue(wkt ?? "");
+              }}
+            />
+          </>
+        ),
       },
-      {
-        name: "bbox",
-        type: "text",
-        label:
-          "Bounding box as WKT POLYGON (alternative to geometry - optional)",
-        placeholder: "",
-        required: true,
-      },
+      // TODO: what is the difference between this and the wkt?  Is it just redundant?
+      // {
+      //   name: "bbox",
+      //   type: "text",
+      //   label:
+      //     "Bounding box as WKT POLYGON (alternative to geometry - optional)",
+      //   placeholder: "",
+      // },
       {
         name: "comment",
         type: "textarea",
         label: "Comment",
         description:
-          "Our interpretation or explanation of why this quotation is relevant",
-        placeholder: "Comment, interpretation or explanation",
+          "Explain how this quotation supports your conclusion about the geographical coverage",
+        placeholder: "Explanation",
         textareaConfig: {},
+        required: true,
       },
     ],
+    globalWrapper: ShowOptionalWrapper,
     submitLabel: "Generate Nanopublication",
     collapseLabel: "Hide",
     expandLabel: "Show",

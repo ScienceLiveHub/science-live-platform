@@ -32,8 +32,6 @@ const LinkWithHref = React.forwardRef<
 
 LinkWithHref.displayName = "LinkWithHref";
 
-const ORCIDIcon = () => <SiOrcid />;
-
 export function Providers({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   return (
@@ -59,7 +57,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           {
             provider: "orcid",
             name: "ORCID",
-            icon: ORCIDIcon,
+            icon: () => <SiOrcid />,
           },
         ],
       }}

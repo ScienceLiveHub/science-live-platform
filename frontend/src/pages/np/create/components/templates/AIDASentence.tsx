@@ -1,3 +1,4 @@
+import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import ApiComboboxMultipleExpandable, {
   SearchEndpoint,
 } from "@/components/np/api-combobox";
@@ -130,6 +131,7 @@ export default function AIDASentence({
         placeholder: "URI of related scholarly work (e.g. publication)",
       },
     ],
+    globalWrapper: ShowOptionalWrapper,
     submitLabel: "Generate Nanopublication",
     collapseLabel: "Hide",
     expandLabel: "Show",

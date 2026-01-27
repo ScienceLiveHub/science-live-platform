@@ -1,3 +1,4 @@
+import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import { useFormedible } from "@/hooks/use-formedible";
 import { validDoi } from "@/lib/validation";
 import z from "zod";
@@ -66,6 +67,7 @@ export default function AnnotateAPaperQuotation({
         textareaConfig: {},
       },
     ],
+    globalWrapper: ShowOptionalWrapper,
     submitLabel: "Generate Nanopublication",
     collapseLabel: "Hide",
     expandLabel: "Show",
