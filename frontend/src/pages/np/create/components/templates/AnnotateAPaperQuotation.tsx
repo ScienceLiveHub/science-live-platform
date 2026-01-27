@@ -1,7 +1,7 @@
 import { useFormedible } from "@/hooks/use-formedible";
+import { validDoi } from "@/lib/validation";
 import z from "zod";
 import { NanopubTemplateDefComponentProps } from "./component-registry";
-import { validDoi } from "./registry";
 
 export default function AnnotateAPaperQuotation({
   publish,
@@ -11,7 +11,7 @@ export default function AnnotateAPaperQuotation({
    * The Schema for types, validation, and error messages
    */
   const schema = z.object({
-    paper: z.string().regex(validDoi, "Enter a valid DOI starting with '10.'"), // The "https://doi.org/" prefix is prepended when published.
+    paper: validDoi, // The "https://doi.org/" prefix is prepended when published.
     quoteType: z.enum(["whole", "ends"]),
     quotation: z.string().min(5).max(500),
     "quotation-end": z.string().min(5).max(500).optional(),

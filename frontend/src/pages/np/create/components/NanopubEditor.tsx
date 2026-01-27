@@ -36,8 +36,8 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import ViewNanopub from "../../ViewNanopub";
 import AnyStatementTemplate from "./AnyStatementTemplate";
+import { NanopubViewer } from "./NanopubViewer";
 import { POPULAR_TEMPLATES } from "./templates/registry";
 
 export interface NanopubEditorProps {
@@ -373,9 +373,11 @@ export default function NanopubEditor({
           <h3 className="text-lg font-semibold">Preview Nanopublication</h3>
 
           {previewStore ? (
-            <div className="border rounded-lg p-4 bg-background">
-              <ViewNanopub store={previewStore} />
-            </div>
+            <NanopubViewer
+              store={previewStore}
+              showShareMenu={false}
+              showCitation={false}
+            />
           ) : (
             <div className="text-muted-foreground p-4 text-center">
               Generating preview...

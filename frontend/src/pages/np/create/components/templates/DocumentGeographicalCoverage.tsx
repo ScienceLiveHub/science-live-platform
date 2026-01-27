@@ -1,7 +1,7 @@
 import { useFormedible } from "@/hooks/use-formedible";
+import { validDoi, validUriPlaceholder } from "@/lib/validation";
 import z from "zod";
 import { NanopubTemplateDefComponentProps } from "./component-registry";
-import { validDoi } from "./registry";
 
 export default function DocumentGeographicalCoverage({
   publish,
@@ -11,11 +11,11 @@ export default function DocumentGeographicalCoverage({
    * The Schema for types, validation, and error messages
    */
   const schema = z.object({
-    paper: z.string().regex(validDoi),
+    paper: validDoi, // The "https://doi.org/" prefix is prepended when published.
     quoteType: z.enum(["whole", "ends"]),
     quotation: z.string().min(5).max(500),
     "quotation-end": z.string().min(5).max(500).optional(),
-    location: z.string(), // Actually a local URI (intoduced resource), so a suffix to current URI
+    location: validUriPlaceholder, // Actually a local URI (introduced resource), so a suffix to current URI
     "location-label": z.string(),
     geometry: z.string().optional(), // Actually a local URI (intoduced resource), so a suffix to current URI
     wkt: z.string().min(5).max(1500).optional(),
@@ -23,10 +23,6 @@ export default function DocumentGeographicalCoverage({
     comment: z.string().min(5).max(1000),
   });
 
-  /**
-   * Construct the form component using Formedible
-   * See manual builder: https://formedible.dev/builder or AI tool https://formedible.dev/ai-builder
-   */
   const { Form } = useFormedible({
     schema,
     fields: [
@@ -70,7 +66,7 @@ export default function DocumentGeographicalCoverage({
         type: "text",
         label: "Short ID for location",
         description:
-          "An ID for the geographical location to be used as teh URI suffix",
+          "An ID for the geographical location to be used as the URI suffix",
         placeholder: "",
         required: true,
       },
