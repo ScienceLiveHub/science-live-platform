@@ -116,6 +116,8 @@ export default function DocumentGeographicalCoverage({
         placeholder: "",
       },
       {
+        // TODO: this has the datatype http://www.opengis.net/ont/geosparql#wktLiteral
+        // according to the template. How does that translate to the generated RDF?
         name: "wkt",
         type: "text",
         label: "Geometry as Well-known Text (WKT)",

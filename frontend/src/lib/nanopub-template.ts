@@ -69,6 +69,29 @@ function isOptional(statement: Statement) {
   );
 }
 
+/**
+ * Are all the placeholders for this statement empty?
+ */
+function isAllEmpty(
+  statement: Statement,
+  values: Record<string, string>,
+  uri: string,
+) {
+  const getPlaceholderName = (v: string) =>
+    v.startsWith(uri) ? getUriEnd(v) : undefined;
+
+  // TODO: we assume only the object matters, is this correct?
+  // const subject = getPlaceholderName(statement.subject.value);
+  // const predicate = getPlaceholderName(statement.predicate.value);
+  const object = getPlaceholderName(statement.object.value);
+
+  return !(
+    // (subject && values[subject]) ||
+    // (predicate && values[predicate]) ||
+    (object && values[object])
+  );
+}
+
 type Statement = {
   id: string;
   types?: RDFT.Term[];
@@ -168,6 +191,9 @@ export class NanopubTemplate extends NanopubStore {
       }
       if (placeholderField?.prefix) {
         outputValue = `${placeholderField.prefix}${outputValue}`;
+      }
+      if (placeholderField?.types?.includes(NS.NPTs("LocalResource").value)) {
+        outputValue = baseUri + encodeURI(outputValue);
       }
       return outputValue;
     };
@@ -286,6 +312,15 @@ export class NanopubTemplate extends NanopubStore {
         outputStore.addQuad(subject, predicate, object, assertionGraph);
       };
       const statementName = getUriEnd(statementId) || statement.id;
+
+      // Skip optional statements which have empty placeholders
+      if (
+        isOptional(statement) &&
+        isAllEmpty(statement, placeholderValues, this.metadata.uri!)
+      ) {
+        continue;
+      }
+
       if (
         isRepeatable(statement) &&
         Array.isArray(placeholderValues[statementName])
