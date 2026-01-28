@@ -463,7 +463,7 @@ export class NanopubTemplate extends NanopubStore {
     let trigOutput = "";
     const quads = outputStore.getQuads(null, null, null, null);
     writer.addQuads(quads);
-    writer.end((error: any, result: string) => {
+    writer.end((error, result: string) => {
       if (error) {
         throw new Error(`Failed to serialize TRIG: ${error}`);
       }
