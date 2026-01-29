@@ -5,7 +5,7 @@ import { NanopubTemplate } from "../src/lib/nanopub-template";
 import { EXAMPLE_privateKey } from "../src/lib/uri";
 
 describe("NanopubTemplate.applyTemplate", () => {
-  const fixturesSets: { input: string; params: any[]; outputs: string[] }[] = [
+  const fixturesSets: { input: string; params: any; outputs: string[] }[] = [
     {
       input: "RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo.trig",
       params: [
@@ -17,7 +17,7 @@ describe("NanopubTemplate.applyTemplate", () => {
         {
           article: "https://doi.org/10.99999999",
           unrelated: "Some unrelated form data that should be EXCLUDED",
-          st01: { article: "Another red-herring, which should be EXCLUDED" },
+          st01: [{ article: "Another red-herring, which should be EXCLUDED" }],
           st02: [
             {
               unrelated2: "https://exclude.this.data",
@@ -95,6 +95,23 @@ describe("NanopubTemplate.applyTemplate", () => {
       ],
       outputs: ["RA4fmfVF-applyTemplate_expected_output.trig"],
     },
+    {
+      input: "RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao.trig",
+      params: [
+        {
+          comment: "Quote mentions the 3 broad regions where cases were taken.",
+          geometry: "na-eu-au",
+          location: "northamerica-eu-australia",
+          "location-label": "North America, European Union and Australia",
+          paper: "10.1136/oemed-2022-108371",
+          quotation:
+            "We pooled data from 10 case-control studies participating in the International Lymphoma Epidemiology Consortium, including 9229 cases and 9626 controls from North America, the European Union and Australia",
+          quoteType: "whole",
+          wkt: "GEOMETRYCOLLECTION(POLYGON((-162.94921875000003 70.61261423801925, -169.62890625000003 62.75472592723178, -161.54296875000003 57.326521225217064, -147.83203125000003 58.99531118795094, -117.94921875000001 27.994401411046148, -76.81640625000001 25.48295117535531, -46.58203125000001 54.36775852406841, -66.97265625000001 70.02058730174062, -162.94921875000003 70.61261423801925)), POLYGON((31.113281250000004 69.53451763078358, 39.90234375000001 44.08758502824518, 20.214843750000004 35.17380831799959, -11.77734375 36.59788913307022, -11.77734375 58.63121664342478, 16.347656250000004 69.77895177646761, 31.113281250000004 69.53451763078358)), POLYGON((131.76654397038808 -10.173053808111849, 111.02435647038811 -21.972369665708793, 115.94623147038811 -36.904907337367746, 130.7118564703881 -32.57346140454925, 145.12591897038808 -43.603290590722224, 156.02435647038814 -27.711522806200023, 143.7196689703881 -10.173053808111849, 131.76654397038808 -10.173053808111849)))",
+        },
+      ],
+      outputs: ["RAsPVd3b-applyTemplate_expected_output.trig"],
+    },
   ];
 
   const loadedFixtures: Record<string, string> = {};
@@ -142,7 +159,7 @@ describe("NanopubTemplate.applyTemplate", () => {
     expect(template.fields.length).toBeGreaterThan(0);
 
     // Check for expected placeholder fields
-    const fieldIds = template.fields.map((f: any) => f.id);
+    const fieldIds = template.fields.map((f) => f.id);
     expect(fieldIds).toContainEqual(expect.stringContaining("article"));
     expect(fieldIds).toContainEqual(expect.stringContaining("cited"));
     expect(fieldIds).toContainEqual(expect.stringContaining("cites"));
@@ -158,12 +175,10 @@ describe("NanopubTemplate.applyTemplate", () => {
 
     // Check for expected statements
     const statements = Array.from(template.statements.values());
-    expect(
-      statements.some((s: any) => s.subject.value.includes("article")),
-    ).toBe(true);
-    expect(statements.some((s: any) => s.object.value.includes("cited"))).toBe(
+    expect(statements.some((s) => s.subject.value.includes("article"))).toBe(
       true,
     );
+    expect(statements.some((s) => s.object.value.includes("cited"))).toBe(true);
   });
 
   it("should apply the template and match expected output exactly", async () => {
@@ -212,6 +227,7 @@ describe("NanopubTemplate.applyTemplate", () => {
 
     expect(result).toMatch(loadedFixtures[fixturesSets[0].outputs[1]]);
   });
+
   it("should correctly output placeholder prefixes, AutoEscapeUriPlaceholder and IntroducedResource", async () => {
     const template = await NanopubTemplate.loadString(
       loadedFixtures[fixturesSets[2].input],
@@ -224,5 +240,19 @@ describe("NanopubTemplate.applyTemplate", () => {
     );
 
     expect(result).toMatch(loadedFixtures[fixturesSets[2].outputs[0]]);
+  });
+
+  it("should correctly handle LocalResource and exclude optional statements where possible", async () => {
+    const template = await NanopubTemplate.loadString(
+      loadedFixtures[fixturesSets[3].input],
+    );
+
+    const { signedRdf: result } = await template.generateNanopublication(
+      fixturesSets[3].params[0],
+      pubdata,
+      EXAMPLE_privateKey,
+    );
+
+    expect(result).toMatch(loadedFixtures[fixturesSets[3].outputs[0]]);
   });
 });

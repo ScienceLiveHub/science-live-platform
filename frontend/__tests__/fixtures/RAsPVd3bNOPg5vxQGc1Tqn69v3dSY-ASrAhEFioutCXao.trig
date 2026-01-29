@@ -1,0 +1,154 @@
+@prefix this: <https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao> .
+@prefix sub: <https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix nt: <https://w3id.org/np/o/ntemplate/> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix orcid: <https://orcid.org/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+sub:Head {
+  this: a np:Nanopublication;
+    np:hasAssertion sub:assertion;
+    np:hasProvenance sub:provenance;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+  dct:spatial rdfs:label "has spatial coverage" .
+  
+  <http://purl.org/spar/cito/hasQuotedText> rdfs:label "has quoted text" .
+  
+  <http://purl.org/spar/cito/hasQuotedTextEnd> rdfs:label "has quoted text end" .
+  
+  <http://purl.org/spar/cito/quotes> rdfs:label "quotes from" .
+  
+  <http://www.opengis.net/ont/geosparql#asWKT> rdfs:label "as WKT" .
+  
+  <http://www.opengis.net/ont/geosparql#hasGeometry> rdfs:label "has geometry" .
+  
+  rdf:type rdfs:label "is a" .
+  
+  rdfs:comment rdfs:label "has comment" .
+  
+  rdfs:label rdfs:label "has the label" .
+  
+  <http://www.w3.org/ns/dcat#bbox> rdfs:label "has the bounding box" .
+  
+  sub:assertion a nt:AssertionTemplate;
+    dct:description "This template allows to document the geographical area or region covered by a research paper's findings, data, or study scope. Users identify the spatial coverage (e.g., Europe, Canada, or a specific fgeographical area) and provide supporting quotations from the paper that led them to this geographical conclusion. This template is designed to work with GeoSPARQL queries for efficient spatial discovery of research.";
+    rdfs:label "Documenting geographical coverage of research based on textual evidence";
+    nt:hasStatement sub:st01, sub:st02, sub:st03, sub:st04, sub:st05, sub:st06, sub:st07,
+      sub:st08, sub:st09, sub:st10;
+    nt:hasTag "Location" .
+  
+  sub:bbox a nt:LongLiteralPlaceholder;
+    rdfs:label "Bounding box as WKT POLYGON (alternative to geometry - optional)";
+    nt:hasRegex "[\\s\\S]{5,1500}" .
+  
+  sub:comment a nt:LongLiteralPlaceholder;
+    rdfs:label "explanation of how this quotation supports your conclusion about the geographical coverage (max. 800 characters)";
+    nt:hasRegex "[\\s\\S]{5,1000}" .
+  
+  sub:geometry a nt:IntroducedResource, nt:LocalResource, nt:UriPlaceholder;
+    rdfs:label "identifier for the geometry object (optional, leave blank if using bbox only)" .
+  
+  sub:location a nt:IntroducedResource, nt:LocalResource, nt:UriPlaceholder;
+    rdfs:label "short ID for the geographical location (will be used as URI suffix)" .
+  
+  sub:location-label a nt:LiteralPlaceholder;
+    rdfs:label "Name of the geographical area covered by this research (e.g., 'Northern Europe', 'Amazon Basin', 'Italian Alps')" .
+  
+  sub:paper a nt:UriPlaceholder;
+    rdfs:label "DOI of the paper (starting with '10.')";
+    nt:hasPrefix "https://doi.org/";
+    nt:hasPrefixLabel "DOI of the paper (starting with '10.')";
+    nt:hasRegex "10.(\\d)+/(\\S)+" .
+  
+  sub:quotation a nt:LongLiteralPlaceholder;
+    rdfs:label "The exact quotation from the paper (max. 500 characters)";
+    nt:hasRegex "[\\s\\S]{5,500}" .
+  
+  sub:quotation-end a nt:LongLiteralPlaceholder;
+    rdfs:label "End of quotation (optional - use when quoting beginning and end of a longer passage, max. 500 characters)";
+    nt:hasRegex "[\\s\\S]{5,500}" .
+  
+  sub:st01 rdf:object sub:paper;
+    rdf:predicate <http://purl.org/spar/cito/quotes>;
+    rdf:subject nt:CREATOR .
+  
+  sub:st02 rdf:object sub:quotation;
+    rdf:predicate <http://purl.org/spar/cito/hasQuotedText>;
+    rdf:subject sub:paper .
+  
+  sub:st03 a nt:OptionalStatement;
+    rdf:object sub:quotation-end;
+    rdf:predicate <http://purl.org/spar/cito/hasQuotedTextEnd>;
+    rdf:subject sub:paper .
+  
+  sub:st04 rdf:object <http://www.opengis.net/ont/geosparql#Feature>;
+    rdf:predicate rdf:type;
+    rdf:subject sub:location .
+  
+  sub:st05 rdf:object sub:location-label;
+    rdf:predicate rdfs:label;
+    rdf:subject sub:location .
+  
+  sub:st06 a nt:OptionalStatement;
+    rdf:object sub:geometry;
+    rdf:predicate <http://www.opengis.net/ont/geosparql#hasGeometry>;
+    rdf:subject sub:location .
+  
+  sub:st07 a nt:OptionalStatement;
+    rdf:object sub:wkt;
+    rdf:predicate <http://www.opengis.net/ont/geosparql#asWKT>;
+    rdf:subject sub:geometry .
+  
+  sub:st08 a nt:OptionalStatement;
+    rdf:object sub:bbox;
+    rdf:predicate <http://www.w3.org/ns/dcat#bbox>;
+    rdf:subject sub:location .
+  
+  sub:st09 rdf:object sub:location;
+    rdf:predicate dct:spatial;
+    rdf:subject sub:paper .
+  
+  sub:st10 rdf:object sub:comment;
+    rdf:predicate rdfs:comment;
+    rdf:subject sub:paper .
+  
+  sub:wkt a nt:LongLiteralPlaceholder;
+    rdfs:label "Well-Known Text geometry (e.g., 'POINT(2.3 48.9)' or 'POLYGON((...))'  - optional but enables spatial queries)";
+    nt:hasDatatype <http://www.opengis.net/ont/geosparql#wktLiteral>;
+    nt:hasRegex "[\\s\\S]{5,1500}" .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo orcid:0000-0002-1784-2920 .
+}
+
+sub:pubinfo {
+  orcid:0000-0002-1784-2920 foaf:name "Anne Fouilloux" .
+  
+  this: dct:created "2025-09-01T11:14:48.463Z"^^xsd:dateTime;
+    dct:creator orcid:0000-0002-1784-2920;
+    dct:license <https://creativecommons.org/licenses/by/4.0/>;
+    npx:supersedes <https://w3id.org/np/RA22xv0H-LaNAF60g8oC-O22_a24gLfAgIqtkkfaXr9-I>;
+    npx:wasCreatedAt <https://nanodash.knowledgepixels.com/>;
+    rdfs:label "Documenting geographical coverage of research based on textual evidence";
+    nt:wasCreatedFromProvenanceTemplate <https://w3id.org/np/RA7lSq6MuK_TIC6JMSHvLtee3lpLoZDOqLJCLXevnrPoU>;
+    nt:wasCreatedFromPubinfoTemplate <https://w3id.org/np/RA0J4vUn_dekg-U1kK3AOEt02p9mT2WO03uGxLDec1jLw>,
+      <https://w3id.org/np/RAoTD7udB2KtUuOuAe74tJi1t3VzK0DyWS7rYVAq1GRvw>, <https://w3id.org/np/RAukAcWHRDlkqxk7H2XNSegc1WnHI569INvNr-xdptDGI>;
+    nt:wasCreatedFromTemplate <https://w3id.org/np/RA1XuAdO6LOtlPJgWiytJHFuK4BFHjQK5x7d9FVymzFnc> .
+  
+  sub:sig npx:hasAlgorithm "RSA";
+    npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDWv2pJnmDsBOq8OlT1aSvYXSuWT34WOp4FYqEzdnn2F0kqzcFevBqWGZDxJWC0lqCrDEuNfp2QFyPe/+nES9dlHGYIhqPi68fwK6ZiNUotRFxXou+rjFznVvUxtCL8Ede79EBHwWN61QtwSIcU12bLoZsNPFlqQASQ93BJuKlihwIDAQAB";
+    npx:hasSignature "UbCfuCrYGHd8b/fm+6bEA0iXFbMBCCcb+kYUMXMdOutdWQw+Cfa5PA9vcDPYARxRW9fuxNboePCznjurEHbPcefZwNN1uecV6haCt9W/wQb+FVZJ6B0Eh/wodtBCiQjiuhxvHTfJF5+UAAnBF7Cz0amhK6n2k6GqPqSB63lhYM0=";
+    npx:hasSignatureTarget this:;
+    npx:signedBy orcid:0000-0002-1784-2920 .
+}
+

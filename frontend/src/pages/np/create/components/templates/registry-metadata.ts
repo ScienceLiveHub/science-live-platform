@@ -56,7 +56,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     description:
       "Documents the geographical area or region covered by a research paper's findings, data, or study scope.",
     moreDescription:
-      " Identify the spatial coverage (e.g., Europe, Canada, or a specific fgeographical area) and provide supporting quotations from the paper that led to this conclusion. The resulting nanopublication can work with GeoSPARQL queries for efficient spatial discovery of research.",
+      "Identify the spatial coverage (e.g. Europe, Canada, or a specific geographical area) and provide supporting quotations from the paper that led to this conclusion. The resulting nanopublication can work with GeoSPARQL queries for efficient spatial discovery of research.",
     category: "geographical coverage",
     icon: "📝",
     recommended: false,
