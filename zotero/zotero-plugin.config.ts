@@ -50,7 +50,7 @@ export default defineConfig({
         // This dialog script is loaded directly by the XUL/XHTML window, so ESM is fine.
         format: "esm",
         target: "firefox115",
-        outfile: `.scaffold/build/addon/content/scripts/dialogs/createNanopub/index.js`,
+        outdir: `.scaffold/build/addon/content/scripts/dialogs/createNanopub`,
         loader: {
           ".png": "file",
           ".svg": "file",
