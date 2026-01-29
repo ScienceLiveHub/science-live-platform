@@ -1,25 +1,30 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import {
   Map,
-  MapDrawCircle,
   MapDrawControl,
-  MapDrawDelete,
-  MapDrawEdit,
   MapDrawMarker,
   MapDrawPolygon,
   MapDrawPolyline,
   MapDrawRectangle,
-  MapDrawUndo,
   MapLocateControl,
   MapTileLayer,
   useLeaflet,
 } from "@/components/ui/map";
-import type { LatLng, LatLngExpression } from "leaflet";
-import { useState } from "react";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { geojsonToWKT, wktToGeoJSON } from "@terraformer/wkt";
+import type { FeatureGroup, LatLngExpression } from "leaflet";
+import { useEffect, useRef, useState } from "react";
 
 export type MapGeometryProps = {
+  /**
+   * The WKT string value.
+   */
+  value?: string;
   /**
    * Called whenever the drawn layers change.
    * - `undefined` when there are no shapes
@@ -28,140 +33,186 @@ export type MapGeometryProps = {
   onWktChange?: (wkt: string | undefined) => void;
 };
 
-function formatCoord(latlng: LatLng) {
-  // WKT expects X Y => lon lat
-  return `${latlng.lng} ${latlng.lat}`;
-}
-
-function closeRing(coords: string[]) {
-  if (coords.length === 0) return coords;
-  return coords[0] === coords[coords.length - 1]
-    ? coords
-    : [...coords, coords[0]];
-}
-
-function polylineLatLngsToCoords(latlngs: unknown): LatLng[] {
-  // Leaflet returns:
-  // - Polyline: LatLng[]
-  // - Polygon: LatLng[][] (or deeper)
-  // We only need the first ring/line for now.
-  if (Array.isArray(latlngs) && latlngs.length > 0) {
-    const first = latlngs[0] as unknown;
-    // If nested arrays, drill down until LatLng objects.
-    if (Array.isArray(first)) {
-      return polylineLatLngsToCoords(first);
-    }
-    return latlngs as LatLng[];
-  }
-  return [];
-}
-
-function circleToPolygonRing(
-  center: LatLng,
-  radiusMeters: number,
-  segments = 32,
-) {
-  // Approximate circle with a polygon ring (WKT has no native CIRCLE).
-  const R = 6378137; // Earth radius in meters (WGS84)
-  const lat1 = (center.lat * Math.PI) / 180;
-  const lon1 = (center.lng * Math.PI) / 180;
-  const angularDistance = radiusMeters / R;
-
-  const points: LatLng[] = [];
-  for (let i = 0; i < segments; i++) {
-    const bearing = (2 * Math.PI * i) / segments;
-    const lat2 = Math.asin(
-      Math.sin(lat1) * Math.cos(angularDistance) +
-        Math.cos(lat1) * Math.sin(angularDistance) * Math.cos(bearing),
-    );
-    const lon2 =
-      lon1 +
-      Math.atan2(
-        Math.sin(bearing) * Math.sin(angularDistance) * Math.cos(lat1),
-        Math.cos(angularDistance) - Math.sin(lat1) * Math.sin(lat2),
-      );
-
-    points.push({
-      lat: (lat2 * 180) / Math.PI,
-      lng: (lon2 * 180) / Math.PI,
-    } as LatLng);
-  }
-
-  const coords = closeRing(points.map(formatCoord));
-  return coords;
-}
-
-export function MapGeometrySelector({ onWktChange }: MapGeometryProps) {
-  // Arbitrary start coordinates of map.  Ideally it should be the current users position
+export function MapGeometrySelector({ value, onWktChange }: MapGeometryProps) {
+  // Arbitrary start coordinates of map. Ideally it should be the current users position
   const TORONTO_COORDINATES = [43.6532, -79.3832] satisfies LatLngExpression;
 
   const { L } = useLeaflet();
   const [numberOfShapes, setNumberOfShapes] = useState(0);
+  const [mode, setMode] = useState<"map" | "text">("map");
+  const [internalValue, setInternalValue] = useState<string | undefined>(
+    undefined,
+  );
 
-  return L ? (
-    <Map center={TORONTO_COORDINATES} zoom={3}>
-      <MapTileLayer />
-      <MapDrawControl
-        onLayersChange={(layers) => {
-          setNumberOfShapes(layers.getLayers().length);
+  const isControlled = value !== undefined;
+  const currentValue = isControlled ? value : internalValue;
 
-          const wkts: string[] = [];
-          layers.eachLayer((layer) => {
-            if (layer instanceof L.Marker) {
-              const p = layer.getLatLng();
-              wkts.push(`POINT(${formatCoord(p)})`);
-              return;
-            }
+  const featureGroupRef = useRef<FeatureGroup | null>(null);
+  const lastEmittedValue = useRef<string | undefined>(undefined);
 
-            if (layer instanceof L.Circle) {
-              const center = layer.getLatLng();
-              const ring = circleToPolygonRing(center, layer.getRadius());
-              wkts.push(`POLYGON((${ring.join(", ")}))`);
-              return;
-            }
+  const handleWktChange = (wkt: string | undefined) => {
+    if (!isControlled) {
+      setInternalValue(wkt);
+    }
+    onWktChange?.(wkt);
+  };
 
-            if (layer instanceof L.Rectangle || layer instanceof L.Polygon) {
-              const ringLatLngs = polylineLatLngsToCoords(layer.getLatLngs());
-              const ring = closeRing(ringLatLngs.map(formatCoord));
-              if (ring.length >= 4) {
-                wkts.push(`POLYGON((${ring.join(", ")}))`);
-              }
-              return;
-            }
+  const updateMapFromValue = (fg: FeatureGroup, val: string | undefined) => {
+    if (!L) return;
 
-            if (layer instanceof L.Polyline) {
-              const lineLatLngs = polylineLatLngsToCoords(layer.getLatLngs());
-              if (lineLatLngs.length >= 2) {
-                wkts.push(
-                  `LINESTRING(${lineLatLngs.map(formatCoord).join(", ")})`,
-                );
-              }
-              return;
-            }
-          });
+    // Recursive helper to add only leaf layers (not groups) to the feature group
+    // This ensures that we don't end up with nested FeatureGroups which cause
+    // problems when converting back to WKT (creating nested GeometryCollections).
+    const addNonGroupLayers = (sourceLayer: any) => {
+      if (sourceLayer instanceof L.LayerGroup) {
+        sourceLayer.eachLayer(addNonGroupLayers);
+      } else {
+        fg.addLayer(sourceLayer);
+      }
+    };
 
-          if (wkts.length === 0) {
-            onWktChange?.(undefined);
-          } else if (wkts.length === 1) {
-            onWktChange?.(wkts[0]);
-          } else {
-            onWktChange?.(`GEOMETRYCOLLECTION(${wkts.join(", ")})`);
-          }
-        }}
-      >
-        <MapDrawMarker />
-        <MapDrawPolyline />
-        <MapDrawCircle />
-        <MapDrawRectangle />
-        <MapDrawPolygon />
-        <MapDrawEdit />
-        <MapDrawDelete />
-        <MapDrawUndo />
-      </MapDrawControl>
-      <MapLocateControl className="absolute right-1 top-1 z-1000" />
-      <Badge className="absolute right-1 bottom-1 z-1000">
-        Shapes: {numberOfShapes}
-      </Badge>
-    </Map>
-  ) : null;
+    fg.clearLayers();
+    if (val) {
+      try {
+        const geojson = wktToGeoJSON(val);
+        const geojsonLayer = L.geoJSON(geojson);
+        addNonGroupLayers(geojsonLayer);
+      } catch (e) {
+        console.error("Failed to parse WKT", e);
+      }
+    }
+    setNumberOfShapes(fg.getLayers().length);
+  };
+
+  // Sync Value -> Map when value changes (and map is mounted)
+  useEffect(() => {
+    if (
+      featureGroupRef.current &&
+      L &&
+      mode === "map" &&
+      currentValue !== lastEmittedValue.current
+    ) {
+      updateMapFromValue(featureGroupRef.current, currentValue);
+      lastEmittedValue.current = currentValue;
+    }
+  }, [currentValue, L, mode]);
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-end space-x-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleWktChange(undefined)}
+          disabled={!currentValue}
+          type="button"
+        >
+          Clear
+        </Button>
+        <Label htmlFor="mode-toggle">Map Mode</Label>
+        <Switch
+          id="mode-toggle"
+          checked={mode === "map"}
+          onCheckedChange={(c) => setMode(c ? "map" : "text")}
+        />
+      </div>
+
+      {mode === "map" ? (
+        L ? (
+          <Map center={TORONTO_COORDINATES} zoom={3}>
+            <MapTileLayer />
+            <MapDrawControl
+              onFeatureGroupReady={(fg) => {
+                featureGroupRef.current = fg;
+                // Initialize map with current value on mount
+                updateMapFromValue(fg, currentValue);
+                lastEmittedValue.current = currentValue;
+              }}
+              onLayersChange={(fg) => {
+                const layers = fg.getLayers();
+                setNumberOfShapes(layers.length);
+
+                let newWkt: string | undefined;
+
+                if (layers.length === 0) {
+                  newWkt = undefined;
+                } else {
+                  try {
+                    // fg.toGeoJSON() returns a FeatureCollection
+                    const fc = fg.toGeoJSON() as any;
+
+                    // Helper to flatten geometries and handle nested GeometryCollections
+                    // that might have crept in or resulted from the structure.
+                    const extractGeometriesFromGeom = (geom: any): any[] => {
+                      if (!geom) return [];
+                      if (geom.type === "GeometryCollection") {
+                        return geom.geometries.flatMap(
+                          extractGeometriesFromGeom,
+                        );
+                      }
+                      return [geom];
+                    };
+
+                    const extractGeometries = (features: any[]): any[] => {
+                      return features.flatMap((f) => {
+                        if (!f.geometry) return [];
+                        if (f.geometry.type === "GeometryCollection") {
+                          return extractGeometriesFromGeom(f.geometry);
+                        }
+                        return [f.geometry];
+                      });
+                    };
+
+                    const geometries = extractGeometries(fc.features);
+
+                    if (geometries.length === 0) {
+                      newWkt = undefined;
+                    } else if (geometries.length === 1) {
+                      newWkt = geojsonToWKT(geometries[0]);
+                    } else {
+                      newWkt = geojsonToWKT({
+                        type: "GeometryCollection",
+                        geometries,
+                      });
+                    }
+                  } catch (e) {
+                    console.error("Failed to convert layers to WKT", e);
+                  }
+                }
+
+                if (newWkt !== lastEmittedValue.current) {
+                  lastEmittedValue.current = newWkt;
+                  handleWktChange(newWkt);
+                }
+              }}
+            >
+              <MapDrawMarker />
+              <MapDrawPolyline />
+              <MapDrawRectangle />
+              <MapDrawPolygon />
+              {/* <MapDrawEdit />
+              <MapDrawDelete />
+              <MapDrawUndo /> */}
+            </MapDrawControl>
+            <MapLocateControl className="absolute left-1 top-1 z-1000" />
+            <Badge className="absolute right-1 bottom-1 z-1000">
+              Shapes: {numberOfShapes}
+            </Badge>
+          </Map>
+        ) : null
+      ) : (
+        <Textarea
+          value={currentValue || ""}
+          onChange={(e) => {
+            const val = e.target.value || undefined;
+            // Update immediately for text area
+            lastEmittedValue.current = val;
+            handleWktChange(val);
+          }}
+          className="min-h-100 font-mono"
+          placeholder="Enter WKT geometry..."
+        />
+      )}
+    </div>
+  );
 }

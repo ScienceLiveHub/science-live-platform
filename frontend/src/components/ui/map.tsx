@@ -919,7 +919,7 @@ type MapDrawShape = "marker" | "polyline" | "circle" | "rectangle" | "polygon";
 type MapDrawAction = "edit" | "delete";
 type MapDrawMode = MapDrawShape | MapDrawAction | null;
 interface MapDrawContextType {
-  readonly featureGroup: L.FeatureGroup | null;
+  readonly featureGroup: FeatureGroup | null;
   activeMode: MapDrawMode;
   setActiveMode: (mode: MapDrawMode) => void;
   readonly editControlRef: React.RefObject<EditToolbar.Edit | null>;
@@ -936,13 +936,15 @@ function useMapDrawContext() {
 function MapDrawControl({
   className,
   onLayersChange,
+  onFeatureGroupReady,
   ...props
 }: React.ComponentProps<"div"> & {
-  onLayersChange?: (layers: L.FeatureGroup) => void;
+  onLayersChange?: (layers: FeatureGroup) => void;
+  onFeatureGroupReady?: (featureGroup: FeatureGroup) => void;
 }) {
   const { L, LeafletDraw } = useLeaflet();
   const map = useMap();
-  const featureGroupRef = useRef<L.FeatureGroup | null>(null);
+  const featureGroupRef = useRef<FeatureGroup | null>(null);
   const editControlRef = useRef<EditToolbar.Edit | null>(null);
   const deleteControlRef = useRef<EditToolbar.Delete | null>(null);
   const [activeMode, setActiveMode] = useState<MapDrawMode>(null);
@@ -1000,7 +1002,12 @@ function MapDrawControl({
         layersCount,
       }}
     >
-      <LeafletFeatureGroup ref={featureGroupRef} />
+      <LeafletFeatureGroup
+        ref={(node) => {
+          featureGroupRef.current = node;
+          if (node) onFeatureGroupReady?.(node);
+        }}
+      />
       <MapControlContainer className={cn("bottom-1 left-1", className)}>
         <ButtonGroup orientation="vertical" {...props} />
       </MapControlContainer>
@@ -1214,7 +1221,7 @@ function MapDrawActionButton<T extends EditToolbar.Edit | EditToolbar.Delete>({
   createDrawTool: (
     L: typeof import("leaflet"),
     map: DrawMap,
-    featureGroup: L.FeatureGroup,
+    featureGroup: FeatureGroup,
   ) => T;
   controlRef: React.RefObject<T | null>;
 }) {

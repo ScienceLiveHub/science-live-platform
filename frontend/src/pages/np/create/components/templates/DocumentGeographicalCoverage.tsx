@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { PlaceAutocomplete } from "@/components/ui/place-autocomplete";
 import { useFormedible } from "@/hooks/use-formedible";
 import { validDoi, validUriPlaceholder } from "@/lib/validation";
+import { wktToGeoJSON } from "@terraformer/wkt";
 import z from "zod";
 import { NanopubTemplateDefComponentProps } from "./component-registry";
 
@@ -22,7 +23,19 @@ export default function DocumentGeographicalCoverage({
     location: validUriPlaceholder, // Actually a local URI (introduced resource), so a suffix to current URI
     "location-label": z.string().nonempty(),
     geometry: validUriPlaceholder.optional(), // Actually a local URI (introduced resource), so a suffix to current URI
-    wkt: z.string().min(5).max(1500).optional(),
+    wkt: z
+      .string()
+      .max(1500)
+      .superRefine((wkt: string, ctx) => {
+        try {
+          if (wkt) {
+            wktToGeoJSON(wkt);
+          }
+        } catch (e) {
+          ctx.addIssue(e instanceof Error ? e.message : "Invalid WKT");
+        }
+      })
+      .optional(),
     bbox: z.string().min(5).max(1500).optional(),
     comment: z.string().min(5).max(1000),
   });
@@ -125,12 +138,27 @@ export default function DocumentGeographicalCoverage({
         // Component from https://shadcn-map.vercel.app/
         component: ({ fieldApi }) => (
           <>
-            <Label>Mark area geometry</Label>
+            <Label>Define area geometry</Label>
             <MapGeometrySelector
               onWktChange={(wkt) => {
                 fieldApi.setValue(wkt ?? "");
               }}
+              value={fieldApi.state.value}
             />
+            {fieldApi.state?.meta?.isTouched &&
+              fieldApi.state?.meta?.errors?.length > 0 && (
+                <div className="text-xs text-destructive pt-1">
+                  {fieldApi.state?.meta?.errors?.map(
+                    (err: string | Error, index: number) => (
+                      <p key={index}>
+                        {typeof err === "string"
+                          ? err
+                          : (err as Error)?.message || "Invalid"}
+                      </p>
+                    ),
+                  )}
+                </div>
+              )}
           </>
         ),
       },
