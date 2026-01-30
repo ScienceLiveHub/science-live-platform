@@ -19,8 +19,13 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { geojsonToWKT, wktToGeoJSON } from "@terraformer/wkt";
-import type { FeatureGroup, LatLngExpression } from "leaflet";
+import type {
+  FeatureGroup,
+  LatLngExpression,
+  Map as LeafletMapType,
+} from "leaflet";
 import { useEffect, useRef, useState } from "react";
+import { useMap } from "react-leaflet";
 
 export type MapGeometryProps = {
   /**
@@ -35,11 +40,24 @@ export type MapGeometryProps = {
   onWktChange?: (wkt: string | undefined) => void;
 };
 
+function MapInstanceCapturer({
+  setMap,
+}: {
+  setMap: (map: LeafletMapType) => void;
+}) {
+  const map = useMap();
+  useEffect(() => {
+    setMap(map);
+  }, [map, setMap]);
+  return null;
+}
+
 export function MapGeometrySelector({ value, onWktChange }: MapGeometryProps) {
   // Arbitrary start coordinates of map. Ideally it should be the current users position
   const TORONTO_COORDINATES = [43.6532, -79.3832] satisfies LatLngExpression;
 
   const { L } = useLeaflet();
+  const mapRef = useRef<LeafletMapType | null>(null);
   const [numberOfShapes, setNumberOfShapes] = useState(0);
   const [mode, setMode] = useState<"map" | "text">("map");
   const [internalValue, setInternalValue] = useState<string | undefined>(
@@ -79,6 +97,13 @@ export function MapGeometrySelector({ value, onWktChange }: MapGeometryProps) {
         const geojson = wktToGeoJSON(val);
         const geojsonLayer = L.geoJSON(geojson);
         addNonGroupLayers(geojsonLayer);
+
+        if (mapRef.current && fg.getLayers().length > 0) {
+          const bounds = fg.getBounds();
+          if (bounds.isValid()) {
+            mapRef.current.fitBounds(bounds, { padding: [20, 20] });
+          }
+        }
       } catch (e) {
         console.error("Failed to parse WKT", e);
       }
@@ -145,6 +170,11 @@ export function MapGeometrySelector({ value, onWktChange }: MapGeometryProps) {
       {mode === "map" ? (
         L ? (
           <Map center={TORONTO_COORDINATES} zoom={3}>
+            <MapInstanceCapturer
+              setMap={(map) => {
+                mapRef.current = map;
+              }}
+            />
             <MapTileLayer />
             <MapDrawControl
               onFeatureGroupReady={(fg) => {
