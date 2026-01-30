@@ -1392,13 +1392,8 @@ function MapDrawUndo({ className, ...props }: React.ComponentProps<"button">) {
   if (!drawContext)
     throw new Error("MapDrawUndo must be used within MapDrawControl");
 
-  const {
-    activeMode,
-    setActiveMode,
-    editControlRef,
-    deleteControlRef,
-    layersCount,
-  } = drawContext;
+  const { activeMode, setActiveMode, editControlRef, deleteControlRef } =
+    drawContext;
   const isInEditMode = activeMode === "edit";
   const isInDeleteMode = activeMode === "delete";
   const isActive = isInEditMode || isInDeleteMode;
