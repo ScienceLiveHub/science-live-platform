@@ -2,7 +2,6 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import {
   Map,
   MapDrawControl,
@@ -17,8 +16,8 @@ import {
   MapTileLayer,
   useLeaflet,
 } from "@/components/ui/map";
-import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { geojsonToWKT, wktToGeoJSON } from "@terraformer/wkt";
 import type { FeatureGroup, LatLngExpression } from "leaflet";
 import { useEffect, useRef, useState } from "react";
@@ -101,25 +100,48 @@ export function MapGeometrySelector({ value, onWktChange }: MapGeometryProps) {
   }, [currentValue, L, mode]);
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-end space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handleWktChange(undefined)}
-          disabled={!currentValue}
-          type="button"
-        >
-          Clear
-        </Button>
-        <Label htmlFor="mode-toggle">Map Mode</Label>
-        <Switch
-          id="mode-toggle"
-          checked={mode === "map"}
-          onCheckedChange={(c) => setMode(c ? "map" : "text")}
-        />
+    <div className="space-y-2 w-full">
+      <div className="flex">
+        <div className="flex w-full items-center justify-start space-x-2">
+          {mode === "text" && (
+            <span className="text-sm text-muted-foreground">
+              Enter{" "}
+              <a
+                href="https://mapscaping.com/a-guide-to-wkt-in-gis/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400"
+              >
+                WKT geometry
+              </a>
+            </span>
+          )}
+        </div>
+        <div className="flex items-center justify-end space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleWktChange(undefined)}
+            disabled={!currentValue}
+            type="button"
+          >
+            Clear
+          </Button>
+          <ToggleGroup
+            variant="outline"
+            type="single"
+            defaultValue="map"
+            onValueChange={(c) => setMode(c as "map" | "text")}
+          >
+            <ToggleGroupItem value="map" aria-label="Show Map">
+              Map
+            </ToggleGroupItem>
+            <ToggleGroupItem value="text" aria-label="Show Text">
+              Text
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
       </div>
-
       {mode === "map" ? (
         L ? (
           <Map center={TORONTO_COORDINATES} zoom={3}>
@@ -213,7 +235,7 @@ export function MapGeometrySelector({ value, onWktChange }: MapGeometryProps) {
             handleWktChange(val);
           }}
           className="min-h-100 font-mono"
-          placeholder="Enter WKT geometry..."
+          placeholder="e.g POLYGON ((-116.1 33.4, ...))"
         />
       )}
     </div>

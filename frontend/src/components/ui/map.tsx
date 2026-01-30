@@ -1041,6 +1041,11 @@ function MapDrawControl({
       <MapControlContainer className={cn("bottom-1 left-1", className)}>
         <ButtonGroup orientation="vertical" {...props} />
       </MapControlContainer>
+      {(activeMode === "edit" || activeMode === "delete") && (
+        <div className="absolute bottom-4 left-12 z-1000 rounded-md border bg-popover px-3 py-1.5 text-xs font-medium text-popover-foreground shadow-md animate-in fade-in-0 slide-in-from-left-1">
+          Press {activeMode} button again to save changes
+        </div>
+      )}
     </MapDrawContext.Provider>
   );
 }
@@ -1292,7 +1297,7 @@ function MapDrawActionButton<T extends EditToolbar.Edit | EditToolbar.Delete>({
       aria-label={`${drawAction === "edit" ? "Edit" : "Remove"} shapes`}
       title={`${drawAction === "edit" ? "Edit" : "Remove"} shapes`}
       variant={isActive ? "default" : "secondary"}
-      disabled={!hasFeatures}
+      disabled={!isActive && !hasFeatures}
       onClick={handleClick}
       className={cn("border", className)}
       {...props}
@@ -1396,7 +1401,7 @@ function MapDrawUndo({ className, ...props }: React.ComponentProps<"button">) {
   } = drawContext;
   const isInEditMode = activeMode === "edit";
   const isInDeleteMode = activeMode === "delete";
-  const isActive = (isInEditMode || isInDeleteMode) && layersCount > 0;
+  const isActive = isInEditMode || isInDeleteMode;
 
   function handleUndo() {
     if (isInEditMode) {
