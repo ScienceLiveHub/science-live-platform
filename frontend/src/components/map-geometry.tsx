@@ -6,10 +6,13 @@ import { Label } from "@/components/ui/label";
 import {
   Map,
   MapDrawControl,
+  MapDrawDelete,
+  MapDrawEdit,
   MapDrawMarker,
   MapDrawPolygon,
   MapDrawPolyline,
   MapDrawRectangle,
+  MapDrawUndo,
   MapLocateControl,
   MapTileLayer,
   useLeaflet,
@@ -190,9 +193,9 @@ export function MapGeometrySelector({ value, onWktChange }: MapGeometryProps) {
               <MapDrawPolyline />
               <MapDrawRectangle />
               <MapDrawPolygon />
-              {/* <MapDrawEdit />
+              <MapDrawEdit />
               <MapDrawDelete />
-              <MapDrawUndo /> */}
+              <MapDrawUndo />
             </MapDrawControl>
             <MapLocateControl className="absolute left-1 top-1 z-1000" />
             <Badge className="absolute right-1 bottom-1 z-1000">

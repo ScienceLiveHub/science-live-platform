@@ -69,6 +69,7 @@ import React, {
   Suspense,
   createContext,
   lazy,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -945,10 +946,12 @@ function MapDrawControl({
   const { L, LeafletDraw } = useLeaflet();
   const map = useMap();
   const featureGroupRef = useRef<FeatureGroup | null>(null);
+  const initializedFeatureGroupRef = useRef<FeatureGroup | null>(null);
   const editControlRef = useRef<EditToolbar.Edit | null>(null);
   const deleteControlRef = useRef<EditToolbar.Delete | null>(null);
   const [activeMode, setActiveMode] = useState<MapDrawMode>(null);
   const [layersCount, setLayersCount] = useState(0);
+  const [featureGroup, setFeatureGroup] = useState<FeatureGroup | null>(null);
 
   function updateLayersCount() {
     if (featureGroupRef.current) {
@@ -971,6 +974,38 @@ function MapDrawControl({
     updateLayersCount();
     setActiveMode(null);
   }
+
+  const handleFeatureGroupRef = useCallback(
+    (node: FeatureGroup | null) => {
+      featureGroupRef.current = node;
+      setFeatureGroup(node);
+      if (node && node !== initializedFeatureGroupRef.current) {
+        initializedFeatureGroupRef.current = node;
+        onFeatureGroupReady?.(node);
+      }
+    },
+    [onFeatureGroupReady],
+  );
+
+  // Sync layers count with feature group events (e.g. when layers are added programmatically)
+  useEffect(() => {
+    if (!featureGroup) return;
+
+    const updateCount = () => {
+      setLayersCount(featureGroup.getLayers().length);
+    };
+
+    // Update immediately
+    updateCount();
+
+    featureGroup.on("layeradd", updateCount);
+    featureGroup.on("layerremove", updateCount);
+
+    return () => {
+      featureGroup.off("layeradd", updateCount);
+      featureGroup.off("layerremove", updateCount);
+    };
+  }, [featureGroup]);
 
   useEffect(() => {
     if (!L || !LeafletDraw || !map) return;
@@ -1002,12 +1037,7 @@ function MapDrawControl({
         layersCount,
       }}
     >
-      <LeafletFeatureGroup
-        ref={(node) => {
-          featureGroupRef.current = node;
-          if (node) onFeatureGroupReady?.(node);
-        }}
-      />
+      <LeafletFeatureGroup ref={handleFeatureGroupRef} />
       <MapControlContainer className={cn("bottom-1 left-1", className)}>
         <ButtonGroup orientation="vertical" {...props} />
       </MapControlContainer>
@@ -1334,13 +1364,18 @@ function MapDrawDelete() {
     throw new Error("MapDrawDelete must be used within MapDrawControl");
   }
 
+  const createDrawTool = useCallback(
+    (L: typeof import("leaflet"), map: DrawMap, featureGroup: FeatureGroup) => {
+      return new L.EditToolbar.Delete(map, { featureGroup });
+    },
+    [],
+  );
+
   return (
     <MapDrawActionButton
       drawAction="delete"
       controlRef={drawContext.deleteControlRef}
-      createDrawTool={(L, map, featureGroup) =>
-        new L.EditToolbar.Delete(map, { featureGroup })
-      }
+      createDrawTool={createDrawTool}
     >
       <Trash2Icon />
     </MapDrawActionButton>

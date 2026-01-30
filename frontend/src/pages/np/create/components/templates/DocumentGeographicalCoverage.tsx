@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { PlaceAutocomplete } from "@/components/ui/place-autocomplete";
 import { useFormedible } from "@/hooks/use-formedible";
 import { validDoi, validUriPlaceholder } from "@/lib/validation";
-import { wktToGeoJSON } from "@terraformer/wkt";
+import { geojsonToWKT, wktToGeoJSON } from "@terraformer/wkt";
 import z from "zod";
 import { NanopubTemplateDefComponentProps } from "./component-registry";
 
@@ -88,15 +88,69 @@ export default function DocumentGeographicalCoverage({
             <div>
               <PlaceAutocomplete
                 onPlaceSelect={(feature) => {
-                  fieldApi.form.setFieldValue(
-                    "location",
-                    feature.properties.osm_value,
-                  );
-                  fieldApi.form.setFieldValue(
-                    "location-label",
-                    feature.properties.name,
-                  );
-                  // TODO: ideally this should also set the geometry WKT and/or show on the map.
+                  if (!fieldApi.form.getFieldValue("location")?.length) {
+                    fieldApi.form.setFieldValue(
+                      "location",
+                      feature.properties.osm_value,
+                    );
+                  }
+                  if (!fieldApi.form.getFieldValue("location-label")?.length) {
+                    fieldApi.form.setFieldValue(
+                      "location-label",
+                      feature.properties.name,
+                    );
+                  }
+                  // Prefer extent (Polygon) over geometry (Point) for coverage
+                  let newGeoJSON = null;
+
+                  if (feature.properties.extent) {
+                    const [minLon, minLat, maxLon, maxLat] =
+                      feature.properties.extent;
+                    newGeoJSON = {
+                      type: "Polygon",
+                      coordinates: [
+                        [
+                          [minLon, minLat],
+                          [maxLon, minLat],
+                          [maxLon, maxLat],
+                          [minLon, maxLat],
+                          [minLon, minLat],
+                        ],
+                      ],
+                    };
+                  } else if (feature.geometry) {
+                    newGeoJSON = feature.geometry;
+                  }
+
+                  if (newGeoJSON) {
+                    try {
+                      const currentWkt = fieldApi.form.getFieldValue("wkt");
+                      if (currentWkt) {
+                        const existingGeoJSON = wktToGeoJSON(currentWkt);
+                        let finalGeoJSON;
+
+                        if (existingGeoJSON.type === "GeometryCollection") {
+                          // @ts-expect-error - GeoJSON types mismatch
+                          existingGeoJSON.geometries.push(newGeoJSON);
+                          finalGeoJSON = existingGeoJSON;
+                        } else {
+                          finalGeoJSON = {
+                            type: "GeometryCollection",
+                            geometries: [existingGeoJSON, newGeoJSON],
+                          };
+                        }
+                        // @ts-expect-error - GeoJSON types mismatch
+                        const wkt = geojsonToWKT(finalGeoJSON);
+                        fieldApi.form.setFieldValue("wkt", wkt);
+                      } else {
+                        // @ts-expect-error - GeoJSON types mismatch
+                        const wkt = geojsonToWKT(newGeoJSON);
+                        fieldApi.form.setFieldValue("wkt", wkt);
+                      }
+                    } catch (e) {
+                      console.error("Failed to update WKT", e);
+                    }
+                  }
                 }}
               />
             </div>
@@ -193,6 +247,7 @@ export default function DocumentGeographicalCoverage({
         location: "",
         "location-label": "",
         comment: "",
+        geometry: "coverage",
         ...prefilledData,
       },
       onSubmit: async ({ value }) => {
