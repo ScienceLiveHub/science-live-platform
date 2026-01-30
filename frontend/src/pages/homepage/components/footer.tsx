@@ -11,13 +11,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Logo } from "@/components/ui/shadcn-io/navbar-01";
+import { GitHubIcon, LinkedInIcon } from "@daveyplate/better-auth-ui";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Github, Linkedin, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const newsletterSchema = z.object({
-  email: z.string().email({
+  email: z.email({
     message: "Please enter a valid email address.",
   }),
 });
@@ -39,12 +40,12 @@ const socialLinks = [
   {
     name: "GitHub",
     href: "https://github.com/ScienceLiveHub",
-    icon: Github,
+    icon: GitHubIcon,
   },
   {
     name: "LinkedIn",
     href: "https://www.linkedin.com/company/sciencelive",
-    icon: Linkedin,
+    icon: LinkedInIcon,
   },
   {
     name: "Email",
@@ -133,7 +134,7 @@ export function LandingFooter() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <social.icon className="h-4 w-4" />
+                    <social.icon className="h-4 w-4 saturate-0" />
                   </a>
                 </Button>
               ))}

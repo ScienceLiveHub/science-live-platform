@@ -10,16 +10,6 @@ import {
 } from "./registry-metadata";
 
 /**
- * Validation regex helpers
- */
-export const validLength = (min: number, max: number) =>
-  new RegExp(`^[\\s\\S]{${min},${max}}$`);
-
-export const validDoi = new RegExp(
-  /^(?:10\.1002\/[^\s]+|10\.\d{4,9}\/[-._;()\/:A-Z0-9]+)$/i,
-);
-
-/**
  * Definition for a pre-defined popular template
  * Note: NanopubTemplateDefComponentProps is imported from component-registry
  */

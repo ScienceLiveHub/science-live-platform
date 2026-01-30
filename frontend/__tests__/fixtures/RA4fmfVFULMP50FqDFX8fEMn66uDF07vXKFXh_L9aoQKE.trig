@@ -1,0 +1,113 @@
+@prefix this: <https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE> .
+@prefix sub: <https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE#> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix nt: <https://w3id.org/np/o/ntemplate/> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix orcid: <https://orcid.org/> .
+@prefix ns1: <http://purl.org/np/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+sub:Head {
+  this: a np:Nanopublication;
+    np:hasAssertion sub:assertion;
+    np:hasProvenance sub:provenance;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+  <http://purl.org/petapico/o/hycl#AIDA-Sentence> rdfs:label "AIDA sentence - an English sentence that is Atomic, Independent, Declarative, and Absolute" .
+  
+  <http://purl.org/spar/cito/obtainsSupportFrom> rdfs:label "is supported by" .
+  
+  <http://schema.org/about> rdfs:label "is about - connects a thing (left) to a subject matter that this thing is about (right)" .
+  
+  rdf:type rdfs:label "is an - connects a thing (left) to a class it belongs to (right)" .
+  
+  <http://www.w3.org/2004/02/skos/core#related> rdfs:label "is related to" .
+  
+  sub:aida a nt:AutoEscapeUriPlaceholder, nt:IntroducedResource;
+    rdfs:label "Type your AIDA sentence here (ending with a full stop)";
+    nt:hasPrefix "http://purl.org/aida/";
+    nt:hasPrefixLabel "The sentence";
+    nt:hasRegex "[\\S ]{5,500}\\." .
+  
+  sub:assertion a nt:AssertionTemplate;
+    dct:description """<p>Such nanopublications use the concept of an AIDA sentence to express a (scientific) statement in an informal or semi-formal manner, which can be formally linked.</p>
+
+<p>AIDA sentences are:<p>
+
+<ul>
+<li><strong>Atomic:</strong> a sentence describing one thought that cannot be further broken down in a practical way</li>
+<li><strong>Independent:</strong> a sentence that can stand on its own, without external references like \"this effect\" or \"we\"</li>
+<li><strong>Declarative:</strong> a complete sentence ending with a full stop that could in theory be either true or false</li>
+<li><strong>Absolute:</strong> a sentence describing the core of a claim ignoring the (un)certainty about its truth and ignoring how it was discovered (no \"probably\" or \"evaluation showed that\"); typically in present tense</li>
+</ul>
+
+<p>You can find more information about AIDA sentences <a href=\"https://github.com/tkuhn/aida\" target=\"_blank\">here</a>.</p>""";
+    rdfs:label "Expressing a statement about research as an AIDA sentence";
+    nt:hasNanopubLabelPattern "AIDA sentence: ${aida}";
+    nt:hasStatement sub:st0, sub:st1, sub:st2, sub:st3;
+    nt:hasTag "Claims";
+    nt:hasTargetNanopubType <http://purl.org/petapico/o/hycl#AIDA-Sentence>, <http://purl.org/petapico/o/hycl> .
+  
+  sub:dataset a nt:UriPlaceholder;
+    rdfs:label "URI of nanopublication for related dataset" .
+  
+  sub:project a nt:GuidedChoicePlaceholder;
+    rdfs:label "URI of nanopublication for related research project";
+    nt:possibleValuesFromApi "https://w3id.org/np/l/nanopub-query-1.1/api/RAz6f1v82BCG0SjYMfHUe-m927VTVKdwvsuq1X7j1qcA8/find-things?type=https://schema.org/ResearchProject" .
+  
+  sub:st0 rdf:object <http://purl.org/petapico/o/hycl#AIDA-Sentence>;
+    rdf:predicate rdf:type;
+    rdf:subject sub:aida .
+  
+  sub:st1 a nt:OptionalStatement, nt:RepeatableStatement;
+    rdf:object sub:topic;
+    rdf:predicate <http://schema.org/about>;
+    rdf:subject sub:aida .
+  
+  sub:st2 rdf:object sub:project;
+    rdf:predicate <http://www.w3.org/2004/02/skos/core#related>;
+    rdf:subject sub:aida .
+  
+  sub:st3 a nt:OptionalStatement;
+    rdf:object sub:dataset;
+    rdf:predicate <http://purl.org/spar/cito/obtainsSupportFrom>;
+    rdf:subject sub:aida .
+  
+  sub:topic a nt:GuidedChoicePlaceholder;
+    rdfs:label "URI of concept or topic the sentence is about";
+    nt:possibleValuesFromApi "http://purl.org/nanopub/api/find_signed_things?type=http%3A%2F%2Fwww.w3.org%2F2002%2F07%2Fowl%23Class&searchterm=",
+      "https://www.wikidata.org/w/api.php?action=wbsearchentities&language=en&format=json&limit=5&search=" .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo orcid:0000-0002-4930-2662 .
+}
+
+sub:pubinfo {
+  orcid:0000-0002-4930-2662 foaf:name "Alessa An Gambardella" .
+  
+  sub:sig npx:hasAlgorithm "RSA";
+    npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCEJGVv2xFV8o+Ojt3f0N2LgtZTt4+24Lxp8esEZiFYKryDGBYaR0Ef4ajadqtlSpvUHlwNlVIF7XRWiGd64P8drVnqPtpRtxJ+SOl0UNvxuHzUjeWlOYKpKZ/UgrGwVSSR3LvwqXOM9qUkWqy0IQ2KsFbJHHwzgNbcEZuZOD+/WQIDAQAB";
+    npx:hasSignature "Im4MJqfUwMPj57n1jPAOcGIZUnhnfjbK8lO/khLyu9oWeMLnWagQof0JpWQWBO4dkJNH03CBPtfV6UzkQ4Ze8MKI1Y7oeqYLeDzOE5/X1QznySE/NXRI4k23+d9MAkXhdnYA5Hh/f4vWMpR1ZL8ZJyY29zLGRBgZdFmQw6+gxN8=";
+    npx:hasSignatureTarget this:;
+    npx:signedBy orcid:0000-0002-4930-2662 .
+  
+  this: dct:created "2024-12-19T13:06:55.214Z"^^xsd:dateTime;
+    dct:creator orcid:0000-0002-4930-2662;
+    dct:license <https://creativecommons.org/licenses/by/4.0/>;
+    npx:supersedes <https://w3id.org/np/RAxskUGnMfP3d5her78bARJyqfQ-19zutfRe0WgEw1ym8>;
+    npx:wasCreatedAt <https://nanodash.knowledgepixels.com/>;
+    rdfs:label "Template: Expressing a statement about research as an AIDA sentence";
+    nt:wasCreatedFromProvenanceTemplate ns1:RANwQa4ICWS5SOjw7gp99nBpXBasapwtZF1fIM3H2gYTM;
+    nt:wasCreatedFromPubinfoTemplate <https://w3id.org/np/RA0J4vUn_dekg-U1kK3AOEt02p9mT2WO03uGxLDec1jLw>,
+      <https://w3id.org/np/RAoTD7udB2KtUuOuAe74tJi1t3VzK0DyWS7rYVAq1GRvw>, <https://w3id.org/np/RAukAcWHRDlkqxk7H2XNSegc1WnHI569INvNr-xdptDGI>;
+    nt:wasCreatedFromTemplate <https://w3id.org/np/RAGBEisKAxwcQTdfR7ALwCeQBrUVeU23F8uFvFmO-H6F0> .
+}
+

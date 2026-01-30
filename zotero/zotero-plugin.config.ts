@@ -37,6 +37,11 @@ export default defineConfig({
         platform: "browser",
         target: "firefox115",
         outfile: `.scaffold/build/addon/content/scripts/${pkg.config.addonRef}.js`,
+        // Add loader configuration for image files (e.g. used in css `background-image: url(images/bg.png);`)
+        loader: {
+          ".png": "file",
+          ".svg": "file",
+        },
       },
       {
         entryPoints: ["src/dialogs/createNanopub/index.tsx"],
@@ -45,7 +50,11 @@ export default defineConfig({
         // This dialog script is loaded directly by the XUL/XHTML window, so ESM is fine.
         format: "esm",
         target: "firefox115",
-        outfile: `.scaffold/build/addon/content/scripts/dialogs/createNanopub/index.js`,
+        outdir: `.scaffold/build/addon/content/scripts/dialogs/createNanopub`,
+        loader: {
+          ".png": "file",
+          ".svg": "file",
+        },
       },
     ],
   },

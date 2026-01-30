@@ -5,6 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
   Command,
   CommandEmpty,
   CommandGroup,
@@ -20,12 +25,19 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
+import { NanopubStore } from "@/lib/nanopub-store";
 import { NanopubTemplate } from "@/lib/nanopub-template";
 import { publishRdf } from "@/lib/rdf";
-import { ChevronsUpDown, FilePlus } from "lucide-react";
-import { useState } from "react";
+import {
+  ChevronDown,
+  ChevronRight,
+  ChevronsUpDown,
+  FilePlus,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import AnyStatementTemplate from "./AnyStatementTemplate";
+import { NanopubViewer } from "./NanopubViewer";
 import { POPULAR_TEMPLATES } from "./templates/registry";
 
 export interface NanopubEditorProps {
@@ -149,12 +161,29 @@ export default function NanopubEditor({
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [publishComplete, setPublishComplete] = useState(false);
   const [publishedUri, setPublishedUri] = useState<string | null>(null);
+  const [previewStore, setPreviewStore] = useState<NanopubStore | null>(null);
+  const [isRawOpen, setIsRawOpen] = useState(false);
 
   // Derived state to determine if we are using a predefined template
   const isPredefined = templateUri && POPULAR_TEMPLATES[templateUri];
   const TemplateComp = isPredefined
     ? POPULAR_TEMPLATES[templateUri]?.component
     : undefined;
+
+  useEffect(() => {
+    if (generatedRdf) {
+      NanopubStore.loadString(generatedRdf)
+        .then((store) => {
+          setPreviewStore(store);
+        })
+        .catch((err) => {
+          console.error("Failed to parse generated RDF for preview", err);
+          setPreviewStore(null);
+        });
+    } else {
+      setPreviewStore(null);
+    }
+  }, [generatedRdf]);
 
   const handleLoadCustomTemplate = () => {
     const uri = inputUri?.trim();
@@ -178,7 +207,7 @@ export default function NanopubEditor({
     // Generate/Sign
     try {
       const template = await NanopubTemplate.load(templateUri!);
-      const signed = await template.applyTemplate(
+      const signed = await template.generateNanopublication(
         data,
         {
           orcid: identity.orcid,
@@ -274,6 +303,9 @@ export default function NanopubEditor({
                   <div className="my-6">
                     {POPULAR_TEMPLATES[templateUri].description}
                   </div>
+                  <div className="my-8 text-muted-foreground">
+                    {POPULAR_TEMPLATES[templateUri].moreDescription}
+                  </div>
                   <TemplateComp
                     publish={publishNanopub}
                     prefilledData={prefilledData}
@@ -337,15 +369,50 @@ export default function NanopubEditor({
 
       {/* Generated RDF display */}
       {generatedRdf && (
-        <div className="mt-8">
-          <h3 className="text-lg font-semibold mb-4">
-            Nanopublication (TRIG format)
-          </h3>
-          <div className="bg-muted rounded-lg p-4">
-            <pre className="text-sm whitespace-pre-wrap overflow-x-auto max-h-96 overflow-y-auto">
-              <code>{generatedRdf}</code>
-            </pre>
-          </div>
+        <div className="mt-8 space-y-6">
+          <h3 className="text-lg font-semibold">Preview Nanopublication</h3>
+
+          {previewStore ? (
+            <NanopubViewer
+              store={previewStore}
+              showShareMenu={false}
+              showCitation={false}
+            />
+          ) : (
+            <div className="text-muted-foreground p-4 text-center">
+              Generating preview...
+            </div>
+          )}
+
+          <Collapsible
+            open={isRawOpen}
+            onOpenChange={setIsRawOpen}
+            className="border rounded-lg"
+          >
+            <div className="flex items-center justify-between p-4">
+              <h3 className="text-sm font-semibold flex items-center gap-2">
+                Raw TriG Output
+              </h3>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="w-9 p-0">
+                  {isRawOpen ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                  <span className="sr-only">Toggle Raw Output</span>
+                </Button>
+              </CollapsibleTrigger>
+            </div>
+            <CollapsibleContent className="p-4 pt-0">
+              <div className="bg-muted rounded-lg p-4">
+                <pre className="text-sm whitespace-pre-wrap overflow-x-auto max-h-96 overflow-y-auto">
+                  <code>{generatedRdf}</code>
+                </pre>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
           <div className="mt-4 flex flex-col items-end gap-3">
             <div className="flex items-center gap-2">
               <Checkbox

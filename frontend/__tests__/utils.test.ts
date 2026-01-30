@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { getUriEnd, getUriFragment, isNanopubUri } from "../src/lib/uri";
+import {
+  getNanopubHash,
+  getUriEnd,
+  getUriFragment,
+  isNanopubUri,
+} from "../src/lib/uri";
 
 describe("isNanopubUri", () => {
   it("should return true for valid nanopub URI with 45-character hash", () => {
@@ -33,10 +38,10 @@ describe("isNanopubUri", () => {
     expect(isNanopubUri(invalidCharsUri)).toBe(false);
   });
 
-  it("should return false for URI without /np/R pattern", () => {
+  it("should return true even for URI without /np/ pattern", () => {
     const noPatternUri =
       "https://w3id.org/somethingelse/RABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr";
-    expect(isNanopubUri(noPatternUri)).toBe(false);
+    expect(isNanopubUri(noPatternUri)).toBe(true);
   });
 
   it("should return false for URI with /np/r (lowercase)", () => {
@@ -45,25 +50,25 @@ describe("isNanopubUri", () => {
     expect(isNanopubUri(lowercaseUri)).toBe(false);
   });
 
-  it("should return false for URI with /NP/R (uppercase NP)", () => {
+  it("should return true for URI with /NP/R (uppercase NP)", () => {
     const uppercaseNP =
-      "https://w3id.org/NP/RABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr";
-    expect(isNanopubUri(uppercaseNP)).toBe(false);
+      "https://w3id.org/NP/FABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr";
+    expect(isNanopubUri(uppercaseNP)).toBe(true);
   });
 
   it("should return false for empty string", () => {
     expect(isNanopubUri("")).toBe(false);
   });
 
-  it("should return false for URI with only /np/R and no hash", () => {
-    const noHashUri = "https://w3id.org/np/R";
+  it("should return false for URI with only /np/RA and no hash", () => {
+    const noHashUri = "https://w3id.org/np/RA";
     expect(isNanopubUri(noHashUri)).toBe(false);
   });
 
-  it("should return false for URI where /np/R appears multiple times", () => {
+  it("should return false for URI where /np/ appears multiple times", () => {
     // This tests the search behavior - it should find the first occurrence
     const multiplePatternUri =
-      "https://w3id.org/np/R1234567890abcdefghijklmnopqrstuvwxyzABCDE/np/Ranother";
+      "https://w3id.org/np/RA1234567890abcdefghijklmnopqrstuvwxyzABCD/np/Ranother";
     expect(isNanopubUri(multiplePatternUri)).toBe(false);
   });
 
@@ -75,13 +80,13 @@ describe("isNanopubUri", () => {
 
   it("should return true for URI with hash containing only numbers", () => {
     const numbersOnlyUri =
-      "https://w3id.org/np/R12345678901234567890123456789012345678901234";
+      "https://w3id.org/np/RB1234567890123456789012345678901234567890123";
     expect(isNanopubUri(numbersOnlyUri)).toBe(true);
   });
 
   it("should return true for URI with hash containing underscores", () => {
     const withUnderscoresUri =
-      "https://w3id.org/np/R_ABC_DEF_GHI_JKL_MNO_PQR_STU_VWX_YZ0_123_456";
+      "https://w3id.org/np/RB_ABC_DEF_GHI_JKL_MNO_PQR_STU_VWX_YZ0_123_45";
     expect(isNanopubUri(withUnderscoresUri)).toBe(true);
   });
 
@@ -94,39 +99,88 @@ describe("isNanopubUri", () => {
 
   it("should return false for URI with hash containing spaces", () => {
     const withSpacesUri =
-      "https://w3id.org/np/R ABC DEF GHI JKL MNO PQR STU VWX YZ 123 4567";
+      "https://w3id.org/np/RA ABC DEF GHI JKL MNO PQR STU VWX YZ 123 456";
     expect(isNanopubUri(withSpacesUri)).toBe(false);
   });
 
   it("should return true for URI with hash containing hyphens", () => {
     const withHyphensUri =
-      "https://w3id.org/np/R-ABC-DEF-GHI-JKL-MNO-PQR-STU-VWX-YZ0-123-456";
+      "https://w3id.org/np/RA-ABC-DEF-GHI-JKL-MNO-PQR-STU-VWX-YZ0-123-45";
     expect(isNanopubUri(withHyphensUri)).toBe(true);
   });
 
   it("should return false for URI with hash containing dots", () => {
     const withDotsUri =
-      "https://w3id.org/np/R.ABC.DEF.GHI.JKL.MNO.PQR.STU.VWX.YZ0.123.456";
+      "https://w3id.org/np/RA.ABC.DEF.GHI.JKL.MNO.PQR.STU.VWX.YZ0.123.45";
     expect(isNanopubUri(withDotsUri)).toBe(false);
   });
 
   it("should handle edge case with undefined/invalid input", () => {
-    // Test with undefined-like input
     expect(isNanopubUri(undefined as any)).toBe(false);
     expect(isNanopubUri(null as any)).toBe(false);
+    expect(isNanopubUri({} as any)).toBe(false);
+    expect(isNanopubUri("")).toBe(false);
   });
 
   it("should return true for minimal valid case with exactly 45 characters", () => {
     // Create exactly 45 valid characters
-    const exactly44Chars = "A".repeat(44);
-    const minimalValidUri = `https://w3id.org/np/R${exactly44Chars}`;
+    const exactly43Chars = "Z".repeat(43);
+    const minimalValidUri = `https://w3id.org/np/RA${exactly43Chars}`;
     expect(isNanopubUri(minimalValidUri)).toBe(true);
   });
 
   it("should return false for exactly 46 characters (one too many)", () => {
-    const exactly46Chars = "A".repeat(46);
-    const tooLongUri = `https://w3id.org/np/R${exactly46Chars}`;
+    const exactly44Chars = "Z".repeat(44);
+    const tooLongUri = `https://w3id.org/np/RA${exactly44Chars}`;
     expect(isNanopubUri(tooLongUri)).toBe(false);
+  });
+});
+
+describe("getNanopubHash", () => {
+  // 43 chars
+  const hash = "abcdefghijklmno-qrstuvwxyzABCDEFGHIJKLMN_12";
+
+  it("should extract valid RA hash", () => {
+    const uri = `https://w3id.org/np/RA${hash}`;
+    expect(getNanopubHash(uri)).toBe(hash);
+  });
+
+  it("should extract valid RB hash", () => {
+    const uri = `https://w3id.org/np/RB${hash}`;
+    expect(getNanopubHash(uri)).toBe(hash);
+  });
+
+  it("should extract valid FA hash", () => {
+    const uri = `https://w3id.org/np/FA${hash}`;
+    expect(getNanopubHash(uri)).toBe(hash);
+  });
+
+  it("should work for other domain/urls", () => {
+    const uri = `https://example.com/RA${hash}`;
+    expect(getNanopubHash(uri)).toBe(hash);
+  });
+
+  it("should return undefined if url is suffixed", () => {
+    const uri1 = `https://w3id.org/np/FA${hash}/abc`;
+    expect(getNanopubHash(uri1)).toBeUndefined();
+    const uri2 = `https://w3id.org/np/FA${hash}#abc`;
+    expect(getNanopubHash(uri2)).toBeUndefined();
+    const uri3 = `https://w3id.org/np/FA${hash}/`;
+    expect(getNanopubHash(uri3)).toBeUndefined();
+  });
+
+  it("should return undefined for invalid hash length", () => {
+    const shortUri = "https://w3id.org/np/RAshort";
+    expect(getNanopubHash(shortUri)).toBeUndefined();
+    const longUri = `https://w3id.org/np/RA${hash}toolong`;
+    expect(getNanopubHash(longUri)).toBeUndefined();
+  });
+
+  it("should handle edge case with undefined/invalid input", () => {
+    expect(getNanopubHash(undefined as any)).toBeUndefined();
+    expect(getNanopubHash(null as any)).toBeUndefined();
+    expect(getNanopubHash({} as any)).toBeUndefined();
+    expect(getNanopubHash("")).toBeUndefined();
   });
 });
 

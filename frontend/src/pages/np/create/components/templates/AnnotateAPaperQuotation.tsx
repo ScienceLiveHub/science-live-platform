@@ -1,7 +1,8 @@
+import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import { useFormedible } from "@/hooks/use-formedible";
+import { validDoi } from "@/lib/validation";
 import z from "zod";
 import { NanopubTemplateDefComponentProps } from "./component-registry";
-import { validDoi } from "./registry";
 
 export default function AnnotateAPaperQuotation({
   publish,
@@ -11,17 +12,13 @@ export default function AnnotateAPaperQuotation({
    * The Schema for types, validation, and error messages
    */
   const schema = z.object({
-    paper: z.string().regex(validDoi, "Enter a valid DOI starting with '10.'"), // The "https://doi.org/" prefix is prepended when published.
+    paper: validDoi, // The "https://doi.org/" prefix is prepended when published.
     quoteType: z.enum(["whole", "ends"]),
     quotation: z.string().min(5).max(500),
     "quotation-end": z.string().min(5).max(500).optional(),
     comment: z.string().min(5).max(500),
   });
 
-  /**
-   * Construct the form component using Formedible
-   * See manual builder: https://formedible.dev/builder or AI tool https://formedible.dev/ai-builder
-   */
   const { Form } = useFormedible({
     schema,
     fields: [
@@ -58,7 +55,7 @@ export default function AnnotateAPaperQuotation({
         description: "Use when quoting beginning and end of a longer passage",
         placeholder: "The exact quotation from the paper",
         textareaConfig: {},
-        conditional: (values: any) => values.quoteType === "ends",
+        conditional: (values) => values.quoteType === "ends",
       },
       {
         name: "comment",
@@ -70,6 +67,7 @@ export default function AnnotateAPaperQuotation({
         textareaConfig: {},
       },
     ],
+    globalWrapper: ShowOptionalWrapper,
     submitLabel: "Generate Nanopublication",
     collapseLabel: "Hide",
     expandLabel: "Show",
@@ -82,7 +80,6 @@ export default function AnnotateAPaperQuotation({
         ...prefilledData,
       },
       onSubmit: async ({ value }) => {
-        value.paper = "https://doi.org/" + value.paper;
         await publish(value);
       },
     },

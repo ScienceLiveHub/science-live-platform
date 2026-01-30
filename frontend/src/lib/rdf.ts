@@ -218,8 +218,10 @@ export function shrinkUri(
  *
  * - Supports multiple predicates mapping to the same property (hence predicates are specified in an array).
  * - Supports strings and arrays of strings for properties (props with the suffix `_$array` are treated as arrays).
+ * - Each value only maps to the first match in propertyMap
  *
- * TODO: there is a chance that if multiple props with same name are found, only one will be opaquely returned.
+ * TODO: there is a chance that if multiple props with same name are found, only one will be opaquely returned if not mapped to array.
+ * TODO: Since order matters ("first match" note above), using Map might be better than Record for propertyMap
  *
  * Property mapping example:
  *
@@ -234,10 +236,13 @@ export function shrinkUri(
  *   };
  */
 
+export type PropertyMatcher = NamedNode | ((q: Quad) => boolean);
+export type PropertyMap = Record<string, PropertyMatcher[]>;
+
 export function extractSubjectProps(
   store: Store,
   sub: NamedNode,
-  propertyMap: Record<string, (NamedNode | ((q: Quad) => boolean))[]>,
+  propertyMap: PropertyMap,
   graphUri?: string | null,
   returnNodes = false,
 ) {
@@ -246,7 +251,7 @@ export function extractSubjectProps(
     if (!graphUri || quad.graph.value === graphUri) {
       if (quad.subject.equals(sub)) {
         const mappedKey = Object.entries(propertyMap).find(([, maps]) => {
-          return maps.some((map) => {
+          return maps.some((map: PropertyMatcher) => {
             if (typeof map === "function") {
               return map(quad as Quad);
             } else {
@@ -278,7 +283,7 @@ export function extractSubjectProps(
  */
 export function extractSubjects(
   store: Store,
-  propertyMap: Record<string, (NamedNode | ((q: Quad) => boolean))[]>,
+  propertyMap: PropertyMap,
   predicate?: string | null,
   object?: string | null,
   graphUri?: string | null,
@@ -311,7 +316,7 @@ export function extractSubjects(
  */
 export function extractSubjectsFiltered(
   store: Store,
-  propertyMap: Record<string, (NamedNode | ((q: Quad) => boolean))[]>,
+  propertyMap: PropertyMap,
   filter: (q: RDFT.Quad) => boolean,
   graphUri?: string | null,
   returnNodes = false,

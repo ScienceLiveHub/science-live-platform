@@ -1,3 +1,4 @@
+import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import { useFormedible } from "@/hooks/use-formedible";
 import { fetchPossibleValuesFromQuads } from "@/lib/rdf";
 import { useEffect, useState } from "react";
@@ -51,10 +52,6 @@ export default function CommentOnPaper({
     text: z.string().max(500),
   });
 
-  /**
-   * Construct the form component using Formedible
-   * See manual builder: https://formedible.dev/builder or AI tool https://formedible.dev/ai-builder
-   */
   const { Form } = useFormedible({
     schema,
     fields: [
@@ -87,6 +84,7 @@ export default function CommentOnPaper({
         required: true,
       },
     ],
+    globalWrapper: ShowOptionalWrapper,
     submitLabel: "Generate Nanopublication",
     collapseLabel: "Hide",
     expandLabel: "Show",

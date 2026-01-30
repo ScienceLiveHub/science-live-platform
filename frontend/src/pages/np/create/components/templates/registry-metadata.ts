@@ -6,6 +6,7 @@
 export interface NanopubTemplateMetadata {
   name: string;
   description: string;
+  moreDescription?: string;
   category: string;
   icon: string;
   recommended?: boolean;
@@ -53,7 +54,9 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
   "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao": {
     name: "Document geographical coverage",
     description:
-      "Document the geographical area or region covered by a resercher paper, data, or study.",
+      "Documents the geographical area or region covered by a research paper's findings, data, or study scope.",
+    moreDescription:
+      "Identify the spatial coverage (e.g. Europe, Canada, or a specific geographical area) and provide supporting quotations from the paper that led to this conclusion. The resulting nanopublication can work with GeoSPARQL queries for efficient spatial discovery of research.",
     category: "geographical coverage",
     icon: "📝",
     recommended: false,
