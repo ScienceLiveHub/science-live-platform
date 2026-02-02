@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { SnippetCopyButton } from "@/components/ui/shadcn-io/snippet";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
 import { usersLatestNanopubs } from "@/lib/queries";
@@ -12,7 +13,14 @@ import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import relativeTime from "dayjs/plugin/relativeTime";
 import ky from "ky";
-import { Calendar, CheckCircle, ExternalLink, User } from "lucide-react";
+import {
+  Calendar,
+  Check,
+  CheckCircle,
+  ExternalLink,
+  Share2,
+  User,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -168,30 +176,47 @@ export default function UserProfile() {
     <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-6xl">
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage
-                src={profile.image || undefined}
-                alt={profile.name}
-              />
-              <AvatarFallback className="text-lg">
-                {getInitials(profile.name)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold">{profile.name}</h1>
-                {profile.emailVerified && (
-                  <Badge variant="secondary" className="gap-1">
-                    <CheckCircle className="h-3 w-3" />
-                    Verified
-                  </Badge>
-                )}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-16 w-16">
+                <AvatarImage
+                  src={profile.image || undefined}
+                  alt={profile.name}
+                />
+                <AvatarFallback className="text-lg">
+                  {getInitials(profile.name)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold">{profile.name}</h1>
+                  {profile.emailVerified && (
+                    <Badge variant="secondary" className="gap-1">
+                      <CheckCircle className="h-3 w-3" />
+                      Verified
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Member since {formatDate(profile.createdAt)}
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Member since {formatDate(profile.createdAt)}
-              </p>
             </div>
+            <SnippetCopyButton
+              variant="outline"
+              size="sm"
+              value={`${window.location.origin}/user/${profile?.id}`}
+              className="gap-2"
+              isCopiedComponent={
+                <>
+                  <Check className="h-4 w-4" />
+                  Copied!
+                </>
+              }
+            >
+              <Share2 className="h-4 w-4" />
+              Share Link
+            </SnippetCopyButton>
           </div>
         </CardHeader>
 

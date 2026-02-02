@@ -9,6 +9,7 @@ import {
   type ComponentProps,
   type HTMLAttributes,
   type ReactElement,
+  ReactNode,
   useState,
 } from "react";
 
@@ -41,6 +42,7 @@ export type SnippetCopyButtonProps = ComponentProps<typeof Button> & {
   onCopy?: () => void;
   onError?: (error: Error) => void;
   timeout?: number;
+  isCopiedComponent?: ReactNode;
 };
 
 export const SnippetCopyButton = ({
@@ -49,6 +51,7 @@ export const SnippetCopyButton = ({
   onCopy,
   onError,
   timeout = 2000,
+  isCopiedComponent,
   children,
   ...props
 }: SnippetCopyButtonProps) => {
@@ -88,7 +91,7 @@ export const SnippetCopyButton = ({
       variant="ghost"
       {...(props as any)}
     >
-      {children ?? icon}
+      {isCopied ? isCopiedComponent : (children ?? icon)}
     </Button>
   );
 };
