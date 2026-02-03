@@ -98,7 +98,7 @@ export const getAuth = (env: Env) => {
       async afterEmailVerification(user: any, request: any) {
         await createNotification(env, user.id, {
           title: "Your email has been verified",
-          type: "approved",
+          type: "approval",
           expiresAt: daysFromNow(5),
         });
       },
@@ -146,7 +146,7 @@ export const getAuth = (env: Env) => {
         sendInvitationEmail: async (data) => {
           const url = `${env.FRONTEND_URL}/accept-invitation?invitationId=${data.id}`;
           await createNotification(env, data.id, {
-            title: `You have been invited to join ${data.organization.name + (data.role !== "member" ? ` as ${data.role}` : "")}`,
+            title: `Invitation to join ${data.organization.name + (data.role !== "member" ? ` as ${data.role}` : "")}`,
             type: "invite",
             link: url,
             expiresAt: data.invitation.expiresAt,

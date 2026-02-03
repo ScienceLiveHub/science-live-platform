@@ -3,6 +3,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { createDb } from "./db";
 import { notification } from "./db/schema/user";
+import { NotificationType } from "./utils";
 
 const app = new Hono<{
   Bindings: Env;
@@ -11,14 +12,6 @@ const app = new Hono<{
     session: Session | null;
   };
 }>();
-
-export type NotificationType =
-  | "invite"
-  | "approved"
-  | "message"
-  | "info"
-  | "warning"
-  | "error";
 
 /**
  * Create a new notification for a user

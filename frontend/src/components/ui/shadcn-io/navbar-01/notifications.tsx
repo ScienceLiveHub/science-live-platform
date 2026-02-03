@@ -22,14 +22,14 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Notification } from "../../../../../../api/src/db/schema/user";
-import { NotificationType } from "../../../../../../api/src/notifications";
+import { NotificationType } from "../../../../../../api/src/utils";
 
 // API base URL from environment
 const API_URL = import.meta.env.VITE_API_URL || "";
 
 const notificationIcons: Record<NotificationType, React.ElementType> = {
   invite: UserCheckIcon,
-  approved: CheckIcon,
+  approval: CheckIcon,
   message: MessageSquareIcon,
   info: InfoIcon,
   warning: CalendarCheck2Icon,
@@ -38,7 +38,7 @@ const notificationIcons: Record<NotificationType, React.ElementType> = {
 
 const notificationColors: Record<NotificationType, string> = {
   invite: "bg-purple-500",
-  approved: "bg-green-500",
+  approval: "bg-green-500",
   message: "bg-blue-500",
   info: "bg-cyan-500",
   warning: "bg-yellow-500",
@@ -62,7 +62,7 @@ function NotificationItem({
     notificationColors[notification.type as NotificationType] || "bg-blue-500";
 
   return (
-    <div className="group flex items-start gap-3 hover:bg-background p-2 bg-card">
+    <div className="group flex items-start gap-3 hover:bg-background pl-3 p-2 bg-card">
       <div
         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${bgColor} text-white`}
       >
