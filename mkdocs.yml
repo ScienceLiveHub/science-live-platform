@@ -1,0 +1,77 @@
+site_name: Zotero Nanopublication Plugin
+site_description: Create nanopublications from Zotero items and PDF highlights using Nanodash templates
+site_url: https://sciencelivehub.github.io/science-live-platform/
+repo_url: https://github.com/ScienceLiveHub/science-live-platform
+repo_name: ScienceLiveHub/science-live-platform
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: custom
+      accent: pink
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: custom
+      accent: pink
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quick-start.md
+  - User Guide:
+    - Features Overview: user-guide/features.md
+    - Template Types: user-guide/templates.md
+    - PDF Annotations: user-guide/pdf-annotations.md
+    - Search & Discovery: user-guide/search-discovery.md
+  - Videos:
+    - Video Tutorials: examples/video-tutorials.md
+  - Technical:
+    - Architecture: technical/architecture.md
+  - Development:
+    - Contributing: development/contributing.md
+    - Build Process: development/build-process.md
+    - Testing: development/testing.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/ScienceLiveHub
+  generator: false
+
+extra_css:
+  - assets/stylesheets/science-live.css

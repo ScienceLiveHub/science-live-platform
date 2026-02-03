@@ -1,0 +1,201 @@
+/* Science Live Brand Colors */
+:root {
+  --sl-navy: #1e3a5f;
+  --sl-pink: #e91e8c;
+  --sl-light-blue: #5fb3d9;
+  --sl-white: #ffffff;
+  --sl-light-pink: #f5a3d0;
+  --sl-dark-pink: #c91677;
+}
+
+/* Primary color scheme - Navy Blue */
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: var(--sl-navy);
+  --md-primary-fg-color--light: #2d4a6b;
+  --md-primary-fg-color--dark: #152e47;
+  --md-accent-fg-color: var(--sl-pink);
+  --md-accent-fg-color--transparent: rgba(233, 30, 140, 0.1);
+}
+
+/* Dark mode - Keep the navy but adjust for readability */
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: var(--sl-navy);
+  --md-primary-fg-color--light: #2d4a6b;
+  --md-primary-fg-color--dark: #152e47;
+  --md-accent-fg-color: var(--sl-light-pink);
+  --md-accent-fg-color--transparent: rgba(245, 163, 208, 0.1);
+}
+
+/* Header styling */
+.md-header {
+  background: linear-gradient(135deg, var(--sl-navy) 0%, #2d4a6b 100%);
+}
+
+/* Tab styling */
+.md-tabs {
+  background: linear-gradient(to right, var(--sl-navy), #2d4a6b);
+}
+
+/* Tab links - WHITE text for good contrast on navy background */
+.md-tabs__item {
+  color: var(--sl-white);
+}
+
+.md-tabs__link {
+  color: var(--sl-white) !important;
+  opacity: 0.8;
+}
+
+.md-tabs__link:hover {
+  color: var(--sl-white) !important;
+  opacity: 1;
+}
+
+.md-tabs__link--active {
+  color: var(--sl-white) !important;
+  opacity: 1;
+  border-bottom: 2px solid var(--sl-pink);
+}
+
+/* Header elements */
+.md-header__title {
+  color: var(--sl-white) !important;
+}
+
+.md-header__button {
+  color: var(--sl-white) !important;
+}
+
+.md-header__source {
+  color: var(--sl-white) !important;
+}
+
+.md-source {
+  color: var(--sl-white) !important;
+}
+
+.md-source__repository {
+  color: var(--sl-white) !important;
+}
+
+.md-source__fact {
+  color: var(--sl-white) !important;
+  opacity: 0.8;
+}
+
+/* MORE PINK ACCENTS */
+
+/* Main headings with pink accent */
+.md-typeset h1 {
+  border-bottom: 3px solid var(--sl-pink);
+  padding-bottom: 0.5rem;
+  color: var(--sl-navy);
+}
+
+/* Secondary headings with pink left border */
+.md-typeset h2 {
+  border-left: 4px solid var(--sl-pink);
+  padding-left: 1rem;
+  color: var(--sl-navy);
+}
+
+/* Third level headings with pink text */
+.md-typeset h3 {
+  color: var(--sl-pink);
+}
+
+/* Bold text in pink */
+.md-typeset strong {
+  color: var(--sl-dark-pink);
+}
+
+/* Table headers with pink background */
+.md-typeset table:not([class]) th {
+  background: linear-gradient(135deg, var(--sl-pink), var(--sl-dark-pink));
+  color: var(--sl-white);
+}
+
+/* Code blocks with pink accents */
+.md-typeset .highlight {
+  border-left: 4px solid var(--sl-pink);
+}
+
+.md-typeset p code,
+.md-typeset li code {
+  background-color: rgba(233, 30, 140, 0.15);
+  color: var(--sl-dark-pink);
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+}
+
+/* Enhanced buttons */
+.md-button {
+  border: 1px solid var(--sl-pink);
+  color: var(--sl-pink);
+  transition: all 0.3s ease;
+}
+
+.md-button:hover {
+  background-color: var(--sl-pink);
+  color: var(--sl-white);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(233, 30, 140, 0.3);
+}
+
+.md-button--primary {
+  background-color: var(--sl-pink);
+  color: var(--sl-white);
+  border-color: var(--sl-pink);
+}
+
+.md-button--primary:hover {
+  background-color: var(--sl-dark-pink);
+  border-color: var(--sl-dark-pink);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(233, 30, 140, 0.4);
+}
+
+/* Links */
+a {
+  color: var(--sl-pink);
+}
+
+a:hover {
+  color: var(--sl-dark-pink);
+}
+
+/* Navigation */
+.md-nav__item .md-nav__link--active {
+  color: var(--sl-pink);
+  font-weight: bold;
+}
+
+.md-nav__item .md-nav__link:hover {
+  color: var(--sl-light-blue);
+}
+
+/* Admonitions */
+.md-typeset .admonition.tip {
+  border-color: var(--sl-light-blue);
+}
+
+.md-typeset .admonition.tip > .admonition-title {
+  background-color: rgba(95, 179, 217, 0.1);
+  border-color: var(--sl-light-blue);
+}
+
+.md-typeset .admonition.info {
+  border-color: var(--sl-pink);
+}
+
+.md-typeset .admonition.info > .admonition-title {
+  background-color: rgba(233, 30, 140, 0.1);
+  border-color: var(--sl-pink);
+  color: var(--sl-dark-pink);
+}
+
+/* Footer with pink accent */
+.md-footer {
+  background: linear-gradient(135deg, var(--sl-navy) 0%, #152e47 100%);
+  border-top: 3px solid var(--sl-pink);
+}
