@@ -20,6 +20,7 @@ import { UserCircle } from "lucide-react";
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import Notifications from "./notifications";
 
 // Simple logo component for the navbar
 const Logo = () => {
@@ -268,6 +269,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
               </Button>
             ) : (
               <>
+                <Notifications />
                 {!!orgList?.length && (
                   <OrganizationSwitcher
                     classNames={{

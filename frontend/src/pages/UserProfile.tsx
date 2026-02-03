@@ -1,3 +1,4 @@
+import { RelativeDateTime } from "@/components/relative-datetime";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -9,9 +10,6 @@ import { usersLatestNanopubs } from "@/lib/queries";
 import { getUriEnd } from "@/lib/uri";
 import { SiOrcid } from "@icons-pack/react-simple-icons";
 import { NanopubClient } from "@nanopub/nanopub-js";
-import dayjs from "dayjs";
-import localizedFormat from "dayjs/plugin/localizedFormat";
-import relativeTime from "dayjs/plugin/relativeTime";
 import ky from "ky";
 import {
   Calendar,
@@ -23,9 +21,6 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-
-dayjs.extend(relativeTime);
-dayjs.extend(localizedFormat);
 
 interface UserProfileData {
   id: string;
@@ -304,14 +299,7 @@ export default function UserProfile() {
                     return (
                       <>
                         <Link to={"/np?uri=" + c.np}>{c.label}</Link>
-                        <div className="flex items-center gap-2 text-sm group relative w-70">
-                          <span className="text-muted-foreground w-auto">
-                            {dayjs(c.date).fromNow()}
-                          </span>
-                          <span className="group-hover:opacity-100 transition-opacity bg-muted px-1 text-sm text-muted-foreground rounded-md absolute translate-y-full opacity-0 m-4 mx-auto">
-                            {dayjs(c.date).toString()}
-                          </span>
-                        </div>
+                        <RelativeDateTime date={c.date} />
                         <hr className="my-4" />
                       </>
                     );

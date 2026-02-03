@@ -1,4 +1,5 @@
-import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { InferSelectModel } from "drizzle-orm";
+import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 /*
  * User and Auth Schema
@@ -61,4 +62,22 @@ export const verification = pgTable("verification", {
   updatedAt: timestamp(),
 });
 
-export const schema = { user, session, account, verification };
+export const notification = pgTable("notification", {
+  id: uuid().primaryKey().defaultRandom(),
+  userId: text()
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  type: text().notNull().default("info"), // e.g., 'invite', 'message', 'info', 'warning', 'error' etc
+  title: text().notNull(),
+  link: text(), // if specified, clicking on title will open this link (preferentially)
+  content: text(), // if specified, clicking on title will show this additional content (markdown supported)
+  isDismissed: boolean().default(false),
+  expiresAt: timestamp(),
+  createdAt: timestamp().notNull().defaultNow(),
+});
+
+export const schema = { user, session, account, verification, notification };
+
+export type User = InferSelectModel<typeof user>;
+export type Session = InferSelectModel<typeof session>;
+export type Notification = InferSelectModel<typeof notification>;

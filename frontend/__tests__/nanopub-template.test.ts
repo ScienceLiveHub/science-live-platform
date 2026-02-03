@@ -195,7 +195,7 @@ describe("NanopubTemplate.applyTemplate", () => {
     expect(result).toMatch(loadedFixtures[fixturesSets[0].outputs[0]]);
   });
 
-  it("should apply emit a literal object correctly", async () => {
+  it("should emit a literal object correctly", async () => {
     const template = await NanopubTemplate.loadString(
       loadedFixtures[fixturesSets[1].input],
     );

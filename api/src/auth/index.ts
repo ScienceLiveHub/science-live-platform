@@ -2,6 +2,8 @@ import { createDb } from "@/db";
 import { organizationSchema } from "@/db/schema/organization";
 import * as authSchema from "@/db/schema/user";
 import { sendEmail } from "@/email";
+import { createNotification } from "@/notifications";
+import { daysFromNow } from "@/utils";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import {
@@ -94,9 +96,11 @@ export const getAuth = (env: Env) => {
       minPasswordLength: 8,
       autoSignInAfterVerification: true,
       async afterEmailVerification(user: any, request: any) {
-        // TODO: currently there is no feedback for successful email verification, it just redirects the frontend to home.
-        // Perhaps send an email or redirect to the /email-verified page
-        console.log(`${user.email} has been successfully verified!`);
+        await createNotification(env, user.id, {
+          title: "Your email has been verified",
+          type: "approval",
+          expiresAt: daysFromNow(5),
+        });
       },
       sendResetPassword: async ({ user, url, token }, request) => {
         await sendEmail(env, {
@@ -141,6 +145,14 @@ export const getAuth = (env: Env) => {
         allowUserToCreateOrganization: false,
         sendInvitationEmail: async (data) => {
           const url = `${env.FRONTEND_URL}/accept-invitation?invitationId=${data.id}`;
+          await createNotification(env, data.id, {
+            title: `Invitation to join ${data.organization.name + (data.role !== "member" ? ` as ${data.role}` : "")}`,
+            type: "invite",
+            link: url,
+            content: "Click to view invite",
+            expiresAt: data.invitation.expiresAt,
+          });
+
           await sendEmail(env, {
             to: data.email,
             subject: "Invitation to join an organization",
