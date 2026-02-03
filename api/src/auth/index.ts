@@ -149,6 +149,7 @@ export const getAuth = (env: Env) => {
             title: `Invitation to join ${data.organization.name + (data.role !== "member" ? ` as ${data.role}` : "")}`,
             type: "invite",
             link: url,
+            content: "Click to view invite",
             expiresAt: data.invitation.expiresAt,
           });
 

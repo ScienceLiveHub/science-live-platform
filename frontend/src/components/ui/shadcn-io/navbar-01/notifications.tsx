@@ -207,7 +207,7 @@ export default function Notifications() {
         ) : notifications.length === 0 ? (
           <div className="text-center py-8 text-sm text-gray-500 dark:text-gray-400">
             <InboxIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p>No unread notifications</p>
+            <p>No new notifications</p>
             {/* <Link to="notifications">
               <p className="text-xs mt-1">View all notifications</p>
             </Link> */}
