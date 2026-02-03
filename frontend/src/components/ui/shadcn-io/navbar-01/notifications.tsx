@@ -19,13 +19,17 @@ import {
   UserCheckIcon,
   XIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useSWR from "swr";
 import { Notification } from "../../../../../../api/src/db/schema/user";
 import { NotificationType } from "../../../../../../api/src/utils";
 
 // API base URL from environment
 const API_URL = import.meta.env.VITE_API_URL || "";
+
+const fetcher = (url: string) =>
+  ky(url, { credentials: "include" }).json<Notification[]>();
 
 const notificationIcons: Record<NotificationType, React.ElementType> = {
   invite: UserCheckIcon,
@@ -99,63 +103,53 @@ function NotificationItem({
 
 export default function Notifications() {
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
 
-  const fetchNotifications = async () => {
-    try {
-      const response = await ky(`${API_URL}/notifications/unread`, {
-        credentials: "include",
-      });
-      if (response.ok) {
-        const data = await response.json<Notification[]>();
-        setNotifications(data);
-        setUnreadCount(data.length);
-      }
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    data: notifications = [],
+    isLoading: loading,
+    mutate,
+  } = useSWR(`${API_URL}/notifications/unread`, fetcher, {
+    refreshInterval: 60000, // poll for notifications every 60s
+    revalidateOnFocus: true, // poll when page is refocused as well
+  });
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
+  const unreadCount = notifications.length;
 
   const handleDismiss = async (notificationId: string) => {
+    // Optimistic update
+    await mutate(
+      notifications.filter((n) => n.id !== notificationId),
+      false,
+    );
+
     try {
-      const response = await ky(
-        `${API_URL}/notifications/${notificationId}/dismiss`,
-        {
-          method: "PATCH",
-          credentials: "include",
-        },
-      );
-      if (response.ok) {
-        // Remove from local state
-        setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
-        setUnreadCount((prev) => Math.max(0, prev - 1));
-      }
+      await ky(`${API_URL}/notifications/${notificationId}/dismiss`, {
+        method: "PATCH",
+        credentials: "include",
+      });
+      // Revalidate to be sure
+      mutate();
     } catch (error) {
       console.error("Error dismissing notification:", error);
+      // Rollback on error
+      mutate();
     }
   };
 
   const handleDismissAll = async () => {
+    // Optimistic update
+    await mutate([], false);
+
     try {
-      const response = await ky(`${API_URL}/notifications/dismiss-all`, {
+      await ky(`${API_URL}/notifications/dismiss-all`, {
         method: "PATCH",
         credentials: "include",
       });
-      if (response.ok) {
-        setNotifications([]);
-        setUnreadCount(0);
-      }
+      mutate();
     } catch (error) {
       console.error("Error dismissing all notifications:", error);
+      mutate();
     }
   };
 

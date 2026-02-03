@@ -119,7 +119,15 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
 
     const [isMobile, setIsMobile] = useState(false);
     const containerRef = useRef<HTMLElement>(null);
-    const { data: orgList } = authClient.useListOrganizations();
+    const { data: orgList, refetch: refetchOrgList } =
+      authClient.useListOrganizations();
+
+    // Needs to be refetched after user signs in
+    useEffect(() => {
+      if (session) {
+        refetchOrgList();
+      }
+    }, [refetchOrgList, session]);
 
     useEffect(() => {
       const checkWidth = () => {
