@@ -3,7 +3,7 @@ import { organizationSchema } from "@/db/schema/organization";
 import * as authSchema from "@/db/schema/user";
 import { sendEmail } from "@/email";
 import { createNotification } from "@/notifications";
-import { daysFromNow } from "@/utils";
+import { daysFromNow, isValidEmail } from "@/utils";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import {
@@ -12,6 +12,7 @@ import {
   openAPI,
   organization,
 } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
 import { builtInProviders } from "./built-in-providers";
 import { customProviders } from "./custom-providers";
 import {
@@ -99,7 +100,7 @@ export const getAuth = (env: Env) => {
         await createNotification(env, user.id, {
           title: "Your email has been verified",
           type: "approval",
-          expiresAt: daysFromNow(5),
+          expiresAt: daysFromNow(2),
         });
       },
       sendResetPassword: async ({ user, url, token }, request) => {
@@ -111,12 +112,21 @@ export const getAuth = (env: Env) => {
       },
     },
     emailVerification: {
+      sendOnSignUp: true,
       sendVerificationEmail: async ({ user, url, token }, request) => {
-        await sendEmail(env, {
-          to: user.email,
-          subject: "Verify your email address",
-          react: verifyEmailTemplate(user.name, env.FRONTEND_URL, url),
-        });
+        // Never verify a placeholder or invalid email
+        if (isValidEmail(user.email)) {
+          await createNotification(env, user.id, {
+            title: "Check your email for verification",
+            type: "info",
+            content: "You need to verify your email in order to publish",
+          });
+          await sendEmail(env, {
+            to: user.email,
+            subject: "Verify your email address",
+            react: verifyEmailTemplate(user.name, env.FRONTEND_URL, url),
+          });
+        }
       },
     },
     user: {
@@ -145,13 +155,24 @@ export const getAuth = (env: Env) => {
         allowUserToCreateOrganization: false,
         sendInvitationEmail: async (data) => {
           const url = `${env.FRONTEND_URL}/accept-invitation?invitationId=${data.id}`;
-          await createNotification(env, data.id, {
-            title: `Invitation to join ${data.organization.name + (data.role !== "member" ? ` as ${data.role}` : "")}`,
-            type: "invite",
-            link: url,
-            content: "Click to view invite",
-            expiresAt: data.invitation.expiresAt,
-          });
+          // Look up the invited user by data.email, if they already exist, create a notification as well
+          const userData = await db
+            ?.select({
+              id: authSchema.user.id,
+            })
+            .from(authSchema.user)
+            .where(eq(authSchema.user.email, data.email))
+            .limit(1);
+
+          if (userData?.[0].id) {
+            await createNotification(env, data.email, {
+              title: `Invitation to join ${data.organization.name + (data.role !== "member" ? ` as ${data.role}` : "")}`,
+              type: "invite",
+              link: url,
+              content: "Click to view invite",
+              expiresAt: data.invitation.expiresAt,
+            });
+          }
 
           await sendEmail(env, {
             to: data.email,

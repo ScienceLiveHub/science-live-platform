@@ -2,6 +2,7 @@
  * Enable and configure OIDC providers which are NOT built into Better Auth
  */
 
+import { ORCID_EMAIL_PLACEHOLDER } from "@/utils";
 import { genericOAuth } from "better-auth/plugins";
 
 export const customProviders = (env: Env) =>
@@ -26,7 +27,7 @@ export const customProviders = (env: Env) =>
             name:
               profile.given_name +
               (profile.family_name?.length ? " " + profile.family_name : ""),
-            email: profile.sub + "@orcid",
+            email: profile.email ?? profile.sub + ORCID_EMAIL_PLACEHOLDER,
           };
         },
       },

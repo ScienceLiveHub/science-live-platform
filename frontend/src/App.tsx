@@ -1,11 +1,12 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { MissingEmailDialog } from "./components/missing-email-dialog";
 import { Navbar01 } from "./components/ui/shadcn-io/navbar-01";
 import { Toaster } from "./components/ui/sonner";
 import AcceptInvitation from "./pages/AcceptInvitation";
 import AccountSettings from "./pages/AccountSettings";
 import AuthPage from "./pages/AuthPage";
 import Demo from "./pages/Demo";
-import EmailVerfied from "./pages/EmailVerified";
+import EmailVerified from "./pages/EmailVerified";
 import { HomePage } from "./pages/homepage/page";
 import CreateNanopub from "./pages/np/create/CreateNanopub";
 import ViewNanopub from "./pages/np/ViewNanopub";
@@ -20,6 +21,7 @@ function App() {
         <div className="relative w-full">
           <Navbar01 />
           <Toaster />
+          <MissingEmailDialog />
         </div>
         <Routes>
           <Route path="/auth/:pathname" element={<AuthPage />} />
@@ -39,7 +41,7 @@ function App() {
           <Route path="/np/demo" element={<Demo />} />
           <Route path="/np/create" element={<CreateNanopub />} />
           <Route path="/np/create/:uri" element={<CreateNanopub />} />
-          <Route path="/email-verified" element={<EmailVerfied />} />
+          <Route path="/email-verified" element={<EmailVerified />} />
         </Routes>
       </Providers>
     </BrowserRouter>

@@ -16,7 +16,7 @@
     "noImplicitReturns": true,
     "skipLibCheck": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx",
+    "jsxImportSource": "react",
     "types": ["node", "./worker-configuration.d.ts"],
     "paths": {
       "@/*": ["./src/*"]
