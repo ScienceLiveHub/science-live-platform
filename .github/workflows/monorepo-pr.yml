@@ -10,7 +10,7 @@ on:
     description: Check the code and build for all workspaces
 
 env:
-  NODE_VERSION: "20"
+  NODE_VERSION: "22"
 
 jobs:
   frontend-check:
