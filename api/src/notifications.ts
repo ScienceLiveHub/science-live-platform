@@ -106,18 +106,22 @@ app.get("/", async (c) => {
         and(eq(invitation.email, user.email), eq(invitation.status, "pending")),
       );
 
+    // Technically someone can sign up with an email they dont own then see invites linked to that email,
+    // however they wont be able to accept/reject that invite without first verifying they own the email.
+    // So we dont worry about checking for email verification here, its more important to let the user
+    // know they have a pending invite.
     if (invitations?.length > 0) {
-      for (const inv of invitations) {
+      for (const invite of invitations) {
         notifications.unshift({
-          id: `${inv.id}-invite`,
+          id: `${invite.id}-invite`,
           type: "invite",
-          title: `Invitation to join ${inv.organizationName + (inv.role !== "member" ? ` as ${inv.role}` : "")}`,
-          group: `${inv.organizationId}-invite`,
-          link: `${c.env.FRONTEND_URL}/auth/accept-invitation?invitationId=${inv.id}`,
+          title: `Invitation to join ${invite.organizationName + (invite.role !== "member" ? ` as ${invite.role}` : "")}`,
+          group: `${invite.organizationId}-invite`,
+          link: `${c.env.FRONTEND_URL}/auth/accept-invitation?invitationId=${invite.id}`,
           content: "Click to view invite",
           status: "persistent",
-          expiresAt: inv.expiresAt,
-          createdAt: inv.createdAt,
+          expiresAt: invite.expiresAt,
+          createdAt: invite.createdAt,
         });
       }
     }

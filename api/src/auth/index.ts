@@ -122,8 +122,18 @@ export const getAuth = (env: Env) => {
           ctx.redirect(`${env.FRONTEND_URL}/email-verified`);
           return;
         }
-        // Redirect after authentication (e.g. OIDC provider sign-in)
-        ctx.redirect(env.FRONTEND_URL ?? "/");
+        if (ctx.path.startsWith("/reset-password") && ctx.params?.token) {
+          // Redirect to pw reset frontend
+          ctx.redirect(
+            `${env.FRONTEND_URL}/auth/reset-password?token=${ctx.params.token}`,
+          );
+          return;
+        }
+        // Catch-all redirect to frontend when an api endpoint is hit directly in a browser
+        // e.g. callback after authentication with OIDC provider sign-in
+        ctx.redirect(
+          `${env.FRONTEND_URL}${ctx.query?.callbackURL ? ctx.query?.callbackURL : "/"}`,
+        );
       }),
     },
     user: {
