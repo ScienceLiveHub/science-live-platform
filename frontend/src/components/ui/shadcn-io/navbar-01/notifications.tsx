@@ -11,12 +11,12 @@ import {
 import ky from "ky";
 import {
   BellIcon,
-  CalendarCheck2Icon,
+  Building2,
   CheckIcon,
   InboxIcon,
   InfoIcon,
   MessageSquareIcon,
-  UserCheckIcon,
+  MessageSquareWarning,
   XIcon,
 } from "lucide-react";
 import { useState } from "react";
@@ -32,11 +32,11 @@ const fetcher = (url: string) =>
   ky(url, { credentials: "include" }).json<Notification[]>();
 
 const notificationIcons: Record<NotificationType, React.ElementType> = {
-  invite: UserCheckIcon,
+  invite: Building2,
   approval: CheckIcon,
   message: MessageSquareIcon,
   info: InfoIcon,
-  warning: CalendarCheck2Icon,
+  warning: MessageSquareWarning,
   error: XIcon,
 };
 
@@ -64,6 +64,7 @@ function NotificationItem({
     notificationIcons[notification.type as NotificationType] || InfoIcon;
   const bgColor =
     notificationColors[notification.type as NotificationType] || "bg-blue-500";
+  const persistent = notification.status === "persistent";
 
   return (
     <div className="group flex items-start gap-3 hover:bg-background pl-3 p-2 bg-card">
@@ -76,7 +77,9 @@ function NotificationItem({
         className={`flex-1 space-y-1 ${notification.link ? "cursor-pointer py-1 rounded transition-colors" : ""}`}
         onClick={() => notification.link && onNavigate(notification.link)}
       >
-        <p className="text-sm font-medium">{notification.title}</p>
+        <p className={`text-sm ${persistent ? "font-bold" : "font-medium"}`}>
+          {notification.title}
+        </p>
         {notification.content && (
           <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
             {notification.content}
@@ -86,17 +89,19 @@ function NotificationItem({
           <RelativeDateTime date={notification.createdAt} noHover />
         </p>
       </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDismiss(notification.id);
-        }}
-      >
-        <XIcon className="h-4 w-4" />
-      </Button>
+      {!persistent && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDismiss(notification.id);
+          }}
+        >
+          <XIcon className="h-4 w-4" />
+        </Button>
+      )}
     </div>
   );
 }
@@ -109,7 +114,7 @@ export default function Notifications() {
     data: notifications = [],
     isLoading: loading,
     mutate,
-  } = useSWR(`${API_URL}/notifications/unread`, fetcher, {
+  } = useSWR(`${API_URL}/notifications`, fetcher, {
     refreshInterval: 60000, // poll for notifications every 60s
     revalidateOnFocus: true, // poll when page is refocused as well
   });
@@ -139,7 +144,10 @@ export default function Notifications() {
 
   const handleDismissAll = async () => {
     // Optimistic update
-    await mutate([], false);
+    await mutate(
+      notifications.filter((n) => n.status === "persistent"),
+      false,
+    );
 
     try {
       await ky(`${API_URL}/notifications/dismiss-all`, {

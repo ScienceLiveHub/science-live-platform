@@ -2,7 +2,6 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { MissingEmailDialog } from "./components/missing-email-dialog";
 import { Navbar01 } from "./components/ui/shadcn-io/navbar-01";
 import { Toaster } from "./components/ui/sonner";
-import AcceptInvitation from "./pages/AcceptInvitation";
 import AccountSettings from "./pages/AccountSettings";
 import AuthPage from "./pages/AuthPage";
 import Demo from "./pages/Demo";
@@ -24,24 +23,26 @@ function App() {
           <MissingEmailDialog />
         </div>
         <Routes>
+          {/* Pages/paths provided by better-auth-ui */}
           <Route path="/auth/:pathname" element={<AuthPage />} />
+          {/* Users account settings */}
           <Route path="/account/:pathname" element={<AccountSettings />} />
+          {/* View any users public profile */}
           <Route path="/user/:userId" element={<UserProfile />} />
+          {/* View the current users own profile */}
           <Route path="/profile" element={<UserProfile />} />
-
+          {/* Manage users organizations (memberships for member + admin for admin/owner) */}
           <Route
             path="/organization/:pathname"
             element={<OrganizationSettings />}
           />
-          <Route path="/accept-invitation" element={<AcceptInvitation />} />
-
-          {/* Main Pages - For Demo/Production */}
+          {/* Main App Pages */}
           <Route path="/" element={<HomePage />} />
           <Route path="/np/" element={<ViewNanopub />} />
-          <Route path="/np/demo" element={<Demo />} />
           <Route path="/np/create" element={<CreateNanopub />} />
           <Route path="/np/create/:uri" element={<CreateNanopub />} />
-          <Route path="/email-verified" element={<EmailVerified />} />
+          <Route path="/np/demo" element={<Demo />} />
+          <Route path="/email-verified" element={<EmailVerified />} />{" "}
         </Routes>
       </Providers>
     </BrowserRouter>

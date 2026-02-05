@@ -23,6 +23,7 @@ export function MissingEmailDialog() {
 
   useEffect(() => {
     // Check if user is logged in and has a placeholder ORCID email or no email
+    // TODO: we could also use this to force the user to verify their email in normal login accounts too
     if (session?.user && !isValidEmail(session.user.email)) {
       setIsOpen(true);
     } else {

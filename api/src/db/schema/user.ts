@@ -1,4 +1,3 @@
-import { InferSelectModel } from "drizzle-orm";
 import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 /*
@@ -67,17 +66,21 @@ export const notification = pgTable("notification", {
   userId: text()
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
+  group: text(), // Optional arbitrary string to roll multiple notifications with the same group into one for a user
   type: text().notNull().default("info"), // e.g., 'invite', 'message', 'info', 'warning', 'error' etc
   title: text().notNull(),
   link: text(), // if specified, clicking on title will open this link (preferentially)
   content: text(), // if specified, clicking on title will show this additional content (markdown supported)
-  isDismissed: boolean().default(false),
+  status: text({
+    enum: ["unread", "read", "dismissed", "persistent"],
+  }).default("unread"),
   expiresAt: timestamp(),
   createdAt: timestamp().notNull().defaultNow(),
 });
 
 export const schema = { user, session, account, verification, notification };
 
-export type User = InferSelectModel<typeof user>;
-export type Session = InferSelectModel<typeof session>;
-export type Notification = InferSelectModel<typeof notification>;
+export type User = typeof user.$inferSelect;
+export type Session = typeof session.$inferSelect;
+export type Notification = typeof notification.$inferSelect;
+export type NewNotification = typeof notification.$inferInsert;

@@ -33,6 +33,10 @@ export const verifyEmailTemplate = (
       <>
         <p>{`Hello ${name},`}</p>
         <p>Click the button below to verify your email address.</p>
+        <p className="italic">
+          This link is only valid for 1 hour. You can{" "}
+          <a href={`${baseUrl}/account/settings`}>send it again</a> if required.
+        </p>
       </>
     ),
     heading: "Verify Email",

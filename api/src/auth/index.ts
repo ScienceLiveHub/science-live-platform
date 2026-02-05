@@ -2,8 +2,7 @@ import { createDb } from "@/db";
 import { organizationSchema } from "@/db/schema/organization";
 import * as authSchema from "@/db/schema/user";
 import { sendEmail } from "@/email";
-import { createNotification } from "@/notifications";
-import { daysFromNow, isValidEmail } from "@/utils";
+import { isValidEmail } from "@/utils";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import {
@@ -12,7 +11,6 @@ import {
   openAPI,
   organization,
 } from "better-auth/plugins";
-import { eq } from "drizzle-orm";
 import { builtInProviders } from "./built-in-providers";
 import { customProviders } from "./custom-providers";
 import {
@@ -95,14 +93,6 @@ export const getAuth = (env: Env) => {
       enabled: true,
       autoSignIn: true,
       minPasswordLength: 8,
-      autoSignInAfterVerification: true,
-      async afterEmailVerification(user: any, request: any) {
-        await createNotification(env, user.id, {
-          title: "Your email has been verified",
-          type: "approval",
-          expiresAt: daysFromNow(2),
-        });
-      },
       sendResetPassword: async ({ user, url, token }, request) => {
         await sendEmail(env, {
           to: user.email,
@@ -116,11 +106,6 @@ export const getAuth = (env: Env) => {
       sendVerificationEmail: async ({ user, url, token }, request) => {
         // Never verify a placeholder or invalid email
         if (isValidEmail(user.email)) {
-          await createNotification(env, user.id, {
-            title: "Check your email for verification",
-            type: "info",
-            content: "You need to verify your email in order to publish",
-          });
           await sendEmail(env, {
             to: user.email,
             subject: "Verify your email address",
@@ -128,6 +113,18 @@ export const getAuth = (env: Env) => {
           });
         }
       },
+    },
+    hooks: {
+      after: createAuthMiddleware(async (ctx) => {
+        if (ctx.path.startsWith("/verify-email") && ctx.query?.token) {
+          //TODO: Cant find a built-in better-auth-ui callback which logs the user in by setting the session cookie in the frontend
+          //      Might need to create our own one.  For now, redirect to our custom page.
+          ctx.redirect(`${env.FRONTEND_URL}/email-verified`);
+          return;
+        }
+        // Redirect after authentication (e.g. OIDC provider sign-in)
+        ctx.redirect(env.FRONTEND_URL ?? "/");
+      }),
     },
     user: {
       changeEmail: {
@@ -153,26 +150,10 @@ export const getAuth = (env: Env) => {
       getSocialProviders(),
       organization({
         allowUserToCreateOrganization: false,
+        cancelPendingInvitationsOnReInvite: true,
+        requireEmailVerificationOnInvitation: true, // Mitigates the security risk for someone signing up with leaked invite link
         sendInvitationEmail: async (data) => {
-          const url = `${env.FRONTEND_URL}/accept-invitation?invitationId=${data.id}`;
-          // Look up the invited user by data.email, if they already exist, create a notification as well
-          const userData = await db
-            ?.select({
-              id: authSchema.user.id,
-            })
-            .from(authSchema.user)
-            .where(eq(authSchema.user.email, data.email))
-            .limit(1);
-
-          if (userData?.[0].id) {
-            await createNotification(env, data.email, {
-              title: `Invitation to join ${data.organization.name + (data.role !== "member" ? ` as ${data.role}` : "")}`,
-              type: "invite",
-              link: url,
-              content: "Click to view invite",
-              expiresAt: data.invitation.expiresAt,
-            });
-          }
+          const url = `${env.FRONTEND_URL}/auth/accept-invitation?invitationId=${data.id}`;
 
           await sendEmail(env, {
             to: data.email,
@@ -189,12 +170,6 @@ export const getAuth = (env: Env) => {
         // This can be done by setting the custom providers config `prompt: "login"`.
         allowDifferentEmails: true,
       },
-    },
-    hooks: {
-      after: createAuthMiddleware(async (ctx) => {
-        //TODO: can we append the partial relative redirect URL to the FRONTEND_URL so it goes back to the same page?
-        ctx.redirect(env.FRONTEND_URL ?? "/");
-      }),
     },
     trustedOrigins: formatAllowedOrigins(env),
     database: drizzleAdapter(db as any, {
