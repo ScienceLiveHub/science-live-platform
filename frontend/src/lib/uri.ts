@@ -51,21 +51,38 @@ export function getUriEnd(uri: string) {
 
 /**
  * Detect whether it is valid nanupublication URI (without any additional suffix/path)
- *
  */
 export function isNanopubUri(uri: string) {
   // TODO: actually check that it is a valid URI as well? e.g. z.url()
   return !!getNanopubHash(uri);
 }
 
+/**
+ * Returns just the Hash part of the URI including 2 char prefix e.g. RAabcd...e23fg
+ */
 export function getNanopubHash(uri: string) {
   // Spec: https://github.com/trustyuri/trustyuri-spec
   // TODO: Could be any non-Base64 char before module code and hash "R....", not just a '/'
   return typeof uri !== "string"
     ? undefined
-    : uri.match(/\/(RA|RB|FA)([A-Za-z0-9_-]{43})$/)?.[2];
+    : uri.match(/\/(RA|RB|FA)([A-Za-z0-9_-]{43})(?=[/#]|$)/)?.[2];
 }
 
+/**
+ * Returns the suffix after the trustyURI hash (separated by either # or /)
+ * or undefined if no suffix
+ */
+export function getNanopubSuffix(uri: string) {
+  return typeof uri !== "string"
+    ? undefined
+    : uri.match(/\/(RA|RB|FA)[A-Za-z0-9_-]{43}[/#]([^/#?]+)/)?.[2];
+}
+
+export function toScienceLiveNPUri(sourceUri: string) {
+  return `https://platform.sciencelive4all.org/np/?uri=${encodeURIComponent(sourceUri)}`;
+}
+
+// TODO: use validDoi zod/regex instead?
 export function isDoiUri(uri: string) {
   return uri.startsWith("https://doi.org/10.");
 }

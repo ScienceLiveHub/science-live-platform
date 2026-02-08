@@ -65,11 +65,14 @@ describe("isNanopubUri", () => {
     expect(isNanopubUri(noHashUri)).toBe(false);
   });
 
-  it("should return false for URI where /np/ appears multiple times", () => {
+  it("should still return true for URI with suffix", () => {
     // This tests the search behavior - it should find the first occurrence
     const multiplePatternUri =
-      "https://w3id.org/np/RA1234567890abcdefghijklmnopqrstuvwxyzABCD/np/Ranother";
-    expect(isNanopubUri(multiplePatternUri)).toBe(false);
+      "https://w3id.org/np/RABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr/np/Ranother";
+    expect(isNanopubUri(multiplePatternUri)).toBe(true);
+    const hashsuffixPatternUri =
+      "https://w3id.org/np/RABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr#topic";
+    expect(isNanopubUri(hashsuffixPatternUri)).toBe(true);
   });
 
   it("should return true for URI with hash containing only letters", () => {
@@ -139,6 +142,7 @@ describe("isNanopubUri", () => {
 describe("getNanopubHash", () => {
   // 43 chars
   const hash = "abcdefghijklmno-qrstuvwxyzABCDEFGHIJKLMN_12";
+  const hash_alt = "qrstuvwxyzABCDEFGHIJKLMN-abcdefghijklmno_99";
 
   it("should extract valid RA hash", () => {
     const uri = `https://w3id.org/np/RA${hash}`;
@@ -160,13 +164,17 @@ describe("getNanopubHash", () => {
     expect(getNanopubHash(uri)).toBe(hash);
   });
 
-  it("should return undefined if url is suffixed", () => {
+  it("should still work if url is suffixed", () => {
     const uri1 = `https://w3id.org/np/FA${hash}/abc`;
-    expect(getNanopubHash(uri1)).toBeUndefined();
+    expect(getNanopubHash(uri1)).toBe(hash);
     const uri2 = `https://w3id.org/np/FA${hash}#abc`;
-    expect(getNanopubHash(uri2)).toBeUndefined();
+    expect(getNanopubHash(uri2)).toBe(hash);
     const uri3 = `https://w3id.org/np/FA${hash}/`;
-    expect(getNanopubHash(uri3)).toBeUndefined();
+    expect(getNanopubHash(uri3)).toBe(hash);
+    const uri4 = `https://w3id.org/np/RA${hash}/RA${hash_alt}`;
+    expect(getNanopubHash(uri4)).toBe(hash);
+    const uri5 = `https://w3id.org/np/RA${hash}/np/RA${hash_alt}`;
+    expect(getNanopubHash(uri5)).toBe(hash);
   });
 
   it("should return undefined for invalid hash length", () => {
