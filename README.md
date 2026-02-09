@@ -14,10 +14,13 @@ Science Live enables researchers to create FAIR (Findable, Accessible, Interoper
 | --------- | -------- | -------------------------------------------- |
 | ✅ Step 1 | Complete | Foundation setup (monorepo, React)           |
 | ✅ Step 2 | Complete | Database integration (PostgreSQL)            |
-| ✅ Step 3 | Complete | ORCID authentication                         |
-| 🔄 Step 4 | Next     | Nanopub parser and viewer with display modes |
-| ⏳ Step 5 | Planned  | Template processing engine                   |
-| ⏳ Step 6 | Planned  | Credit system implementation                 |
+| ✅ Step 3 | Complete | ORCID authentication and Org support         |
+| ✅ Step 4 | Complete | Nanopub parser and viewer with display modes |
+| ✅ Step 5 | Complete | Template processing engine for NP creation   |
+| 🔄 Step 6 | Next     | Zotero integration V1 release                |
+| ⏳ Step 7 | Planned  | AI tools for NP creation                     |
+| ⏳ Step 8 | Planned  | AI tools for search and info presentation    |
+| ⏳ Step 9 | Planned  | Credit system implementation                 |
 
 **Timeline:** Beta launch planned for January 2026, Public launch June 2026.
 
@@ -219,6 +222,7 @@ curl http://localhost:3001/health
 
 - **Node.js 22** - Runtime
 - **TypeScript** - Type safety
+- **Vitest** - Tests
 
 #### Frontend
 
