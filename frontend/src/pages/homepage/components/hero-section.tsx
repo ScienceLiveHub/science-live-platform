@@ -55,7 +55,7 @@ export function HeroSection() {
               className="text-base cursor-pointer"
               asChild
             >
-              <a href="https://sciencelive4all.org/zotero-nanopub-plugin/">
+              <a href="https://sciencelive4all.org/science-live-platform/">
                 <Puzzle />
                 Zotero Plugin
               </a>
