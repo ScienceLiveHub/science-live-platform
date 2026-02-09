@@ -6,3 +6,5 @@ package-lock.json
 yarn.lock
 pnpm-lock.yaml
 addon/content/styles/sciencelive.css
+docs/
+mkdocs.yml
