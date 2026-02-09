@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  extractDoisFromText,
   getNanopubHash,
   getUriEnd,
   getUriFragment,
@@ -504,5 +505,61 @@ describe("getUriEnd", () => {
         "RAbcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN_123",
       );
     });
+  });
+});
+
+describe("extractDoiFromText", () => {
+  it("should extract a valid DOI from text", () => {
+    const text = "See https://doi.org/10.1000/xyz123 for more info";
+    expect(extractDoisFromText(text)).toEqual(["10.1000/xyz123"]);
+  });
+
+  it("should extract DOI from text with trailing punctuation", () => {
+    const text = "See https://doi.org/10.1000/xyz123.";
+    expect(extractDoisFromText(text)).toEqual(["10.1000/xyz123"]);
+  });
+
+  it("should extract DOI with parentheses in suffix", () => {
+    const text = "See 10.1000/xyz(2023)45 for more info";
+    expect(extractDoisFromText(text)).toEqual(["10.1000/xyz(2023)45"]);
+  });
+
+  it("should extract DOI with underscores in suffix", () => {
+    const text = "See 10.1000/xyz_abc_123 for more info";
+    expect(extractDoisFromText(text)).toEqual(["10.1000/xyz_abc_123"]);
+  });
+
+  it("should extract DOI with hyphens in suffix", () => {
+    const text = "See 10.1000/xyz-abc-123 for more info";
+    expect(extractDoisFromText(text)).toEqual(["10.1000/xyz-abc-123"]);
+  });
+
+  it("should extract DOI from text with colon in suffix", () => {
+    const text = "See 10.1000/xyz:section for more info";
+    expect(extractDoisFromText(text)).toEqual(["10.1000/xyz:section"]);
+  });
+
+  it("should extract first DOI from text with multiple DOIs", () => {
+    const text =
+      "See 10.1000/first1, 10.1000/second2 and 10.1000/third3 for more info";
+    expect(extractDoisFromText(text)).toEqual([
+      "10.1000/first1",
+      "10.1000/second2",
+      "10.1000/third3",
+    ]);
+  });
+
+  it("should extract 10.1002 DOI (Wiley format)", () => {
+    const text = "See 10.1002/anie.202312345 for more info";
+    expect(extractDoisFromText(text)).toEqual(["10.1002/anie.202312345"]);
+  });
+
+  it("should return empty array when no DOI found", () => {
+    const text = "This text contains no DOI";
+    expect(extractDoisFromText(text)).toEqual([]);
+  });
+
+  it("should return empty array for empty string", () => {
+    expect(extractDoisFromText("")).toEqual([]);
   });
 });

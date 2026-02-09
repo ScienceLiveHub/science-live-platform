@@ -88,6 +88,17 @@ export function isDoiUri(uri: string) {
 }
 
 /**
+ * Returns array of all occuring matching DOIs in the string
+ */
+export function extractDoisFromText(input: string) {
+  const regex =
+    /(?:10\.1002\/[^\s]*[A-Z0-9]|10\.\d{4,9}\/[-._;()/:A-Z0-9]*[A-Z0-9])/gi;
+  const matches = input.match(regex);
+
+  return (matches as string[]) ?? [];
+}
+
+/**
  * Normalize an orcid URI
  */
 export function cleanOrcidUri(uri: string) {
