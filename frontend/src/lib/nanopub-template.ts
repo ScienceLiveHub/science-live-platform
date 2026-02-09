@@ -1,4 +1,4 @@
-import { DEFAULT_NANOPUB_URI, sign } from "@nanopub/nanopub-js";
+import { sign } from "@nanopub/nanopub-js";
 import * as RDFT from "@rdfjs/types";
 import { DataFactory, Quad, Store, Writer } from "n3";
 import z from "zod";
@@ -13,6 +13,8 @@ import {
 import { cleanOrcidUri, getUriEnd, isNanopubUri } from "./uri";
 
 const { namedNode, literal, blankNode } = DataFactory;
+
+export const SCIENCELIVE_NANOPUB_URI = "https://w3id.org/sciencelive/np/";
 
 // Template placeholder types
 // Get these from https://w3id.org/np/o/ntemplate/
@@ -164,7 +166,7 @@ export class NanopubTemplate extends NanopubStore {
     },
     privateKey: string,
   ) {
-    const baseUri = DEFAULT_NANOPUB_URI;
+    const baseUri = SCIENCELIVE_NANOPUB_URI;
     const newNanopubUri = baseUri;
     const newSubUri = `${newNanopubUri}`;
 

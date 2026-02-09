@@ -50,10 +50,10 @@ export default function CreateNanopub() {
     setSearchParams(next);
   };
 
-  const identity = currentUser?.orcidConnected
+  const identity = currentUser
     ? {
         name: currentUser.name,
-        orcid: currentUser.orcidId,
+        orcid: currentUser?.orcidConnected ? currentUser.orcidId : undefined,
         privateKey: EXAMPLE_privateKey, // TODO: Replace with real key management
       }
     : null;
@@ -67,6 +67,9 @@ export default function CreateNanopub() {
         onTemplateUriChange={handleTemplateChange}
         embedded={false}
         demoMode={true} // TODO: currently hard coded as demo for web app
+        orcidLinkAction={async () =>
+          await authClient.linkSocial({ provider: "orcid" })
+        } // TODO: ideally this should open in a new window so it doesn't wipe out the form entries
       />
     </main>
   );
