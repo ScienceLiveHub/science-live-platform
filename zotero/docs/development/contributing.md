@@ -28,7 +28,7 @@ pip install mkdocs-material
 - Then you can generate the documentation:
 
 ```
-mkdocs build
+mkdocs build -f zotero/mkdocs.yml
 ```
 
 - And serve it to view it:
