@@ -48,7 +48,14 @@ export default function CitationWithCiTO({
    */
   const schema = z.object({
     article: z.url(),
-    st02: z.array(object({ cites: z.string(), cited: z.url() })).length(1),
+    st02: z
+      .array(
+        object({
+          cites: z.string("Select a type").nonempty(),
+          cited: z.url("Invalid URL"),
+        }),
+      )
+      .nonempty("Add at least one citation"),
   });
 
   const { Form } = useFormedible({
