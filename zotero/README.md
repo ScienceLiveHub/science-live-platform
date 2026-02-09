@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Zotero](https://img.shields.io/badge/Zotero-7.0%2B-red)](https://www.zotero.org/)
-[![Version](https://img.shields.io/github/v/release/ScienceLiveHub/zotero-nanopub-plugin)](https://github.com/ScienceLiveHub/zotero-nanopub-plugin/releases)
+[![Version](https://img.shields.io/github/v/release/ScienceLiveHub/science-live-platform)](https://github.com/ScienceLiveHub/science-live-platform/releases)
 
 Transform your Zotero library into a semantic web publishing platform. Create, sign, and publish nanopublications **entirely within Zotero** using an embedded form interface.
 
@@ -126,12 +126,12 @@ Flexible semantic statements:
 
 ## 📘 Documentation
 
-**Full documentation:** http://sciencelive4all.org/zotero-nanopub-plugin/
+**Full documentation:** http://sciencelive4all.org/zotero-plugin/
 
-- [Installation Guide](http://sciencelive4all.org/zotero-nanopub-plugin/getting-started/installation/)
-- [Quick Start](http://sciencelive4all.org/zotero-nanopub-plugin/getting-started/quick-start/)
-- [Template Guide](http://sciencelive4all.org/zotero-nanopub-plugin/user-guide/templates/)
-- [Architecture](http://sciencelive4all.org/zotero-nanopub-plugin/technical/architecture/)
+- [Installation Guide](http://sciencelive4all.org/zotero-plugin/getting-started/installation/)
+- [Quick Start](http://sciencelive4all.org/zotero-plugin/getting-started/quick-start/)
+- [Template Guide](http://sciencelive4all.org/zotero-plugin/user-guide/templates/)
+- [Architecture](http://sciencelive4all.org/zotero-plugin/technical/architecture/)
 
 ---
 
@@ -179,6 +179,6 @@ Built on:
 
 ## 📧 Contact
 
-- **Issues:** [GitHub Issues](https://github.com/ScienceLiveHub/zotero-nanopub-plugin/issues)
+- **Issues:** [GitHub Issues](https://github.com/ScienceLiveHub/science-live-platform/issues)
 - **Email:** contact@vitenhub.no
 - **Website:** https://sciencelive4all.org
