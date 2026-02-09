@@ -18,7 +18,7 @@
   "bugs": {
     "url": "https://github.com/ScienceLiveHub/science-live-platform/issues"
   },
-  "homepage": "https://sciencelive4all.org/zotero-plugin/",
+  "homepage": "https://sciencelive4all.org/science-live-platform/",
   "scripts": {
     "start": "npm run build:embedded-css && zotero-plugin serve",
     "build": "npm run build:embedded-css && zotero-plugin build && tsc --noEmit",

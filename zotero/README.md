@@ -126,12 +126,12 @@ Flexible semantic statements:
 
 ## 📘 Documentation
 
-**Full documentation:** http://sciencelive4all.org/zotero-plugin/
+**Full documentation:** https://sciencelive4all.org/science-live-platform/
 
-- [Installation Guide](http://sciencelive4all.org/zotero-plugin/getting-started/installation/)
-- [Quick Start](http://sciencelive4all.org/zotero-plugin/getting-started/quick-start/)
-- [Template Guide](http://sciencelive4all.org/zotero-plugin/user-guide/templates/)
-- [Architecture](http://sciencelive4all.org/zotero-plugin/technical/architecture/)
+- [Installation Guide](https://sciencelive4all.org/science-live-platform/getting-started/installation/)
+- [Quick Start](https://sciencelive4all.org/science-live-platform/getting-started/quick-start/)
+- [Template Guide](https://sciencelive4all.org/science-live-platform/user-guide/templates/)
+- [Architecture](https://sciencelive4all.org/science-live-platform/technical/architecture/)
 
 ---
 
