@@ -28,6 +28,7 @@ import { Switch } from "@/components/ui/switch";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NanopubTemplate } from "@/lib/nanopub-template";
 import { publishRdf } from "@/lib/rdf";
+import { EXAMPLE_privateKey } from "@/lib/uri";
 import {
   ChevronDown,
   ChevronRight,
@@ -91,6 +92,13 @@ export interface NanopubEditorProps {
    * If true, forces ExampleNanopublication property for generated RDF.
    */
   demoMode?: boolean;
+
+  /**
+   * A function to call if an ORCID is not found, to help the user correct it.
+   */
+  orcidLinkAction?: (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) => void;
 }
 
 export function TemplateCombobox({
@@ -151,6 +159,7 @@ export default function NanopubEditor({
   prefilledData,
   publishServer,
   onPublished,
+  orcidLinkAction,
   embedded = false,
   demoMode = false,
 }: NanopubEditorProps) {
@@ -204,6 +213,28 @@ export default function NanopubEditor({
       return;
     }
 
+    if (!identity.orcid) {
+      toast.error("ORCID Required", {
+        description:
+          "Your account must be linked to your ORCID to publish nanopublications.",
+        action: orcidLinkAction
+          ? {
+              label: "Link ORCID",
+              onClick: orcidLinkAction,
+            }
+          : undefined,
+      });
+      return;
+    }
+
+    if (!identity.privateKey && !demoMode) {
+      toast.error("No Private Key", {
+        description:
+          "Enter a private key in your account or use Demo Mode to sign with an example key.",
+      });
+      return;
+    }
+
     // Generate/Sign
     try {
       const template = await NanopubTemplate.load(templateUri!);
@@ -214,7 +245,7 @@ export default function NanopubEditor({
           name: identity.name,
           isExample: demoMode || data?.isExampleNanopub === true, // Checkbox in AnyStatementTemplate
         },
-        identity.privateKey,
+        identity.privateKey || EXAMPLE_privateKey,
       );
 
       setGeneratedRdf(signed.signedRdf);
