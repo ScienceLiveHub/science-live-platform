@@ -1,5 +1,5 @@
-PREFIX this: <https://w3id.org/np/RAX2Z9YIWJT0IffS6c12O0OFRH1tWQ3sYF1qBNGn1mr5c>
-PREFIX sub: <https://w3id.org/np/RAX2Z9YIWJT0IffS6c12O0OFRH1tWQ3sYF1qBNGn1mr5c/>
+PREFIX this: <https://w3id.org/sciencelive/np/RABzTMDhUjvDlnLPYan3aIs42YIDj5IwS43-xxwKgv3c4>
+PREFIX sub: <https://w3id.org/sciencelive/np/RABzTMDhUjvDlnLPYan3aIs42YIDj5IwS43-xxwKgv3c4/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -18,7 +18,7 @@ PREFIX biolink: <https://w3id.org/biolink/vocab/>
 PREFIX infores: <https://w3id.org/biolink/infores/>
 
 GRAPH sub:Head {
-  <https://w3id.org/np/RAX2Z9YIWJT0IffS6c12O0OFRH1tWQ3sYF1qBNGn1mr5c> a np:Nanopublication;
+  <https://w3id.org/sciencelive/np/RABzTMDhUjvDlnLPYan3aIs42YIDj5IwS43-xxwKgv3c4> a np:Nanopublication;
     np:hasAssertion sub:assertion;
     np:hasProvenance sub:provenance;
     np:hasPublicationInfo sub:pubinfo.
@@ -30,15 +30,15 @@ GRAPH sub:assertion {
     <http://purl.org/spar/cito/hasQuotedText> "We pooled data from 10 case-control studies participating in the International Lymphoma Epidemiology Consortium, including 9229 cases and 9626 controls from North America, the European Union and Australia";
     rdfs:comment "Quote mentions the 3 broad regions where cases were taken.".
 
+  <https://w3id.org/np/o/ntemplate/CREATOR>
+    <http://purl.org/spar/cito/quotes> <https://doi.org/10.1136/oemed-2022-108371>.
+
   sub:na-eu-au
     <http://www.opengis.net/ont/geosparql#asWKT> "GEOMETRYCOLLECTION(POLYGON((-162.94921875000003 70.61261423801925, -169.62890625000003 62.75472592723178, -161.54296875000003 57.326521225217064, -147.83203125000003 58.99531118795094, -117.94921875000001 27.994401411046148, -76.81640625000001 25.48295117535531, -46.58203125000001 54.36775852406841, -66.97265625000001 70.02058730174062, -162.94921875000003 70.61261423801925)), POLYGON((31.113281250000004 69.53451763078358, 39.90234375000001 44.08758502824518, 20.214843750000004 35.17380831799959, -11.77734375 36.59788913307022, -11.77734375 58.63121664342478, 16.347656250000004 69.77895177646761, 31.113281250000004 69.53451763078358)), POLYGON((131.76654397038808 -10.173053808111849, 111.02435647038811 -21.972369665708793, 115.94623147038811 -36.904907337367746, 130.7118564703881 -32.57346140454925, 145.12591897038808 -43.603290590722224, 156.02435647038814 -27.711522806200023, 143.7196689703881 -10.173053808111849, 131.76654397038808 -10.173053808111849)))".
 
   sub:northamerica-eu-australia a <http://www.opengis.net/ont/geosparql#Feature>;
     <http://www.opengis.net/ont/geosparql#hasGeometry> sub:na-eu-au;
     rdfs:label "North America, European Union and Australia".
-
-  <https://w3id.org/np/o/ntemplate/CREATOR>
-    <http://purl.org/spar/cito/quotes> <https://doi.org/10.1136/oemed-2022-108371>.
 }
 
 GRAPH sub:provenance {
@@ -50,7 +50,7 @@ GRAPH sub:pubinfo {
   orcid:0000-9999-1234-9999
     foaf:name "Test User1".
 
-  <https://w3id.org/np/RAX2Z9YIWJT0IffS6c12O0OFRH1tWQ3sYF1qBNGn1mr5c>
+  <https://w3id.org/sciencelive/np/RABzTMDhUjvDlnLPYan3aIs42YIDj5IwS43-xxwKgv3c4>
     dcterms:created "2025-01-01T00:00:00.000Z"^^xsd:dateTime;
     dcterms:creator orcid:0000-9999-1234-9999;
     dcterms:license <https://creativecommons.org/licenses/by/4.0/>;
@@ -63,7 +63,7 @@ GRAPH sub:pubinfo {
   sub:sig
     npx:hasAlgorithm "RSA";
     npx:hasPublicKey "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzUBHKF13IXaU5u9U4nYcq9QTCafI2HlYO/6C25hOVjidIYpUh/25or8sAfh6Ezq+v97aYp8NAcLNjNpv+yy5w2mnmAeUQtg6A9gSgWuPfcjh2t6xjBjof74sghjiW4xTyDZTIbCM7K/sL5LR8NCXJX1udPJR5rnY80df+gdzj3W4+l8NvdlRyEbdlncgpjxHPP98787snEN8bFEZzMUaAHRaiH+Yj99KZ/bqj/hMda1GmeJW61PALjT8rN34iDw1U2ILIeGpWPyHGL3eTgr59rsOC6F3fyWW/RCbktSmCvb/w0YqwnZb0jYeIcuVBO/5zYJlw7d8WIw38zmDf/DfYQIDAQAB";
-    npx:hasSignature "cmr7pDZP19D6q35I0RzpsZ9NKxUOYfYJRjqp51sSbcDZi9j0bB/Kka8MdEJFxsnzt5+6Amr0U2Y0OKNvdsHzJ9ock3VJL0m6Jxmj0tHSqWqZ8AdE2tOnyPY1SrB8sGsUsKFoRm4PWnZ1d9+obrN5GEwjhWdUjCBmJWqARXOh6o8R9YL5OjKinjVkYbHtGCiGMiLA3H6hpna3ZQ8xFVBlqviUlYAh2ER0SSOMJQ4DU7UuV9BA5HCeTmo8g5PeR4xkC5D6QJAlAatpr6Wm8mKFW4wkMRgjmw0ExUQhL2rIRVAmZCpe1FqjIOM++qbX7TjOvw1ePGejN9gf/OxHp3DeqQ==";
-    npx:hasSignatureTarget <https://w3id.org/np/RAX2Z9YIWJT0IffS6c12O0OFRH1tWQ3sYF1qBNGn1mr5c>;
+    npx:hasSignature "dnFlhaY21nUlUdCDRYefHnZBIluC+3qMN2AjjWylZB0gQGXpxFCTut6EiraCuUcmaRNTQFXp76n3X6WSHxNrI+B6DOenLUDNXB8Sh+DEUAOy1Uf+ocofnAkGag8pk08X+EFueWEPzVGAWg650ElpVhr4Hp2FhqlS3flHtcswUaDmmD9VDWNGcHQ4qiieWRrS6FHItYJJh6rkGuffNvqlslNvn+HQ/Uz2bJyxjaaApn0nF39yazj8F1XdQ9gj9CztYvsK/JrlNZJlfADX8mIYs9LuQ9WhlV4ZjIEKWyOwiTcivjgiKu0WzY7yKOOXnz5xAv2w/G5UTKD54NmNV3ejgg==";
+    npx:hasSignatureTarget <https://w3id.org/sciencelive/np/RABzTMDhUjvDlnLPYan3aIs42YIDj5IwS43-xxwKgv3c4>;
     npx:signedBy orcid:0000-9999-1234-9999.
 }

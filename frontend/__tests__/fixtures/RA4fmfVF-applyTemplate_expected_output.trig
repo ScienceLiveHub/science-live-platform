@@ -1,5 +1,5 @@
-PREFIX this: <https://w3id.org/np/RAHNzHFIMP-4AXxwIjBndzWXKwc2YVgLbJ2VFEhKshD4M>
-PREFIX sub: <https://w3id.org/np/RAHNzHFIMP-4AXxwIjBndzWXKwc2YVgLbJ2VFEhKshD4M/>
+PREFIX this: <https://w3id.org/sciencelive/np/RAtGIs_afhd5xb3qH5Vmw9RtAkKB3J31hp8lS3I6p0Ivk>
+PREFIX sub: <https://w3id.org/sciencelive/np/RAtGIs_afhd5xb3qH5Vmw9RtAkKB3J31hp8lS3I6p0Ivk/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -18,7 +18,7 @@ PREFIX biolink: <https://w3id.org/biolink/vocab/>
 PREFIX infores: <https://w3id.org/biolink/infores/>
 
 GRAPH sub:Head {
-  <https://w3id.org/np/RAHNzHFIMP-4AXxwIjBndzWXKwc2YVgLbJ2VFEhKshD4M> a np:Nanopublication;
+  <https://w3id.org/sciencelive/np/RAtGIs_afhd5xb3qH5Vmw9RtAkKB3J31hp8lS3I6p0Ivk> a np:Nanopublication;
     np:hasAssertion sub:assertion;
     np:hasProvenance sub:provenance;
     np:hasPublicationInfo sub:pubinfo.
@@ -42,7 +42,7 @@ GRAPH sub:pubinfo {
   orcid:0000-9999-1234-9999
     foaf:name "Test User1".
 
-  <https://w3id.org/np/RAHNzHFIMP-4AXxwIjBndzWXKwc2YVgLbJ2VFEhKshD4M>
+  <https://w3id.org/sciencelive/np/RAtGIs_afhd5xb3qH5Vmw9RtAkKB3J31hp8lS3I6p0Ivk>
     dcterms:created "2025-01-01T00:00:00.000Z"^^xsd:dateTime;
     dcterms:creator orcid:0000-9999-1234-9999;
     dcterms:license <https://creativecommons.org/licenses/by/4.0/>;
@@ -55,7 +55,7 @@ GRAPH sub:pubinfo {
   sub:sig
     npx:hasAlgorithm "RSA";
     npx:hasPublicKey "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzUBHKF13IXaU5u9U4nYcq9QTCafI2HlYO/6C25hOVjidIYpUh/25or8sAfh6Ezq+v97aYp8NAcLNjNpv+yy5w2mnmAeUQtg6A9gSgWuPfcjh2t6xjBjof74sghjiW4xTyDZTIbCM7K/sL5LR8NCXJX1udPJR5rnY80df+gdzj3W4+l8NvdlRyEbdlncgpjxHPP98787snEN8bFEZzMUaAHRaiH+Yj99KZ/bqj/hMda1GmeJW61PALjT8rN34iDw1U2ILIeGpWPyHGL3eTgr59rsOC6F3fyWW/RCbktSmCvb/w0YqwnZb0jYeIcuVBO/5zYJlw7d8WIw38zmDf/DfYQIDAQAB";
-    npx:hasSignature "EAnme3mkmZSVPFMSSgrQDAFpt9U6vsBaTVoR3yYO72O/3rU9KrtQ426I3iOY+GYOFKfYWlVevrZLVoA2zBvWmRWsYlRqQINIcdOoKhNiQht1FHCQDSq5ndemj0NXtTNdJ4YB71feT/g3u6O7TE+0SE2KXj4vO6puA8Y1zLcZtrNLlscmI268H9HZEK5YIz2Nd7wz6FfvV4eQy0/Brs7gWD4JjbRJMBX0yVO10xvUwX/zHKmitWbaKRvnkonoxAqxy3KnXlfbDsPxXBok4QVZlxSmNjI+8LbU33TWtpS1nsC0T762KEox3KEw9AxDGdXw8ka6XFlaeCgH4TzjGguKuQ==";
-    npx:hasSignatureTarget <https://w3id.org/np/RAHNzHFIMP-4AXxwIjBndzWXKwc2YVgLbJ2VFEhKshD4M>;
+    npx:hasSignature "JPEo5utnd4FyC/c6LV4jcvHfNdSz30RFR5EoO5+EIi8OEiq85Vef1jQG1/DgxadgvE/2EKOu8UVJbzUshdBTSCR2pqv1TGq2/V999z6/EhKtc3X/wOVlAgwzT4di0CaShGYZrRim2oa1Hrj7CnWnGo8FDtcTRzmUvdXbaq+F7HlbFrIYI3HlRObt/Wj+C6DJ6wcxBpotoTVRfWMXKd3Ka4ZzG2jSvfDGhNqV+/CJl2Pi8ZEmQhLk2lZbEdWaS7mZzXUZczq0r/dw9o82CEO5KeTntDkGqxLjutYLysZ6rCa/yk1OCS2npJh1ViOg5pmv/iO2cDo+TgPic9lr0u1Stw==";
+    npx:hasSignatureTarget <https://w3id.org/sciencelive/np/RAtGIs_afhd5xb3qH5Vmw9RtAkKB3J31hp8lS3I6p0Ivk>;
     npx:signedBy orcid:0000-9999-1234-9999.
 }
