@@ -245,25 +245,114 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
     [itemIds, value, fieldApi, sortable],
   );
 
+  // Track per-item touched state since these are mock field APIs
+  const [touchedItems, setTouchedItems] = useState<Set<number>>(
+    () => new Set(),
+  );
+
+  // Parse structured validation errors from the parent array field.
+  // The validator in use-formedible.tsx returns a JSON-encoded array of
+  // {path, message} objects for array fields so we can distribute errors
+  // to individual items and their sub-fields.
+  const parsedErrors = useMemo(() => {
+    const parentErrors = fieldApi.state?.meta?.errors as unknown[];
+    if (!parentErrors || parentErrors.length === 0) return {};
+
+    const errorsByItem: Record<
+      number,
+      { itemErrors: string[]; subFieldErrors: Record<string, string[]> }
+    > = {};
+
+    for (const err of parentErrors) {
+      if (typeof err !== "string") continue;
+
+      // Try to parse as JSON array of structured issues
+      try {
+        const issues = JSON.parse(err) as Array<{
+          path: (string | number)[];
+          message: string;
+        }>;
+        if (Array.isArray(issues)) {
+          for (const issue of issues) {
+            if (!issue.path || issue.path.length === 0) continue;
+
+            const itemIndex =
+              typeof issue.path[0] === "number" ? issue.path[0] : -1;
+            if (itemIndex < 0) continue;
+
+            if (!errorsByItem[itemIndex]) {
+              errorsByItem[itemIndex] = {
+                itemErrors: [],
+                subFieldErrors: {},
+              };
+            }
+
+            if (issue.path.length > 1) {
+              // Sub-field error (e.g., path: [0, "cites"])
+              const subFieldName = String(issue.path[1]);
+              if (!errorsByItem[itemIndex].subFieldErrors[subFieldName]) {
+                errorsByItem[itemIndex].subFieldErrors[subFieldName] = [];
+              }
+              errorsByItem[itemIndex].subFieldErrors[subFieldName].push(
+                issue.message,
+              );
+            } else {
+              // Item-level error
+              errorsByItem[itemIndex].itemErrors.push(issue.message);
+            }
+          }
+          continue;
+        }
+      } catch {
+        // Not JSON — treat as a plain error string for the whole array
+      }
+    }
+
+    return errorsByItem;
+  }, [fieldApi.state?.meta?.errors]);
+
   // Create a mock field API for each item
   const createItemFieldApi = useCallback(
     (index: number) => {
+      // Get item-level errors from parsed structured errors
+      const itemParsedErrors = parsedErrors[index];
+      const itemErrors = itemParsedErrors?.itemErrors || [];
+
+      // Item is touched if:
+      // - the user interacted with it directly (blur), OR
+      // - the form has been submitted (submissionAttempts > 0), OR
+      // - the parent array field is touched (e.g., from form validation)
+      const formSubmitted =
+        (fieldApi.form?.state as any)?.submissionAttempts > 0;
+      const parentTouched = fieldApi.state?.meta?.isTouched ?? false;
+      const itemTouched =
+        touchedItems.has(index) || formSubmitted || parentTouched;
+
       return {
         name: `${name}[${index}]`,
         state: {
           value: value[index],
           meta: {
-            errors: [],
-            isTouched: false,
+            errors: itemErrors,
+            isTouched: itemTouched,
             isValidating: false,
+            // Attach sub-field errors so object-field can pick them up
+            _subFieldErrors: itemParsedErrors?.subFieldErrors || {},
           },
         },
         handleChange: (newValue: unknown) => updateItem(index, newValue),
-        handleBlur: () => fieldApi.handleBlur(),
+        handleBlur: () => {
+          setTouchedItems((prev) => {
+            const next = new Set(prev);
+            next.add(index);
+            return next;
+          });
+          fieldApi.handleBlur();
+        },
         form: fieldApi.form,
       };
     },
-    [name, value, updateItem, fieldApi],
+    [name, value, updateItem, fieldApi, touchedItems, parsedErrors],
   );
 
   const canAddMore = value.length < maxItems;

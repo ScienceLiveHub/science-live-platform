@@ -1,5 +1,6 @@
 import { getLocaleID, getString } from "../utils/locale";
 import { TEMPLATE_METADATA } from "../../../frontend/src/pages/np/create/components/templates/registry-metadata";
+import { extractDoisFromText } from "../../../frontend/src/lib/uri";
 
 function logged(
   target: any,
@@ -35,6 +36,121 @@ function isDarkMode(win?: _ZoteroTypes.MainWindow) {
   return !!win.matchMedia("(prefers-color-scheme: dark)")?.matches;
 }
 
+/**
+ * Open a dialog window for creating a new nanopub, using a given template
+ * and optional prefilled form data.
+ */
+function openNanopubCreationDialog(templateUri: string, prefilledData: any) {
+  // Open the form with pre-filled data
+  const win = Zotero.getMainWindow();
+  const dark = isDarkMode(win);
+
+  // Open an independent window (dialog=no) so it's resizable and non-modal.
+  win.openDialog(
+    `chrome://${addon.data.config.addonRef}/content/createNanopub.xhtml`,
+    "",
+    "chrome,dialog=no,modal=no,centerscreen,resizable,width=900,height=700",
+    templateUri, // Citation with CiTO
+    prefilledData,
+    dark,
+  );
+}
+
+/**
+ * Get the annotation item based on key
+ */
+async function getAnnotationItem(reader: any, annotationKey: string) {
+  let annotationItem: Zotero.Item | false | undefined = undefined;
+
+  // First try as an ID (number)
+  if (!isNaN(Number(annotationKey))) {
+    annotationItem = await Zotero.Items.getAsync(Number(annotationKey));
+    ztoolkit.log(`ReaderIntegration: Tried as ID, found: ${!!annotationItem}`);
+  }
+
+  // If not found, try to find it via the reader's PDF item using the key
+  if (!annotationItem && reader.itemID) {
+    ztoolkit.log(
+      `ReaderIntegration: Trying via reader.itemID: ${reader.itemID}`,
+    );
+    const pdfItem = await Zotero.Items.getAsync(reader.itemID);
+    if (pdfItem) {
+      const annotations = pdfItem.getAnnotations();
+      ztoolkit.log(
+        `ReaderIntegration: PDF has ${annotations.length} annotations`,
+      );
+      annotationItem = annotations.find(
+        (a: any) => a.key === annotationKey || a.id == annotationKey,
+      );
+      ztoolkit.log(
+        `ReaderIntegration: Found via key match: ${!!annotationItem}`,
+      );
+    }
+  }
+
+  // Try one more approach - get by key directly
+  if (!annotationItem) {
+    try {
+      const libraryID = Zotero.Libraries.userLibraryID;
+      annotationItem = await Zotero.Items.getByLibraryAndKeyAsync(
+        libraryID,
+        annotationKey,
+      );
+      ztoolkit.log(
+        `ReaderIntegration: Tried getByLibraryAndKeyAsync, found: ${!!annotationItem}`,
+      );
+    } catch (e) {
+      ztoolkit.log(`ReaderIntegration: getByLibraryAndKeyAsync failed: ${e}`);
+    }
+  }
+
+  if (!annotationItem) {
+    ztoolkit.log(
+      "ReaderIntegration: Annotation not found for key: " + annotationKey,
+    );
+    alert("Error", "Annotation not found. Please try again.");
+    return undefined;
+  }
+
+  return annotationItem;
+}
+
+/**
+ * Process quote text - split if > 500 characters
+ */
+function splitIfTooLong(text: string): {
+  quoteStart: string;
+  quoteEnd?: string;
+} {
+  if (!text || text.length <= 500) {
+    return { quoteStart: text };
+  }
+
+  const firstPart = text.substring(0, 500);
+  const lastSentenceEnd = Math.max(
+    firstPart.lastIndexOf(". "),
+    firstPart.lastIndexOf("! "),
+    firstPart.lastIndexOf("? "),
+  );
+
+  let quoteStart: string;
+  let remainingText: string;
+
+  if (lastSentenceEnd > 200) {
+    quoteStart = text.substring(0, lastSentenceEnd + 1).trim();
+    remainingText = text.substring(lastSentenceEnd + 1).trim();
+  } else {
+    quoteStart = firstPart.trim();
+    remainingText = text.substring(500).trim();
+  }
+
+  const sentences = remainingText.split(/(?<=[.!?])\s+/);
+  const quoteEnd =
+    sentences.length > 0 ? sentences[sentences.length - 1].trim() : undefined;
+
+  return { quoteStart, quoteEnd };
+}
+
 export class ScienceLivePlugin {
   // Create Nanopublication menu and dynamically generated submenus(from predefined TEMPLATE_METADATA)
   static createNanopubMenu = () => ({
@@ -46,17 +162,7 @@ export class ScienceLivePlugin {
       label: `${v.icon} ${v.name}`,
       commandListener: (ev: any) => {
         ev?.stopPropagation?.();
-        // Open an independent window (dialog=no) so it's resizable and non-modal.
-        const win = Zotero.getMainWindow();
-        const dark = isDarkMode(win);
-        win.openDialog(
-          `chrome://${addon.data.config.addonRef}/content/createNanopub.xhtml`,
-          "",
-          "chrome,dialog=no,modal=no,centerscreen,resizable,width=900,height=700",
-          k,
-          null,
-          dark,
-        );
+        openNanopubCreationDialog(k, null);
       },
     })),
   });
@@ -261,8 +367,17 @@ export class ScienceLivePlugin {
       append({
         label: "✨ Create Nanopublication from Annotation",
         onCommand: async () => {
-          ztoolkit.log("ReaderIntegration: Menu item clicked");
           await this.createNanopubFromAnnotation(reader, annotationIds[0]);
+        },
+      });
+
+      append({
+        label: "📚 Create Citation Nanopublication",
+        onCommand: async () => {
+          await this.createCitationNanopubFromAnnotation(
+            reader,
+            annotationIds[0],
+          );
         },
       });
 
@@ -499,75 +614,59 @@ export class ScienceLivePlugin {
         `ReaderIntegration: Creating nanopub from annotation key: ${annotationKey}`,
       );
 
-      let annotationItem: any = null;
-
-      // First try as an ID (number)
-      if (!isNaN(Number(annotationKey))) {
-        annotationItem = await Zotero.Items.getAsync(Number(annotationKey));
-        ztoolkit.log(
-          `ReaderIntegration: Tried as ID, found: ${!!annotationItem}`,
-        );
-      }
-
-      // If not found, try to find it via the reader's PDF item using the key
-      if (!annotationItem && reader.itemID) {
-        ztoolkit.log(
-          `ReaderIntegration: Trying via reader.itemID: ${reader.itemID}`,
-        );
-        const pdfItem = await Zotero.Items.getAsync(reader.itemID);
-        if (pdfItem) {
-          const annotations = pdfItem.getAnnotations();
-          ztoolkit.log(
-            `ReaderIntegration: PDF has ${annotations.length} annotations`,
-          );
-          annotationItem = annotations.find(
-            (a: any) => a.key === annotationKey || a.id == annotationKey,
-          );
-          ztoolkit.log(
-            `ReaderIntegration: Found via key match: ${!!annotationItem}`,
-          );
-        }
-      }
-
-      // Try one more approach - get by key directly
+      const annotationItem = await getAnnotationItem(reader, annotationKey);
       if (!annotationItem) {
-        try {
-          const libraryID = Zotero.Libraries.userLibraryID;
-          annotationItem = await Zotero.Items.getByLibraryAndKeyAsync(
-            libraryID,
-            annotationKey,
-          );
-          ztoolkit.log(
-            `ReaderIntegration: Tried getByLibraryAndKeyAsync, found: ${!!annotationItem}`,
-          );
-        } catch (e) {
-          ztoolkit.log(
-            `ReaderIntegration: getByLibraryAndKeyAsync failed: ${e}`,
-          );
-        }
-      }
-
-      if (!annotationItem) {
-        ztoolkit.log(
-          "ReaderIntegration: Annotation not found for key: " + annotationKey,
-        );
-        alert("Error", "Annotation not found. Please try again.");
         return;
       }
 
       // Get annotation data
-      const annotationType = annotationItem.annotationType;
       const annotationText = annotationItem.annotationText || "";
       const annotationComment = annotationItem.annotationComment || "";
       const pageLabel = annotationItem.annotationPageLabel || "";
 
-      ztoolkit.log(`ReaderIntegration: Annotation type: ${annotationType}`);
-      ztoolkit.log(
-        `ReaderIntegration: Annotation text length: ${annotationText.length}`,
+      // Process the quote text
+      const { quoteStart, quoteEnd } = splitIfTooLong(annotationText);
+
+      // Prepare annotation data for the form
+      const annotationData = {
+        quotation: quoteStart,
+        "quotation-end": quoteEnd,
+        comment: annotationComment,
+        paper: pageLabel,
+        quoteType: quoteEnd && quoteEnd.length > 0 ? "ends" : "whole",
+      };
+
+      openNanopubCreationDialog(
+        "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU",
+        annotationData,
       );
+    } catch (err: any) {
       ztoolkit.log(
-        `ReaderIntegration: Annotation comment length: ${annotationComment.length}`,
+        "ReaderIntegration: Failed to create nanopub from annotation:",
+        err,
       );
+      alert("Error", `Failed to create nanopublication:\n${err.message}`);
+    }
+  }
+
+  /**
+   * Create Citation nanopublication from an annotation
+   */
+  private static async createCitationNanopubFromAnnotation(
+    reader: any,
+    annotationKey: string,
+  ) {
+    try {
+      ztoolkit.log(
+        `ReaderIntegration: Creating Citation nanopub from annotation key: ${annotationKey}`,
+      );
+      const annotationItem = await getAnnotationItem(reader, annotationKey);
+      if (!annotationItem) {
+        return;
+      }
+
+      // Get annotation data
+      const annotationText = annotationItem.annotationText || "";
 
       // Get the PDF item and parent item
       const pdfItem = annotationItem.parentItem;
@@ -584,31 +683,22 @@ export class ScienceLivePlugin {
         return;
       }
 
-      ztoolkit.log(
-        `ReaderIntegration: Parent item: ${parentItem.getField("title")}`,
-      );
+      const article = parentItem.getField("DOI") || undefined;
+      const cited = extractDoisFromText(annotationText);
+      const st02 = [];
+      for (const c of cited) {
+        st02.push({ cited: `https://doi.org/${c}` });
+      }
 
-      // Process the quote text
-      const { quoteStart, quoteEnd } = this.processQuoteText(annotationText);
-
-      // Prepare annotation data for the form
+      // Prepare data for the form
       const annotationData = {
-        quotation: quoteStart,
-        "quotation-end": quoteEnd,
-        comment: annotationComment,
-        paper: pageLabel,
-        quoteType: quoteEnd && quoteEnd.length > 0 ? "ends" : "whole",
+        article, // DOI from Zotero Item
+        st02,
       };
-      // Open the form with pre-filled data
-      const win = Zotero.getMainWindow();
-      const dark = isDarkMode(win);
-      win.openDialog(
-        `chrome://${addon.data.config.addonRef}/content/createNanopub.xhtml`,
-        "",
-        "chrome,dialog=no,modal=no,centerscreen,resizable,width=900,height=700",
-        "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU", // Annotate a paper quotation
+
+      openNanopubCreationDialog(
+        "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo",
         annotationData,
-        dark,
       );
     } catch (err: any) {
       ztoolkit.log(
@@ -617,42 +707,6 @@ export class ScienceLivePlugin {
       );
       alert("Error", `Failed to create nanopublication:\n${err.message}`);
     }
-  }
-
-  /**
-   * Process quote text - split if > 500 characters
-   */
-  private static processQuoteText(text: string): {
-    quoteStart: string;
-    quoteEnd?: string;
-  } {
-    if (!text || text.length <= 500) {
-      return { quoteStart: text };
-    }
-
-    const firstPart = text.substring(0, 500);
-    const lastSentenceEnd = Math.max(
-      firstPart.lastIndexOf(". "),
-      firstPart.lastIndexOf("! "),
-      firstPart.lastIndexOf("? "),
-    );
-
-    let quoteStart: string;
-    let remainingText: string;
-
-    if (lastSentenceEnd > 200) {
-      quoteStart = text.substring(0, lastSentenceEnd + 1).trim();
-      remainingText = text.substring(lastSentenceEnd + 1).trim();
-    } else {
-      quoteStart = firstPart.trim();
-      remainingText = text.substring(500).trim();
-    }
-
-    const sentences = remainingText.split(/(?<=[.!?])\s+/);
-    const quoteEnd =
-      sentences.length > 0 ? sentences[sentences.length - 1].trim() : undefined;
-
-    return { quoteStart, quoteEnd };
   }
 
   /**

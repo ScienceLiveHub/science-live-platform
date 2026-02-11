@@ -30,18 +30,57 @@ export const ObjectField: React.FC<ObjectFieldProps> = ({
     return unsubscribe;
   }, [fieldApi.form]);
 
+  // Track per-sub-field touched state
+  const [touchedFields, setTouchedFields] = React.useState<Set<string>>(
+    () => new Set(),
+  );
+
   // Create a properly typed mockFieldApi that includes the form property
   const createMockFieldApi = (fieldName: string, fieldValue: unknown) => {
+    const fullFieldName = `${fieldApi.name}.${fieldName}`;
+
+    // First, check for sub-field errors passed down from array-field
+    // via the _subFieldErrors property on the parent's meta
+    const parentSubFieldErrors = (fieldApi.state?.meta as any)
+      ?._subFieldErrors as Record<string, string[]> | undefined;
+    let subFieldErrors: unknown[] = [];
+
+    if (parentSubFieldErrors && parentSubFieldErrors[fieldName]) {
+      subFieldErrors = parentSubFieldErrors[fieldName];
+    }
+
+    // Also check the form's fieldMeta for this specific sub-field
+    if (subFieldErrors.length === 0) {
+      const fieldMeta = fieldApi.form?.state?.fieldMeta;
+      if (fieldMeta) {
+        const subMeta = fieldMeta[fullFieldName as keyof typeof fieldMeta] as
+          | { errors?: unknown[] }
+          | undefined;
+        if (subMeta?.errors && subMeta.errors.length > 0) {
+          subFieldErrors = subMeta.errors;
+        }
+      }
+    }
+
+    // Sub-field is touched if:
+    // - the user interacted with it directly (blur), OR
+    // - the parent is touched (e.g., from array field or form validation), OR
+    // - the form has been submitted
+    const parentTouched = fieldApi.state?.meta?.isTouched ?? false;
+    const formSubmitted = (fieldApi.form?.state as any)?.submissionAttempts > 0;
+    const subFieldTouched =
+      touchedFields.has(fieldName) || parentTouched || formSubmitted;
+
     return {
-      name: `${fieldApi.name}.${fieldName}`,
-      form: fieldApi.form, // Include the form property to fix the bug
+      name: fullFieldName,
+      form: fieldApi.form,
       state: {
         ...fieldApi.state,
         value: fieldValue,
         meta: {
           ...fieldApi.state.meta,
-          errors: [], // Reset errors for subfield
-          isTouched: false, // Reset touched state for subfield
+          errors: subFieldErrors,
+          isTouched: subFieldTouched,
         },
       },
       handleChange: (value: unknown) => {
@@ -51,7 +90,14 @@ export const ObjectField: React.FC<ObjectFieldProps> = ({
           [fieldName]: value,
         });
       },
-      handleBlur: fieldApi.handleBlur,
+      handleBlur: () => {
+        setTouchedFields((prev) => {
+          const next = new Set(prev);
+          next.add(fieldName);
+          return next;
+        });
+        fieldApi.handleBlur();
+      },
     };
   };
 

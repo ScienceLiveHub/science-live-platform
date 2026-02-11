@@ -1,6 +1,13 @@
 import { DataFactory, Store as N3Store, NamedNode, Term, Util } from "n3";
 import { fetchQuads, NS, parseRdf, shrinkUri, Statement } from "./rdf";
-import { getUriEnd, isDoiUri, isNanopubUri, unique } from "./uri";
+import {
+  getNanopubSuffix,
+  getUriEnd,
+  isDoiUri,
+  isNanopubUri,
+  toScienceLiveNPUri,
+  unique,
+} from "./uri";
 
 const { namedNode } = DataFactory;
 const { isNamedNode } = Util;
@@ -132,43 +139,38 @@ export class NanopubStore extends N3Store {
   }
 
   /**
-   * Find a user-friendly label for term, using heuristics and searching within the nanopub
+   * Find a user-friendly label for term, using heuristics and searching within the nanopub.
+   * We want to make a best-attempt while avoiding any async calls here.
    *
+   * Return undefined if either nothing found or it is deemed better for the caller to
+   * handle it (e.g. do an async lookup using a hook, or just show the uri as label)
    */
   findInternalLabel(t: Term | string): string | undefined {
     let label;
     const uri = isNamedNode(t as Term) ? (t as NamedNode).id : (t as string);
     if (uri) {
-      // Search the document internally, then the local cache, then a list of common labels
-      // label = this.matchOne(namedNode(uri), NS.RDFS("label"), null, null)
-      //   ?.object.value;
+      // Search the document internally, then the local labelCache, then a list of COMMON_LABELS
       label =
         this.matchOne(namedNode(uri), NS.FOAF("name"), null, null)?.object
           .value ??
         this.labelCache[uri] ??
         COMMON_LABELS[uri];
-      if (label) return label;
-
-      // Return null if it's a Nanopub or DOI
-      // The caller can handle this (e.g. do an async call using a hook or just show the uri)
-      if (isNanopubUri(uri) || isDoiUri(uri)) {
-        return undefined;
+      if (label) {
+        return label;
       }
 
-      // Failing that, a special case where the uri starts with the current nanopubs uri (this/sub)
-      const thisNpUri = this.prefixes["this"] ?? this.prefixes["sub"];
-      if (thisNpUri && uri.startsWith(thisNpUri)) {
-        label = uri.replace(thisNpUri, "");
-        const firstChar = label.charAt(0);
-        if (firstChar === "/" || firstChar === "#") {
-          label = label.substring(1);
-        }
+      if (isNanopubUri(uri)) {
+        // Look for a suffix if available
+        label = getNanopubSuffix(uri);
         label = label === "assertion" ? "This assertion" : label;
-        if (label.length) {
+        if (label) {
           return label;
         } else {
-          return "This nanopublication";
+          return undefined;
         }
+      }
+      if (isDoiUri(uri)) {
+        return undefined;
       }
 
       // Failing that, use the end-most part of the URL converted to space case
@@ -391,9 +393,7 @@ export class NanopubStore extends N3Store {
       : "Unknown";
     const citation = this.getCitation();
     const sourceUri = this.metadata.uri;
-    const exploreLink = sourceUri
-      ? `https://platform.sciencelive4all.org/np/?uri=${encodeURIComponent(sourceUri)}`
-      : undefined;
+    const exploreLink = sourceUri ? toScienceLiveNPUri(sourceUri) : undefined;
 
     const assertionGraph = this.graphUris.assertion
       ? namedNode(this.graphUris.assertion)
@@ -425,9 +425,9 @@ export class NanopubStore extends N3Store {
       "",
       citation,
       "",
-      `**Source:** [${sourceUri}](${sourceUri})`,
+      `[Original Source](${sourceUri})`,
       "",
-      `[Explore on Science Live](${exploreLink})`,
+      `**[Explore on Science Live](${exploreLink})**`,
     ];
 
     return formattedLines.join("\n");
@@ -442,7 +442,8 @@ export class NanopubStore extends N3Store {
   ) {
     if (term.termType === "NamedNode") {
       const label = this.findInternalLabel(term as NamedNode) ?? term.value;
-      return `[${label}](${term.value})`;
+      // Replace nanopub links with ScienceLive Platform links
+      return `[${label}](${isNanopubUri(term.value) ? toScienceLiveNPUri(term.value) : term.value})`;
     }
 
     if (term.termType === "Literal") {

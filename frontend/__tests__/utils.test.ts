@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  extractDoisFromText,
   getNanopubHash,
   getUriEnd,
   getUriFragment,
@@ -65,11 +66,14 @@ describe("isNanopubUri", () => {
     expect(isNanopubUri(noHashUri)).toBe(false);
   });
 
-  it("should return false for URI where /np/ appears multiple times", () => {
+  it("should still return true for URI with suffix", () => {
     // This tests the search behavior - it should find the first occurrence
     const multiplePatternUri =
-      "https://w3id.org/np/RA1234567890abcdefghijklmnopqrstuvwxyzABCD/np/Ranother";
-    expect(isNanopubUri(multiplePatternUri)).toBe(false);
+      "https://w3id.org/np/RABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr/np/Ranother";
+    expect(isNanopubUri(multiplePatternUri)).toBe(true);
+    const hashsuffixPatternUri =
+      "https://w3id.org/np/RABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr#topic";
+    expect(isNanopubUri(hashsuffixPatternUri)).toBe(true);
   });
 
   it("should return true for URI with hash containing only letters", () => {
@@ -139,6 +143,7 @@ describe("isNanopubUri", () => {
 describe("getNanopubHash", () => {
   // 43 chars
   const hash = "abcdefghijklmno-qrstuvwxyzABCDEFGHIJKLMN_12";
+  const hash_alt = "qrstuvwxyzABCDEFGHIJKLMN-abcdefghijklmno_99";
 
   it("should extract valid RA hash", () => {
     const uri = `https://w3id.org/np/RA${hash}`;
@@ -160,13 +165,17 @@ describe("getNanopubHash", () => {
     expect(getNanopubHash(uri)).toBe(hash);
   });
 
-  it("should return undefined if url is suffixed", () => {
+  it("should still work if url is suffixed", () => {
     const uri1 = `https://w3id.org/np/FA${hash}/abc`;
-    expect(getNanopubHash(uri1)).toBeUndefined();
+    expect(getNanopubHash(uri1)).toBe(hash);
     const uri2 = `https://w3id.org/np/FA${hash}#abc`;
-    expect(getNanopubHash(uri2)).toBeUndefined();
+    expect(getNanopubHash(uri2)).toBe(hash);
     const uri3 = `https://w3id.org/np/FA${hash}/`;
-    expect(getNanopubHash(uri3)).toBeUndefined();
+    expect(getNanopubHash(uri3)).toBe(hash);
+    const uri4 = `https://w3id.org/np/RA${hash}/RA${hash_alt}`;
+    expect(getNanopubHash(uri4)).toBe(hash);
+    const uri5 = `https://w3id.org/np/RA${hash}/np/RA${hash_alt}`;
+    expect(getNanopubHash(uri5)).toBe(hash);
   });
 
   it("should return undefined for invalid hash length", () => {
@@ -496,5 +505,61 @@ describe("getUriEnd", () => {
         "RAbcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN_123",
       );
     });
+  });
+});
+
+describe("extractDoiFromText", () => {
+  it("should extract a valid DOI from text", () => {
+    const text = "See https://doi.org/10.1000/xyz123 for more info";
+    expect(extractDoisFromText(text)).toEqual(["10.1000/xyz123"]);
+  });
+
+  it("should extract DOI from text with trailing punctuation", () => {
+    const text = "See https://doi.org/10.1000/xyz123.";
+    expect(extractDoisFromText(text)).toEqual(["10.1000/xyz123"]);
+  });
+
+  it("should extract DOI with parentheses in suffix", () => {
+    const text = "See 10.1000/xyz(2023)45 for more info";
+    expect(extractDoisFromText(text)).toEqual(["10.1000/xyz(2023)45"]);
+  });
+
+  it("should extract DOI with underscores in suffix", () => {
+    const text = "See 10.1000/xyz_abc_123 for more info";
+    expect(extractDoisFromText(text)).toEqual(["10.1000/xyz_abc_123"]);
+  });
+
+  it("should extract DOI with hyphens in suffix", () => {
+    const text = "See 10.1000/xyz-abc-123 for more info";
+    expect(extractDoisFromText(text)).toEqual(["10.1000/xyz-abc-123"]);
+  });
+
+  it("should extract DOI from text with colon in suffix", () => {
+    const text = "See 10.1000/xyz:section for more info";
+    expect(extractDoisFromText(text)).toEqual(["10.1000/xyz:section"]);
+  });
+
+  it("should extract first DOI from text with multiple DOIs", () => {
+    const text =
+      "See 10.1000/first1, 10.1000/second2 and 10.1000/third3 for more info";
+    expect(extractDoisFromText(text)).toEqual([
+      "10.1000/first1",
+      "10.1000/second2",
+      "10.1000/third3",
+    ]);
+  });
+
+  it("should extract 10.1002 DOI (Wiley format)", () => {
+    const text = "See 10.1002/anie.202312345 for more info";
+    expect(extractDoisFromText(text)).toEqual(["10.1002/anie.202312345"]);
+  });
+
+  it("should return empty array when no DOI found", () => {
+    const text = "This text contains no DOI";
+    expect(extractDoisFromText(text)).toEqual([]);
+  });
+
+  it("should return empty array for empty string", () => {
+    expect(extractDoisFromText("")).toEqual([]);
   });
 });

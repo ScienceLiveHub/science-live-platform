@@ -1650,9 +1650,23 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
                 ? {
                     onChange: ({ value }) => {
                       const result = validation.safeParse(value);
-                      return result.success
-                        ? undefined
-                        : result.error.issues[0]?.message || "Invalid value";
+                      if (result.success) return undefined;
+
+                      // For array fields with nested errors, return all issues
+                      // with path info so array-field and object-field can
+                      // display per-item/sub-field errors
+                      if (type === "array" && result.error.issues.length > 0) {
+                        // Return a JSON-encoded array of all issues with paths
+                        // so the array field can parse and distribute them
+                        return JSON.stringify(
+                          result.error.issues.map((issue) => ({
+                            path: issue.path,
+                            message: issue.message,
+                          })),
+                        );
+                      }
+
+                      return result.error.issues[0]?.message || "Invalid value";
                     },
                   }
                 : undefined
