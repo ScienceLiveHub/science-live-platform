@@ -1,7 +1,8 @@
 import { Badge } from "@/components/ui/badge";
+import { useLabels } from "@/hooks/use-labels";
 import { COMMON_LICENSES } from "@/lib/nanopub-store";
 import { formatDate } from "@/lib/string-format";
-import { extractOrcidId } from "@/lib/uri";
+import { extractOrcidId, getNanopubHash } from "@/lib/uri";
 import { BadgeCheck, LayersPlus, NotepadTextDashed, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { NanopubViewerProps, ShareMenu } from "./NanopubViewer";
@@ -11,6 +12,8 @@ export function NanopubOverview({
   creatorUserIdsByOrcid = {},
   showShareMenu = true,
 }: NanopubViewerProps) {
+  const { getLabel } = useLabels(store.labelCache);
+
   return (
     <>
       {/* Overview */}
@@ -18,7 +21,8 @@ export function NanopubOverview({
         <div className="relative mb-6">
           <div className="pr-16">
             <h2 className=" text-2xl md:text-3xl font-bold flex">
-              {store.metadata.title}{" "}
+              {store.metadata.title ??
+                `${getNanopubHash(store.metadata.uri!)?.substring(0, 10)}...`}{" "}
               {/* TODO: this should actually check for trustworthiness somehow */}
               <BadgeCheck
                 className="m-1.5"
@@ -35,7 +39,9 @@ export function NanopubOverview({
                   className="m-1.5"
                   color="#999999"
                   strokeWidth={2}
-                />
+                >
+                  <title>This is a DRAFT nanopub</title>
+                </NotepadTextDashed>
               )}
               {store.metadata.types?.some(
                 (t) => t.href === "http://purl.org/nanopub/x/introduces",
@@ -54,7 +60,7 @@ export function NanopubOverview({
                 {store.metadata.creators.map((c) => {
                   const orcidId = extractOrcidId(c.href ?? "");
                   const scienceLiveUserId = orcidId
-                    ? creatorUserIdsByOrcid[orcidId]
+                    ? creatorUserIdsByOrcid[orcidId]?.id
                     : null;
 
                   return (
@@ -72,7 +78,7 @@ export function NanopubOverview({
                           c.href?.startsWith("http") ? "noreferrer" : undefined
                         }
                       >
-                        {c.name}
+                        {c.name ?? (c.href ? getLabel(c.href) : "user")}
                       </a>
                       {scienceLiveUserId ? (
                         <Link

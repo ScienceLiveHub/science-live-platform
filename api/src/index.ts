@@ -4,6 +4,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import health from "./health";
 import notifications from "./notifications";
+import orcid from "./orcid";
 import userProfile from "./user-profile";
 
 const app = new Hono<{
@@ -36,6 +37,7 @@ app.use(
 // Public endpoints (no auth required)
 app.route("/health", health);
 app.route("/user-profile", userProfile);
+app.route("/orcid", orcid);
 
 // Middleware for endpoints that require sign-in (better-auth)
 app.use("*", async (c, next) => {

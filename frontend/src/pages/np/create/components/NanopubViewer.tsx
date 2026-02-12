@@ -10,6 +10,7 @@ import {
 import { ItemSeparator } from "@/components/ui/item";
 import { SnippetCopyButton } from "@/components/ui/shadcn-io/snippet";
 import { useLabels } from "@/hooks/use-labels";
+import { UserId } from "@/hooks/use-nanopub";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { shrinkUri, Statement } from "@/lib/rdf";
 import {
@@ -80,7 +81,7 @@ export type NanopubViewerProps = {
    * When provided, enables linking ORCID creators to their Science Live user
    * profiles.
    */
-  creatorUserIdsByOrcid?: Record<string, string | null>;
+  creatorUserIdsByOrcid?: Record<string, UserId | null>;
   showShareMenu?: boolean;
   showCitation?: boolean;
 };

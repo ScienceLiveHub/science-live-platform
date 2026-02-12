@@ -14,7 +14,7 @@ import { NS } from "@/lib/rdf";
 import { ArrowRight, BookOpen, ExternalLink, Link2 } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
-import { NanopubViewShell } from "./NanopubViewShell";
+import { CustomViewerProps, NanopubViewShell } from "./NanopubViewShell";
 
 const { namedNode } = DataFactory;
 
@@ -158,15 +158,10 @@ function CitationContent({
   );
 }
 
-interface ViewCitationWithCiTOProps {
-  store: NanopubStore;
-  creatorUserIdsByOrcid?: Record<string, string | null>;
-}
-
 export function ViewCitationWithCiTO({
   store,
   creatorUserIdsByOrcid,
-}: ViewCitationWithCiTOProps) {
+}: CustomViewerProps) {
   const data = useMemo(() => extractCitationWithCiTO(store), [store]);
 
   if (!data) return null;

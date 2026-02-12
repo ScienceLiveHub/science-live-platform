@@ -14,7 +14,7 @@ import { NS } from "@/lib/rdf";
 import { ExternalLink, Link2, MessageSquare } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
-import { NanopubViewShell } from "./NanopubViewShell";
+import { CustomViewerProps, NanopubViewShell } from "./NanopubViewShell";
 
 const { namedNode } = DataFactory;
 
@@ -136,15 +136,10 @@ function CommentContent({
   );
 }
 
-interface ViewCommentOnPaperProps {
-  store: NanopubStore;
-  creatorUserIdsByOrcid?: Record<string, string | null>;
-}
-
 export function ViewCommentOnPaper({
   store,
   creatorUserIdsByOrcid,
-}: ViewCommentOnPaperProps) {
+}: CustomViewerProps) {
   const data = useMemo(() => extractCommentOnPaper(store), [store]);
 
   if (!data) return null;

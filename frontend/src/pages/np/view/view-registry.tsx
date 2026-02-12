@@ -7,26 +7,21 @@
  * the generic NanopubViewer is used as a fallback.
  */
 
-import { NanopubStore } from "@/lib/nanopub-store";
 import { ComponentType } from "react";
 import { TEMPLATE_URI } from "../create/components/templates/registry-metadata";
+import { CustomViewerProps } from "./NanopubViewShell";
 import { ViewAIDASentence } from "./ViewAIDASentence";
 import { ViewAnnotateQuotation } from "./ViewAnnotateQuotation";
 import { ViewCitationWithCiTO } from "./ViewCitationWithCiTO";
 import { ViewCommentOnPaper } from "./ViewCommentOnPaper";
 import { ViewGeographicalCoverage } from "./ViewGeographicalCoverage";
 
-export interface NanopubViewComponentProps {
-  store: NanopubStore;
-  creatorUserIdsByOrcid?: Record<string, string | null>;
-}
-
 /**
  * Registry mapping template URIs to their custom view components.
  */
 export const VIEW_COMPONENTS: Record<
   string,
-  ComponentType<NanopubViewComponentProps>
+  ComponentType<CustomViewerProps>
 > = {
   [TEMPLATE_URI.CITATION_CITO]: ViewCitationWithCiTO,
   [TEMPLATE_URI.ANNOTATE_QUOTATION]: ViewAnnotateQuotation,

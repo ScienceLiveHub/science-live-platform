@@ -124,9 +124,12 @@ export function GraphSection({
               !repeat && st.subject.equals(statements[idx + 1]?.subject);
             return (
               <>
+                {(firstOfRepeat || !repeat) && (
+                  <div className="mt-8 border-0"></div>
+                )}
                 {/* Avoid repeating the subject if there are multiple rows with it */}
                 {firstOfRepeat && (
-                  <p className="mb-2 font-bold">
+                  <p className="mb-2 font-bold border-0">
                     <TripleCell
                       display={{
                         text: decodeURI(
@@ -135,9 +138,8 @@ export function GraphSection({
                         ),
                         href: st.subject.value,
                       }}
-                      className="pr-3"
+                      className="pr-3 border-0"
                     />
-                    {}
                   </p>
                 )}
                 <TripleRow

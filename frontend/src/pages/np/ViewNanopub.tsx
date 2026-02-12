@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { useNanopub } from "@/hooks/use-nanopub";
+import { useNanopub, UserId } from "@/hooks/use-nanopub";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NanopubViewer } from "@/pages/np/create/components/NanopubViewer";
 import { FileCode } from "lucide-react";
@@ -35,7 +35,7 @@ export function SmartNanopubViewer({
   creatorUserIdsByOrcid,
 }: {
   store: NanopubStore;
-  creatorUserIdsByOrcid: Record<string, string | null>;
+  creatorUserIdsByOrcid: Record<string, UserId | null>;
 }) {
   const templateUri = store.metadata.template;
 

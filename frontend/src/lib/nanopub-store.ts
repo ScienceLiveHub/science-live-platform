@@ -51,7 +51,7 @@ export function generateCitation(
 
 export type Metadata = {
   created?: string | null;
-  creators?: { name: string; href?: string }[];
+  creators?: { name?: string; href?: string }[];
   types?: { name: string; href?: string }[];
   title?: string | null;
   assertionSubjects?: any[];
@@ -182,7 +182,12 @@ export class NanopubStore extends N3Store {
           return undefined;
         }
       }
+
+      // Return undefined for anything that we want to look up async later
       if (isDoiUri(uri)) {
+        return undefined;
+      }
+      if (uri.startsWith("https://orcid.org/")) {
         return undefined;
       }
 
@@ -299,8 +304,7 @@ export class NanopubStore extends N3Store {
     ).map((q) => {
       return {
         // TODO: we could also set the name to undefined if not found, and the UI can try to fetch something better via the useLabels hook
-        name:
-          this.findInternalLabel(namedNode(q.object.value)) ?? q.object.value,
+        name: this.findInternalLabel(namedNode(q.object.value)) ?? undefined,
         href: q.object.value,
       };
     });

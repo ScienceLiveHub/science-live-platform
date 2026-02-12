@@ -64,6 +64,18 @@ export function useLabels(
           )
           .json()) as any;
         label = data?.entities?.[entityId]?.labels?.en?.value;
+      } else if (uri.startsWith("https://orcid.org/")) {
+        try {
+          const orcidId = uri.split("https://orcid.org/")[1];
+          const data = (await ky
+            .get(
+              `${import.meta.env.VITE_API_URL}/orcid/display-name?orcid=${encodeURIComponent(uri)}`,
+            )
+            .json()) as any;
+          label = data?.displayName ?? orcidId;
+        } catch (error) {
+          console.warn(`Failed to fetch ORCID display name for ${uri}:`, error);
+        }
       } else {
         // Try to fetch RDF and look for labels or names
         // let label: string | undefined;

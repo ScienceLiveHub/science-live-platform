@@ -19,15 +19,21 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useLabels } from "@/hooks/use-labels";
+import { UserId } from "@/hooks/use-nanopub";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { shrinkUri, Statement } from "@/lib/rdf";
 import { ChevronsUpDown, File, Microscope, UserCircle } from "lucide-react";
 import { ReactNode, useMemo } from "react";
 import { NanopubOverview } from "../create/components/NanopubOverview";
 
+export interface CustomViewerProps {
+  store: NanopubStore;
+  creatorUserIdsByOrcid?: Record<string, UserId | null>;
+}
+
 export interface NanopubViewShellProps {
   store: NanopubStore;
-  creatorUserIdsByOrcid?: Record<string, string | null>;
+  creatorUserIdsByOrcid?: Record<string, UserId | null>;
   /** The custom content to render between the header and the raw RDF */
   children: ReactNode;
 }

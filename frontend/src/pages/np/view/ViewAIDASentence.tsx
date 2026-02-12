@@ -17,7 +17,7 @@ import { toScienceLiveNPUri } from "@/lib/uri";
 import { Database, ExternalLink, FlaskConical, Link2, Tag } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
-import { NanopubViewShell } from "./NanopubViewShell";
+import { CustomViewerProps, NanopubViewShell } from "./NanopubViewShell";
 
 const { namedNode } = DataFactory;
 
@@ -209,15 +209,10 @@ function AIDASentenceContent({
   );
 }
 
-interface ViewAIDASentenceProps {
-  store: NanopubStore;
-  creatorUserIdsByOrcid?: Record<string, string | null>;
-}
-
 export function ViewAIDASentence({
   store,
   creatorUserIdsByOrcid,
-}: ViewAIDASentenceProps) {
+}: CustomViewerProps) {
   const data = useMemo(() => extractAIDASentence(store), [store]);
 
   if (!data) return null;
