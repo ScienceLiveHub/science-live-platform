@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { Statement } from "@/lib/rdf";
+import { isNanopubUri, toScienceLiveNPUri } from "@/lib/uri";
 import {
   Collapsible,
   CollapsibleContent,
@@ -22,7 +23,11 @@ function TripleCell({
       {display.href ? (
         <a
           className="text-blue-600 dark:text-blue-300 hover:underline"
-          href={display.href}
+          href={
+            isNanopubUri(display.href)
+              ? toScienceLiveNPUri(display.href)
+              : display.href
+          }
           target="_blank"
           rel="noreferrer"
         >
@@ -46,12 +51,15 @@ function TripleRow({
   excludeSub?: boolean;
   getLabel: (term: Term | string) => string;
 }) {
-  const s = {
-    text:
-      store.findInternalLabel(st.subject.value) ??
-      getLabel(st.subject.value as string),
-    href: st.subject.value,
-  };
+  const s = !excludeSub
+    ? {
+        text: decodeURI(
+          store.findInternalLabel(st.subject.value) ??
+            getLabel(st.subject.value as string),
+        ),
+        href: st.subject.value,
+      }
+    : { text: "-" };
   const p = {
     text:
       store.findInternalLabel(st.predicate.value) ??
@@ -83,6 +91,7 @@ export function GraphSection({
   Icon = File,
   extraClasses,
   getLabel,
+  collapsible = false,
 }: {
   store: NanopubStore;
   title: string;
@@ -90,33 +99,86 @@ export function GraphSection({
   Icon: LucideIcon;
   extraClasses?: string;
   getLabel: (term: Term | string) => string;
+  collapsible?: boolean;
 }) {
+  const header = (
+    <CardTitle className="flex items-center gap-2">
+      <Icon className="h-5 w-5 text-primary" />
+      {title}
+      {collapsible && (
+        <Button variant="ghost" size="icon" className="size-8">
+          <ChevronsUpDown />
+          <span className="sr-only">Toggle</span>
+        </Button>
+      )}
+    </CardTitle>
+  );
+
+  const content = (
+    <CardContent>
+      <table className="text-left">
+        <tbody className="divide-y">
+          {statements.map((st, idx) => {
+            const repeat = st.subject.equals(statements[idx - 1]?.subject);
+            const firstOfRepeat =
+              !repeat && st.subject.equals(statements[idx + 1]?.subject);
+            return (
+              <>
+                {/* Avoid repeating the subject if there are multiple rows with it */}
+                {firstOfRepeat && (
+                  <p className="mb-2 font-bold">
+                    <TripleCell
+                      display={{
+                        text: decodeURI(
+                          store.findInternalLabel(st.subject.value) ??
+                            getLabel(st.subject.value as string),
+                        ),
+                        href: st.subject.value,
+                      }}
+                      className="pr-3"
+                    />
+                    {}
+                  </p>
+                )}
+                <TripleRow
+                  store={store}
+                  key={idx}
+                  st={st}
+                  getLabel={getLabel}
+                  excludeSub={firstOfRepeat || repeat}
+                />
+              </>
+            );
+          })}
+        </tbody>
+      </table>
+    </CardContent>
+  );
+
   return (
     <Card
       className={
         "hover:shadow-md transition-shadow cursor-pointer m-0 " + extraClasses
       }
     >
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Icon className="h-5 w-5 text-primary" />
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <table className=" text-left">
-          <tbody className="divide-y">
-            {statements.map((st, idx) => (
-              <TripleRow store={store} key={idx} st={st} getLabel={getLabel} />
-            ))}
-          </tbody>
-        </table>
-      </CardContent>
+      {collapsible ? (
+        <Collapsible>
+          <CardHeader>
+            <CollapsibleTrigger>{header}</CollapsibleTrigger>
+          </CardHeader>
+          <CollapsibleContent>{content}</CollapsibleContent>
+        </Collapsible>
+      ) : (
+        <>
+          <CardHeader>{header}</CardHeader>
+          {content}
+        </>
+      )}
     </Card>
   );
 }
 
-export function CollapsibleGraphSection({
+export function PubInfoSection({
   store,
   title,
   statements,

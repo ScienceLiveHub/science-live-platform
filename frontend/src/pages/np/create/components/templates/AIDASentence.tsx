@@ -108,6 +108,7 @@ export default function AIDASentence({
               fieldApi.setValue(items);
             }}
             maxShownItems={5}
+            title="Select related topics/tags"
           />
         ),
       },
@@ -117,18 +118,13 @@ export default function AIDASentence({
         type: "text",
         label: "Relates to this nanopublication",
         placeholder: "URI of nanopublication for related reasearch project",
+        required: true,
       },
       {
         name: "dataset",
         type: "text",
         label: "Supported by dataset",
         placeholder: "URI of related published dataset",
-      },
-      {
-        name: "publication",
-        type: "text",
-        label: "Supported by publication",
-        placeholder: "URI of related scholarly work (e.g. publication)",
       },
     ],
     globalWrapper: ShowOptionalWrapper,

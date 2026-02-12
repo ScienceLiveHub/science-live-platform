@@ -57,6 +57,7 @@ export type Metadata = {
   assertionSubjects?: any[];
   license?: string;
   uri?: string;
+  template?: string;
 };
 
 export const COMMON_LABELS: Record<string, string> = {
@@ -76,12 +77,22 @@ export const COMMON_LABELS: Record<string, string> = {
   "http://purl.org/dc/terms/creator": "was created by",
   "http://purl.org/dc/terms/created": "was created at",
   "http://purl.org/dc/terms/license": "has license",
-  "http://www.w3.org/2000/01/rdf-schema#label": "is labeled",
+  "http://www.w3.org/2000/01/rdf-schema#label": "is labelled",
   "http://purl.org/nanopub/x/hasNanopubType": "is a nanopub of type",
   "http://purl.org/nanopub/x/wasCreatedAt": "is a nanopub created at",
   "http://www.w3.org/2000/01/rdf-schema#comment": "has the quote or comment",
-  "http://purl.org/spar/cito/includesQuotationFrom":
-    "includes quotation(s) from",
+  "http://purl.org/spar/cito/includesQuotationFrom": "includes quotation from",
+  "http://www.w3.org/ns/prov#wasAttributedTo": "was attributed to",
+  "https://w3id.org/np/o/ntemplate/hasLabelFromApi": "has label from API",
+};
+
+export const COMMON_LICENSES: Record<string, string> = {
+  "https://creativecommons.org/licenses/by/4.0/":
+    "Attribution 4.0 International (CC BY 4.0)",
+  "https://creativecommons.org/licenses/by-sa/4.0/":
+    "Attribution-ShareAlike 4.0 International (CC BY 4.0)",
+  "https://creativecommons.org/publicdomain/zero/1.0/":
+    "CC0 1.0 Universal (CC0 1.0) Public Domain Dedication",
 };
 
 /**
@@ -152,8 +163,10 @@ export class NanopubStore extends N3Store {
       // Search the document internally, then the local labelCache, then a list of COMMON_LABELS
       label =
         this.matchOne(namedNode(uri), NS.FOAF("name"), null, null)?.object
-          .value ??
-        this.labelCache[uri] ??
+          .value ||
+        this.matchOne(namedNode(uri), NS.NPTs("hasLabelFromApi"), null, null)
+          ?.object.value ||
+        this.labelCache[uri] ||
         COMMON_LABELS[uri];
       if (label) {
         return label;
@@ -323,6 +336,30 @@ export class NanopubStore extends N3Store {
         href: q.object.value,
       });
     });
+    this.match(
+      namedNode(this.prefixes["this"]),
+      RDF("type"),
+      null,
+      namedNode(this.graphUris.pubinfo!),
+    ).forEach((q) => {
+      types.push({
+        name:
+          this.findInternalLabel(namedNode(q.object.value)) ?? q.object.value,
+        href: q.object.value,
+      });
+    });
+    const introduces = this.matchOne(
+      namedNode(this.prefixes["this"]),
+      NPX("introduces"),
+      null,
+      namedNode(this.graphUris.pubinfo!),
+    );
+    if (introduces) {
+      types.push({
+        name: "Introduction",
+        href: NPX("introduces").value,
+      });
+    }
 
     const title =
       this.matchOnePredicate(DCT("title"), this.graphUris.pubinfo) ??
@@ -346,6 +383,13 @@ export class NanopubStore extends N3Store {
           .map((t) => t.subject.value)
       : [];
 
+    const template = this.matchOne(
+      null,
+      NS.NPTs("wasCreatedFromTemplate"),
+      null,
+      this.graphUris.pubinfo,
+    )?.object.value;
+
     this.metadata = {
       created: createdLit?.object ? createdLit.object.value : null,
       creators: creators,
@@ -354,6 +398,7 @@ export class NanopubStore extends N3Store {
       assertionSubjects: unique(assertionSubjects),
       license: license,
       uri: this.prefixes["this"],
+      template,
     };
   }
 

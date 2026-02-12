@@ -13,12 +13,25 @@ export interface NanopubTemplateMetadata {
   keywords?: string[];
 }
 
+/** Nanopub hash portion of each known template URI */
+export const TEMPLATE_URI = {
+  CITATION_CITO:
+    "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo",
+  ANNOTATE_QUOTATION:
+    "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU",
+  COMMENT_PAPER:
+    "https://w3id.org/np/RAVEpTdLrX5XrhNl_gnvTaBcjRRSDu_hhZix8gu2HO7jI",
+  AIDA_SENTENCE:
+    "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE",
+  GEO_COVERAGE:
+    "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao",
+};
 /**
  * Template metadata without React components
  * Non-React workspaces (e.g., Zotero) should import this directly
  */
 export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
-  "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo": {
+  [TEMPLATE_URI.CITATION_CITO]: {
     name: "Citation with CiTO",
     description:
       "Declare citations between papers using Citation Typing Ontology",
@@ -27,7 +40,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     recommended: true,
     keywords: ["citation", "cito", "reference", "cite"],
   },
-  "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU": {
+  [TEMPLATE_URI.ANNOTATE_QUOTATION]: {
     name: "Annotate a paper quotation",
     description: "Annotating a paper quotation with personal interpretation",
     category: "Annotation",
@@ -35,7 +48,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     recommended: true,
     keywords: ["comment", "annotation", "quote", "interpretation"],
   },
-  "https://w3id.org/np/RAVEpTdLrX5XrhNl_gnvTaBcjRRSDu_hhZix8gu2HO7jI": {
+  [TEMPLATE_URI.COMMENT_PAPER]: {
     name: "Comment on Paper",
     description: "Add comments, quotes, or evaluations to papers",
     category: "Annotation",
@@ -43,7 +56,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     recommended: true,
     keywords: ["comment", "annotation", "quote", "review"],
   },
-  "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE": {
+  [TEMPLATE_URI.AIDA_SENTENCE]: {
     name: "AIDA Sentence",
     description: "Make structured scientific claims following the AIDA model",
     category: "Scientific",
@@ -51,7 +64,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     recommended: true,
     keywords: ["aida", "claim", "assertion", "scientific"],
   },
-  "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao": {
+  [TEMPLATE_URI.GEO_COVERAGE]: {
     name: "Document geographical coverage",
     description:
       "Documents the geographical area or region covered by a research paper's findings, data, or study scope.",

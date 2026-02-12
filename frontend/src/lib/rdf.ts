@@ -23,6 +23,7 @@ export const NS = {
   DCT: prefix("http://purl.org/dc/terms/"),
   PROV: prefix("http://www.w3.org/ns/prov#"),
   FOAF: prefix("http://xmlns.com/foaf/0.1/"),
+  CITO: prefix("http://purl.org/spar/cito/"),
 };
 
 const { RDF, RDFS, XSD, NP, NPT, DCT, PROV, FOAF } = NS;
@@ -41,8 +42,6 @@ export const DEFAULT_PREFIXES: Record<string, string> = {
   schema: "http://schema.org/",
   dc: "http://purl.org/dc/elements/1.1/",
 };
-
-const problematicHosts = ["https://purl.org", "http://purl.org"];
 
 /**
  * fetch the RDF document, parse it (streaming) and run the callback on each quad that it finds.
@@ -64,18 +63,18 @@ export async function fetchQuads(
     redirect: "follow",
     retry: 2,
   }).catch(async (error) => {
-    // Some hosts (e.g. purl.org) dont support CORS headers for calling from js clients in the browser
-    // For those, retry getting the trig directly from known working servers
-    if (problematicHosts.some((host) => url.startsWith(host))) {
-      const hash = getNanopubHash(url);
-      if (hash) {
-        url = `https://registry.knowledgepixels.com/np/${hash}.trig`;
-        return await ky(url, {
-          headers: {
-            Accept: PREFERRED_FORMAT,
-          },
-        });
-      }
+    // Some hosts (e.g. purl.org) either dont support CORS headers for calling from js clients
+    // in the browser or dont currently support download of application/trig (sciencelive).
+    // Therefore, retry getting the trig directly from known working registries
+    // TODO: Add more registries to try of this fails.
+    const hash = getNanopubHash(url);
+    if (hash) {
+      url = `https://registry.knowledgepixels.com/np/${hash}.trig`;
+      return await ky(url, {
+        headers: {
+          Accept: PREFERRED_FORMAT,
+        },
+      });
     }
     throw error;
   });

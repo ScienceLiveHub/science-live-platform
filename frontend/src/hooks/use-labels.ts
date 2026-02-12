@@ -1,6 +1,10 @@
 import { COMMON_LABELS } from "@/lib/nanopub-store";
 import { fetchQuads, NS, shrinkUri } from "@/lib/rdf";
-import { isDoiUri } from "@/lib/uri";
+import {
+  extractDoisFromText,
+  extractWikidataEntityId,
+  isWikidataEntityUri,
+} from "@/lib/uri";
 import ky from "ky";
 import { NamedNode, Term, Util } from "n3";
 import { useCallback, useState } from "react";
@@ -42,15 +46,24 @@ export function useLabels(
     let label: string | undefined = undefined;
 
     try {
-      if (isDoiUri(uri)) {
+      const doi = extractDoisFromText(uri)?.[0];
+      if (doi) {
         // Try to resolve the title of the DOI using crossref API
         const data = (await ky
-          .get(uri.replace("https://doi.org", "https://api.crossref.org/works"))
+          .get(`https://api.crossref.org/works/${doi}`)
           .json()) as any;
         const title = data?.message?.title?.[0];
         if (title) {
           label = title;
         }
+      } else if (isWikidataEntityUri(uri)) {
+        const entityId = extractWikidataEntityId(uri)!;
+        const data = (await ky
+          .get(
+            `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${entityId}&languages=en&props=labels&format=json&origin=*`,
+          )
+          .json()) as any;
+        label = data?.entities?.[entityId]?.labels?.en?.value;
       } else {
         // Try to fetch RDF and look for labels or names
         // let label: string | undefined;

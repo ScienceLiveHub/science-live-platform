@@ -50,7 +50,7 @@ export function getUriEnd(uri: string) {
 }
 
 /**
- * Detect whether it is valid nanupublication URI (without any additional suffix/path)
+ * Detect whether it is valid nanupublication URI (without or without any additional suffix/path)
  */
 export function isNanopubUri(uri: string) {
   // TODO: actually check that it is a valid URI as well? e.g. z.url()
@@ -58,14 +58,22 @@ export function isNanopubUri(uri: string) {
 }
 
 /**
- * Returns just the Hash part of the URI including 2 char prefix e.g. RAabcd...e23fg
+ * Returns just the Hash part of the URI including 2 char module prefix e.g. RAabcd...e23fg
+ *
+ * Optionally you can exclude the 2 char module prefix.
  */
-export function getNanopubHash(uri: string) {
+export function getNanopubHash(uri: string, includeModulePrefx = true) {
   // Spec: https://github.com/trustyuri/trustyuri-spec
   // TODO: Could be any non-Base64 char before module code and hash "R....", not just a '/'
-  return typeof uri !== "string"
-    ? undefined
-    : uri.match(/\/(RA|RB|FA)([A-Za-z0-9_-]{43})(?=[/#]|$)/)?.[2];
+  const match =
+    typeof uri !== "string"
+      ? undefined
+      : uri.match(/\/(RA|RB|FA)([A-Za-z0-9_-]{43})(?=[/#]|$)/);
+  return match
+    ? includeModulePrefx
+      ? `${match?.[1]}${match?.[2]}`
+      : match?.[2]
+    : undefined;
 }
 
 /**
@@ -83,6 +91,7 @@ export function toScienceLiveNPUri(sourceUri: string) {
 }
 
 // TODO: use validDoi zod/regex instead?
+// TODO: this only checks one domain, there are other valid ones
 export function isDoiUri(uri: string) {
   return uri.startsWith("https://doi.org/10.");
 }
@@ -99,7 +108,23 @@ export function extractDoisFromText(input: string) {
 }
 
 /**
- * Normalize an orcid URI
+ * Returns true if it is a Wikidata entity such as http://www.wikidata.org/entity/Q12345
+ */
+export function isWikidataEntityUri(uri: string) {
+  return /^https?:\/\/www\.wikidata\.org\/entity\//.test(uri);
+}
+
+/**
+ * Returns the QID (aka Q number) of the Wikidata entity
+ * e.g. http://www.wikidata.org/entity/Q12345 -> Q12345
+ */
+export function extractWikidataEntityId(uri: string): string | undefined {
+  const match = uri.match(/^https?:\/\/www\.wikidata\.org\/entity\/(Q\d+)$/);
+  return match ? match[1] : undefined;
+}
+
+/**
+ * Normalize an ORCID URI
  */
 export function cleanOrcidUri(uri: string) {
   return uri.startsWith("https://orcid.org/")
@@ -107,6 +132,9 @@ export function cleanOrcidUri(uri: string) {
     : `https://orcid.org/${uri.replace(/https?:\/\/orcid\.org\//, "")}`;
 }
 
+/**
+ * Return just the ORCID ID found in the string/URI
+ */
 export function extractOrcidId(href: string): string | null {
   const match = href.match(/(\d{4}-\d{4}-\d{4}-\d{3}[0-9Xx])/);
   if (!match) return null;

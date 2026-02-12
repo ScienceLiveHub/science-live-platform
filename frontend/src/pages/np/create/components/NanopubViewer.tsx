@@ -1,9 +1,5 @@
 import { Citation } from "@/components/np/citation";
-import {
-  CollapsibleGraphSection,
-  GraphSection,
-} from "@/components/np/graph-section";
-import { Badge } from "@/components/ui/badge";
+import { GraphSection, PubInfoSection } from "@/components/np/graph-section";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,7 +12,6 @@ import { SnippetCopyButton } from "@/components/ui/shadcn-io/snippet";
 import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { shrinkUri, Statement } from "@/lib/rdf";
-import { extractOrcidId } from "@/lib/uri";
 import {
   Copy,
   Download,
@@ -25,11 +20,10 @@ import {
   LucideIcon,
   Microscope,
   Share2,
-  User,
   UserCircle,
 } from "lucide-react";
 import { useMemo } from "react";
-import { Link } from "react-router-dom";
+import { NanopubOverview } from "./NanopubOverview";
 
 const MenuItem = ({
   text = "",
@@ -150,108 +144,11 @@ export function NanopubViewer({
 
   return (
     <>
-      {/* Overview */}
-      <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
-        <div className="relative mb-6">
-          <div className="pr-16">
-            <h2 className="text-2xl md:text-3xl font-bold">
-              {store.metadata.title}
-            </h2>
-          </div>
-
-          <div>
-            <span className="">By</span>{" "}
-            {store.metadata.creators?.length ? (
-              <span className="space-x-2">
-                {store.metadata.creators.map((c) => {
-                  const orcidId = extractOrcidId(c.href ?? "");
-                  const scienceLiveUserId = orcidId
-                    ? creatorUserIdsByOrcid[orcidId]
-                    : null;
-
-                  return (
-                    <span
-                      key={`${c.name}-${c.href ?? ""}`}
-                      className="inline-flex items-center gap-1"
-                    >
-                      <a
-                        className="text-purple-600 dark:text-purple-400 hover:underline break-all"
-                        href={c.href?.startsWith("http") ? c.href : undefined}
-                        target={
-                          c.href?.startsWith("http") ? "_blank" : undefined
-                        }
-                        rel={
-                          c.href?.startsWith("http") ? "noreferrer" : undefined
-                        }
-                      >
-                        {c.name}
-                      </a>
-
-                      {scienceLiveUserId ? (
-                        <Link
-                          to={`/user/${scienceLiveUserId}`}
-                          className="text-muted-foreground hover:text-foreground"
-                          title="View Science Live profile"
-                        >
-                          <User className="h-4 w-4" />
-                        </Link>
-                      ) : null}
-                    </span>
-                  );
-                })}
-              </span>
-            ) : (
-              <span className="text-muted-foreground">—</span>
-            )}
-          </div>
-
-          {showShareMenu && store.metadata.uri ? (
-            <div className="absolute right-0 top-0">
-              <ShareMenu uri={store.metadata.uri} />
-            </div>
-          ) : null}
-        </div>
-
-        <div className="mt-1 text-sm space-y-1">
-          <div>
-            <span className="font-bold">Published:</span>{" "}
-            {store.metadata.created ? (
-              new Date(store.metadata.created).toLocaleDateString()
-            ) : (
-              <span className="text-muted-foreground">—</span>
-            )}
-          </div>
-
-          <div>
-            <span className="font-bold">Type:</span>{" "}
-            {store.metadata.types?.length ? (
-              <span className="space-x-2">
-                {store.metadata.types.map((c) => (
-                  <a
-                    key={c.name}
-                    className="text-blue-600 hover:underline break-all"
-                    href={c.href?.startsWith("http") ? c.href : undefined}
-                    target={c.href?.startsWith("http") ? "_blank" : undefined}
-                    rel={c.href?.startsWith("http") ? "noreferrer" : undefined}
-                  >
-                    <Badge variant="secondary" className="gap-1">
-                      {c.name}
-                    </Badge>
-                  </a>
-                ))}
-              </span>
-            ) : (
-              <span className="text-muted-foreground">—</span>
-            )}
-          </div>
-
-          <div>
-            <span className="font-bold">License:</span> {store.metadata.license}
-          </div>
-        </div>
-      </div>
-
-      {showCitation ? <Citation data={store.metadata} /> : null}
+      <NanopubOverview
+        store={store}
+        creatorUserIdsByOrcid={creatorUserIdsByOrcid}
+        showShareMenu={showShareMenu}
+      />
 
       {/* Sections */}
       <section className="space-y-4">
@@ -271,9 +168,10 @@ export function NanopubViewer({
           Icon={Microscope}
           extraClasses="border-l-8 border-l-purple-600"
           getLabel={getLabel}
+          collapsible
         />
 
-        <CollapsibleGraphSection
+        <PubInfoSection
           store={store}
           title="Publication Info"
           statements={pubinfoStatements}
@@ -299,6 +197,7 @@ export function NanopubViewer({
           </div>
         )}
       </section>
+      {showCitation ? <Citation data={store.metadata} /> : null}
     </>
   );
 }

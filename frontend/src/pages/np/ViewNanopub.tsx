@@ -2,23 +2,88 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { useNanopub } from "@/hooks/use-nanopub";
+import { NanopubStore } from "@/lib/nanopub-store";
 import { NanopubViewer } from "@/pages/np/create/components/NanopubViewer";
 import { FileCode } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { TEMPLATE_URI } from "./create/components/templates/registry-metadata";
+import { ViewAIDASentence } from "./view/ViewAIDASentence";
+import { ViewAnnotateQuotation } from "./view/ViewAnnotateQuotation";
+import { ViewCitationWithCiTO } from "./view/ViewCitationWithCiTO";
+import { ViewCommentOnPaper } from "./view/ViewCommentOnPaper";
+import { ViewGeographicalCoverage } from "./view/ViewGeographicalCoverage";
 
 /**
  * ViewNanopub
  *
  * - Render a nanopub in a user-friendly way.
  * - Pass in a nanopub `store`, otherwise it will look in the `uri` query
- *   paraneter and fetch it.  Failing that, show a text field where the user
+ *   parameter and fetch it.  Failing that, show a text field where the user
  *   can enter a URI themselves.
- * - Displays graphs (Head, Assertion, Provenance, PubInfo) and triples in a
- *   readable format.
- *
- * Intended for generic viewing of any nanopub content.
+ * - If the nanopub was created from a known template, renders a custom
+ *   template-specific view. Otherwise falls back to the generic NanopubViewer
+ *   which displays graphs (Head, Assertion, Provenance, PubInfo) and triples.
  */
+
+/**
+ * Renders either a custom template-specific view or the generic NanopubViewer.
+ * Uses direct conditional rendering to avoid the "component created during render" lint error.
+ */
+export function SmartNanopubViewer({
+  store,
+  creatorUserIdsByOrcid,
+}: {
+  store: NanopubStore;
+  creatorUserIdsByOrcid: Record<string, string | null>;
+}) {
+  const templateUri = store.metadata.template;
+
+  switch (templateUri) {
+    case TEMPLATE_URI.CITATION_CITO:
+      return (
+        <ViewCitationWithCiTO
+          store={store}
+          creatorUserIdsByOrcid={creatorUserIdsByOrcid}
+        />
+      );
+    case TEMPLATE_URI.ANNOTATE_QUOTATION:
+      return (
+        <ViewAnnotateQuotation
+          store={store}
+          creatorUserIdsByOrcid={creatorUserIdsByOrcid}
+        />
+      );
+    case TEMPLATE_URI.COMMENT_PAPER:
+      return (
+        <ViewCommentOnPaper
+          store={store}
+          creatorUserIdsByOrcid={creatorUserIdsByOrcid}
+        />
+      );
+    case TEMPLATE_URI.AIDA_SENTENCE:
+      return (
+        <ViewAIDASentence
+          store={store}
+          creatorUserIdsByOrcid={creatorUserIdsByOrcid}
+        />
+      );
+    case TEMPLATE_URI.GEO_COVERAGE:
+      return (
+        <ViewGeographicalCoverage
+          store={store}
+          creatorUserIdsByOrcid={creatorUserIdsByOrcid}
+        />
+      );
+    default:
+      return (
+        <NanopubViewer
+          store={store}
+          creatorUserIdsByOrcid={creatorUserIdsByOrcid}
+        />
+      );
+  }
+}
 
 export default function ViewNanopub() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -82,7 +147,7 @@ export default function ViewNanopub() {
           {!loading && !error && (
             <>
               {store ? (
-                <NanopubViewer
+                <SmartNanopubViewer
                   store={store}
                   creatorUserIdsByOrcid={creatorUserIdsByOrcid}
                 />
