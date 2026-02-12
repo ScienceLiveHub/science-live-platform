@@ -153,7 +153,7 @@ export async function publishRdf(
 }
 
 /**
- * fetch a list of from a remote RDF document (e.g. values for a combobox or multi choice).
+ * fetch a list of values from a remote RDF document (e.g. values for a combobox or multi choice).
  *
  */
 export async function fetchPossibleValuesFromQuads(url: string) {
@@ -219,7 +219,9 @@ export function shrinkUri(
  * - Supports strings and arrays of strings for properties (props with the suffix `_$array` are treated as arrays).
  * - Each value only maps to the first match in propertyMap
  *
- * TODO: there is a chance that if multiple props with same name are found, only one will be opaquely returned if not mapped to array.
+ * TODO: there is a chance that if multiple props with same name are found, only one will be opaquely returned
+ *       if not mapped to an `*_$array` property.  Whether to return the first or last match can be controlled by
+ *       the `firstMatch` option
  * TODO: Since order matters ("first match" note above), using Map might be better than Record for propertyMap
  *
  * Property mapping example:
@@ -244,6 +246,7 @@ export function extractSubjectProps(
   propertyMap: PropertyMap,
   graphUri?: string | null,
   returnNodes = false,
+  firstMatch = false,
 ) {
   const outputObj: any = {};
   store.forEach((quad) => {
@@ -266,7 +269,9 @@ export function extractSubjectProps(
           }
           outputObj[key].push(returnNodes ? quad.object : quad.object.value);
         } else {
-          outputObj[key] = returnNodes ? quad.object : quad.object.value;
+          if (!(firstMatch && outputObj[key])) {
+            outputObj[key] = returnNodes ? quad.object : quad.object.value;
+          }
         }
       }
     }

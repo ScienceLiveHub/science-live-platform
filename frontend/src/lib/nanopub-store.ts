@@ -1,5 +1,12 @@
 import { DataFactory, Store as N3Store, NamedNode, Term, Util } from "n3";
-import { fetchQuads, NS, parseRdf, shrinkUri, Statement } from "./rdf";
+import {
+  extractSubjectProps,
+  fetchQuads,
+  NS,
+  parseRdf,
+  shrinkUri,
+  Statement,
+} from "./rdf";
 import {
   getNanopubSuffix,
   getUriEnd,
@@ -49,10 +56,17 @@ export function generateCitation(
   return formats[format as keyof typeof formats] || formats.apa;
 }
 
+export type IntroducedObject = {
+  uri?: string;
+  label?: string;
+  types?: { name: string; href?: string }[];
+};
+
 export type Metadata = {
   created?: string | null;
   creators?: { name?: string; href?: string }[];
   types?: { name: string; href?: string }[];
+  introduces?: IntroducedObject[];
   title?: string | null;
   assertionSubjects?: any[];
   license?: string;
@@ -352,18 +366,27 @@ export class NanopubStore extends N3Store {
         href: q.object.value,
       });
     });
-    const introduces = this.matchOne(
+    const introduces: IntroducedObject[] | undefined = this.match(
       namedNode(this.prefixes["this"]),
       NPX("introduces"),
       null,
       namedNode(this.graphUris.pubinfo!),
-    );
-    if (introduces) {
-      types.push({
-        name: "Introduction",
-        href: NPX("introduces").value,
+    )
+      .toArray()
+      .map((i) => {
+        const props = extractSubjectProps(
+          this,
+          namedNode(i.object.value),
+          {
+            types_$array: [NS.RDF("type")],
+            label: [NS.RDFS("label")],
+          },
+          null,
+          false,
+          true,
+        );
+        return { uri: i.object.value, types: props.types, label: props.label };
       });
-    }
 
     const title =
       this.matchOnePredicate(DCT("title"), this.graphUris.pubinfo) ??
@@ -396,11 +419,12 @@ export class NanopubStore extends N3Store {
 
     this.metadata = {
       created: createdLit?.object ? createdLit.object.value : null,
-      creators: creators,
-      types: types,
+      creators,
+      types,
+      introduces: introduces,
       title: title?.object?.value || null,
       assertionSubjects: unique(assertionSubjects),
-      license: license,
+      license,
       uri: this.prefixes["this"],
       template,
     };

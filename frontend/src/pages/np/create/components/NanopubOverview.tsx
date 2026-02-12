@@ -13,7 +13,9 @@ export function NanopubOverview({
   showShareMenu = true,
 }: NanopubViewerProps) {
   const { getLabel } = useLabels(store.labelCache);
-
+  const isExample = store.metadata.types?.some(
+    (t) => t.href === "http://purl.org/nanopub/x/ExampleNanopub",
+  );
   return (
     <>
       {/* Overview */}
@@ -21,31 +23,33 @@ export function NanopubOverview({
         <div className="relative mb-6">
           <div className="pr-16">
             <h2 className=" text-2xl md:text-3xl font-bold flex">
-              {store.metadata.title ??
+              {store.metadata.title ||
+                store.metadata.introduces?.[0]?.label ||
                 `${getNanopubHash(store.metadata.uri!)?.substring(0, 10)}...`}{" "}
               {/* TODO: this should actually check for trustworthiness somehow */}
-              <BadgeCheck
-                className="m-1.5"
-                color="#33aa33"
-                strokeWidth={2}
-                fill="#33dd3333"
-              >
-                <title>This nanopub is trustworthy</title>
-              </BadgeCheck>
-              {store.metadata.types?.some(
-                (t) => t.href === "http://purl.org/nanopub/x/ExampleNanopub",
-              ) && (
+              {!isExample && (
+                <BadgeCheck
+                  className="m-1.5"
+                  color="#33aa33"
+                  strokeWidth={2}
+                  fill="#33dd3333"
+                >
+                  <title>This nanopub is trustworthy</title>
+                </BadgeCheck>
+              )}
+              {isExample && (
                 <NotepadTextDashed
                   className="m-1.5"
                   color="#999999"
                   strokeWidth={2}
                 >
-                  <title>This is a DRAFT nanopub</title>
+                  <title>
+                    This is an EXAMPLE nanopub, for demo purposes and not to be
+                    taken seriously
+                  </title>
                 </NotepadTextDashed>
               )}
-              {store.metadata.types?.some(
-                (t) => t.href === "http://purl.org/nanopub/x/introduces",
-              ) && (
+              {!!store.metadata.introduces?.length && (
                 <LayersPlus className="m-1.5" color="#aaaa00" strokeWidth={2}>
                   <title>This nanopub introduces something</title>
                 </LayersPlus>
@@ -94,7 +98,7 @@ export function NanopubOverview({
                 })}
               </span>
             ) : (
-              <span className="text-muted-foreground">—</span>
+              <span className="text-muted-foreground">-</span>
             )}
           </div>
 
@@ -108,15 +112,11 @@ export function NanopubOverview({
             {store.metadata.created ? (
               formatDate(store.metadata.created)
             ) : (
-              <span className="text-muted-foreground">—</span>
+              <span className="text-muted-foreground">-</span>
             )}
           </div>
-        </div>
-
-        <div className="mt-1 text-sm space-y-1">
           <div>
-            <span className="font-bold">Type:</span>{" "}
-            {store.metadata.types?.length ? (
+            {!!store.metadata.types?.length && (
               <span className="space-x-2">
                 {store.metadata.types.map((c) => (
                   <a
@@ -132,11 +132,29 @@ export function NanopubOverview({
                   </a>
                 ))}
               </span>
-            ) : (
-              <span className="text-muted-foreground">—</span>
             )}
           </div>
+        </div>
 
+        <div className="mt-1 text-sm space-y-1">
+          {!!store.metadata.introduces?.length && (
+            <div>
+              <span className="font-bold">Introduces:</span>{" "}
+              <span className="space-x-2">
+                {store.metadata.introduces.map((c) => (
+                  <a
+                    key={c.uri}
+                    className="font-mono border-2 p-0.5 px-1.5 rounded-sm font-bold text-sm text-blue-600 dark:text-blue-300 hover:underline"
+                    href={c.uri}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {c.label}
+                  </a>
+                ))}
+              </span>
+            </div>
+          )}
           <div>
             <span className="font-bold">License:</span>{" "}
             <a href={store.metadata.license}>

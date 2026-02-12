@@ -14,15 +14,17 @@ import { Term, Util } from "n3";
 function TripleCell({
   display,
   className,
+  innerClassName,
 }: {
   display: { text: string; href?: string };
   className?: string;
+  innerClassName?: string;
 }) {
   return (
     <td className={`py-2 align-top font-mono text-sm ${className || ""}`}>
       {display.href ? (
         <a
-          className="text-blue-600 dark:text-blue-300 hover:underline"
+          className={`text-blue-600 dark:text-blue-300 hover:underline ${innerClassName || ""}`}
           href={
             isNanopubUri(display.href)
               ? toScienceLiveNPUri(display.href)
@@ -77,9 +79,22 @@ function TripleRow({
 
   return (
     <tr className="border-b last:border-b-0">
-      {!excludeSub && <TripleCell display={s} className="pr-3" />}
+      {!excludeSub && (
+        <TripleCell
+          display={s}
+          className={`pr-3${store.metadata.introduces?.some((i) => i.uri === s.href) ? " border-2 p-0.5 px-1.5 rounded-sm font-bold" : ""}`}
+        />
+      )}
       <TripleCell display={p} className="px-3 text-muted-foreground" />
-      <TripleCell display={o} className="pl-3 wrap-anywhere" />
+      <TripleCell
+        display={o}
+        className="pl-3 wrap-anywhere"
+        innerClassName={
+          store.metadata.introduces?.some((i) => i.uri === o.href)
+            ? " border-2 p-0.5 px-1.5 rounded-sm font-bold"
+            : undefined
+        }
+      />
     </tr>
   );
 }
@@ -139,6 +154,13 @@ export function GraphSection({
                         href: st.subject.value,
                       }}
                       className="pr-3 border-0"
+                      innerClassName={
+                        store.metadata.introduces?.some(
+                          (i) => i.uri === st.subject.value,
+                        )
+                          ? " border-2 p-0.5 px-1.5 rounded-sm font-bold"
+                          : undefined
+                      }
                     />
                   </p>
                 )}
