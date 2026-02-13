@@ -89,21 +89,19 @@ function extractAnnotateQuotation(
   return { paperUrl, quotedText, commentText };
 }
 
-function QuotationContent({
-  data,
-  store,
-}: {
-  data: AnnotateQuotationData;
-  store: NanopubStore;
-}) {
+export function ViewAnnotateQuotation({ store }: CustomViewerProps) {
+  const data = useMemo(() => extractAnnotateQuotation(store), [store]);
+
   const { getLabel } = useLabels(store.labelCache);
+
+  if (!data) return null;
 
   return (
     <Card className="border-l-8 border-l-rose-500">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <Quote className="h-5 w-5 text-rose-600" />
-          Paper Quotation &amp; Annotation
+          Paper Quotation & Annotation
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
@@ -162,12 +160,4 @@ function QuotationContent({
       </CardContent>
     </Card>
   );
-}
-
-export function ViewAnnotateQuotation({ store }: CustomViewerProps) {
-  const data = useMemo(() => extractAnnotateQuotation(store), [store]);
-
-  if (!data) return null;
-
-  return <QuotationContent data={data} store={store} />;
 }

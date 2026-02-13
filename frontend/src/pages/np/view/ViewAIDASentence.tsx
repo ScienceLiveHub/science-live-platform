@@ -108,14 +108,12 @@ function extractAIDASentence(store: NanopubStore): AIDASentenceData | null {
   };
 }
 
-function AIDASentenceContent({
-  data,
-  store,
-}: {
-  data: AIDASentenceData;
-  store: NanopubStore;
-}) {
+export function ViewAIDASentence({ store }: CustomViewerProps) {
+  const data = useMemo(() => extractAIDASentence(store), [store]);
+
   const { getLabel } = useLabels(store.labelCache);
+
+  if (!data) return null;
 
   return (
     <Card className="border-l-8 border-l-emerald-500">
@@ -207,12 +205,4 @@ function AIDASentenceContent({
       </CardContent>
     </Card>
   );
-}
-
-export function ViewAIDASentence({ store }: CustomViewerProps) {
-  const data = useMemo(() => extractAIDASentence(store), [store]);
-
-  if (!data) return null;
-
-  return <AIDASentenceContent data={data} store={store} />;
 }

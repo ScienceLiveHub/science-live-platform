@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { Statement } from "@/lib/rdf";
 import { isNanopubUri, toScienceLiveNPUri } from "@/lib/uri";
@@ -9,7 +10,7 @@ import {
   CollapsibleTrigger,
 } from "@radix-ui/react-collapsible";
 import { ChevronsUpDown, File, LucideIcon } from "lucide-react";
-import { Term, Util } from "n3";
+import { Util } from "n3";
 
 const introducedClass = "border-2 p-0.5 px-1.5 rounded-sm font-bold";
 
@@ -54,14 +55,13 @@ function TripleRow({
   st,
   excludeSub,
   className,
-  getLabel,
 }: {
   store: NanopubStore;
   st: Statement;
   excludeSub?: boolean;
   className?: string;
-  getLabel: (term: Term | string) => string;
 }) {
+  const { getLabel } = useLabels(store.labelCache);
   const s = !excludeSub
     ? {
         text: decodeURI(
@@ -119,7 +119,6 @@ export function GraphSection({
   statements,
   Icon = File,
   extraClasses,
-  getLabel,
   collapsible = false,
 }: {
   store: NanopubStore;
@@ -127,9 +126,10 @@ export function GraphSection({
   statements: Statement[];
   Icon: LucideIcon;
   extraClasses?: string;
-  getLabel: (term: Term | string) => string;
   collapsible?: boolean;
 }) {
+  const { getLabel } = useLabels(store.labelCache);
+
   const header = (
     <CardTitle className="flex items-center gap-2">
       <Icon className="h-5 w-5 text-primary" />
@@ -182,7 +182,6 @@ export function GraphSection({
                   store={store}
                   key={idx}
                   st={st}
-                  getLabel={getLabel}
                   excludeSub={firstOfRepeat || repeat}
                   className={
                     !(firstOfRepeat || repeat || idx == 0) ? "pt-6" : undefined
@@ -221,14 +220,12 @@ export function PubInfoSection({
   statements,
   Icon = File,
   extraClasses,
-  getLabel,
 }: {
   store: NanopubStore;
   title: string;
   statements: Statement[];
   Icon: LucideIcon;
   extraClasses?: string;
-  getLabel: (term: Term | string) => string;
 }) {
   const pubStatements: Statement[] = [];
   const sigStatements: Statement[] = [];
@@ -272,13 +269,7 @@ export function PubInfoSection({
                 <table className="table-auto text-left">
                   <tbody className="divide-y">
                     {pubStatements.map((st, idx) => (
-                      <TripleRow
-                        store={store}
-                        key={idx}
-                        st={st}
-                        excludeSub
-                        getLabel={getLabel}
-                      />
+                      <TripleRow store={store} key={idx} st={st} excludeSub />
                     ))}
                   </tbody>
                 </table>
@@ -290,13 +281,7 @@ export function PubInfoSection({
                 <table className="table-auto text-left">
                   <tbody className="divide-y">
                     {sigStatements.map((st, idx) => (
-                      <TripleRow
-                        store={store}
-                        key={idx}
-                        st={st}
-                        excludeSub
-                        getLabel={getLabel}
-                      />
+                      <TripleRow store={store} key={idx} st={st} excludeSub />
                     ))}
                   </tbody>
                 </table>
@@ -307,12 +292,7 @@ export function PubInfoSection({
               <table className="table-auto text-left">
                 <tbody className="divide-y">
                   {otherStatements.map((st, idx) => (
-                    <TripleRow
-                      store={store}
-                      key={idx}
-                      st={st}
-                      getLabel={getLabel}
-                    />
+                    <TripleRow store={store} key={idx} st={st} />
                   ))}
                 </tbody>
               </table>

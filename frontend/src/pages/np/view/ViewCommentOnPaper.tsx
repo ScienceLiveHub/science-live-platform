@@ -81,14 +81,12 @@ function extractCommentOnPaper(store: NanopubStore): CommentOnPaperData | null {
   return { paperUrl, relationType, commentText };
 }
 
-function CommentContent({
-  data,
-  store,
-}: {
-  data: CommentOnPaperData;
-  store: NanopubStore;
-}) {
+export function ViewCommentOnPaper({ store }: CustomViewerProps) {
+  const data = useMemo(() => extractCommentOnPaper(store), [store]);
+
   const { getLabel } = useLabels(store.labelCache);
+
+  if (!data) return null;
 
   return (
     <Card className="border-l-8 border-l-sky-500">
@@ -134,12 +132,4 @@ function CommentContent({
       </CardContent>
     </Card>
   );
-}
-
-export function ViewCommentOnPaper({ store }: CustomViewerProps) {
-  const data = useMemo(() => extractCommentOnPaper(store), [store]);
-
-  if (!data) return null;
-
-  return <CommentContent data={data} store={store} />;
 }

@@ -84,14 +84,12 @@ function UriLink({ uri, label }: { uri: string; label?: string }) {
   );
 }
 
-function CitationContent({
-  data,
-  store,
-}: {
-  data: CitationWithCiTOData;
-  store: NanopubStore;
-}) {
+export function ViewCitationWithCiTO({ store }: CustomViewerProps) {
+  const data = useMemo(() => extractCitationWithCiTO(store), [store]);
+
   const { getLabel } = useLabels(store.labelCache);
+
+  if (!data) return null;
 
   return (
     <Card className="border-l-8 border-l-amber-500">
@@ -156,12 +154,4 @@ function CitationContent({
       </CardContent>
     </Card>
   );
-}
-
-export function ViewCitationWithCiTO({ store }: CustomViewerProps) {
-  const data = useMemo(() => extractCitationWithCiTO(store), [store]);
-
-  if (!data) return null;
-
-  return <CitationContent data={data} store={store} />;
 }

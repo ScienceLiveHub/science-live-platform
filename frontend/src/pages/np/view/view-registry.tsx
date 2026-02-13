@@ -21,7 +21,7 @@ import { ViewGeographicalCoverage } from "./ViewGeographicalCoverage";
  */
 export const VIEW_COMPONENTS: Record<
   string,
-  ComponentType<CustomViewerProps>
+  ComponentType<CustomViewerProps> | undefined
 > = {
   [TEMPLATE_URI.CITATION_CITO]: ViewCitationWithCiTO,
   [TEMPLATE_URI.ANNOTATE_QUOTATION]: ViewAnnotateQuotation,

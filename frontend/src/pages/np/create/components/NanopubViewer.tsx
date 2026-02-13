@@ -10,7 +10,6 @@ import {
 import { ItemSeparator } from "@/components/ui/item";
 import { SnippetCopyButton } from "@/components/ui/shadcn-io/snippet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useLabels } from "@/hooks/use-labels";
 import { UserId } from "@/hooks/use-nanopub";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { shrinkUri, Statement } from "@/lib/rdf";
@@ -25,7 +24,8 @@ import {
   Share2,
   UserCircle,
 } from "lucide-react";
-import { ReactNode, useMemo } from "react";
+import { useMemo } from "react";
+import { VIEW_COMPONENTS } from "../../view/view-registry";
 import { NanopubOverview } from "./NanopubOverview";
 
 const MenuItem = ({
@@ -44,6 +44,7 @@ const MenuItem = ({
     </DropdownMenuItem>
   </a>
 );
+
 export function ShareMenu({ uri }: { uri: string }) {
   const fileUrl = toRegistryDownloadUrl(uri);
   return (
@@ -79,8 +80,6 @@ export function ShareMenu({ uri }: { uri: string }) {
 
 /**
  * Props accepted by custom template view components (e.g. ViewCitationWithCiTO).
- * Each component receives the nanopub store and returns its template-specific
- * content as a ReactNode (or null when extraction fails).
  */
 export interface CustomViewerProps {
   store: NanopubStore;
@@ -90,8 +89,7 @@ export interface CustomViewerProps {
 export type NanopubViewerProps = {
   store: NanopubStore;
   /**
-   * When provided, enables linking ORCID creators to their Science Live user
-   * profiles.
+   * When provided, enables linking ORCID to their Science Live user profiles.
    */
   creatorUserIdsByOrcid?: Record<string, UserId | null>;
   showShareMenu?: boolean;
@@ -101,25 +99,22 @@ export type NanopubViewerProps = {
    * generally for previewing generated TriG in the nanopub creator.
    */
   generatedTrig?: string;
-  /**
-   * Optional custom template content. When provided, a "Template View" tab is
-   * shown and selected by default. When absent, the tab is disabled and "Raw
-   * RDF Graphs" is the default (and only active) view.
-   */
-  children?: ReactNode;
 };
 
 /**
- * Unified nanopub viewer.
+ * Nanopub Viewer.
+ *
+ * Component which displays the given nanopub store.
  *
  * Renders the nanopub overview header, then a tabbed area with:
- *   - **Template View** – custom template-specific content (`children`).
- *     This tab is the default when children are provided; otherwise it is
- *     disabled and the viewer defaults to the Raw RDF Graphs tab.
- *   - **Raw RDF Graphs** – the standard Assertion / Provenance / PubInfo
+ *   - **Template View**: friendly template-specific view if available.
+ *   - **RDF View**: the standard Assertion / Provenance / PubInfo
  *     graph sections.
  *
- * Optionally shows a citation section below the tabs.
+ * Optionally show:
+ *   - A "share" menu
+ *   - Citation section below the tabs
+ *   - A third tab with raw Trig, if provided
  */
 export function NanopubViewer({
   store,
@@ -127,11 +122,10 @@ export function NanopubViewer({
   showShareMenu = true,
   showCitation = true,
   generatedTrig,
-  children,
 }: NanopubViewerProps) {
-  const { getLabel } = useLabels(store.labelCache);
-
-  const hasCustomContent = children != null;
+  const ViewComponent = store.metadata.template
+    ? VIEW_COMPONENTS[store.metadata.template]
+    : null;
 
   const assertionStatements = useMemo(() => {
     return store.graphUris.assertion
@@ -190,7 +184,6 @@ export function NanopubViewer({
         statements={assertionStatements}
         Icon={File}
         extraClasses="border-l-8 border-l-yellow-300"
-        getLabel={getLabel}
       />
 
       <GraphSection
@@ -199,7 +192,6 @@ export function NanopubViewer({
         statements={provenanceStatements}
         Icon={Microscope}
         extraClasses="border-l-8 border-l-purple-600"
-        getLabel={getLabel}
         collapsible
       />
 
@@ -209,7 +201,6 @@ export function NanopubViewer({
         statements={pubinfoStatements}
         Icon={UserCircle}
         extraClasses="border-l-8 border-l-blue-800"
-        getLabel={getLabel}
       />
 
       {otherGraphs.length > 0 && (
@@ -223,7 +214,6 @@ export function NanopubViewer({
               statements={g.statements}
               Icon={File}
               extraClasses="border-l-8 border-l-purple-600"
-              getLabel={getLabel}
             />
           ))}
         </div>
@@ -239,17 +229,19 @@ export function NanopubViewer({
         showShareMenu={showShareMenu}
       />
 
-      <Tabs defaultValue={hasCustomContent ? "template" : "rdf"}>
-        {(generatedTrig || hasCustomContent) && (
+      <Tabs defaultValue={ViewComponent ? "template" : "rdf"}>
+        {(generatedTrig || ViewComponent) && (
           <TabsList>
-            <TabsTrigger value="template" disabled={!hasCustomContent}>
+            <TabsTrigger value="template" disabled={!ViewComponent}>
               Template View
             </TabsTrigger>
             <TabsTrigger value="rdf">RDF View</TabsTrigger>
             {generatedTrig && <TabsTrigger value="trig">TriG View</TabsTrigger>}
           </TabsList>
         )}
-        <TabsContent value="template">{children}</TabsContent>
+        <TabsContent value="template">
+          {ViewComponent && <ViewComponent store={store} />}
+        </TabsContent>
         <TabsContent value="rdf">{rdfGraphsContent}</TabsContent>
         {generatedTrig && (
           <TabsContent value="trig">

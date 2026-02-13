@@ -32,8 +32,8 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { SmartNanopubViewer } from "../../ViewNanopub";
 import AnyStatementTemplate from "./AnyStatementTemplate";
+import { NanopubViewer } from "./NanopubViewer";
 import { POPULAR_TEMPLATES } from "./templates/registry";
 
 export interface NanopubEditorProps {
@@ -418,7 +418,7 @@ export default function NanopubEditor({
             PREVIEW:
           </h1>
           {previewStore ? (
-            <SmartNanopubViewer
+            <NanopubViewer
               store={previewStore}
               creatorUserIdsByOrcid={{}}
               showShareMenu={false}

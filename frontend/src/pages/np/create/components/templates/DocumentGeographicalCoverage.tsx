@@ -56,6 +56,7 @@ export default function DocumentGeographicalCoverage({
       {
         name: "quoteType",
         type: "radio",
+        required: true,
         options: [
           {
             value: "whole",

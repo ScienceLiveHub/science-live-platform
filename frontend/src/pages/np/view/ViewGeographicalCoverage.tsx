@@ -116,14 +116,12 @@ function extractGeographicalCoverage(
 // Lazy-load the map component to avoid loading Leaflet when not needed
 const ReadOnlyMap = lazy(() => import("../../../components/map-viewer"));
 
-function GeoCoverageContent({
-  data,
-  store,
-}: {
-  data: GeographicalCoverageData;
-  store: NanopubStore;
-}) {
+export function ViewGeographicalCoverage({ store }: CustomViewerProps) {
+  const data = useMemo(() => extractGeographicalCoverage(store), [store]);
+
   const { getLabel } = useLabels(store.labelCache);
+
+  if (!data) return null;
 
   return (
     <Card className="border-l-8 border-l-teal-500">
@@ -163,7 +161,7 @@ function GeoCoverageContent({
               Area
             </p>
             <Badge variant="secondary" className="text-sm gap-1">
-              <MapPin className="h-3 w-3" />
+              <span className="text-teal-600 opacity-70">⬤</span>{" "}
               {data.locationLabel}
             </Badge>
           </div>
@@ -214,12 +212,4 @@ function GeoCoverageContent({
       </CardContent>
     </Card>
   );
-}
-
-export function ViewGeographicalCoverage({ store }: CustomViewerProps) {
-  const data = useMemo(() => extractGeographicalCoverage(store), [store]);
-
-  if (!data) return null;
-
-  return <GeoCoverageContent data={data} store={store} />;
 }

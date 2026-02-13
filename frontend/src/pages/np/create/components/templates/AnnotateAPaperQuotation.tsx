@@ -35,6 +35,7 @@ export default function AnnotateAPaperQuotation({
       {
         name: "quoteType",
         type: "radio",
+        required: true,
         options: [
           {
             value: "whole",
