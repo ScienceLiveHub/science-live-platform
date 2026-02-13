@@ -17,7 +17,7 @@ import { toScienceLiveNPUri } from "@/lib/uri";
 import { Database, ExternalLink, FlaskConical, Link2, Tag } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
-import { CustomViewerProps, NanopubViewShell } from "./NanopubViewShell";
+import { CustomViewerProps } from "../create/components/NanopubViewer";
 
 const { namedNode } = DataFactory;
 
@@ -156,7 +156,7 @@ function AIDASentenceContent({
                 >
                   <Badge
                     variant="secondary"
-                    className="gap-1 hover:bg-secondary/80 cursor-pointer"
+                    className="gap-1 hover:bg-secondary/80"
                   >
                     {getLabel(topic.uri)}
                   </Badge>
@@ -209,20 +209,10 @@ function AIDASentenceContent({
   );
 }
 
-export function ViewAIDASentence({
-  store,
-  creatorUserIdsByOrcid,
-}: CustomViewerProps) {
+export function ViewAIDASentence({ store }: CustomViewerProps) {
   const data = useMemo(() => extractAIDASentence(store), [store]);
 
   if (!data) return null;
 
-  return (
-    <NanopubViewShell
-      store={store}
-      creatorUserIdsByOrcid={creatorUserIdsByOrcid}
-    >
-      <AIDASentenceContent data={data} store={store} />
-    </NanopubViewShell>
-  );
+  return <AIDASentenceContent data={data} store={store} />;
 }

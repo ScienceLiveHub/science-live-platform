@@ -77,6 +77,20 @@ export function getNanopubHash(uri: string, includeModulePrefx = true) {
 }
 
 /**
+ * Returns a link to download the raw content in various formats, from the nanopub registry.
+ * If no format is specified, excludes the file extension.
+ */
+export function toRegistryDownloadUrl(
+  sourceUri: string,
+  format?: "trig" | "jsonld" | "nq" | "xml",
+) {
+  const hash = getNanopubHash(sourceUri);
+  return hash
+    ? `https://registry.knowledgepixels.com/np/${hash}${format ? "." + format : ""}`
+    : undefined;
+}
+
+/**
  * Returns the suffix after the trustyURI hash (separated by either # or /)
  * or undefined if no suffix
  */
@@ -87,7 +101,9 @@ export function getNanopubSuffix(uri: string) {
 }
 
 export function toScienceLiveNPUri(sourceUri: string) {
-  return `https://platform.sciencelive4all.org/np/?uri=${encodeURIComponent(sourceUri)}`;
+  return isNanopubUri(sourceUri)
+    ? `/np/?uri=${encodeURIComponent(sourceUri)}`
+    : undefined;
 }
 
 // TODO: use validDoi zod/regex instead?

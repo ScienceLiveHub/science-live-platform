@@ -30,3 +30,17 @@ export const TEMPLATE_COMPONENTS: Record<
   [TEMPLATE_URI.AIDA_SENTENCE]: AIDASentence,
   [TEMPLATE_URI.GEO_COVERAGE]: DocumentGeographicalCoverage,
 };
+
+export const NanopubEditorOptionFields = [
+  {
+    name: "isExampleNanopub",
+    type: "checkbox",
+    label: "Create Example Nanopub (for testing and demo purposes)",
+    required: true,
+    defaultValue: false,
+    gridColumnSpan: 2,
+    section: {
+      title: "Options",
+    },
+  },
+];

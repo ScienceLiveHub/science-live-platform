@@ -1,7 +1,7 @@
 import * as RDFT from "@rdfjs/types";
 import ky from "ky";
 import { DataFactory, NamedNode, Parser, Quad, Store, Term, Util } from "n3";
-import { getNanopubHash, getUriEnd } from "./uri";
+import { getUriEnd, toRegistryDownloadUrl } from "./uri";
 
 const { namedNode } = DataFactory;
 const { prefix } = Util;
@@ -67,10 +67,9 @@ export async function fetchQuads(
     // in the browser or dont currently support download of application/trig (sciencelive).
     // Therefore, retry getting the trig directly from known working registries
     // TODO: Add more registries to try of this fails.
-    const hash = getNanopubHash(url);
-    if (hash) {
-      url = `https://registry.knowledgepixels.com/np/${hash}.trig`;
-      return await ky(url, {
+    const dl = toRegistryDownloadUrl(url, "trig");
+    if (dl) {
+      return await ky(dl, {
         headers: {
           Accept: PREFERRED_FORMAT,
         },

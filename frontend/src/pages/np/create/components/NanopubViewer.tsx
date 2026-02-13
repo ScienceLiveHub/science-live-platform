@@ -9,10 +9,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ItemSeparator } from "@/components/ui/item";
 import { SnippetCopyButton } from "@/components/ui/shadcn-io/snippet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLabels } from "@/hooks/use-labels";
 import { UserId } from "@/hooks/use-nanopub";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { shrinkUri, Statement } from "@/lib/rdf";
+import { toRegistryDownloadUrl } from "@/lib/uri";
 import {
   Copy,
   Download,
@@ -23,7 +25,7 @@ import {
   Share2,
   UserCircle,
 } from "lucide-react";
-import { useMemo } from "react";
+import { ReactNode, useMemo } from "react";
 import { NanopubOverview } from "./NanopubOverview";
 
 const MenuItem = ({
@@ -42,8 +44,8 @@ const MenuItem = ({
     </DropdownMenuItem>
   </a>
 );
-
 export function ShareMenu({ uri }: { uri: string }) {
+  const fileUrl = toRegistryDownloadUrl(uri);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -65,14 +67,24 @@ export function ShareMenu({ uri }: { uri: string }) {
         </SnippetCopyButton>
         <MenuItem text="Open original" Icon={ExternalLink} href={uri} />
         <ItemSeparator />
-        {/* TODO: these dont work yet */}
-        <MenuItem text="TriG" Icon={Download} />
-        <MenuItem text="JSON-LD" Icon={Download} />
-        <MenuItem text="N-Quads" Icon={Download} />
-        <MenuItem text="XML" Icon={Download} />
+
+        <MenuItem text="TriG" Icon={Download} href={fileUrl + ".trig"} />
+        <MenuItem text="JSON-LD" Icon={Download} href={fileUrl + ".jsonld"} />
+        <MenuItem text="N-Quads" Icon={Download} href={fileUrl + ".nq"} />
+        <MenuItem text="XML" Icon={Download} href={fileUrl + ".xml"} />
       </DropdownMenuContent>
     </DropdownMenu>
   );
+}
+
+/**
+ * Props accepted by custom template view components (e.g. ViewCitationWithCiTO).
+ * Each component receives the nanopub store and returns its template-specific
+ * content as a ReactNode (or null when extraction fails).
+ */
+export interface CustomViewerProps {
+  store: NanopubStore;
+  creatorUserIdsByOrcid?: Record<string, UserId | null>;
 }
 
 export type NanopubViewerProps = {
@@ -84,16 +96,42 @@ export type NanopubViewerProps = {
   creatorUserIdsByOrcid?: Record<string, UserId | null>;
   showShareMenu?: boolean;
   showCitation?: boolean;
+  /**
+   * Optional. If provided, shows an additional tab with the RAW TriG content,
+   * generally for previewing generated TriG in the nanopub creator.
+   */
+  generatedTrig?: string;
+  /**
+   * Optional custom template content. When provided, a "Template View" tab is
+   * shown and selected by default. When absent, the tab is disabled and "Raw
+   * RDF Graphs" is the default (and only active) view.
+   */
+  children?: ReactNode;
 };
 
+/**
+ * Unified nanopub viewer.
+ *
+ * Renders the nanopub overview header, then a tabbed area with:
+ *   - **Template View** – custom template-specific content (`children`).
+ *     This tab is the default when children are provided; otherwise it is
+ *     disabled and the viewer defaults to the Raw RDF Graphs tab.
+ *   - **Raw RDF Graphs** – the standard Assertion / Provenance / PubInfo
+ *     graph sections.
+ *
+ * Optionally shows a citation section below the tabs.
+ */
 export function NanopubViewer({
   store,
   creatorUserIdsByOrcid = {},
   showShareMenu = true,
   showCitation = true,
+  generatedTrig,
+  children,
 }: NanopubViewerProps) {
-  // Initialize the labels hook with the store's label cache
   const { getLabel } = useLabels(store.labelCache);
+
+  const hasCustomContent = children != null;
 
   const assertionStatements = useMemo(() => {
     return store.graphUris.assertion
@@ -113,7 +151,8 @@ export function NanopubViewer({
       : [];
   }, [store]);
 
-  // otherGraphs should always be empty if its a valid nanopublication, but keep it as a backstop for anomalies
+  // otherGraphs should always be empty if its a valid nanopublication, but
+  // keep it as a backstop for anomalies
   const otherGraphs = useMemo(() => {
     const known = new Set(
       [
@@ -143,6 +182,55 @@ export function NanopubViewer({
     }));
   }, [store]);
 
+  const rdfGraphsContent = (
+    <section className="space-y-4">
+      <GraphSection
+        store={store}
+        title="Assertion"
+        statements={assertionStatements}
+        Icon={File}
+        extraClasses="border-l-8 border-l-yellow-300"
+        getLabel={getLabel}
+      />
+
+      <GraphSection
+        store={store}
+        title="Provenance"
+        statements={provenanceStatements}
+        Icon={Microscope}
+        extraClasses="border-l-8 border-l-purple-600"
+        getLabel={getLabel}
+        collapsible
+      />
+
+      <PubInfoSection
+        store={store}
+        title="Publication Info"
+        statements={pubinfoStatements}
+        Icon={UserCircle}
+        extraClasses="border-l-8 border-l-blue-800"
+        getLabel={getLabel}
+      />
+
+      {otherGraphs.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-xl font-semibold">Other Graphs</h2>
+          {otherGraphs.map((g) => (
+            <GraphSection
+              store={store}
+              key={g.uri}
+              title={`Graph: ${shrinkUri(g.uri, store.prefixes)}`}
+              statements={g.statements}
+              Icon={File}
+              extraClasses="border-l-8 border-l-purple-600"
+              getLabel={getLabel}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+
   return (
     <>
       <NanopubOverview
@@ -151,53 +239,29 @@ export function NanopubViewer({
         showShareMenu={showShareMenu}
       />
 
-      {/* Sections */}
-      <section className="space-y-4">
-        <GraphSection
-          store={store}
-          title="Assertion"
-          statements={assertionStatements}
-          Icon={File}
-          extraClasses="border-l-8 border-l-yellow-300"
-          getLabel={getLabel}
-        />
-
-        <GraphSection
-          store={store}
-          title="Provenance"
-          statements={provenanceStatements}
-          Icon={Microscope}
-          extraClasses="border-l-8 border-l-purple-600"
-          getLabel={getLabel}
-          collapsible
-        />
-
-        <PubInfoSection
-          store={store}
-          title="Publication Info"
-          statements={pubinfoStatements}
-          Icon={UserCircle}
-          extraClasses="border-l-8 border-l-blue-800"
-          getLabel={getLabel}
-        />
-
-        {otherGraphs.length > 0 && (
-          <div className="space-y-3">
-            <h2 className="text-xl font-semibold">Other Graphs</h2>
-            {otherGraphs.map((g) => (
-              <GraphSection
-                store={store}
-                key={g.uri}
-                title={`Graph: ${shrinkUri(g.uri, store.prefixes)}`}
-                statements={g.statements}
-                Icon={File}
-                extraClasses="border-l-8 border-l-purple-600"
-                getLabel={getLabel}
-              />
-            ))}
-          </div>
+      <Tabs defaultValue={hasCustomContent ? "template" : "rdf"}>
+        {(generatedTrig || hasCustomContent) && (
+          <TabsList>
+            <TabsTrigger value="template" disabled={!hasCustomContent}>
+              Template View
+            </TabsTrigger>
+            <TabsTrigger value="rdf">RDF View</TabsTrigger>
+            {generatedTrig && <TabsTrigger value="trig">TriG View</TabsTrigger>}
+          </TabsList>
         )}
-      </section>
+        <TabsContent value="template">{children}</TabsContent>
+        <TabsContent value="rdf">{rdfGraphsContent}</TabsContent>
+        {generatedTrig && (
+          <TabsContent value="trig">
+            <div className="bg-muted rounded-lg p-4">
+              <pre className="text-sm whitespace-pre-wrap overflow-x-auto max-h-96 overflow-y-auto">
+                <code>{generatedTrig}</code>
+              </pre>
+            </div>
+          </TabsContent>
+        )}
+      </Tabs>
+
       {showCitation ? <Citation data={store.metadata} /> : null}
     </>
   );

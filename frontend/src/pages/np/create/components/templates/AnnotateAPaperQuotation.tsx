@@ -2,7 +2,10 @@ import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffi
 import { useFormedible } from "@/hooks/use-formedible";
 import { validDoi } from "@/lib/validation";
 import z from "zod";
-import { NanopubTemplateDefComponentProps } from "./component-registry";
+import {
+  NanopubEditorOptionFields,
+  NanopubTemplateDefComponentProps,
+} from "./component-registry";
 
 export default function AnnotateAPaperQuotation({
   publish,
@@ -64,8 +67,10 @@ export default function AnnotateAPaperQuotation({
         description:
           "Our interpretation or explanation of why this quotation is relevant",
         placeholder: "Comment, interpretation or explanation",
+        required: true,
         textareaConfig: {},
       },
+      ...NanopubEditorOptionFields,
     ],
     globalWrapper: ShowOptionalWrapper,
     submitLabel: "Generate Nanopublication",

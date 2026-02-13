@@ -13,7 +13,7 @@ import { NS } from "@/lib/rdf";
 import { ExternalLink, Link2, MessageCircle, Quote } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
-import { CustomViewerProps, NanopubViewShell } from "./NanopubViewShell";
+import { CustomViewerProps } from "../create/components/NanopubViewer";
 
 const { namedNode } = DataFactory;
 
@@ -164,20 +164,10 @@ function QuotationContent({
   );
 }
 
-export function ViewAnnotateQuotation({
-  store,
-  creatorUserIdsByOrcid,
-}: CustomViewerProps) {
+export function ViewAnnotateQuotation({ store }: CustomViewerProps) {
   const data = useMemo(() => extractAnnotateQuotation(store), [store]);
 
   if (!data) return null;
 
-  return (
-    <NanopubViewShell
-      store={store}
-      creatorUserIdsByOrcid={creatorUserIdsByOrcid}
-    >
-      <QuotationContent data={data} store={store} />
-    </NanopubViewShell>
-  );
+  return <QuotationContent data={data} store={store} />;
 }

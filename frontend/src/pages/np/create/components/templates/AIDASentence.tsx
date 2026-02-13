@@ -6,7 +6,10 @@ import { useFormedible } from "@/hooks/use-formedible";
 import { isNanopubUri } from "@/lib/uri";
 import { KyResponse } from "ky";
 import z from "zod";
-import { NanopubTemplateDefComponentProps } from "./component-registry";
+import {
+  NanopubEditorOptionFields,
+  NanopubTemplateDefComponentProps,
+} from "./component-registry";
 
 const topicEndpoints: SearchEndpoint[] = [
   {
@@ -117,7 +120,7 @@ export default function AIDASentence({
         name: "project",
         type: "text",
         label: "Relates to this nanopublication",
-        placeholder: "URI of nanopublication for related reasearch project",
+        placeholder: "URI of nanopublication for related research project",
         required: true,
       },
       {
@@ -126,6 +129,7 @@ export default function AIDASentence({
         label: "Supported by dataset",
         placeholder: "URI of related published dataset",
       },
+      ...NanopubEditorOptionFields,
     ],
     globalWrapper: ShowOptionalWrapper,
     submitLabel: "Generate Nanopublication",

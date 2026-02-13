@@ -204,6 +204,9 @@ export class NanopubStore extends N3Store {
       if (uri.startsWith("https://orcid.org/")) {
         return undefined;
       }
+      if (uri.startsWith("http://www.wikidata.org/entity/")) {
+        return undefined;
+      }
 
       // Failing that, use the end-most part of the URL converted to space case
       label = getUriEnd(uri);

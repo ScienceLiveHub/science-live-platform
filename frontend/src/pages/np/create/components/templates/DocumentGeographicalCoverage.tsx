@@ -6,7 +6,10 @@ import { useFormedible } from "@/hooks/use-formedible";
 import { validDoi, validUriPlaceholder } from "@/lib/validation";
 import { geojsonToWKT, wktToGeoJSON } from "@terraformer/wkt";
 import z from "zod";
-import { NanopubTemplateDefComponentProps } from "./component-registry";
+import {
+  NanopubEditorOptionFields,
+  NanopubTemplateDefComponentProps,
+} from "./component-registry";
 
 export default function DocumentGeographicalCoverage({
   publish,
@@ -234,6 +237,7 @@ export default function DocumentGeographicalCoverage({
         textareaConfig: {},
         required: true,
       },
+      ...NanopubEditorOptionFields,
     ],
     globalWrapper: ShowOptionalWrapper,
     submitLabel: "Generate Nanopublication",

@@ -2,10 +2,17 @@ import { Badge } from "@/components/ui/badge";
 import { useLabels } from "@/hooks/use-labels";
 import { COMMON_LICENSES } from "@/lib/nanopub-store";
 import { formatDate } from "@/lib/string-format";
-import { extractOrcidId, getNanopubHash } from "@/lib/uri";
-import { BadgeCheck, LayersPlus, NotepadTextDashed, User } from "lucide-react";
+import { extractOrcidId, getNanopubHash, toScienceLiveNPUri } from "@/lib/uri";
+import {
+  BadgeCheck,
+  FilePlus,
+  LayersPlus,
+  NotepadTextDashed,
+  User,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { NanopubViewerProps, ShareMenu } from "./NanopubViewer";
+import { TEMPLATE_METADATA } from "./templates/registry-metadata";
 
 export function NanopubOverview({
   store,
@@ -16,6 +23,9 @@ export function NanopubOverview({
   const isExample = store.metadata.types?.some(
     (t) => t.href === "http://purl.org/nanopub/x/ExampleNanopub",
   );
+  const isTemplate = store.metadata.types?.some(
+    (t) => t.href === "https://w3id.org/np/o/ntemplate/AssertionTemplate",
+  );
   return (
     <>
       {/* Overview */}
@@ -23,8 +33,13 @@ export function NanopubOverview({
         <div className="relative mb-6">
           <div className="pr-16">
             <h2 className=" text-2xl md:text-3xl font-bold flex">
+              {/* TODO: peform this during store.metadata generation and store in metadata.title? */}
               {store.metadata.title ||
                 store.metadata.introduces?.[0]?.label ||
+                (store.metadata.introduces?.[0]?.uri &&
+                  store.findInternalLabel(
+                    store.metadata.introduces?.[0]?.uri,
+                  )) ||
                 `${getNanopubHash(store.metadata.uri!)?.substring(0, 10)}...`}{" "}
               {/* TODO: this should actually check for trustworthiness somehow */}
               {!isExample && (
@@ -53,6 +68,17 @@ export function NanopubOverview({
                 <LayersPlus className="m-1.5" color="#aaaa00" strokeWidth={2}>
                   <title>This nanopub introduces something</title>
                 </LayersPlus>
+              )}
+              {isTemplate && (
+                <Link to={`/np/create?template=${store.metadata.uri}`}>
+                  {" "}
+                  <FilePlus className="m-1.5" color="#9999ff" strokeWidth={2}>
+                    <title>
+                      This is a template, click to create a new nanopub using
+                      this template
+                    </title>
+                  </FilePlus>
+                </Link>
               )}
             </h2>
           </div>
@@ -145,16 +171,26 @@ export function NanopubOverview({
                   <a
                     key={c.uri}
                     className="font-mono border-2 p-0.5 px-1.5 rounded-sm font-bold text-sm text-blue-600 dark:text-blue-300 hover:underline"
-                    href={c.uri}
+                    href={toScienceLiveNPUri(c.uri!) || c.uri}
                     target="_blank"
                     rel="noreferrer"
                   >
-                    {c.label}
+                    {decodeURI(store.findInternalLabel(c.uri!) || "")}
                   </a>
                 ))}
               </span>
             </div>
           )}
+          {store.metadata.template && (
+            <div>
+              <span className="font-bold">From Template:</span>{" "}
+              <a href={toScienceLiveNPUri(store.metadata.template)}>
+                {TEMPLATE_METADATA[store.metadata.template]?.name ||
+                  getLabel(store.metadata.template)}
+              </a>
+            </div>
+          )}
+
           <div>
             <span className="font-bold">License:</span>{" "}
             <a href={store.metadata.license}>

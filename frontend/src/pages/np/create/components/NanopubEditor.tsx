@@ -5,11 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
   Command,
   CommandEmpty,
   CommandGroup,
@@ -28,14 +23,14 @@ import { Switch } from "@/components/ui/switch";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NanopubTemplate } from "@/lib/nanopub-template";
 import { publishRdf } from "@/lib/rdf";
-import { EXAMPLE_privateKey } from "@/lib/uri";
+import { EXAMPLE_privateKey, toScienceLiveNPUri } from "@/lib/uri";
 import {
-  ChevronDown,
-  ChevronRight,
+  BookCheck,
   ChevronsUpDown,
+  ExternalLink,
   FilePlus,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { SmartNanopubViewer } from "../../ViewNanopub";
 import AnyStatementTemplate from "./AnyStatementTemplate";
@@ -171,7 +166,8 @@ export default function NanopubEditor({
   const [publishComplete, setPublishComplete] = useState(false);
   const [publishedUri, setPublishedUri] = useState<string | null>(null);
   const [previewStore, setPreviewStore] = useState<NanopubStore | null>(null);
-  const [isRawOpen, setIsRawOpen] = useState(false);
+  const scrollBottomRef = useRef(null);
+  const scrollPreviewRef = useRef(null);
 
   // Derived state to determine if we are using a predefined template
   const isPredefined = templateUri && POPULAR_TEMPLATES[templateUri];
@@ -256,6 +252,10 @@ export default function NanopubEditor({
       toast.success("Nanopublication generated", {
         description: "Signed TriG generated and displayed below.",
       });
+      (scrollPreviewRef?.current as any)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     } catch (error) {
       console.error("Error applying template:", error);
       toast.error("Failed to apply template", {
@@ -289,6 +289,9 @@ export default function NanopubEditor({
           signedRdf: generatedRdf,
           publishResponseText: text,
         });
+        (scrollBottomRef?.current as any)?.scrollIntoView({
+          behavior: "smooth",
+        });
       }
     } catch (error) {
       console.error(error);
@@ -320,7 +323,6 @@ export default function NanopubEditor({
           )}
         </div>
       )}
-
       <Card>
         <CardContent>
           {templateUri ? (
@@ -328,8 +330,17 @@ export default function NanopubEditor({
             <>
               {isPredefined && TemplateComp && !isAdvancedMode ? (
                 <>
-                  <div className="font-bold">
-                    {POPULAR_TEMPLATES[templateUri].name}
+                  <div className="font-bold inline-flex">
+                    {POPULAR_TEMPLATES[templateUri].name}{" "}
+                    <a
+                      href={toScienceLiveNPUri(templateUri)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-2 text-blue-400"
+                      title="View source template"
+                    >
+                      <ExternalLink size={20} />
+                    </a>
                   </div>
                   <div className="my-6">
                     {POPULAR_TEMPLATES[templateUri].description}
@@ -339,7 +350,10 @@ export default function NanopubEditor({
                   </div>
                   <TemplateComp
                     publish={publishNanopub}
-                    prefilledData={prefilledData}
+                    prefilledData={{
+                      ...(prefilledData ?? {}),
+                      isExampleNanopub: demoMode,
+                    }}
                   />
                 </>
               ) : (
@@ -397,54 +411,25 @@ export default function NanopubEditor({
           )}
         </CardContent>
       </Card>
-
       {/* Generated RDF display */}
       {generatedRdf && (
-        <div className="mt-8 space-y-6">
-          <h3 className="text-lg font-semibold">Preview Nanopublication</h3>
-
+        <div className="mt-20 space-y-6" ref={scrollPreviewRef}>
+          <h1 className="flex items-center text-xl text-muted-foreground font-black">
+            PREVIEW:
+          </h1>
           {previewStore ? (
             <SmartNanopubViewer
               store={previewStore}
               creatorUserIdsByOrcid={{}}
-              // showShareMenu={false}
-              // showCitation={false}
+              showShareMenu={false}
+              showCitation={false}
+              generatedTrig={generatedRdf}
             />
           ) : (
             <div className="text-muted-foreground p-4 text-center">
               Generating preview...
             </div>
           )}
-
-          <Collapsible
-            open={isRawOpen}
-            onOpenChange={setIsRawOpen}
-            className="border rounded-lg"
-          >
-            <div className="flex items-center justify-between p-4">
-              <h3 className="text-sm font-semibold flex items-center gap-2">
-                Raw TriG Output
-              </h3>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="w-9 p-0">
-                  {isRawOpen ? (
-                    <ChevronDown className="h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
-                  )}
-                  <span className="sr-only">Toggle Raw Output</span>
-                </Button>
-              </CollapsibleTrigger>
-            </div>
-            <CollapsibleContent className="p-4 pt-0">
-              <div className="bg-muted rounded-lg p-4">
-                <pre className="text-sm whitespace-pre-wrap overflow-x-auto max-h-96 overflow-y-auto">
-                  <code>{generatedRdf}</code>
-                </pre>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-
           <div className="mt-4 flex flex-col items-end gap-3">
             <div className="flex items-center gap-2">
               <Checkbox
@@ -467,17 +452,27 @@ export default function NanopubEditor({
             >
               Publish
             </Button>
-            {publishComplete && publishedUri && (
-              <a
-                href={publishedUri}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-primary hover:underline"
-              >
-                {publishedUri}
-              </a>
-            )}
           </div>
+
+          {publishComplete && publishedUri && (
+            <Card>
+              <CardContent>
+                <h3 className="text-lg font-semibold text-green-500 flex items-center gap-2">
+                  <BookCheck /> Successfully Published
+                </h3>
+                <p>Your new nanopublication will soon be available at:</p>
+                <a
+                  href={publishedUri}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline"
+                >
+                  {publishedUri}
+                </a>
+              </CardContent>
+            </Card>
+          )}
+          <div ref={scrollBottomRef} />
         </div>
       )}
     </div>

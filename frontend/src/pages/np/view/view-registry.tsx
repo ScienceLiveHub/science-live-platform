@@ -8,8 +8,8 @@
  */
 
 import { ComponentType } from "react";
+import { CustomViewerProps } from "../create/components/NanopubViewer";
 import { TEMPLATE_URI } from "../create/components/templates/registry-metadata";
-import { CustomViewerProps } from "./NanopubViewShell";
 import { ViewAIDASentence } from "./ViewAIDASentence";
 import { ViewAnnotateQuotation } from "./ViewAnnotateQuotation";
 import { ViewCitationWithCiTO } from "./ViewCitationWithCiTO";

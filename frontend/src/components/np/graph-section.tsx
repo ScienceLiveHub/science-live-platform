@@ -11,17 +11,24 @@ import {
 import { ChevronsUpDown, File, LucideIcon } from "lucide-react";
 import { Term, Util } from "n3";
 
+const introducedClass = "border-2 p-0.5 px-1.5 rounded-sm font-bold";
+
 function TripleCell({
   display,
   className,
   innerClassName,
+  colSpan,
 }: {
   display: { text: string; href?: string };
   className?: string;
   innerClassName?: string;
+  colSpan?: number;
 }) {
   return (
-    <td className={`py-2 align-top font-mono text-sm ${className || ""}`}>
+    <td
+      className={`py-2 align-top font-mono text-sm ${className || ""}`}
+      colSpan={colSpan}
+    >
       {display.href ? (
         <a
           className={`text-blue-600 dark:text-blue-300 hover:underline ${innerClassName || ""}`}
@@ -46,11 +53,13 @@ function TripleRow({
   store,
   st,
   excludeSub,
+  className,
   getLabel,
 }: {
   store: NanopubStore;
   st: Statement;
   excludeSub?: boolean;
+  className?: string;
   getLabel: (term: Term | string) => string;
 }) {
   const s = !excludeSub
@@ -82,18 +91,23 @@ function TripleRow({
       {!excludeSub && (
         <TripleCell
           display={s}
-          className={`pr-3${store.metadata.introduces?.some((i) => i.uri === s.href) ? " border-2 p-0.5 px-1.5 rounded-sm font-bold" : ""}`}
+          className={`pr-3 font-bold ${className ?? ""}`}
+          innerClassName={`${store.metadata.introduces?.some((i) => i.uri === s.href) ? introducedClass : ""}`}
         />
       )}
-      <TripleCell display={p} className="px-3 text-muted-foreground" />
+      <TripleCell
+        display={p}
+        className={`${excludeSub ? "pl-6" : "pl-3"} pr-3 text-muted-foreground ${className ?? ""}`}
+      />
       <TripleCell
         display={o}
-        className="pl-3 wrap-anywhere"
+        className={`pl-3 wrap-anywhere ${className ?? ""}`}
         innerClassName={
           store.metadata.introduces?.some((i) => i.uri === o.href)
-            ? " border-2 p-0.5 px-1.5 rounded-sm font-bold"
+            ? introducedClass
             : undefined
         }
+        colSpan={excludeSub ? 2 : undefined}
       />
     </tr>
   );
@@ -139,12 +153,10 @@ export function GraphSection({
               !repeat && st.subject.equals(statements[idx + 1]?.subject);
             return (
               <>
-                {(firstOfRepeat || !repeat) && (
-                  <div className="mt-8 border-0"></div>
-                )}
-                {/* Avoid repeating the subject if there are multiple rows with it */}
+                {/* Avoid repeating the subject if there are multiple rows with it,
+                    just show it once on its own row */}
                 {firstOfRepeat && (
-                  <p className="mb-2 font-bold border-0">
+                  <tr>
                     <TripleCell
                       display={{
                         text: decodeURI(
@@ -153,16 +165,18 @@ export function GraphSection({
                         ),
                         href: st.subject.value,
                       }}
-                      className="pr-3 border-0"
-                      innerClassName={
+                      className={`mb-2 font-bold ${firstOfRepeat || !repeat ? " pt-8" : ""}`}
+                      // Introduced objects get a border around them
+                      innerClassName={`${
                         store.metadata.introduces?.some(
                           (i) => i.uri === st.subject.value,
                         )
-                          ? " border-2 p-0.5 px-1.5 rounded-sm font-bold"
+                          ? introducedClass
                           : undefined
-                      }
+                      }`}
+                      colSpan={3}
                     />
-                  </p>
+                  </tr>
                 )}
                 <TripleRow
                   store={store}
@@ -170,6 +184,9 @@ export function GraphSection({
                   st={st}
                   getLabel={getLabel}
                   excludeSub={firstOfRepeat || repeat}
+                  className={
+                    !(firstOfRepeat || repeat || idx == 0) ? "pt-6" : undefined
+                  }
                 />
               </>
             );
@@ -180,11 +197,7 @@ export function GraphSection({
   );
 
   return (
-    <Card
-      className={
-        "hover:shadow-md transition-shadow cursor-pointer m-0 " + extraClasses
-      }
-    >
+    <Card className={"hover:shadow-md transition-shadow m-0 " + extraClasses}>
       {collapsible ? (
         <Collapsible>
           <CardHeader>
@@ -237,11 +250,7 @@ export function PubInfoSection({
   });
 
   return (
-    <Card
-      className={
-        "hover:shadow-md transition-shadow cursor-pointer m-0 " + extraClasses
-      }
-    >
+    <Card className={"hover:shadow-md transition-shadow m-0 " + extraClasses}>
       <Collapsible>
         <CardHeader>
           <CollapsibleTrigger>
@@ -257,9 +266,7 @@ export function PubInfoSection({
         </CardHeader>
         <CollapsibleContent>
           <CardContent>
-            <Card
-              className={"hover:shadow-md transition-shadow cursor-pointer m-3"}
-            >
+            <Card className={"hover:shadow-md transition-shadow m-3"}>
               <CardContent>
                 <p className="mb-2 font-medium">This Nanopublication...</p>
                 <table className="table-auto text-left">
@@ -277,9 +284,7 @@ export function PubInfoSection({
                 </table>
               </CardContent>
             </Card>
-            <Card
-              className={"hover:shadow-md transition-shadow cursor-pointer m-3"}
-            >
+            <Card className={"hover:shadow-md transition-shadow m-3"}>
               <CardContent>
                 <p className="mb-2 font-medium">Signature...</p>
                 <table className="table-auto text-left">

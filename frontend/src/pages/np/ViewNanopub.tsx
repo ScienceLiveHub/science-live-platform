@@ -5,7 +5,7 @@ import { useNanopub, UserId } from "@/hooks/use-nanopub";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NanopubViewer } from "@/pages/np/create/components/NanopubViewer";
 import { FileCode } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { TEMPLATE_URI } from "./create/components/templates/registry-metadata";
 import { ViewAIDASentence } from "./view/ViewAIDASentence";
@@ -22,67 +22,67 @@ import { ViewGeographicalCoverage } from "./view/ViewGeographicalCoverage";
  *   parameter and fetch it.  Failing that, show a text field where the user
  *   can enter a URI themselves.
  * - If the nanopub was created from a known template, renders a custom
- *   template-specific view. Otherwise falls back to the generic NanopubViewer
- *   which displays graphs (Head, Assertion, Provenance, PubInfo) and triples.
+ *   template-specific view inside the "Template View" tab of NanopubViewer.
+ *   Otherwise falls back to the generic NanopubViewer which displays the
+ *   "Raw RDF Graphs" tab by default.
  */
 
 /**
- * Renders either a custom template-specific view or the generic NanopubViewer.
- * Uses direct conditional rendering to avoid the "component created during render" lint error.
+ * Returns the custom template content for a known template, or `null` for
+ * unknown templates (which causes NanopubViewer to default to Raw RDF Graphs).
+ */
+function useCustomTemplateContent(store: NanopubStore): ReactNode | null {
+  const templateUri = store.metadata.template;
+
+  return useMemo(() => {
+    switch (templateUri) {
+      case TEMPLATE_URI.CITATION_CITO:
+        return <ViewCitationWithCiTO store={store} />;
+      case TEMPLATE_URI.ANNOTATE_QUOTATION:
+        return <ViewAnnotateQuotation store={store} />;
+      case TEMPLATE_URI.COMMENT_PAPER:
+        return <ViewCommentOnPaper store={store} />;
+      case TEMPLATE_URI.AIDA_SENTENCE:
+        return <ViewAIDASentence store={store} />;
+      case TEMPLATE_URI.GEO_COVERAGE:
+        return <ViewGeographicalCoverage store={store} />;
+      default:
+        return null;
+    }
+  }, [templateUri, store]);
+}
+
+/**
+ * Renders the unified NanopubViewer. When a custom template view exists it is
+ * passed as `children`, making the "Template View" tab the default. Otherwise
+ * NanopubViewer defaults to the "Raw RDF Graphs" tab.
  */
 export function SmartNanopubViewer({
   store,
   creatorUserIdsByOrcid,
+  showShareMenu = true,
+  showCitation = true,
+  generatedTrig,
 }: {
   store: NanopubStore;
   creatorUserIdsByOrcid: Record<string, UserId | null>;
+  showShareMenu?: boolean;
+  showCitation?: boolean;
+  generatedTrig?: string;
 }) {
-  const templateUri = store.metadata.template;
+  const customContent = useCustomTemplateContent(store);
 
-  switch (templateUri) {
-    case TEMPLATE_URI.CITATION_CITO:
-      return (
-        <ViewCitationWithCiTO
-          store={store}
-          creatorUserIdsByOrcid={creatorUserIdsByOrcid}
-        />
-      );
-    case TEMPLATE_URI.ANNOTATE_QUOTATION:
-      return (
-        <ViewAnnotateQuotation
-          store={store}
-          creatorUserIdsByOrcid={creatorUserIdsByOrcid}
-        />
-      );
-    case TEMPLATE_URI.COMMENT_PAPER:
-      return (
-        <ViewCommentOnPaper
-          store={store}
-          creatorUserIdsByOrcid={creatorUserIdsByOrcid}
-        />
-      );
-    case TEMPLATE_URI.AIDA_SENTENCE:
-      return (
-        <ViewAIDASentence
-          store={store}
-          creatorUserIdsByOrcid={creatorUserIdsByOrcid}
-        />
-      );
-    case TEMPLATE_URI.GEO_COVERAGE:
-      return (
-        <ViewGeographicalCoverage
-          store={store}
-          creatorUserIdsByOrcid={creatorUserIdsByOrcid}
-        />
-      );
-    default:
-      return (
-        <NanopubViewer
-          store={store}
-          creatorUserIdsByOrcid={creatorUserIdsByOrcid}
-        />
-      );
-  }
+  return (
+    <NanopubViewer
+      store={store}
+      creatorUserIdsByOrcid={creatorUserIdsByOrcid}
+      showShareMenu={showShareMenu}
+      showCitation={showCitation}
+      generatedTrig={generatedTrig}
+    >
+      {customContent}
+    </NanopubViewer>
+  );
 }
 
 export default function ViewNanopub() {

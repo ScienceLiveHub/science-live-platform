@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { DataFactory } from "n3";
 import { lazy, Suspense, useMemo } from "react";
-import { CustomViewerProps, NanopubViewShell } from "./NanopubViewShell";
+import { CustomViewerProps } from "../create/components/NanopubViewer";
 
 const { namedNode } = DataFactory;
 
@@ -216,20 +216,10 @@ function GeoCoverageContent({
   );
 }
 
-export function ViewGeographicalCoverage({
-  store,
-  creatorUserIdsByOrcid,
-}: CustomViewerProps) {
+export function ViewGeographicalCoverage({ store }: CustomViewerProps) {
   const data = useMemo(() => extractGeographicalCoverage(store), [store]);
 
   if (!data) return null;
 
-  return (
-    <NanopubViewShell
-      store={store}
-      creatorUserIdsByOrcid={creatorUserIdsByOrcid}
-    >
-      <GeoCoverageContent data={data} store={store} />
-    </NanopubViewShell>
-  );
+  return <GeoCoverageContent data={data} store={store} />;
 }
