@@ -60,7 +60,7 @@ export function AboutSection({ hideTitle }: { hideTitle?: boolean }) {
 
           {/* Side boxes */}
           <div className="space-y-6 order-2 lg:order-2">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer m-0 border-l-8 border-l-yellow-300">
+            <Card className="hover:shadow-md transition-shadow m-0 border-l-8 border-l-yellow-300">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <File className="h-5 w-5 text-primary" />
@@ -74,7 +74,7 @@ export function AboutSection({ hideTitle }: { hideTitle?: boolean }) {
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-md transition-shadow cursor-pointer m-0 border-l-8 border-l-purple-600">
+            <Card className="hover:shadow-md transition-shadow m-0 border-l-8 border-l-purple-600">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Microscope className="h-5 w-5 text-primary" />
@@ -88,7 +88,7 @@ export function AboutSection({ hideTitle }: { hideTitle?: boolean }) {
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-md transition-shadow cursor-pointer m-0 border-l-8 border-l-blue-800">
+            <Card className="hover:shadow-md transition-shadow m-0 border-l-8 border-l-blue-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <UserCircle className="h-5 w-5 text-primary" />

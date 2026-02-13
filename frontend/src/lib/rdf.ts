@@ -1,7 +1,7 @@
 import * as RDFT from "@rdfjs/types";
 import ky from "ky";
 import { DataFactory, NamedNode, Parser, Quad, Store, Term, Util } from "n3";
-import { getNanopubHash, getUriEnd } from "./uri";
+import { getUriEnd, toRegistryDownloadUrl } from "./uri";
 
 const { namedNode } = DataFactory;
 const { prefix } = Util;
@@ -23,6 +23,7 @@ export const NS = {
   DCT: prefix("http://purl.org/dc/terms/"),
   PROV: prefix("http://www.w3.org/ns/prov#"),
   FOAF: prefix("http://xmlns.com/foaf/0.1/"),
+  CITO: prefix("http://purl.org/spar/cito/"),
 };
 
 const { RDF, RDFS, XSD, NP, NPT, DCT, PROV, FOAF } = NS;
@@ -41,8 +42,6 @@ export const DEFAULT_PREFIXES: Record<string, string> = {
   schema: "http://schema.org/",
   dc: "http://purl.org/dc/elements/1.1/",
 };
-
-const problematicHosts = ["https://purl.org", "http://purl.org"];
 
 /**
  * fetch the RDF document, parse it (streaming) and run the callback on each quad that it finds.
@@ -64,18 +63,17 @@ export async function fetchQuads(
     redirect: "follow",
     retry: 2,
   }).catch(async (error) => {
-    // Some hosts (e.g. purl.org) dont support CORS headers for calling from js clients in the browser
-    // For those, retry getting the trig directly from known working servers
-    if (problematicHosts.some((host) => url.startsWith(host))) {
-      const hash = getNanopubHash(url);
-      if (hash) {
-        url = `https://registry.knowledgepixels.com/np/${hash}.trig`;
-        return await ky(url, {
-          headers: {
-            Accept: PREFERRED_FORMAT,
-          },
-        });
-      }
+    // Some hosts (e.g. purl.org) either dont support CORS headers for calling from js clients
+    // in the browser or dont currently support download of application/trig (sciencelive).
+    // Therefore, retry getting the trig directly from known working registries
+    // TODO: Add more registries to try of this fails.
+    const dl = toRegistryDownloadUrl(url, "trig");
+    if (dl) {
+      return await ky(dl, {
+        headers: {
+          Accept: PREFERRED_FORMAT,
+        },
+      });
     }
     throw error;
   });
@@ -154,7 +152,7 @@ export async function publishRdf(
 }
 
 /**
- * fetch a list of from a remote RDF document (e.g. values for a combobox or multi choice).
+ * fetch a list of values from a remote RDF document (e.g. values for a combobox or multi choice).
  *
  */
 export async function fetchPossibleValuesFromQuads(url: string) {
@@ -220,7 +218,9 @@ export function shrinkUri(
  * - Supports strings and arrays of strings for properties (props with the suffix `_$array` are treated as arrays).
  * - Each value only maps to the first match in propertyMap
  *
- * TODO: there is a chance that if multiple props with same name are found, only one will be opaquely returned if not mapped to array.
+ * TODO: there is a chance that if multiple props with same name are found, only one will be opaquely returned
+ *       if not mapped to an `*_$array` property.  Whether to return the first or last match can be controlled by
+ *       the `firstMatch` option
  * TODO: Since order matters ("first match" note above), using Map might be better than Record for propertyMap
  *
  * Property mapping example:
@@ -245,6 +245,7 @@ export function extractSubjectProps(
   propertyMap: PropertyMap,
   graphUri?: string | null,
   returnNodes = false,
+  firstMatch = false,
 ) {
   const outputObj: any = {};
   store.forEach((quad) => {
@@ -267,7 +268,9 @@ export function extractSubjectProps(
           }
           outputObj[key].push(returnNodes ? quad.object : quad.object.value);
         } else {
-          outputObj[key] = returnNodes ? quad.object : quad.object.value;
+          if (!(firstMatch && outputObj[key])) {
+            outputObj[key] = returnNodes ? quad.object : quad.object.value;
+          }
         }
       }
     }

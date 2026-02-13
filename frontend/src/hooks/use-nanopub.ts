@@ -3,11 +3,16 @@ import { extractOrcidId, unique } from "@/lib/uri";
 import ky from "ky";
 import { useEffect, useState } from "react";
 
+export interface UserId {
+  id?: string;
+  name?: string;
+}
+
 interface UseNanopubResult {
   store: NanopubStore | null;
   loading: boolean;
   error: string | null;
-  creatorUserIdsByOrcid: Record<string, string | null>;
+  creatorUserIdsByOrcid: Record<string, UserId | null>;
 }
 
 export function useNanopub(
@@ -17,7 +22,7 @@ export function useNanopub(
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [creatorUserIdsByOrcid, setCreatorUserIdsByOrcid] = useState<
-    Record<string, string | null>
+    Record<string, UserId | null>
   >({});
 
   useEffect(() => {
@@ -67,7 +72,10 @@ export function useNanopub(
                   },
                 ).json()) as any;
 
-                return [orcidId, data?.userId ?? null] as const;
+                return [
+                  orcidId,
+                  { id: data?.userId ?? null, name: data?.name ?? null },
+                ] as const;
               } catch {
                 return [orcidId, null] as const;
               }

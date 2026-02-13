@@ -7,6 +7,7 @@ import { SnippetCopyButton } from "@/components/ui/shadcn-io/snippet";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
 import { usersLatestNanopubs } from "@/lib/queries";
+import { formatDate } from "@/lib/string-format";
 import { getUriEnd } from "@/lib/uri";
 import { SiOrcid } from "@icons-pack/react-simple-icons";
 import { NanopubClient } from "@nanopub/nanopub-js";
@@ -149,14 +150,6 @@ export default function UserProfile() {
   if (!profile) {
     return null;
   }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
 
   const getInitials = (name: string) => {
     return name

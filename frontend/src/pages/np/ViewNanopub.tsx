@@ -2,22 +2,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { useNanopub } from "@/hooks/use-nanopub";
-import { NanopubViewer } from "@/pages/np/create/components/NanopubViewer";
 import { FileCode } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { NanopubViewer } from "./create/components/NanopubViewer";
 
 /**
  * ViewNanopub
  *
- * - Render a nanopub in a user-friendly way.
- * - Pass in a nanopub `store`, otherwise it will look in the `uri` query
- *   paraneter and fetch it.  Failing that, show a text field where the user
- *   can enter a URI themselves.
- * - Displays graphs (Head, Assertion, Provenance, PubInfo) and triples in a
- *   readable format.
- *
- * Intended for generic viewing of any nanopub content.
+ * Standard page for viewing nanopubs.
+ * Gets the nanopub uri from the query string `uri` or allows loading any user-entered uri
+ * using a text field and submit button
  */
 
 export default function ViewNanopub() {
@@ -55,6 +50,11 @@ export default function ViewNanopub() {
             placeholder="Enter URI e.g. https://w3id.org/np/... or http://purl.org/nanopub/..."
             value={inputUri}
             onChange={(e) => setInputUri(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleLoadClick();
+              }
+            }}
           />
           <Button
             className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"

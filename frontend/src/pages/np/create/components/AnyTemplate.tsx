@@ -8,6 +8,7 @@ import {
 import parse from "html-react-parser";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { NanopubEditorOptionFields } from "./templates/component-registry";
 
 interface AnyTemplateProps {
   templateUri: string;
@@ -55,7 +56,7 @@ export default function AnyTemplate({
 
   const { Form } = useFormedible({
     schema,
-    fields,
+    fields: [...fields, ...NanopubEditorOptionFields],
     submitLabel: "Generate Nanopublication",
     resetOnSubmitSuccess: false,
     collapseLabel: "Hide",

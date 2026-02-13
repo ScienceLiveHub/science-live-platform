@@ -1,88 +1,108 @@
 import { COMMON_LABELS } from "@/lib/nanopub-store";
 import { fetchQuads, NS, shrinkUri } from "@/lib/rdf";
-import { isDoiUri } from "@/lib/uri";
+import {
+  extractDoisFromText,
+  extractWikidataEntityId,
+  isWikidataEntityUri,
+} from "@/lib/uri";
 import ky from "ky";
 import { NamedNode, Term, Util } from "n3";
 import { useCallback, useState } from "react";
 
 const { isNamedNode } = Util;
 
-export const kyInstance = ky.create({
-  referrerPolicy: "origin-when-cross-origin",
-});
-
 export interface LabelStore {
   getLabel: (term: Term | string, prefixes?: Record<string, string>) => string;
   isLoading: (uri: string) => boolean;
 }
 
-export function useLabels(
-  storeLabelCache?: Record<string, string>,
-): LabelStore {
-  const [labelCache, setLabelCache] = useState<Record<string, string>>(
-    storeLabelCache || {},
-  );
+export function useLabels(storeLabelCache: Record<string, string>): LabelStore {
   const [loadingUris, setLoadingUris] = useState<Set<string>>(new Set());
 
-  // Update local cache when store cache changes
-  //   useEffect(() => {
-  //     if (storeLabelCache) {
-  //       setLabelCache((prev) => ({ ...prev, ...storeLabelCache }));
-  //     }
-  //   }, [storeLabelCache]);
+  const fetchAndCacheRemoteLabel = useCallback(
+    async (uri: string) => {
+      if (storeLabelCache[uri]) {
+        return storeLabelCache[uri];
+      }
+      // Cancel if already loading
+      if (loadingUris.has(uri)) {
+        return;
+      }
+      // Add to loading set so we only fetch once
+      setLoadingUris((prev) => new Set(prev.add(uri)));
 
-  const fetchAndCacheRemoteLabel = useCallback(async (uri: string) => {
-    // Cancel if already loading or cached
-    if (labelCache[uri] || loadingUris.has(uri)) {
-      return;
-    }
-    // Add to loading set so we only fetch once
-    setLoadingUris((prev) => new Set(prev.add(uri)));
+      let label: string | undefined = undefined;
 
-    let label: string | undefined = undefined;
-
-    try {
-      if (isDoiUri(uri)) {
-        // Try to resolve the title of the DOI using crossref API
-        const data = (await ky
-          .get(uri.replace("https://doi.org", "https://api.crossref.org/works"))
-          .json()) as any;
-        const title = data?.message?.title?.[0];
-        if (title) {
-          label = title;
-        }
-      } else {
-        // Try to fetch RDF and look for labels or names
-        // let label: string | undefined;
-
-        await fetchQuads(uri, (quad) => {
-          const p = quad.predicate.value;
-          const s = quad.subject.value;
-          // If this quad is a name or label for the current nanopub or its assertion, save it
-          if (
-            (s === uri ||
-              s === uri + "#assertion" ||
-              s === uri + "/assertion") &&
-            (p === NS.RDFS("label").value || p === NS.FOAF("name").value)
-          ) {
-            label = quad.object.value ?? uri;
-            // TODO: we should stop searching if we found it
+      try {
+        const doi = extractDoisFromText(uri)?.[0];
+        if (doi) {
+          // Try to resolve the title of the DOI using crossref API
+          const data = (await ky
+            .get(`https://api.crossref.org/works/${doi}`)
+            .json()) as { message?: { title?: string[] } };
+          const title = data?.message?.title?.[0] || doi;
+          if (title) {
+            label = title;
           }
+        } else if (isWikidataEntityUri(uri)) {
+          const entityId = extractWikidataEntityId(uri)!;
+          const data = (await ky
+            .get(
+              `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${entityId}&languages=en&props=labels&format=json&origin=*`,
+            )
+            .json()) as {
+            entities?: Record<
+              string,
+              { labels?: Record<string, { value?: string }> }
+            >;
+          };
+          label = data?.entities?.[entityId]?.labels?.en?.value;
+        } else if (uri.startsWith("https://orcid.org/")) {
+          try {
+            const orcidId = uri.split("https://orcid.org/")[1];
+            const data = (await ky
+              .get(
+                `${import.meta.env.VITE_API_URL}/orcid/display-name?orcid=${encodeURIComponent(uri)}`,
+              )
+              .json()) as { displayName?: string };
+            label = data?.displayName ?? orcidId;
+          } catch (error) {
+            console.warn(
+              `Failed to fetch ORCID display name for ${uri}:`,
+              error,
+            );
+          }
+        } else {
+          // Try to fetch RDF and look for labels or names
+          await fetchQuads(uri, (quad) => {
+            const p = quad.predicate.value;
+            const s = quad.subject.value;
+            // If this quad is a name or label for the current nanopub or its assertion, save it
+            if (
+              (s === uri ||
+                s === uri + "#assertion" ||
+                s === uri + "/assertion") &&
+              (p === NS.RDFS("label").value || p === NS.FOAF("name").value)
+            ) {
+              label = quad.object.value ?? uri;
+              // TODO: we should stop searching if we found it. How do we exit this callback? throw error?
+            }
+          });
+        }
+      } catch (error) {
+        console.warn(`Failed to fetch label for ${uri}:`, error);
+      } finally {
+        // TODO: if it failed, is it better to save uri, short uri or nothing?
+        storeLabelCache[uri] = label ?? uri;
+        // Always remove from loading set regardless of whether it failed or succeeded
+        setLoadingUris((prev) => {
+          prev.delete(uri);
+          return new Set(prev);
         });
       }
-    } catch (error) {
-      console.warn(`Failed to fetch label for ${uri}:`, error);
-    } finally {
-      // Always remove from loading set regardless of whether it failed or succeeded
-      console.log(`✅ Finished fetching remote label ${uri}-> ${label}`);
-      // TODO: if it failed, is it better to save uri, short uri or nothing?
-      setLabelCache((prev) => ({ ...prev, [uri]: label ?? uri }));
-      setLoadingUris((prev) => {
-        prev.delete(uri);
-        return new Set(prev);
-      });
-    }
-  }, []);
+    },
+    [loadingUris, storeLabelCache],
+  );
 
   const getLabel = useCallback(
     (term: Term | string, prefixes?: Record<string, string>): string => {
@@ -91,8 +111,8 @@ export function useLabels(
         : (term as string);
 
       // If we already have a cached label, return it
-      if (labelCache[uri]) {
-        return labelCache[uri];
+      if (storeLabelCache?.[uri]) {
+        return storeLabelCache[uri];
       }
 
       // Also check common labels
@@ -107,12 +127,13 @@ export function useLabels(
 
       return shrinkUri(uri, prefixes || {});
     },
-    [fetchAndCacheRemoteLabel, loadingUris],
+    [fetchAndCacheRemoteLabel, loadingUris, storeLabelCache],
   );
 
+  // For checking whether any URIs are loading, or a specific URI if specified
   const isLoading = useCallback(
-    (uri: string): boolean => {
-      return loadingUris.has(uri);
+    (uri?: string): boolean => {
+      return uri ? loadingUris.has(uri) : !!loadingUris.size;
     },
     [loadingUris],
   );
