@@ -11,10 +11,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
-import { ExternalLink, Link2, MessageSquare } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
 import { CustomViewerProps } from "../create/components/NanopubViewer";
+import { CommentBlock, ItemTitle } from "./shared-components";
 
 const { namedNode } = DataFactory;
 
@@ -101,16 +102,15 @@ export function ViewCommentOnPaper({ store }: CustomViewerProps) {
         <div>
           {/* Relation Type */}
           <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">
-              This Nanopublication
-            </p>
+            <ItemTitle title="This Nanopublication" />
             <Badge variant="outline" className="text-sm">
-              {getLabel(data.relationType)}
+              {store.findInternalLabel(data.relationType) ||
+                getLabel(data.relationType)}
             </Badge>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Link2 className="h-4 w-4 text-muted-foreground shrink-0" />
+          {/* Paper Link - styled inline with badge */}
+          <div className="flex items-center gap-2 mt-2">
             <a
               href={data.paperUrl}
               target="_blank"
@@ -118,17 +118,12 @@ export function ViewCommentOnPaper({ store }: CustomViewerProps) {
               className="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 break-all"
             >
               {getLabel(data.paperUrl)}
-              <ExternalLink className="h-3 w-3 shrink-0" />
             </a>
           </div>
         </div>
 
         {/* Comment Text */}
-        <div>
-          <blockquote className="rounded-md border-l-4 border-sky-300 bg-muted/40 p-4 text-base italic leading-relaxed">
-            {data.commentText}
-          </blockquote>
-        </div>
+        <CommentBlock text={data.commentText} />
       </CardContent>
     </Card>
   );

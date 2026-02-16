@@ -11,10 +11,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
-import { ArrowRight, BookOpen, ExternalLink, Link2 } from "lucide-react";
+import { ArrowRight, BookOpen, Link2 } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
 import { CustomViewerProps } from "../create/components/NanopubViewer";
+import { ExternalUriLink, ItemTitle } from "./shared-components";
 
 const { namedNode } = DataFactory;
 
@@ -70,20 +71,6 @@ function extractCitationWithCiTO(
   return { citingArticle, citations };
 }
 
-function UriLink({ uri, label }: { uri: string; label?: string }) {
-  return (
-    <a
-      href={uri}
-      target="_blank"
-      rel="noreferrer"
-      className="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 break-all"
-    >
-      {label || uri}
-      <ExternalLink className="h-3 w-3 shrink-0" />
-    </a>
-  );
-}
-
 export function ViewCitationWithCiTO({ store }: CustomViewerProps) {
   const data = useMemo(() => extractCitationWithCiTO(store), [store]);
 
@@ -102,12 +89,10 @@ export function ViewCitationWithCiTO({ store }: CustomViewerProps) {
       <CardContent className="space-y-6">
         {/* Citing Article */}
         <div>
-          <p className="text-sm font-medium text-muted-foreground mb-1">
-            This Article
-          </p>
+          <ItemTitle title="This Article" />
           <div className="flex items-center gap-2">
             <Link2 className="h-4 w-4 text-muted-foreground shrink-0" />
-            <UriLink
+            <ExternalUriLink
               uri={data.citingArticle}
               label={getLabel(data.citingArticle)}
             />
@@ -117,9 +102,7 @@ export function ViewCitationWithCiTO({ store }: CustomViewerProps) {
         {/* Citations List */}
         {data.citations.length > 0 && (
           <div>
-            <p className="text-sm font-medium text-muted-foreground mb-3">
-              cites the following:
-            </p>
+            <ItemTitle title="cites the following:" className="mb-3" />
             <div className="space-y-3">
               {data.citations.map((citation, idx) => (
                 <div
@@ -140,7 +123,7 @@ export function ViewCitationWithCiTO({ store }: CustomViewerProps) {
                       </Badge>
                     </a>
                     <div>
-                      <UriLink
+                      <ExternalUriLink
                         uri={citation.citedArticle}
                         label={getLabel(citation.citedArticle)}
                       />

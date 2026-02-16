@@ -14,10 +14,15 @@ import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
 import { toScienceLiveNPUri } from "@/lib/uri";
-import { Database, ExternalLink, FlaskConical, Link2, Tag } from "lucide-react";
+import { Database, ExternalLink, FlaskConical, Tag } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
 import { CustomViewerProps } from "../create/components/NanopubViewer";
+import {
+  ItemTitle,
+  RelatedNanopubLink,
+  ScientificClaimBlock,
+} from "./shared-components";
 
 const { namedNode } = DataFactory;
 
@@ -125,24 +130,16 @@ export function ViewAIDASentence({ store }: CustomViewerProps) {
       </CardHeader>
       <CardContent className="space-y-5">
         {/* The Sentence */}
-        <div>
-          <p className="text-sm font-medium text-muted-foreground mb-2">
-            Scientific Claim
-          </p>
-          <div className="rounded-md border-l-4 border-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 p-4">
-            <p className="text-lg font-medium leading-relaxed">
-              {data.sentence}
-            </p>
-          </div>
-        </div>
+        <ScientificClaimBlock text={data.sentence} />
 
         {/* Topics */}
         {data.topics.length > 0 && (
           <div>
-            <p className="text-sm font-medium text-muted-foreground mb-2">
-              <Tag className="h-4 w-4 inline-block mr-1" />
-              Topics
-            </p>
+            <ItemTitle
+              title="Topics"
+              icon={<Tag className="h-4 w-4 inline-block mr-1" />}
+              className="mb-2"
+            />
             <div className="flex flex-wrap gap-2">
               {data.topics.map((topic) => (
                 <a
@@ -163,31 +160,20 @@ export function ViewAIDASentence({ store }: CustomViewerProps) {
             </div>
           </div>
         )}
+
         {/* Related Nanopub */}
         {data.relatedNanopub && (
-          <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">
-              Related Nanopublication
-            </p>
-            <div className="flex items-center gap-2">
-              <Link2 className="h-4 w-4 text-muted-foreground shrink-0" />
-              <a
-                href={toScienceLiveNPUri(data.relatedNanopub)}
-                rel="noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 break-all text-sm"
-              >
-                {getLabel(data.relatedNanopub)}
-              </a>
-            </div>
-          </div>
+          <RelatedNanopubLink
+            uri={data.relatedNanopub}
+            label={getLabel(data.relatedNanopub)}
+            href={toScienceLiveNPUri(data.relatedNanopub)}
+          />
         )}
 
         {/* Supporting Dataset */}
         {data.supportingDataset && (
           <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">
-              Supporting Dataset
-            </p>
+            <ItemTitle title="Supporting Dataset" />
             <div className="flex items-center gap-2">
               <Database className="h-4 w-4 text-muted-foreground shrink-0" />
               <a
