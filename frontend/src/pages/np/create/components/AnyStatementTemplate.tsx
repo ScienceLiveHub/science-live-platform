@@ -9,6 +9,7 @@ import parse from "html-react-parser";
 import { ExternalLink } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { NanopubEditorOptionFields } from "./templates/component-registry";
 
 interface AnyStatementTemplateProps {
   templateUri: string;
@@ -61,15 +62,7 @@ export default function AnyStatementTemplate({
   const { Form } = useFormedible({
     schema,
     layout: { type: "grid", columns: 3 },
-    fields: [
-      ...fields,
-      {
-        name: "isExampleNanopub",
-        type: "checkbox",
-        label: "Create as an Example Nanopub (for testing and demo purposes)",
-        gridColumnSpan: 2,
-      },
-    ],
+    fields: [...fields, ...NanopubEditorOptionFields],
     submitLabel: "Generate Nanopublication",
     resetOnSubmitSuccess: false,
     collapseLabel: "Hide",
@@ -84,7 +77,6 @@ export default function AnyStatementTemplate({
           },
           {} as Record<string, any>,
         ),
-        isExampleNanopub: false,
         ...prefilledData,
       },
       onSubmit: async ({ value }) => {

@@ -3,7 +3,10 @@ import { useFormedible } from "@/hooks/use-formedible";
 import { fetchPossibleValuesFromQuads } from "@/lib/rdf";
 import { useEffect, useState } from "react";
 import z from "zod";
-import { NanopubTemplateDefComponentProps } from "./component-registry";
+import {
+  NanopubEditorOptionFields,
+  NanopubTemplateDefComponentProps,
+} from "./component-registry";
 
 export default function CommentOnPaper({
   publish,
@@ -83,6 +86,7 @@ export default function CommentOnPaper({
         placeholder: "Enter text",
         required: true,
       },
+      ...NanopubEditorOptionFields,
     ],
     globalWrapper: ShowOptionalWrapper,
     submitLabel: "Generate Nanopublication",
