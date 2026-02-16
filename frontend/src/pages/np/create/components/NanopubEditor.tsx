@@ -232,8 +232,18 @@ export default function NanopubEditor({
     }
 
     // Generate/Sign
+    let template;
     try {
-      const template = await NanopubTemplate.load(templateUri!);
+      template = await NanopubTemplate.load(templateUri!);
+    } catch (error) {
+      console.error("Error generating nanopub:", error);
+      toast.error("Failed to generate nanopub", {
+        description:
+          "An error occured while loading the template. Check your internet connection or try again later.",
+      });
+      return;
+    }
+    try {
       const signed = await template.generateNanopublication(
         data,
         {
@@ -257,8 +267,8 @@ export default function NanopubEditor({
         block: "start",
       });
     } catch (error) {
-      console.error("Error applying template:", error);
-      toast.error("Failed to apply template", {
+      console.error("Error generating nanopub:", error);
+      toast.error("Failed to generate nanopub", {
         description: error instanceof Error ? error.message : "Unknown error",
       });
     }
