@@ -41,45 +41,6 @@ export function NanopubOverview({
                     store.metadata.introduces?.[0]?.uri,
                   )) ||
                 `${getNanopubHash(store.metadata.uri!)?.substring(0, 10)}...`}{" "}
-              {/* TODO: this should actually check for trustworthiness somehow */}
-              {!isExample && (
-                <BadgeCheck
-                  className="m-1.5"
-                  color="#33aa33"
-                  strokeWidth={2}
-                  fill="#33dd3333"
-                >
-                  <title>This nanopub is trustworthy</title>
-                </BadgeCheck>
-              )}
-              {isExample && (
-                <NotepadTextDashed
-                  className="m-1.5"
-                  color="#999999"
-                  strokeWidth={2}
-                >
-                  <title>
-                    This is an EXAMPLE nanopub, for demo purposes and not to be
-                    taken seriously
-                  </title>
-                </NotepadTextDashed>
-              )}
-              {!!store.metadata.introduces?.length && (
-                <LayersPlus className="m-1.5" color="#aaaa00" strokeWidth={2}>
-                  <title>This nanopub introduces something</title>
-                </LayersPlus>
-              )}
-              {isTemplate && (
-                <Link to={`/np/create?template=${store.metadata.uri}`}>
-                  {" "}
-                  <FilePlus className="m-1.5" color="#9999ff" strokeWidth={2}>
-                    <title>
-                      This is a template, click to create a new nanopub using
-                      this template
-                    </title>
-                  </FilePlus>
-                </Link>
-              )}
             </h2>
           </div>
 
@@ -128,11 +89,52 @@ export function NanopubOverview({
             )}
           </div>
 
-          {showShareMenu && store.metadata.uri ? (
-            <div className="absolute right-0 top-0">
-              <ShareMenu uri={store.metadata.uri} />
+          <div className="flex absolute right-0 top-0">
+            <div className="flex right-0 top-0">
+              {/* TODO: this should actually check for trustworthiness somehow */}
+              {!isExample && (
+                <BadgeCheck
+                  className="m-1.5"
+                  color="#33aa33"
+                  strokeWidth={2}
+                  fill="#33dd3333"
+                >
+                  <title>This nanopub is trustworthy</title>
+                </BadgeCheck>
+              )}
+              {isExample && (
+                <NotepadTextDashed
+                  className="m-1.5"
+                  color="#999999"
+                  strokeWidth={2}
+                >
+                  <title>
+                    This is an EXAMPLE nanopub, for demo purposes and not to be
+                    taken seriously
+                  </title>
+                </NotepadTextDashed>
+              )}
+              {!!store.metadata.introduces?.length && (
+                <LayersPlus className="m-1.5" color="#aaaa00" strokeWidth={2}>
+                  <title>This nanopub introduces something</title>
+                </LayersPlus>
+              )}
+              {isTemplate && (
+                <Link to={`/np/create?template=${store.metadata.uri}`}>
+                  {" "}
+                  <FilePlus className="m-1.5" color="#9999ff" strokeWidth={2}>
+                    <title>
+                      This is a template, click to create a new nanopub using
+                      this template
+                    </title>
+                  </FilePlus>
+                </Link>
+              )}
             </div>
-          ) : null}
+            {showShareMenu && store.metadata.uri && (
+              <ShareMenu uri={store.metadata.uri} />
+            )}
+          </div>
           <div className="text-sm">
             <span className="">Published </span>{" "}
             {store.metadata.created ? (

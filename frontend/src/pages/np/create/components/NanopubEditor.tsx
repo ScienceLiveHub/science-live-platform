@@ -430,31 +430,8 @@ export default function NanopubEditor({
               Generating preview...
             </div>
           )}
-          <div className="mt-4 flex flex-col items-end gap-3">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="terms-checkbox"
-                checked={termsAgreed}
-                onCheckedChange={(checked) => setTermsAgreed(checked === true)}
-              />
-              <Label
-                htmlFor="terms-checkbox"
-                className="text-sm cursor-pointer italic w-md"
-              >
-                I agree to the terms and conditions, and acknowledge that once
-                published, a nanopublication is public and cannot be deleted
-                (although it can be later labelled as retracted)
-              </Label>
-            </div>
-            <Button
-              disabled={!termsAgreed || publishComplete}
-              onClick={doFinalPublish}
-            >
-              Publish
-            </Button>
-          </div>
 
-          {publishComplete && publishedUri && (
+          {publishComplete && publishedUri ? (
             <Card>
               <CardContent>
                 <h3 className="text-lg font-semibold text-green-500 flex items-center gap-2">
@@ -471,7 +448,34 @@ export default function NanopubEditor({
                 </a>
               </CardContent>
             </Card>
+          ) : (
+            <div className="mt-4 flex flex-col items-end gap-3">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="terms-checkbox"
+                  checked={termsAgreed}
+                  onCheckedChange={(checked) =>
+                    setTermsAgreed(checked === true)
+                  }
+                />
+                <Label
+                  htmlFor="terms-checkbox"
+                  className="text-sm cursor-pointer italic w-md"
+                >
+                  I agree to the terms and conditions, and acknowledge that once
+                  published, a nanopublication is public and cannot be deleted
+                  (although it can be later labelled as retracted)
+                </Label>
+              </div>
+              <Button
+                disabled={!termsAgreed || publishComplete}
+                onClick={doFinalPublish}
+              >
+                Publish
+              </Button>
+            </div>
           )}
+
           <div ref={scrollBottomRef} />
         </div>
       )}

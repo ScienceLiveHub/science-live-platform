@@ -624,6 +624,21 @@ export class ScienceLivePlugin {
       const annotationComment = annotationItem.annotationComment || "";
       const pageLabel = annotationItem.annotationPageLabel || "";
 
+      // Get the PDF item and parent item
+      const pdfItem = annotationItem.parentItem;
+      if (!pdfItem) {
+        ztoolkit.log("ReaderIntegration: PDF item not found");
+        alert("Error", "PDF item not found");
+        return;
+      }
+
+      const parentItem = pdfItem.parentItem;
+      if (!parentItem) {
+        ztoolkit.log("ReaderIntegration: Parent item not found");
+        alert("Error", "Parent item not found");
+        return;
+      }
+
       // Process the quote text
       const { quoteStart, quoteEnd } = splitIfTooLong(annotationText);
 
@@ -632,7 +647,7 @@ export class ScienceLivePlugin {
         quotation: quoteStart,
         "quotation-end": quoteEnd,
         comment: annotationComment,
-        paper: pageLabel,
+        paper: parentItem.getField("DOI"),
         quoteType: quoteEnd && quoteEnd.length > 0 ? "ends" : "whole",
       };
 
