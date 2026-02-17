@@ -260,7 +260,7 @@ export default function NanopubEditor({
       console.log("Generated RDF:\n", signed);
 
       toast.success("Nanopublication generated", {
-        description: "Signed TriG generated and displayed below.",
+        description: "Signed TriG generated, review before publishing.",
       });
       (scrollPreviewRef?.current as any)?.scrollIntoView({
         behavior: "smooth",
