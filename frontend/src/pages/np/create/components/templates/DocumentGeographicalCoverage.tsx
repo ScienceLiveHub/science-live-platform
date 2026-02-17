@@ -12,7 +12,7 @@ import {
 } from "./component-registry";
 
 export default function DocumentGeographicalCoverage({
-  publish,
+  submit,
   prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
   /**
@@ -255,9 +255,7 @@ export default function DocumentGeographicalCoverage({
         geometry: "coverage",
         ...prefilledData,
       },
-      onSubmit: async ({ value }) => {
-        await publish(value);
-      },
+      onSubmit: async ({ value }) => await submit(value),
     },
   });
   return <Form />;

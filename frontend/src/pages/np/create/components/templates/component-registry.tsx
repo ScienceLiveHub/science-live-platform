@@ -12,7 +12,7 @@ import DocumentGeographicalCoverage from "./DocumentGeographicalCoverage";
 import { TEMPLATE_URI } from "./registry-metadata";
 
 export interface NanopubTemplateDefComponentProps {
-  publish: (data: Record<string, string | object>) => Promise<void>;
+  submit: (data: Record<string, string | object>) => Promise<void>;
   prefilledData?: Record<string, string | object>;
 }
 

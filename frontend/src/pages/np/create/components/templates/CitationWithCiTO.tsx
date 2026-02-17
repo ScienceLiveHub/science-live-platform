@@ -9,7 +9,7 @@ import {
 } from "./component-registry";
 
 export default function CitationWithCiTO({
-  publish,
+  submit,
   prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
   const [options, setOptions] = useState<{ value: string; label: string }[]>(
@@ -128,9 +128,7 @@ export default function CitationWithCiTO({
         st02: [],
         ...prefilledData,
       },
-      onSubmit: async ({ value }) => {
-        await publish(value);
-      },
+      onSubmit: async ({ value }) => await submit(value),
     },
   });
   return <Form />;

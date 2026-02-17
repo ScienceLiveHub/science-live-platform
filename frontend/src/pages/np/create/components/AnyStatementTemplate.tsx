@@ -13,13 +13,13 @@ import { NanopubEditorOptionFields } from "./templates/component-registry";
 
 interface AnyStatementTemplateProps {
   templateUri: string;
-  publish: (data: any) => Promise<void>;
+  submit: (data: any) => Promise<void>;
   prefilledData?: any;
 }
 
 export default function AnyStatementTemplate({
   templateUri,
-  publish,
+  submit,
   prefilledData = {},
 }: AnyStatementTemplateProps) {
   const [template, setTemplate] = useState<NanopubTemplate | null>(null);
@@ -79,9 +79,7 @@ export default function AnyStatementTemplate({
         ),
         ...prefilledData,
       },
-      onSubmit: async ({ value }) => {
-        await publish(value);
-      },
+      onSubmit: async ({ value }) => await submit(value),
     },
   });
 

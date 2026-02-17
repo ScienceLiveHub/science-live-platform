@@ -8,7 +8,7 @@ import {
 } from "./component-registry";
 
 export default function AnnotateAPaperQuotation({
-  publish,
+  submit,
   prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
   /**
@@ -85,9 +85,7 @@ export default function AnnotateAPaperQuotation({
         comment: "",
         ...prefilledData,
       },
-      onSubmit: async ({ value }) => {
-        await publish(value);
-      },
+      onSubmit: async ({ value }) => await submit(value),
     },
   });
   return <Form />;

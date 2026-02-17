@@ -50,7 +50,7 @@ function openNanopubCreationDialog(templateUri: string, prefilledData: any) {
     `chrome://${addon.data.config.addonRef}/content/createNanopub.xhtml`,
     "",
     "chrome,dialog=no,modal=no,centerscreen,resizable,width=900,height=700",
-    templateUri, // Citation with CiTO
+    templateUri,
     prefilledData,
     dark,
   );
@@ -697,8 +697,12 @@ export class ScienceLivePlugin {
         alert("Error", "Parent item not found");
         return;
       }
+      const doi = parentItem.getField("DOI");
 
-      const article = parentItem.getField("DOI") || undefined;
+      // TODO: should URL or DOI be preferred?
+      const article = doi
+        ? `https://doi.org/${doi}`
+        : parentItem.getField("URL") || undefined;
       const cited = extractDoisFromText(annotationText);
       const st02 = [];
       for (const c of cited) {
@@ -707,7 +711,7 @@ export class ScienceLivePlugin {
 
       // Prepare data for the form
       const annotationData = {
-        article, // DOI from Zotero Item
+        article, // Must be a URL, either DOI url or other URL from Zotero Item
         st02,
       };
 

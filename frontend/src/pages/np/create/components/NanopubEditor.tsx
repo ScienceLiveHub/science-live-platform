@@ -199,18 +199,18 @@ export default function NanopubEditor({
     onTemplateUriChange?.(uri);
   };
 
-  const publishNanopub = async (data: any) => {
+  const generateNanopub = async (data: any) => {
     console.log("Data entered:", data);
 
     if (!identity) {
-      toast.error("Authentication Required", {
+      toast.warning("Authentication Required", {
         description: "You need to be signed in to publish nanopublications.",
       });
       return;
     }
 
     if (!identity.orcid) {
-      toast.error("ORCID Required", {
+      toast.warning("ORCID Required", {
         description:
           "Your account must be linked to your ORCID to publish nanopublications.",
         action: orcidLinkAction
@@ -249,7 +249,7 @@ export default function NanopubEditor({
         {
           orcid: identity.orcid,
           name: identity.name,
-          isExample: demoMode || data?.isExampleNanopub === true, // Checkbox in AnyStatementTemplate
+          isExample: demoMode || data?.isExampleNanopub === true,
         },
         identity.privateKey || EXAMPLE_privateKey,
       );
@@ -274,7 +274,7 @@ export default function NanopubEditor({
     }
   };
 
-  const doFinalPublish = async () => {
+  const publish = async () => {
     if (!generatedRdf) return;
 
     try {
@@ -359,7 +359,7 @@ export default function NanopubEditor({
                     {POPULAR_TEMPLATES[templateUri].moreDescription}
                   </div>
                   <TemplateComp
-                    publish={publishNanopub}
+                    submit={generateNanopub}
                     prefilledData={{
                       ...(prefilledData ?? {}),
                       isExampleNanopub: demoMode,
@@ -369,7 +369,7 @@ export default function NanopubEditor({
               ) : (
                 <AnyStatementTemplate
                   templateUri={templateUri}
-                  publish={publishNanopub}
+                  submit={generateNanopub}
                   prefilledData={{
                     ...(prefilledData ?? {}),
                     isExampleNanopub: demoMode,
@@ -479,7 +479,7 @@ export default function NanopubEditor({
               </div>
               <Button
                 disabled={!termsAgreed || publishComplete}
-                onClick={doFinalPublish}
+                onClick={publish}
               >
                 Publish
               </Button>

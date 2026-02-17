@@ -9,7 +9,7 @@ import {
 } from "./component-registry";
 
 export default function CommentOnPaper({
-  publish,
+  submit,
   prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
   const [options, setOptions] = useState<{ value: string; label: string }[]>(
@@ -99,9 +99,7 @@ export default function CommentOnPaper({
         text: "",
         ...prefilledData,
       },
-      onSubmit: async ({ value }) => {
-        await publish(value);
-      },
+      onSubmit: async ({ value }) => await submit(value),
     },
   });
   return <Form />;

@@ -51,7 +51,7 @@ const topicEndpoints: SearchEndpoint[] = [
 ];
 
 export default function AIDASentence({
-  publish,
+  submit,
   prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
   /**
@@ -146,7 +146,7 @@ export default function AIDASentence({
         value.st1 = value.topic?.map((t: Record<string, string>) => ({
           topic: t.uri,
         }));
-        await publish(value);
+        await submit(value);
       },
     },
   });
