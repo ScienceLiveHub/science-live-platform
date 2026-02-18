@@ -42,7 +42,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       emailVerification={true}
       deleteUser={true}
       avatar={true}
-      // Built-in auth providers
+      apiKey={{ prefix: "sl_" }}
+      // Built-in auth providers (currently disabled)
       social={{
         providers: [
           /*"github", "google"*/
@@ -60,6 +61,20 @@ export function Providers({ children }: { children: React.ReactNode }) {
             icon: () => <SiOrcid />,
           },
         ],
+      }}
+      account={{
+        fields: ["image", "name", "privateKey"], // Include custom fields in account settings
+      }}
+      additionalFields={{
+        privateKey: {
+          label: "Private Key",
+          placeholder: "",
+          description:
+            "Your Private Key for signing nanopublications you create",
+          required: true,
+          type: "string",
+          multiline: true,
+        },
       }}
     >
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">

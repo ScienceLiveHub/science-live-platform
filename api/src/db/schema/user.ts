@@ -78,6 +78,16 @@ export const notification = pgTable("notification", {
   createdAt: timestamp().notNull().defaultNow(),
 });
 
+export const signingKey = pgTable("signingKey", {
+  id: uuid().primaryKey().defaultRandom(),
+  userId: text()
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  key: text(), // This will be the encrypted key
+  isDefault: boolean(),
+  createdAt: timestamp().notNull().defaultNow(),
+});
+
 export const schema = { user, session, account, verification, notification };
 
 export type User = typeof user.$inferSelect;

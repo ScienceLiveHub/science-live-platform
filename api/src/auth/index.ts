@@ -1,4 +1,5 @@
 import { createDb } from "@/db";
+import { apikeySchema } from "@/db/schema/apikey";
 import { organizationSchema } from "@/db/schema/organization";
 import * as authSchema from "@/db/schema/user";
 import { sendEmail } from "@/email";
@@ -6,6 +7,7 @@ import { isValidEmail } from "@/utils";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import {
+  apiKey,
   createAuthEndpoint,
   createAuthMiddleware,
   openAPI,
@@ -158,6 +160,7 @@ export const getAuth = (env: Env) => {
       openAPI(),
       customProviders(env),
       getSocialProviders(),
+      apiKey(),
       organization({
         allowUserToCreateOrganization: false,
         cancelPendingInvitationsOnReInvite: true,
@@ -184,7 +187,7 @@ export const getAuth = (env: Env) => {
     trustedOrigins: formatAllowedOrigins(env),
     database: drizzleAdapter(db as any, {
       provider: "pg",
-      schema: { ...authSchema, ...organizationSchema },
+      schema: { ...authSchema, ...organizationSchema, ...apikeySchema },
     }),
   });
 };

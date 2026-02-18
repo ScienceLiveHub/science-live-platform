@@ -1,7 +1,7 @@
 {
   "name": "zotero-sciencelive",
   "type": "module",
-  "version": "0.2.0-zotero",
+  "version": "0.2.1-zotero",
   "description": "Science Live plugin for Zotero - Create nanopublications from Zotero items and link them to your bibliography",
   "config": {
     "addonName": "Science Live",
