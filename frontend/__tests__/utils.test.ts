@@ -147,42 +147,42 @@ describe("getNanopubHash", () => {
 
   it("should extract valid RA hash", () => {
     const uri = `https://w3id.org/np/RA${hash}`;
-    expect(getNanopubHash(uri)).toBe(hash);
+    expect(getNanopubHash(uri, false)).toBe(hash);
   });
 
   it("should extract valid RB hash", () => {
     const uri = `https://w3id.org/np/RB${hash}`;
-    expect(getNanopubHash(uri)).toBe(hash);
+    expect(getNanopubHash(uri, false)).toBe(hash);
   });
 
   it("should extract valid FA hash", () => {
     const uri = `https://w3id.org/np/FA${hash}`;
-    expect(getNanopubHash(uri)).toBe(hash);
+    expect(getNanopubHash(uri, false)).toBe(hash);
   });
 
   it("should work for other domain/urls", () => {
     const uri = `https://example.com/RA${hash}`;
-    expect(getNanopubHash(uri)).toBe(hash);
+    expect(getNanopubHash(uri, false)).toBe(hash);
   });
 
   it("should still work if url is suffixed", () => {
     const uri1 = `https://w3id.org/np/FA${hash}/abc`;
-    expect(getNanopubHash(uri1)).toBe(hash);
+    expect(getNanopubHash(uri1, false)).toBe(hash);
     const uri2 = `https://w3id.org/np/FA${hash}#abc`;
-    expect(getNanopubHash(uri2)).toBe(hash);
+    expect(getNanopubHash(uri2, false)).toBe(hash);
     const uri3 = `https://w3id.org/np/FA${hash}/`;
-    expect(getNanopubHash(uri3)).toBe(hash);
+    expect(getNanopubHash(uri3, false)).toBe(hash);
     const uri4 = `https://w3id.org/np/RA${hash}/RA${hash_alt}`;
-    expect(getNanopubHash(uri4)).toBe(hash);
+    expect(getNanopubHash(uri4, false)).toBe(hash);
     const uri5 = `https://w3id.org/np/RA${hash}/np/RA${hash_alt}`;
-    expect(getNanopubHash(uri5)).toBe(hash);
+    expect(getNanopubHash(uri5, false)).toBe(hash);
   });
 
   it("should return undefined for invalid hash length", () => {
     const shortUri = "https://w3id.org/np/RAshort";
-    expect(getNanopubHash(shortUri)).toBeUndefined();
+    expect(getNanopubHash(shortUri, false)).toBeUndefined();
     const longUri = `https://w3id.org/np/RA${hash}toolong`;
-    expect(getNanopubHash(longUri)).toBeUndefined();
+    expect(getNanopubHash(longUri, false)).toBeUndefined();
   });
 
   it("should handle edge case with undefined/invalid input", () => {

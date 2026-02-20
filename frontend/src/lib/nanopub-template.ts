@@ -472,12 +472,18 @@ export class NanopubTemplate extends NanopubStore {
       trigOutput = result;
     });
 
-    const signed = await sign(
-      trigOutput,
-      privateKey,
-      pubData.orcid,
-      pubData.name,
-    );
+    let signed;
+    try {
+      signed = await sign(trigOutput, privateKey, pubData.orcid, pubData.name);
+    } catch (e) {
+      // The error should be either Error object or a string if it occured in wasm
+      if (e instanceof Error) {
+        throw e;
+      } else if (typeof e === "string" || e instanceof String) {
+        throw new Error(`${e}`);
+      }
+      throw new Error("An error occured during signing");
+    }
 
     return signed;
   }

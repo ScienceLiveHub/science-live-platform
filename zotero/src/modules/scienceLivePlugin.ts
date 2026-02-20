@@ -50,7 +50,7 @@ function openNanopubCreationDialog(templateUri: string, prefilledData: any) {
     `chrome://${addon.data.config.addonRef}/content/createNanopub.xhtml`,
     "",
     "chrome,dialog=no,modal=no,centerscreen,resizable,width=900,height=700",
-    templateUri, // Citation with CiTO
+    templateUri,
     prefilledData,
     dark,
   );
@@ -624,6 +624,21 @@ export class ScienceLivePlugin {
       const annotationComment = annotationItem.annotationComment || "";
       const pageLabel = annotationItem.annotationPageLabel || "";
 
+      // Get the PDF item and parent item
+      const pdfItem = annotationItem.parentItem;
+      if (!pdfItem) {
+        ztoolkit.log("ReaderIntegration: PDF item not found");
+        alert("Error", "PDF item not found");
+        return;
+      }
+
+      const parentItem = pdfItem.parentItem;
+      if (!parentItem) {
+        ztoolkit.log("ReaderIntegration: Parent item not found");
+        alert("Error", "Parent item not found");
+        return;
+      }
+
       // Process the quote text
       const { quoteStart, quoteEnd } = splitIfTooLong(annotationText);
 
@@ -632,7 +647,7 @@ export class ScienceLivePlugin {
         quotation: quoteStart,
         "quotation-end": quoteEnd,
         comment: annotationComment,
-        paper: pageLabel,
+        paper: parentItem.getField("DOI"),
         quoteType: quoteEnd && quoteEnd.length > 0 ? "ends" : "whole",
       };
 
@@ -682,8 +697,12 @@ export class ScienceLivePlugin {
         alert("Error", "Parent item not found");
         return;
       }
+      const doi = parentItem.getField("DOI");
 
-      const article = parentItem.getField("DOI") || undefined;
+      // TODO: should URL or DOI be preferred?
+      const article = doi
+        ? `https://doi.org/${doi}`
+        : parentItem.getField("URL") || undefined;
       const cited = extractDoisFromText(annotationText);
       const st02 = [];
       for (const c of cited) {
@@ -692,7 +711,7 @@ export class ScienceLivePlugin {
 
       // Prepare data for the form
       const annotationData = {
-        article, // DOI from Zotero Item
+        article, // Must be a URL, either DOI url or other URL from Zotero Item
         st02,
       };
 

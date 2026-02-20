@@ -6,7 +6,10 @@ import { useFormedible } from "@/hooks/use-formedible";
 import { isNanopubUri } from "@/lib/uri";
 import { KyResponse } from "ky";
 import z from "zod";
-import { NanopubTemplateDefComponentProps } from "./component-registry";
+import {
+  NanopubEditorOptionFields,
+  NanopubTemplateDefComponentProps,
+} from "./component-registry";
 
 const topicEndpoints: SearchEndpoint[] = [
   {
@@ -48,7 +51,7 @@ const topicEndpoints: SearchEndpoint[] = [
 ];
 
 export default function AIDASentence({
-  publish,
+  submit,
   prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
   /**
@@ -108,6 +111,7 @@ export default function AIDASentence({
               fieldApi.setValue(items);
             }}
             maxShownItems={5}
+            title="Select related topics/tags"
           />
         ),
       },
@@ -116,7 +120,8 @@ export default function AIDASentence({
         name: "project",
         type: "text",
         label: "Relates to this nanopublication",
-        placeholder: "URI of nanopublication for related reasearch project",
+        placeholder: "URI of nanopublication for related research project",
+        required: true,
       },
       {
         name: "dataset",
@@ -124,12 +129,7 @@ export default function AIDASentence({
         label: "Supported by dataset",
         placeholder: "URI of related published dataset",
       },
-      {
-        name: "publication",
-        type: "text",
-        label: "Supported by publication",
-        placeholder: "URI of related scholarly work (e.g. publication)",
-      },
+      ...NanopubEditorOptionFields,
     ],
     globalWrapper: ShowOptionalWrapper,
     submitLabel: "Generate Nanopublication",
@@ -146,7 +146,7 @@ export default function AIDASentence({
         value.st1 = value.topic?.map((t: Record<string, string>) => ({
           topic: t.uri,
         }));
-        await publish(value);
+        await submit(value);
       },
     },
   });

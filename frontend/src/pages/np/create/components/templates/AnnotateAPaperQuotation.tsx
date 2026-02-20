@@ -2,10 +2,13 @@ import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffi
 import { useFormedible } from "@/hooks/use-formedible";
 import { validDoi } from "@/lib/validation";
 import z from "zod";
-import { NanopubTemplateDefComponentProps } from "./component-registry";
+import {
+  NanopubEditorOptionFields,
+  NanopubTemplateDefComponentProps,
+} from "./component-registry";
 
 export default function AnnotateAPaperQuotation({
-  publish,
+  submit,
   prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
   /**
@@ -32,6 +35,7 @@ export default function AnnotateAPaperQuotation({
       {
         name: "quoteType",
         type: "radio",
+        required: true,
         options: [
           {
             value: "whole",
@@ -64,8 +68,10 @@ export default function AnnotateAPaperQuotation({
         description:
           "Our interpretation or explanation of why this quotation is relevant",
         placeholder: "Comment, interpretation or explanation",
+        required: true,
         textareaConfig: {},
       },
+      ...NanopubEditorOptionFields,
     ],
     globalWrapper: ShowOptionalWrapper,
     submitLabel: "Generate Nanopublication",
@@ -79,9 +85,7 @@ export default function AnnotateAPaperQuotation({
         comment: "",
         ...prefilledData,
       },
-      onSubmit: async ({ value }) => {
-        await publish(value);
-      },
+      onSubmit: async ({ value }) => await submit(value),
     },
   });
   return <Form />;

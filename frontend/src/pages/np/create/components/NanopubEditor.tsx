@@ -5,11 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
   Command,
   CommandEmpty,
   CommandGroup,
@@ -28,14 +23,14 @@ import { Switch } from "@/components/ui/switch";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NanopubTemplate } from "@/lib/nanopub-template";
 import { publishRdf } from "@/lib/rdf";
-import { EXAMPLE_privateKey } from "@/lib/uri";
+import { EXAMPLE_privateKey, toScienceLiveNPUri } from "@/lib/uri";
 import {
-  ChevronDown,
-  ChevronRight,
+  BookCheck,
   ChevronsUpDown,
+  ExternalLink,
   FilePlus,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import AnyStatementTemplate from "./AnyStatementTemplate";
 import { NanopubViewer } from "./NanopubViewer";
@@ -171,7 +166,8 @@ export default function NanopubEditor({
   const [publishComplete, setPublishComplete] = useState(false);
   const [publishedUri, setPublishedUri] = useState<string | null>(null);
   const [previewStore, setPreviewStore] = useState<NanopubStore | null>(null);
-  const [isRawOpen, setIsRawOpen] = useState(false);
+  const scrollBottomRef = useRef(null);
+  const scrollPreviewRef = useRef(null);
 
   // Derived state to determine if we are using a predefined template
   const isPredefined = templateUri && POPULAR_TEMPLATES[templateUri];
@@ -203,18 +199,18 @@ export default function NanopubEditor({
     onTemplateUriChange?.(uri);
   };
 
-  const publishNanopub = async (data: any) => {
+  const generateNanopub = async (data: any) => {
     console.log("Data entered:", data);
 
     if (!identity) {
-      toast.error("Authentication Required", {
+      toast.warning("Authentication Required", {
         description: "You need to be signed in to publish nanopublications.",
       });
       return;
     }
 
     if (!identity.orcid) {
-      toast.error("ORCID Required", {
+      toast.warning("ORCID Required", {
         description:
           "Your account must be linked to your ORCID to publish nanopublications.",
         action: orcidLinkAction
@@ -236,14 +232,24 @@ export default function NanopubEditor({
     }
 
     // Generate/Sign
+    let template;
     try {
-      const template = await NanopubTemplate.load(templateUri!);
+      template = await NanopubTemplate.load(templateUri!);
+    } catch (error) {
+      console.error("Error generating nanopub:", error);
+      toast.error("Failed to generate nanopub", {
+        description:
+          "An error occured while loading the template. Check your internet connection or try again later.",
+      });
+      return;
+    }
+    try {
       const signed = await template.generateNanopublication(
         data,
         {
           orcid: identity.orcid,
           name: identity.name,
-          isExample: demoMode || data?.isExampleNanopub === true, // Checkbox in AnyStatementTemplate
+          isExample: demoMode || data?.isExampleNanopub === true,
         },
         identity.privateKey || EXAMPLE_privateKey,
       );
@@ -254,17 +260,21 @@ export default function NanopubEditor({
       console.log("Generated RDF:\n", signed);
 
       toast.success("Nanopublication generated", {
-        description: "Signed TriG generated and displayed below.",
+        description: "Signed TriG generated, review before publishing.",
+      });
+      (scrollPreviewRef?.current as any)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
       });
     } catch (error) {
-      console.error("Error applying template:", error);
-      toast.error("Failed to apply template", {
+      console.error("Error generating nanopub:", error);
+      toast.error("Failed to generate nanopub", {
         description: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
 
-  const doFinalPublish = async () => {
+  const publish = async () => {
     if (!generatedRdf) return;
 
     try {
@@ -288,6 +298,9 @@ export default function NanopubEditor({
           uri: publishedUri,
           signedRdf: generatedRdf,
           publishResponseText: text,
+        });
+        (scrollBottomRef?.current as any)?.scrollIntoView({
+          behavior: "smooth",
         });
       }
     } catch (error) {
@@ -320,7 +333,6 @@ export default function NanopubEditor({
           )}
         </div>
       )}
-
       <Card>
         <CardContent>
           {templateUri ? (
@@ -328,8 +340,17 @@ export default function NanopubEditor({
             <>
               {isPredefined && TemplateComp && !isAdvancedMode ? (
                 <>
-                  <div className="font-bold">
-                    {POPULAR_TEMPLATES[templateUri].name}
+                  <div className="font-bold inline-flex">
+                    {POPULAR_TEMPLATES[templateUri].name}{" "}
+                    <a
+                      href={toScienceLiveNPUri(templateUri)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-2 text-blue-400"
+                      title="View source template"
+                    >
+                      <ExternalLink size={20} />
+                    </a>
                   </div>
                   <div className="my-6">
                     {POPULAR_TEMPLATES[templateUri].description}
@@ -338,14 +359,17 @@ export default function NanopubEditor({
                     {POPULAR_TEMPLATES[templateUri].moreDescription}
                   </div>
                   <TemplateComp
-                    publish={publishNanopub}
-                    prefilledData={prefilledData}
+                    submit={generateNanopub}
+                    prefilledData={{
+                      ...(prefilledData ?? {}),
+                      isExampleNanopub: demoMode,
+                    }}
                   />
                 </>
               ) : (
                 <AnyStatementTemplate
                   templateUri={templateUri}
-                  publish={publishNanopub}
+                  submit={generateNanopub}
                   prefilledData={{
                     ...(prefilledData ?? {}),
                     isExampleNanopub: demoMode,
@@ -397,17 +421,19 @@ export default function NanopubEditor({
           )}
         </CardContent>
       </Card>
-
       {/* Generated RDF display */}
       {generatedRdf && (
-        <div className="mt-8 space-y-6">
-          <h3 className="text-lg font-semibold">Preview Nanopublication</h3>
-
+        <div className="mt-20 space-y-6" ref={scrollPreviewRef}>
+          <h1 className="flex items-center text-xl text-muted-foreground font-black">
+            PREVIEW:
+          </h1>
           {previewStore ? (
             <NanopubViewer
               store={previewStore}
+              creatorUserIdsByOrcid={{}}
               showShareMenu={false}
               showCitation={false}
+              generatedTrig={generatedRdf}
             />
           ) : (
             <div className="text-muted-foreground p-4 text-center">
@@ -415,68 +441,52 @@ export default function NanopubEditor({
             </div>
           )}
 
-          <Collapsible
-            open={isRawOpen}
-            onOpenChange={setIsRawOpen}
-            className="border rounded-lg"
-          >
-            <div className="flex items-center justify-between p-4">
-              <h3 className="text-sm font-semibold flex items-center gap-2">
-                Raw TriG Output
-              </h3>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm" className="w-9 p-0">
-                  {isRawOpen ? (
-                    <ChevronDown className="h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
-                  )}
-                  <span className="sr-only">Toggle Raw Output</span>
-                </Button>
-              </CollapsibleTrigger>
-            </div>
-            <CollapsibleContent className="p-4 pt-0">
-              <div className="bg-muted rounded-lg p-4">
-                <pre className="text-sm whitespace-pre-wrap overflow-x-auto max-h-96 overflow-y-auto">
-                  <code>{generatedRdf}</code>
-                </pre>
+          {publishComplete && publishedUri ? (
+            <Card>
+              <CardContent>
+                <h3 className="text-lg font-semibold text-green-500 flex items-center gap-2">
+                  <BookCheck /> Successfully Published
+                </h3>
+                <p>Your new nanopublication will soon be available at:</p>
+                <a
+                  href={publishedUri}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline"
+                >
+                  {publishedUri}
+                </a>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="mt-4 flex flex-col items-end gap-3">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="terms-checkbox"
+                  checked={termsAgreed}
+                  onCheckedChange={(checked) =>
+                    setTermsAgreed(checked === true)
+                  }
+                />
+                <Label
+                  htmlFor="terms-checkbox"
+                  className="text-sm cursor-pointer italic w-md"
+                >
+                  I agree to the terms and conditions, and acknowledge that once
+                  published, a nanopublication is public and cannot be deleted
+                  (although it can be later labelled as retracted)
+                </Label>
               </div>
-            </CollapsibleContent>
-          </Collapsible>
-
-          <div className="mt-4 flex flex-col items-end gap-3">
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="terms-checkbox"
-                checked={termsAgreed}
-                onCheckedChange={(checked) => setTermsAgreed(checked === true)}
-              />
-              <Label
-                htmlFor="terms-checkbox"
-                className="text-sm cursor-pointer italic w-md"
+              <Button
+                disabled={!termsAgreed || publishComplete}
+                onClick={publish}
               >
-                I agree to the terms and conditions, and acknowledge that once
-                published, a nanopublication is public and cannot be deleted
-                (although it can be later labelled as retracted)
-              </Label>
+                Publish
+              </Button>
             </div>
-            <Button
-              disabled={!termsAgreed || publishComplete}
-              onClick={doFinalPublish}
-            >
-              Publish
-            </Button>
-            {publishComplete && publishedUri && (
-              <a
-                href={publishedUri}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-primary hover:underline"
-              >
-                {publishedUri}
-              </a>
-            )}
-          </div>
+          )}
+
+          <div ref={scrollBottomRef} />
         </div>
       )}
     </div>

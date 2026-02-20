@@ -9,9 +9,10 @@ import AnnotateAPaperQuotation from "./AnnotateAPaperQuotation";
 import CitationWithCiTO from "./CitationWithCiTO";
 import CommentOnPaper from "./CommentOnPaper";
 import DocumentGeographicalCoverage from "./DocumentGeographicalCoverage";
+import { TEMPLATE_URI } from "./registry-metadata";
 
 export interface NanopubTemplateDefComponentProps {
-  publish: (data: Record<string, string | object>) => Promise<void>;
+  submit: (data: Record<string, string | object>) => Promise<void>;
   prefilledData?: Record<string, string | object>;
 }
 
@@ -23,14 +24,23 @@ export const TEMPLATE_COMPONENTS: Record<
   string,
   ComponentType<NanopubTemplateDefComponentProps>
 > = {
-  "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo":
-    CitationWithCiTO,
-  "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU":
-    AnnotateAPaperQuotation,
-  "https://w3id.org/np/RAVEpTdLrX5XrhNl_gnvTaBcjRRSDu_hhZix8gu2HO7jI":
-    CommentOnPaper,
-  "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE":
-    AIDASentence,
-  "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao":
-    DocumentGeographicalCoverage,
+  [TEMPLATE_URI.CITATION_CITO]: CitationWithCiTO,
+  [TEMPLATE_URI.ANNOTATE_QUOTATION]: AnnotateAPaperQuotation,
+  [TEMPLATE_URI.COMMENT_PAPER]: CommentOnPaper,
+  [TEMPLATE_URI.AIDA_SENTENCE]: AIDASentence,
+  [TEMPLATE_URI.GEO_COVERAGE]: DocumentGeographicalCoverage,
 };
+
+export const NanopubEditorOptionFields = [
+  {
+    name: "isExampleNanopub",
+    type: "checkbox",
+    label: "Create Example Nanopub (for testing and demo purposes)",
+    required: true,
+    defaultValue: false,
+    gridColumnSpan: 2,
+    section: {
+      title: "Options",
+    },
+  },
+];

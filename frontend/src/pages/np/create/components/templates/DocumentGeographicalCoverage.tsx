@@ -6,10 +6,13 @@ import { useFormedible } from "@/hooks/use-formedible";
 import { validDoi, validUriPlaceholder } from "@/lib/validation";
 import { geojsonToWKT, wktToGeoJSON } from "@terraformer/wkt";
 import z from "zod";
-import { NanopubTemplateDefComponentProps } from "./component-registry";
+import {
+  NanopubEditorOptionFields,
+  NanopubTemplateDefComponentProps,
+} from "./component-registry";
 
 export default function DocumentGeographicalCoverage({
-  publish,
+  submit,
   prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
   /**
@@ -53,6 +56,7 @@ export default function DocumentGeographicalCoverage({
       {
         name: "quoteType",
         type: "radio",
+        required: true,
         options: [
           {
             value: "whole",
@@ -234,6 +238,7 @@ export default function DocumentGeographicalCoverage({
         textareaConfig: {},
         required: true,
       },
+      ...NanopubEditorOptionFields,
     ],
     globalWrapper: ShowOptionalWrapper,
     submitLabel: "Generate Nanopublication",
@@ -250,9 +255,7 @@ export default function DocumentGeographicalCoverage({
         geometry: "coverage",
         ...prefilledData,
       },
-      onSubmit: async ({ value }) => {
-        await publish(value);
-      },
+      onSubmit: async ({ value }) => await submit(value),
     },
   });
   return <Form />;

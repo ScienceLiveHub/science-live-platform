@@ -48,8 +48,8 @@ window.addEventListener("load", () => {
     // Visible in Zotero error console (Tools → Developer → Error Console)
     // so we can diagnose when the dialog is blank.
     console.log("[createNanopub] dialog script loaded");
-
-    if (getInjectedPref("dark") === "true") {
+    const darkmode = getInjectedPref("dark") === "true";
+    if (darkmode) {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
@@ -104,7 +104,7 @@ window.addEventListener("load", () => {
           prefilledData={prefilledData}
           embedded={true}
         />
-        <Toaster />
+        <Toaster theme={darkmode ? "dark" : "light"} />
       </React.StrictMode>,
     );
     console.log("[createNanopub] React render() called");
