@@ -20,7 +20,7 @@ Your nanopubs are signed with your ORCID for proper attribution.
 2. Enter your full name (e.g., "Jane Smith")
 3. Enter your ORCID (e.g., `0000-0002-1234-5678` or `https://orcid.org/0000-0002-1234-5678`)
 4. Click **Save Profile**
-![Screenshot: Profile setup name dialog](../assets/images/setup-profile-name.png)
+![Screenshot: Profile setup name dialog](../../assets/images/setup-profile-name.png)
 5. To check your profile, click on **View Profile** on the same setup panel.
 
 The plugin generates cryptographic keys and stores them securely in Zotero.
@@ -64,7 +64,7 @@ We’re adding new templates as we develop the Nanopublication Zotero plugin —
 
 A new tab opens in Zotero with an interactive form:
 
-![Screenshot: Zotero tab with nanopub creation form](../assets/images/cito-form.png)
+![Screenshot: Zotero tab with nanopub creation form](../../assets/images/cito-form.png)
 
 The form is automatically pre-filled with information from your selected paper:
 
@@ -90,11 +90,11 @@ The form is automatically pre-filled with information from your selected paper:
 !!! warning
     A nanopublication is immediately created when you click on "Create Nanopublication".
 
-![Screenshot: Success - Nanopublication created](../assets/images/success-published-nanopub.png)
+![Screenshot: Success - Nanopublication created](../../assets/images/success-published-nanopub.png)
 
 If you want to add the newly created nanopublication as a note under your item, select **OK**; otherwise, select **Cancel**.
 
-![Screenshot: Success - Nanopublication created](../assets/images/note-added.png)
+![Screenshot: Success - Nanopublication created](../../assets/images/note-added.png)
 
 ---
 
@@ -102,7 +102,7 @@ If you want to add the newly created nanopublication as a note under your item, 
 
 Once the nanopublication is added as a note to your selected item, you can check and display its content by clicking on it.
 
-![Screenshot: Rich note in Zotero showing the nanopub](../assets/images/cito-view-from-zotero.png)
+![Screenshot: Rich note in Zotero showing the nanopub](../../assets/images/cito-view-from-zotero.png)
 
 The rich note includes:
 

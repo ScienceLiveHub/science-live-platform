@@ -30,13 +30,13 @@ Find out what the research community has published about any paper in your libra
 1. Select a paper in your library
 2. Go to **Item → Search for Related Nanopublications**
 
-![Screenshot: Search menu option](../assets/images/search-menu.png)
+![Screenshot: Search menu option](../../assets/images/search-menu.png)
 
 ### Understanding Search Results
 
 A results panel opens showing nanopublications related to your paper:
 
-![Screenshot: Search results panel](../assets/images/search-results.png)
+![Screenshot: Search results panel](../../assets/images/search-results.png)
 
 At the moment, you can either add all the search results to you item  (click on "OK") or cancel.
 
@@ -77,7 +77,7 @@ Add a nanopublication as a standalone item in your library.
 2. Enter the nanopub URI (e.g., `https://w3id.org/np/RAbc123...`)
 3. Click **Import**
 
-![Screenshot: Import dialog](../assets/images/import-nanopub-dialog.png)
+![Screenshot: Import dialog](../../assets/images/import-nanopub-dialog.png)
 
 **Result:** A new item appears in your library with:
 
@@ -106,7 +106,7 @@ Link a nanopublication to a paper already in your library.
 3. Enter the nanopub URI
 4. Click **Attach**
 
-![Screenshot: Attach nanopub menu](../assets/images/attach-nanopub-menu.png)
+![Screenshot: Attach nanopub menu](../../assets/images/attach-nanopub-menu.png)
 
 **Result:** The nanopub is added as a child note under your item:
 

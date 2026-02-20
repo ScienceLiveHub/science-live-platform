@@ -12,7 +12,7 @@
 3. Drag the `.xpi` file into the Add-ons window
 4. Restart Zotero when prompted
 
-![Nanopub Zotero plugin installation](../assets/images/plugin-installation.png)
+![Nanopub Zotero plugin installation](../../assets/images/plugin-installation.png)
 
 Watch the step-by-step installation guide:
 
@@ -27,11 +27,11 @@ Right-click any item in your Zotero library and look for:
 - "Attach Nanopublication"
 - "Search Related Nanopublications"
 
-![Nanopub Zotero Item Menu](../assets/images/ItemMenu.png){ width="300" }
+![Nanopub Zotero Item Menu](../../assets/images/ItemMenu.png){ width="300" }
 
 Similar menu can be found from the "File" tab:
 
-![Nanopub Zotero File Menu](../assets/images/File-menu.png)
+![Nanopub Zotero File Menu](../../assets/images/File-menu.png)
 
 If you see these options, the installation was successful!
 
