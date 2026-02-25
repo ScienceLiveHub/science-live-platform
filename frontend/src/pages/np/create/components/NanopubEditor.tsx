@@ -20,15 +20,27 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NanopubTemplate } from "@/lib/nanopub-template";
 import { publishRdf } from "@/lib/rdf";
-import { EXAMPLE_privateKey, toScienceLiveNPUri } from "@/lib/uri";
 import {
+  EXAMPLE_privateKey,
+  extractOrcidId,
+  toScienceLiveNPUri,
+} from "@/lib/uri";
+import {
+  AlertTriangle,
   BookCheck,
+  CheckCircle2,
   ChevronsUpDown,
   ExternalLink,
   FilePlus,
+  KeyRound,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -45,6 +57,7 @@ export interface NanopubEditorProps {
     name: string;
     orcid: string;
     privateKey: string;
+    keyInfo?: string;
   } | null;
 
   /**
@@ -87,6 +100,11 @@ export interface NanopubEditorProps {
    * If true, forces ExampleNanopublication property for generated RDF.
    */
   demoMode?: boolean;
+
+  /**
+   * If true, show a small widget with the currently loaded profile info.
+   */
+  showProfile?: boolean;
 
   /**
    * A function to call if an ORCID is not found, to help the user correct it.
@@ -156,6 +174,7 @@ export default function NanopubEditor({
   onPublished,
   orcidLinkAction,
   embedded = false,
+  showProfile = true,
   demoMode = false,
 }: NanopubEditorProps) {
   // Local state for the "custom URI" input (when not using predefined template)
@@ -226,7 +245,7 @@ export default function NanopubEditor({
     if (!identity.privateKey && !demoMode) {
       toast.error("No Private Key", {
         description:
-          "Enter a private key in your account or use Demo Mode to sign with an example key.",
+          "Enter a private key in your Science Live account or use Demo Mode to sign with an example key.",
       });
       return;
     }
@@ -311,6 +330,20 @@ export default function NanopubEditor({
     }
   };
 
+  // Compute identity issues for profile widget
+  const identityIssues: string[] = [];
+  if (!identity) {
+    identityIssues.push("No profile loaded");
+  } else {
+    if (!identity.orcid) {
+      identityIssues.push("ORCID not linked");
+    }
+    if (!identity.privateKey) {
+      identityIssues.push("Private key not set");
+    }
+  }
+  const hasIdentityIssues = identityIssues.length > 0;
+
   return (
     <div className={`flex flex-col gap-6 `}>
       {!embedded && (
@@ -332,6 +365,69 @@ export default function NanopubEditor({
             </div>
           )}
         </div>
+      )}
+      {showProfile && (
+        <Card className="border-muted py-3">
+          <CardContent className="">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex flex-col font-bold pr-6">
+                  Publishing as:
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">
+                    {identity?.name || "Unknown User"}
+                  </span>
+                </div>
+                {identity?.orcid && (
+                  <a
+                    href={identity.orcid}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1"
+                  >
+                    {extractOrcidId(identity.orcid)}
+                  </a>
+                )}
+                {identity?.privateKey && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <KeyRound className="text-muted-foreground" size={14} />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{identity.keyInfo || "<Unnamed key>"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {hasIdentityIssues ? (
+                  <div className="flex items-center gap-2 text-amber-500">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span className="text-xs">
+                      {identityIssues.join(" • ")}
+                    </span>
+                    {orcidLinkAction && !identity?.orcid && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-xs text-foreground"
+                        onClick={orcidLinkAction}
+                      >
+                        Link
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1 text-green-500">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span className="text-xs">Ready to publish</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
       <Card>
         <CardContent>

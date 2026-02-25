@@ -6,11 +6,12 @@
  */
 
 import { ThemeProvider } from "@/components/theme-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { authClient } from "@/lib/auth-client";
 import { AuthUIProvider } from "@daveyplate/better-auth-ui";
 import { SiOrcid } from "@icons-pack/react-simple-icons";
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authClient } from "./lib/auth-client";
 
 // Wrapper around react-router-dom Link to match AuthUIProvider's Link interface.
 // AuthUIProvider Link expects an `href` parameter while react-router-dom Link uses `to`
@@ -64,6 +65,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       }}
       account={{
         fields: ["image", "name", "privateKey"], // Include custom fields in account settings
+        basePath: "/settings",
+        viewPaths: { SETTINGS: "account" },
       }}
       additionalFields={{
         privateKey: {
@@ -78,7 +81,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       }}
     >
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-        {children}
+        <TooltipProvider>{children}</TooltipProvider>
       </ThemeProvider>
     </AuthUIProvider>
   );

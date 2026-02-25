@@ -1,4 +1,4 @@
-import { sign } from "@nanopub/nanopub-js";
+import { DEFAULT_NANOPUB_URI, sign } from "@nanopub/nanopub-js";
 import * as RDFT from "@rdfjs/types";
 import { DataFactory, Quad, Store, Writer } from "n3";
 import z from "zod";
@@ -10,6 +10,7 @@ import {
   fetchPossibleValuesFromQuads,
   NS,
 } from "./rdf";
+import { unwrapPEMKey } from "./string-format";
 import { cleanOrcidUri, getUriEnd, isNanopubUri } from "./uri";
 
 const { namedNode, literal, blankNode } = DataFactory;
@@ -166,7 +167,9 @@ export class NanopubTemplate extends NanopubStore {
     },
     privateKey: string,
   ) {
-    const baseUri = SCIENCELIVE_NANOPUB_URI;
+    // TODO: once nanopub-js custom URI works, uncomment this
+    // const baseUri = SCIENCELIVE_NANOPUB_URI;
+    const baseUri = DEFAULT_NANOPUB_URI;
     const newNanopubUri = baseUri;
     const newSubUri = `${newNanopubUri}`;
 
@@ -474,9 +477,10 @@ export class NanopubTemplate extends NanopubStore {
 
     let signed;
     try {
-      signed = await sign(trigOutput, privateKey, pubData.orcid, pubData.name);
+      const base64Key = unwrapPEMKey(privateKey);
+      signed = await sign(trigOutput, base64Key, pubData.orcid);
     } catch (e) {
-      // The error should be either Error object or a string if it occured in wasm
+      // The error should be either Error object or a string if it occured in native code
       if (e instanceof Error) {
         throw e;
       } else if (typeof e === "string" || e instanceof String) {

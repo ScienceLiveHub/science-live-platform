@@ -22,6 +22,7 @@ export default defineConfig({
       homepage: pkg.homepage,
       buildVersion: pkg.version,
       buildTime: "{{buildTime}}",
+      env: process.env.NODE_ENV,
     },
     prefs: {
       prefix: pkg.config.prefsPrefix,

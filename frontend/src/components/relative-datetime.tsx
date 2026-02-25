@@ -9,29 +9,35 @@ dayjs.extend(localizedFormat);
 export function RelativeDateTime({
   date,
   noHover = false,
+  prefix,
+  className,
 }: {
   date: string | number | Date;
   noHover?: boolean;
+  prefix?: string;
+  className?: string;
 }) {
+  const dateComponent = (
+    <span
+      className={`text-sm text-gray-500 dark:text-gray-400 pointer-events-auto w-auto ${className ?? ""}`}
+    >
+      {prefix}
+      {dayjs(date).fromNow()}
+    </span>
+  );
   return (
     <div className="flex items-center gap-2 text-sm group relative">
       {noHover ? (
-        <span className="text-sm text-gray-500 dark:text-gray-400 pointer-events-auto w-auto">
-          {dayjs(date).fromNow()}
-        </span>
+        dateComponent
       ) : (
         <HoverCard openDelay={100} closeDelay={100}>
-          <HoverCardTrigger>
-            <span className="text-sm text-gray-500 dark:text-gray-400 pointer-events-auto w-auto">
-              {dayjs(date).fromNow()}
-            </span>
-          </HoverCardTrigger>
+          <HoverCardTrigger>{dateComponent}</HoverCardTrigger>
           <HoverCardContent
             align="start"
             className="p-0 px-2 m-0 w-auto bg-muted"
           >
             <span className="text-sm text-muted-foreground rounded-md shadow-md">
-              {dayjs(date).toString()}
+              {dayjs(date).format("llll").toString()}
             </span>
           </HoverCardContent>
         </HoverCard>

@@ -2,91 +2,32 @@
   <html:link rel="localization" href="__addonRef__-preferences.ftl" />
 </linkset>
 
-<groupbox
-  onload="Zotero.__addonInstance__.hooks.onPrefsEvent('load', { window })"
->
+<groupbox onload="Zotero.__addonInstance__.hooks.onPrefsEvent('load', { window })">
   <label>
-    <html:h2 data-l10n-id="pref-title"></html:h2>
+    <html:h2 style=" margin-top: 10px" data-l10n-id="pref-title">
+    </html:h2>
+    <html:label style="margin-bottom: 10px" data-l10n-id="pref-about-profile"></html:label>
   </label>
 
-  <hbox align="center">
-    <html:label
-      for="nanopub-profile-name"
-      data-l10n-id="pref-name"
-      style="width: 80px"
-    ></html:label>
-    <html:input
-      type="text"
-      id="nanopub-profile-name"
-      preference="__prefsPrefix__.name"
-      placeholder="Jane Smith"
-      style="flex: 1; margin-left: 10px"
-    ></html:input>
-  </hbox>
-
-  <hbox align="center" style="margin-top: 10px">
-    <html:label
-      for="nanopub-profile-orcid"
-      data-l10n-id="pref-orcid"
-      style="width: 80px"
-    ></html:label>
-    <html:input
-      type="text"
-      id="nanopub-profile-orcid"
-      preference="__prefsPrefix__.orcid"
-      placeholder="0000-0002-1234-5678 or https://orcid.org/0000-0002-1234-5678"
-      style="flex: 1; margin-left: 10px"
-    >
+  <a
+    href="https://platform.sciencelive4all.org/settings/api-keys">https://platform.sciencelive4all.org/settings/api-keys</a>
+  <hbox align="center" style="margin-left: 15px; margin-top: 10px">
+    <html:label for="science-live-api-key" data-l10n-id="pref-api-key" style="width: 80px"></html:label>
+    <html:input type="password" id="science-live-api-key" preference="__prefsPrefix__.apiKey"
+      placeholder="e.g. sl_abc123..." style="flex: 1; margin-left: 10px" rows="3">
     </html:input>
   </hbox>
-
-  <description
-    style="margin-top: 8px; color: gray; font-size: 0.9em"
-    data-l10n-id="pref-help-orcid"
-  >
-  </description>
-
-  <hbox align="center" style="margin-top: 10px">
-    <html:label
-      for="nanopub-profile-private-key"
-      data-l10n-id="pref-private-key"
-      style="width: 80px"
-    ></html:label>
-    <html:textarea
-      type="password"
-      id="nanopub-profile-private-key"
-      preference="__prefsPrefix__.privateKey"
-      placeholder="-----BEGIN PRIVATE KEY-----
-      ABCD...
-      -----END PRIVATE KEY-----"
-      style="flex: 1; margin-left: 10px"
-      rows="3"
-    >
-    </html:textarea>
-  </hbox>
-
-  <description
-    style="margin-top: 10px; color: gray; font-size: 0.9em"
-    data-l10n-id="pref-help-sign"
-  >
-  </description>
 </groupbox>
 
 <groupbox style="margin-top: 20px">
   <label>
     <html:h2 data-l10n-id="pref-about"></html:h2>
   </label>
-  <label
-    class="zotero-text-link keyboard-clickable"
-    is="zotero-text-link"
-    role="link"
-    href="https://sciencelive4all.org/science-live-platform/"
-    value="Science Live - Zotero Nanopub Plugin"
-  ></label>
+  <label class="zotero-text-link keyboard-clickable" is="zotero-text-link" role="link"
+    href="https://sciencelive4all.org/science-live-platform/" value="Science Live - Zotero Nanopub Plugin"></label>
 </groupbox>
 <vbox>
-  <html:label
-    data-l10n-id="pref-help"
-    data-l10n-args='{"time": "__buildTime__","name": "__addonName__","version":"__buildVersion__"}'
-  ></html:label>
+  <html:label data-l10n-id="pref-help"
+    data-l10n-args='{"time": "__buildTime__","name": "__addonName__","version":"__buildVersion__","build":"__env__"}'>
+  </html:label>
 </vbox>

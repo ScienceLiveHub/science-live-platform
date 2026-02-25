@@ -1,8 +1,5 @@
 pref-title = Nanopub Profile
-pref-name = Your Name:
-pref-orcid = Your ORCID:
-pref-private-key = Your Secret Signing Key:
-pref-help-orcid = Enter the full URL e.g. https://orcid.org/0000-0002-1234-5678
-pref-help-sign = Your profile is used to sign nanopublications. Key is stored securely in Zotero.
-pref-help = Build { $version } { $time }
+pref-about-profile = In order to create nanopublications, you need a verified Science Live Platform account which is linked to an ORCID, then create an API key using the link below and paste it here to connect Zotero to your account.
+pref-api-key = Your Science Live API Key:
+pref-help = Build { $version } { $time } ({ $build })
 pref-about = About

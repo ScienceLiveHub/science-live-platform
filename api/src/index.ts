@@ -5,6 +5,7 @@ import { cors } from "hono/cors";
 import health from "./health";
 import notifications from "./notifications";
 import orcid from "./orcid";
+import signing from "./signing";
 import userProfile from "./user-profile";
 
 const app = new Hono<{
@@ -27,7 +28,7 @@ app.use(
     },
     // TODO: ideally we should have the allowHeaders setting but it prevents localhost dev from working
     // allowHeaders: ["Content-Type", "Authorization"],
-    allowMethods: ["POST", "GET", "PATCH", "OPTIONS"],
+    allowMethods: ["POST", "GET", "PATCH", "PUT", "DELETE", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
     maxAge: 600,
     credentials: true,
@@ -60,5 +61,6 @@ app.on(["POST", "GET"], "/auth/*", (c) => getAuth(c.env).handler(c.req.raw));
 
 // Endpoints that require auth
 app.route("/notifications", notifications);
+app.route("/signing", signing);
 
 export default app;

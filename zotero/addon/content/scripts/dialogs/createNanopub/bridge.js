@@ -27,26 +27,25 @@ window.addEventListener("load", () => {
       iframe.getAttribute("src") ||
       "chrome://__addonRef__/content/createNanopub.html";
 
-    const name = ZoteroGlobal?.Prefs?.get("__prefsPrefix__.name", true) ?? "";
-    const orcid = ZoteroGlobal?.Prefs?.get("__prefsPrefix__.orcid", true) ?? "";
-    const privateKey =
-      ZoteroGlobal?.Prefs?.get("__prefsPrefix__.privateKey", true) ?? "";
+    const apiKey =
+      ZoteroGlobal?.Prefs?.get("__prefsPrefix__.apiKey", true) ?? "";
 
     // The URI of the template, passed in via optional args of openDialog()
     const templateUri = window.arguments[0];
     const prefilledData = window.arguments[1];
-    const darkMode = window.arguments[2];
+    const apiUrl = window.arguments[2];
+    const darkMode = window.arguments[3];
 
-    if (!name && !orcid && !privateKey) {
+    if (!apiKey) {
       console.warn(
         "[createNanopub] prefs injection: Zotero.Prefs not available on this window; tried window, opener, top",
       );
     }
+    console.warn("[createNanopub] prefs injection key:", apiKey);
 
     const params = new URLSearchParams();
-    if (name) params.set("name", name);
-    if (orcid) params.set("orcid", orcid);
-    if (privateKey) params.set("privateKey", privateKey);
+    if (apiKey) params.set("apiKey", apiKey);
+    if (apiUrl) params.set("apiUrl", apiUrl);
     if (templateUri) params.set("templateUri", templateUri);
     // Everything must be passed as strings, so convert objects to string
     if (prefilledData)

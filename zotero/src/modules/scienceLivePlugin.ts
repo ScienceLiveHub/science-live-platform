@@ -52,6 +52,9 @@ function openNanopubCreationDialog(templateUri: string, prefilledData: any) {
     "chrome,dialog=no,modal=no,centerscreen,resizable,width=900,height=700",
     templateUri,
     prefilledData,
+    addon.data.env === "development"
+      ? "http://localhost:3001"
+      : "https://api.sciencelive4all.org",
     dark,
   );
 }

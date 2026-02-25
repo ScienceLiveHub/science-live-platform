@@ -18,21 +18,12 @@ import { createRoot } from "react-dom/client";
 // Reuse the app's existing embedded nanopub creator UI.
 // NOTE: This file runs in Zotero's chrome dialog context.
 import { Toaster } from "../../../../frontend/src/components/ui/sonner";
-import { EXAMPLE_privateKey } from "../../../../frontend/src/lib/uri";
 import NanopubEditor from "../../../../frontend/src/pages/np/create/components/NanopubEditor";
 
 declare const Services: any;
 
 const DEFAULT_TEMPLATE_URI =
   "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU"; // Annotating a paper quotation
-
-// Placeholder profile for now (first step: show the UI in Zotero).
-// You can later replace this with a proper profile stored in plugin prefs.
-const DEFAULT_PROFILE = {
-  name: "Zotero User",
-  orcid: "https://orcid.org/0000-0000-0000-0000",
-  privateKey: EXAMPLE_privateKey,
-};
 
 function getInjectedPref(key: string): string | undefined {
   try {
@@ -43,13 +34,16 @@ function getInjectedPref(key: string): string | undefined {
   }
 }
 
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
   try {
-    // Visible in Zotero error console (Tools → Developer → Error Console)
-    // so we can diagnose when the dialog is blank.
-    console.log("[createNanopub] dialog script loaded");
-    const darkmode = getInjectedPref("dark") === "true";
-    if (darkmode) {
+    const darkmode = getInjectedPref("dark");
+
+    if (!darkmode) {
+      // This listener gets called twice, and the first time prefs are empty so skip it
+      return;
+    }
+
+    if (darkmode === "true") {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
@@ -67,6 +61,37 @@ window.addEventListener("load", () => {
     }
 
     const prefilledDataString = getInjectedPref("prefilledData");
+
+    // Retrieve the signing profile using API key
+    const apiKey = getInjectedPref("apiKey");
+    if (!apiKey) {
+      window.alert(
+        `Science Live API key not set, please set it in Zotero Settings.`,
+      );
+      return;
+    }
+
+    const apiUrl =
+      getInjectedPref("apiUrl") || "https://api.sciencelive4all.org";
+    let profile;
+    try {
+      const result = await fetch(`${apiUrl}/signing/profile`, {
+        headers: { "x-api-key": apiKey ?? "" },
+      });
+      profile = await result.json();
+      if (!profile.name) {
+        window.alert(
+          `Science Live API key not set, please set it in Zotero Settings.`,
+        );
+        return;
+      }
+    } catch {
+      window.alert(
+        `Failed to connect to Science Live. Check your Internet connection, and/or your Science Live API key in Zotero Settings.`,
+      );
+      return;
+    }
+
     let prefilledData;
     try {
       prefilledData = prefilledDataString
@@ -80,14 +105,7 @@ window.addEventListener("load", () => {
       <React.StrictMode>
         <NanopubEditor
           templateUri={getInjectedPref("templateUri") ?? DEFAULT_TEMPLATE_URI}
-          identity={{
-            // This dialog UI is hosted inside an <iframe> (content context).
-            // We can't reliably access Zotero chrome globals like Zotero.Prefs from here,
-            // so the chrome parent window injects prefs into the iframe src querystring.
-            name: getInjectedPref("name") ?? DEFAULT_PROFILE.name,
-            orcid: getInjectedPref("orcid") ?? DEFAULT_PROFILE.orcid,
-            privateKey: getInjectedPref("privateKey") ?? EXAMPLE_privateKey,
-          }}
+          identity={profile}
           publishServer={"https://registry.knowledgepixels.com/"}
           onPublished={async ({ uri }) => {
             // Best-effort feedback in Zotero.
@@ -102,7 +120,8 @@ window.addEventListener("load", () => {
             }
           }}
           prefilledData={prefilledData}
-          embedded={true}
+          embedded
+          showProfile
         />
         <Toaster theme={darkmode ? "dark" : "light"} />
       </React.StrictMode>,
