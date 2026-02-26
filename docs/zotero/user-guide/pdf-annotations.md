@@ -51,7 +51,7 @@ Select the text you want to turn into a nanopublication:
 !!! tip
     For the best nanopublications, highlight specific claims, findings, or quotes — not entire paragraphs.
 
-![Screenshot: Highlighting text in PDF reader](../assets/images/pdf-highlight-text.png)
+![Screenshot: Highlighting text in PDF reader](../../assets/images/pdf-highlight-text.png)
 
 ---
 
@@ -60,7 +60,7 @@ Select the text you want to turn into a nanopublication:
 1. Click on the "..." of the annotation box.
 2. Hover over **"Create Nanopublication"**
 
-![Screenshot: Right-click menu on annotation](../assets/images/pdf-annotation-menu.png)
+![Screenshot: Right-click menu on annotation](../../assets/images/pdf-annotation-menu.png)
 
 ---
 
@@ -68,7 +68,7 @@ Select the text you want to turn into a nanopublication:
 
 A new tab opens in Zotero with a pre-filled form:
 
-![Screenshot: Nanopub form with annotation data](../assets/images/pdf-annotation-form.png)
+![Screenshot: Nanopub form with annotation data](../../assets/images/pdf-annotation-form.png)
 
 The form automatically includes:
 
@@ -107,7 +107,7 @@ After creation, you'll see a success message.
 - A rich note is added to your Zotero item
 - The nanopub is live on the nanopub network
 
-![Screenshot: Annotation with nanopub link](../assets/images/pdf-annotation-linked.png)
+![Screenshot: Annotation with nanopub link](../../assets/images/pdf-annotation-linked.png)
 
 ---
 

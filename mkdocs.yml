@@ -1,5 +1,5 @@
-site_name: Zotero Nanopublication Plugin
-site_description: Create nanopublications from Zotero items and PDF highlights using Nanodash templates
+site_name: Science Live Platform Documentation
+site_description: Documentation for the Science Live Platform
 site_url: https://sciencelive4all.org/science-live-platform/
 repo_url: https://github.com/ScienceLiveHub/science-live-platform
 repo_name: ScienceLiveHub/science-live-platform
@@ -33,22 +33,23 @@ plugins:
 
 nav:
   - Home: index.md
-  - Getting Started:
-    - Installation: getting-started/installation.md
-    - Quick Start: getting-started/quick-start.md
-  - User Guide:
-    - Features Overview: user-guide/features.md
-    - Template Types: user-guide/templates.md
-    - PDF Annotations: user-guide/pdf-annotations.md
-    - Search & Discovery: user-guide/search-discovery.md
-  - Videos:
-    - Video Tutorials: examples/video-tutorials.md
-  - Technical:
-    - Architecture: technical/architecture.md
-  - Development:
-    - Contributing: development/contributing.md
-    - Build Process: development/build-process.md
-    - Testing: development/testing.md
+  - Getting Started: getting-started.md
+  - Zotero Integration:
+    - Overview: zotero/index.md
+    - Installation: zotero/getting-started/installation.md
+    - Quick Start: zotero/getting-started/quick-start.md
+    - Features Overview: zotero/user-guide/features.md
+    - Template Types: zotero/user-guide/templates.md
+    - PDF Annotations: zotero/user-guide/pdf-annotations.md
+    - Search & Discovery: zotero/user-guide/search-discovery.md
+    - Video Tutorials: zotero/examples/video-tutorials.md
+    - Architecture: zotero/technical/architecture.md
+    - Contributing: zotero/development/contributing.md
+    - Build Process: zotero/development/build-process.md
+    - Testing: zotero/development/testing.md
+
+theme:
+  name: material  # or your preferred theme
 
 markdown_extensions:
   - admonition

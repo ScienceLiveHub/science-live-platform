@@ -27,7 +27,7 @@ Transform bibliography items into semantic, machine-readable statements using an
 **Right-Click Context Menu:**
 - Right-click any item → Create Nanopublication → [Choose Template]
 
-![Screenshot: File menu showing Create Nanopublication submenu](../assets/images/File-menu.png)
+![Screenshot: File menu showing Create Nanopublication submenu](../../assets/images/File-menu.png)
 
 ### What You Get
 
@@ -91,7 +91,7 @@ The plugin:
 - Stores keys securely in Zotero's data directory
 - Links everything to your ORCID
 
-![Screenshot: Profile setup name dialog](../assets/images/setup-profile-name.png)
+![Screenshot: Profile setup name dialog](../../assets/images/setup-profile-name.png)
 
 ### View Your Profile
 
@@ -101,7 +101,7 @@ The plugin:
 - Name
 - ORCID
 
-![Screenshot: View Profile setup ORCID](../assets/images/profile-orcid.png)
+![Screenshot: View Profile setup ORCID](../../assets/images/profile-orcid.png)
 
 ---
 
@@ -123,7 +123,7 @@ The notes include:
   - Share
   - Cite
 
-![Screenshot: Rich note example in Zotero](../assets/images/nanopub-view.png)
+![Screenshot: Rich note example in Zotero](../../assets/images/nanopub-view.png)
 
 ### Theme Support
 

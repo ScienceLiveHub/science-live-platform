@@ -76,7 +76,7 @@ Want updates? [Watch the repository](https://github.com/ScienceLiveHub/science-l
 
 **No browser windows. No external websites. All in Zotero!**
 
-![Screenshot: Workflow diagram showing steps within Zotero interface](assets/images/annotated-screenshot-sequence.png)
+![Screenshot: Workflow diagram showing steps within Zotero interface](../assets/images/annotated-screenshot-sequence.png)
 
 ---
 

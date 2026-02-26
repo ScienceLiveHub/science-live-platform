@@ -120,7 +120,7 @@ The paper explains that most tools do not have sufficient metadata and advocate 
 **Result:** A semantic statement saying "I uses conclusions `The paper explains that most tools do not have sufficient metadata and advocate for the usage of ontologies such as the EDAM Ontology to annotate tools and workflows.` from https://doi.org/10.1162/dint_a_00136"
 
 
-![Nanopub Zotero plugin Comment on paper](../assets/images/comment-form.png)
+![Nanopub Zotero plugin Comment on paper](../../assets/images/comment-form.png)
 ---
 
 ## Scientific Claim (AIDA)
