@@ -17,6 +17,43 @@
       placeholder="e.g. sl_abc123..." style="flex: 1; margin-left: 10px" rows="3">
     </html:input>
   </hbox>
+  <vbox style="margin-left: 15px; margin-top: 10px">
+    <html:button id="science-live-test-connection" data-l10n-id="pref-test-connection" onclick="(async () => {
+        const btn = document.getElementById('science-live-test-connection');
+        const apiDisplay = document.getElementById('science-live-test-api');
+        const resultDisplay = document.getElementById('science-live-test-connection-result');
+        const apiKeyInput = document.getElementById('science-live-api-key');
+        const apiKey = apiKeyInput?.value || '';
+        if (!apiKey) {
+          Services.prompt.alert(window, 'Test Connection', 'Please enter an API key first.');
+          return;
+        }
+        apiDisplay.classList.hidden = 'visible';
+        btn.disabled = true;
+        btn.textContent = 'Testing...';
+        try {
+          const result = await fetch(`__api__/signing/profile`, {
+            headers: { 'x-api-key': apiKey },
+          });
+          const profile = await result.json();
+          if (profile.name) {
+            resultDisplay.textContent = `✅ Connected to profile: ${profile.name}`;
+          } else {
+            Services.prompt.alert(window, 'Connection Failed', 'API key is invalid or not linked to a profile. Please check your key.');
+          }
+        } catch (e) {
+          Services.prompt.alert(window, 'Connection Failed', `Failed to connect to Science Live. Check your Internet connection and API key.`);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Test Connection';
+          btn.setAttribute('data-l10n-id', 'pref-test-connection');
+        }
+      })()" style="margin-left: 90px; width: 200px">
+    </html:button>
+    <html:label id="science-live-test-api" style="margin-left: 90px; margin-top: 10px; color: grey">Server:
+      __api__</html:label>
+    <html:label id="science-live-test-connection-result" style="margin-left: 90px; margin-top: 10px"></html:label>
+  </vbox>
 </groupbox>
 
 <groupbox style="margin-top: 20px">

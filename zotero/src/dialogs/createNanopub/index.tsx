@@ -18,9 +18,8 @@ import { createRoot } from "react-dom/client";
 // Reuse the app's existing embedded nanopub creator UI.
 // NOTE: This file runs in Zotero's chrome dialog context.
 import { Toaster } from "../../../../frontend/src/components/ui/sonner";
+import { TooltipProvider } from "../../../../frontend/src/components/ui/tooltip";
 import NanopubEditor from "../../../../frontend/src/pages/np/create/components/NanopubEditor";
-
-declare const Services: any;
 
 const DEFAULT_TEMPLATE_URI =
   "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU"; // Annotating a paper quotation
@@ -103,27 +102,20 @@ window.addEventListener("load", async () => {
 
     createRoot(el).render(
       <React.StrictMode>
-        <NanopubEditor
-          templateUri={getInjectedPref("templateUri") ?? DEFAULT_TEMPLATE_URI}
-          identity={profile}
-          publishServer={"https://registry.knowledgepixels.com/"}
-          onPublished={async ({ uri }) => {
-            // Best-effort feedback in Zotero.
-            try {
-              Services.prompt.alert(
-                null,
-                "Nanopublication Published",
-                `Published nanopublication:\n\n${uri}`,
-              );
-            } catch {
-              // ignore
-            }
-          }}
-          prefilledData={prefilledData}
-          embedded
-          showProfile
-        />
-        <Toaster theme={darkmode ? "dark" : "light"} />
+        <TooltipProvider>
+          <NanopubEditor
+            templateUri={getInjectedPref("templateUri") ?? DEFAULT_TEMPLATE_URI}
+            identity={profile}
+            publishServer={"https://registry.knowledgepixels.com/"}
+            onPublished={async ({ uri }) => {
+              console.log("Published:", uri);
+            }}
+            prefilledData={prefilledData}
+            embedded
+            showProfile
+          />
+          <Toaster theme={darkmode ? "dark" : "light"} />
+        </TooltipProvider>
       </React.StrictMode>,
     );
     console.log("[createNanopub] React render() called");

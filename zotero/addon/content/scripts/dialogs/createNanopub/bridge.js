@@ -41,7 +41,6 @@ window.addEventListener("load", () => {
         "[createNanopub] prefs injection: Zotero.Prefs not available on this window; tried window, opener, top",
       );
     }
-    console.warn("[createNanopub] prefs injection key:", apiKey);
 
     const params = new URLSearchParams();
     if (apiKey) params.set("apiKey", apiKey);
@@ -51,6 +50,7 @@ window.addEventListener("load", () => {
     if (prefilledData)
       params.set("prefilledData", JSON.stringify(prefilledData));
     if (darkMode) params.set("dark", "true");
+    else params.set("dark", "false");
     // Set or append the params to the iframe query string
     iframe.setAttribute(
       "src",

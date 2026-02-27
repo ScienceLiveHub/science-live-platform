@@ -7,8 +7,18 @@ curl -sL https://raw.githubusercontent.com/retorquere/zotero-deb/master/install.
 
 sudo apt update
 sudo apt upgrade -y
-sudo apt install zotero trash-cli -y
+sudo apt install zotero trash-cli  -y
+
+# Update to yarn 4+, which is sometimes needed for using local dev versions of nanopub-js
+export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+corepack enable
+yarn set version berry
+
 npm install
+
+# Setup and dependencies for Playwright (Chrome etc)
+npx playwright install-deps
+npx playwright install
 
 # Download some sample paper pdfs to help with testing the zotero plugin
 cd /home/node

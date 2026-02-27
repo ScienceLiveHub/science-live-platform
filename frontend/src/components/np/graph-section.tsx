@@ -234,7 +234,7 @@ export function PubInfoSection({
   // Filter statements into sections for display
   statements.forEach((st) => {
     const sub = st.subject.value;
-    if (sub === store.prefixes["this"]) {
+    if (sub === store.prefixes["this"] || sub === store.prefixes["sub"]) {
       pubStatements.push(st);
     } else if (
       sub === store.prefixes["this"] + "/sig" ||

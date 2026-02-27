@@ -9,7 +9,14 @@ export default defineConfig(({ mode }) => {
   // The third parameter "" means all envs will be available here, not just `VITE_*`
   const env = loadEnv(mode, process.cwd(), "");
   return {
-    plugins: [react(), tailwindcss(), cloudflare()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      cloudflare({
+        configPath:
+          mode === "development" ? "./wrangler-dev.jsonc" : "./wrangler.jsonc",
+      }),
+    ],
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),

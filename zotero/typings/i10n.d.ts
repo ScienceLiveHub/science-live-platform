@@ -4,7 +4,8 @@
 // @ts-nocheck
 export type FluentMessageId =
   | 'menuitem-attach-nanopub-label'
-  | 'menuitem-create-nanopub-label'
+  | 'menuitem-create-nanopub-submenu'
+  | 'menuitem-custom-label'
   | 'menuitem-file-import-attach-label'
   | 'menuitem-file-import-new-label'
   | 'menuitem-search-nanopub-label'
@@ -12,6 +13,7 @@ export type FluentMessageId =
   | 'pref-about-profile'
   | 'pref-api-key'
   | 'pref-help'
+  | 'pref-test-connection'
   | 'pref-title'
   | 'prefs-title'
   | 'startup-begin'

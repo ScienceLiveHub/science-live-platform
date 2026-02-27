@@ -52,9 +52,7 @@ function openNanopubCreationDialog(templateUri: string, prefilledData: any) {
     "chrome,dialog=no,modal=no,centerscreen,resizable,width=900,height=700",
     templateUri,
     prefilledData,
-    addon.data.env === "development"
-      ? "http://localhost:3001"
-      : "https://api.sciencelive4all.org",
+    __api__,
     dark,
   );
 }
@@ -156,19 +154,21 @@ function splitIfTooLong(text: string): {
 
 export class ScienceLivePlugin {
   // Create Nanopublication menu and dynamically generated submenus(from predefined TEMPLATE_METADATA)
-  static createNanopubMenu = () => ({
-    tag: "menu",
-    label: getString("menuitem-create-nanopub-label"),
-    icon: "chrome://zotero/skin/20/universal/plus.svg",
-    children: Object.entries(TEMPLATE_METADATA).map(([k, v]) => ({
-      tag: "menuitem",
-      label: `${v.icon} ${v.name}`,
-      commandListener: (ev: any) => {
-        ev?.stopPropagation?.();
-        openNanopubCreationDialog(k, null);
-      },
-    })),
-  });
+  static createNanopubMenu = () =>
+    ({
+      menuType: "submenu",
+      l10nID: getLocaleID("menuitem-create-nanopub-submenu"),
+      icon: "chrome://zotero/skin/20/universal/plus.svg",
+      menus: Object.entries(TEMPLATE_METADATA).map(([k, v]) => ({
+        menuType: "menuitem",
+        l10nID: getLocaleID("menuitem-custom-label"),
+        l10nArgs: { npLabel: `${v.icon} ${v.name}` },
+        onCommand: (event: any) => {
+          event?.stopPropagation?.();
+          openNanopubCreationDialog(k, null);
+        },
+      })),
+    }) as _ZoteroTypes.MenuManager.MenuData<_ZoteroTypes.MenuManager.BaseMenuContext>;
 
   static makeId = (key: string) =>
     `${addon.data.config.addonRef}-editor-menu-${key}`;
@@ -226,39 +226,35 @@ export class ScienceLivePlugin {
   static registerRightClickMenu(win: Window) {
     const scienceliveLogo = `chrome://${addon.data.config.addonRef}/content/icons/favicon@0.5x.png`;
 
-    // ----- (Separator)
-    ztoolkit.Menu.register("item", {
-      tag: "menuseparator",
-    });
+    Zotero.MenuManager.registerMenu({
+      menuID: "science-live-item-context-menu",
+      pluginID: addon.data.config.addonID,
+      target: "main/library/item",
+      menus: [
+        // Create Nanopublication > [submenu-items]
+        ScienceLivePlugin.createNanopubMenu(),
+        // Attach Nanopublication...
+        {
+          menuType: "menuitem",
+          l10nID: getLocaleID("menuitem-attach-nanopub-label"),
+          icon: "chrome://zotero/skin/20/universal/add-file.svg",
+          onCommand: (event) => {
+            event?.stopPropagation?.();
+            this.importNanopubByUrl();
+          },
+        },
+        // Search Related Nanopublications
+        {
+          menuType: "menuitem",
 
-    // Create Nanopublication > [submenu-items]
-    ztoolkit.Menu.register(
-      "item",
-      ScienceLivePlugin.createNanopubMenu() as any,
-    );
-
-    // Attach Nanopublication...
-    ztoolkit.Menu.register("item", {
-      tag: "menuitem",
-      id: this.makeId("attach"),
-      label: getString("menuitem-attach-nanopub-label"),
-      icon: "chrome://zotero/skin/20/universal/add-file.svg",
-      commandListener: (ev) => {
-        ev?.stopPropagation?.();
-        this.importNanopubByUrl();
-      },
-    });
-
-    // Search Related Nanopublications
-    ztoolkit.Menu.register("item", {
-      tag: "menuitem",
-      id: this.makeId("search"),
-      label: getString("menuitem-search-nanopub-label"),
-      icon: "chrome://zotero/skin/20/universal/magnifier.svg",
-      commandListener: (ev) => {
-        ev?.stopPropagation?.();
-        this.searchRelatedNanopubs();
-      },
+          l10nID: getLocaleID("menuitem-search-nanopub-label"),
+          icon: "chrome://zotero/skin/20/universal/magnifier.svg",
+          onCommand: (event) => {
+            event?.stopPropagation?.();
+            this.searchRelatedNanopubs();
+          },
+        },
+      ],
     });
   }
 
@@ -267,36 +263,34 @@ export class ScienceLivePlugin {
    */
   @logged
   static registerWindowMenu() {
-    // File > ----- (Separator)
-    ztoolkit.Menu.register("menuFile", {
-      tag: "menuseparator",
+    Zotero.MenuManager.registerMenu({
+      menuID: "science-live-file-menu",
+      pluginID: addon.data.config.addonID,
+      target: "main/menubar/file",
+      menus: [
+        { menuType: "separator" },
+        // File > Import Nanopublication as New Item...
+        {
+          menuType: "menuitem",
+          l10nID: getLocaleID("menuitem-file-import-new-label"),
+          onCommand: (event) => {
+            event?.stopPropagation?.();
+            this.importNanopubAsNewItem();
+          },
+        },
+        // File > Import Nanopublication (Attach to Item)...
+        {
+          menuType: "menuitem",
+          l10nID: getLocaleID("menuitem-file-import-attach-label"),
+          onCommand: (event) => {
+            event?.stopPropagation?.();
+            this.importNanopubByUrl();
+          },
+        },
+        // Create Nanopublication > [submenu-items]
+        ScienceLivePlugin.createNanopubMenu(),
+      ],
     });
-
-    // File > Import Nanopublication as New Item...
-    ztoolkit.Menu.register("menuFile", {
-      tag: "menuitem",
-      label: getString("menuitem-file-import-new-label"),
-      commandListener: (ev) => {
-        ev?.stopPropagation?.();
-        this.importNanopubAsNewItem();
-      },
-    });
-
-    // File > Import Nanopublication (Attach to Item)...
-    ztoolkit.Menu.register("menuFile", {
-      tag: "menuitem",
-      label: getString("menuitem-file-import-attach-label"),
-      commandListener: (ev) => {
-        ev?.stopPropagation?.();
-        this.importNanopubByUrl();
-      },
-    });
-
-    // Create Nanopublication > [submenu-items]
-    ztoolkit.Menu.register(
-      "menuFile",
-      ScienceLivePlugin.createNanopubMenu() as any,
-    );
   }
 
   /**
