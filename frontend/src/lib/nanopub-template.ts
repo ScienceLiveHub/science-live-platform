@@ -10,6 +10,7 @@ import {
   fetchPossibleValuesFromQuads,
   NS,
 } from "./rdf";
+import { unwrapPEMKey } from "./string-format";
 import { cleanOrcidUri, getUriEnd, isNanopubUri } from "./uri";
 
 const { namedNode, literal, blankNode } = DataFactory;
@@ -473,9 +474,8 @@ export class NanopubTemplate extends NanopubStore {
 
     let signed;
     try {
-      // const base64Key = unwrapPEMKey(privateKey);
-      // signed = await sign(trigOutput, base64Key, pubData.orcid);
-      signed = await sign(trigOutput, privateKey, pubData.orcid, pubData.name);
+      const base64Key = unwrapPEMKey(privateKey);
+      signed = await sign(trigOutput, base64Key, pubData.orcid);
     } catch (e) {
       // The error should be either Error object or a string if it occured in native code
       if (e instanceof Error) {

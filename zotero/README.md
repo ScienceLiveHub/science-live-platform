@@ -14,7 +14,7 @@ Transform your Zotero library into a semantic web publishing platform. Create, s
 
 - **All In-Zotero** - Complete workflow in Zotero tabs, no external websites
 - **Smart Forms** - Auto-generated forms from nanopub templates
-- **ORCID Signing** - Cryptographic signing with your ORCID (WASM-powered)
+- **ORCID Signing** - Cryptographic signing with your ORCID
 - **Multiple Templates** - CiTO, AIDA, Rosetta, and custom templates
 - **Discovery** - Search for related nanopublications
 - **Import** - Add nanopubs from the network to your library
@@ -170,10 +170,8 @@ MIT License - see [LICENSE](LICENSE)
 
 Built on:
 
-- [@sciencelivehub/nanopub-create](https://github.com/ScienceLiveHub/nanopub-create)
-- [@sciencelivehub/nanopub-view](https://github.com/ScienceLiveHub/nanopub-view)
-- [nanopub-rs](https://github.com/vemonet/nanopub-rs) (WASM signing)
 - [Nanopub Network](http://nanopub.org) (Knowledge Pixels)
+- [nanopub-js](https://github.com/Nanopublication/nanopub-js) - Nanopublications Javascript library
 
 ---
 
