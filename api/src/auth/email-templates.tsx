@@ -6,7 +6,7 @@ export const orgInviteEmailTemplate = (
   link: string,
 ) =>
   EmailTemplate({
-    imageUrl: `${baseUrl}/sciencelive-logo-small.webp`,
+    imageUrl: `${baseUrl}/favicon.png`,
     action: "Organization Invitation",
     content: (
       <>
@@ -27,7 +27,7 @@ export const verifyEmailTemplate = (
   link: string,
 ) =>
   EmailTemplate({
-    imageUrl: `${baseUrl}/sciencelive-logo-small.webp`,
+    imageUrl: `${baseUrl}/favicon.png`,
     action: "Verify Email",
     content: (
       <>
@@ -53,7 +53,7 @@ export const changeEmailTemplate = (
   link: string,
 ) =>
   EmailTemplate({
-    imageUrl: `${baseUrl}/sciencelive-logo-small.webp`,
+    imageUrl: `${baseUrl}/favicon.png`,
     action: "Confirm Email Change",
     content: (
       <>
@@ -74,7 +74,7 @@ export const resetPasswordTemplate = (
   link: string,
 ) =>
   EmailTemplate({
-    imageUrl: `${baseUrl}/sciencelive-logo-small.webp`,
+    imageUrl: `${baseUrl}/favicon.png`,
     action: "Reset Password",
     content: (
       <>

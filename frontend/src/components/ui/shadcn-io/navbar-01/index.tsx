@@ -24,14 +24,7 @@ import Notifications from "./notifications";
 
 // Simple logo component for the navbar
 const Logo = () => {
-  return (
-    <img
-      src="/sciencelive-logo-small.webp"
-      alt="SL"
-      width="32px"
-      className="m-3"
-    />
-  );
+  return <img src="/favicon.png" alt="SL" width="32px" className="m-3" />;
 };
 
 // Hamburger icon component
