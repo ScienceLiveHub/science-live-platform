@@ -8,6 +8,7 @@ import {
   Statement,
 } from "./rdf";
 import {
+  getNanopubHash,
   getNanopubSuffix,
   getUriEnd,
   isDoiUri,
@@ -38,7 +39,9 @@ export function generateCitation(
 ) {
   const author = data?.creators?.[0]?.name || "Unknown Author";
   const year = data?.created ? new Date(data.created).getFullYear() : "n.d.";
-  const title = data?.title || "Untitled Nanopublication";
+  const title = data
+    ? data.title || getNanopubHash(data.uri!)?.substring(0, 10)
+    : "Untitled";
   const uri = data?.uri;
 
   if (!uri) return "";
@@ -444,7 +447,9 @@ export class NanopubStore extends N3Store {
    * Output nanopublication as a markdown string.
    */
   toMarkdownString() {
-    const title = this.metadata.title ?? "Untitled Nanopublication";
+    const title =
+      this.metadata.title ??
+      getNanopubHash(this.metadata.uri!)?.substring(0, 10);
     const creators = this.metadata.creators?.length
       ? this.metadata.creators
           .map((creator) =>
@@ -469,7 +474,9 @@ export class NanopubStore extends N3Store {
       : "Unknown";
     const citation = this.getCitation();
     const sourceUri = this.metadata.uri;
-    const exploreLink = sourceUri ? toScienceLiveNPUri(sourceUri) : undefined;
+    const exploreLink = sourceUri
+      ? toScienceLiveNPUri(sourceUri, false)
+      : undefined;
 
     const assertionGraph = this.graphUris.assertion
       ? namedNode(this.graphUris.assertion)
@@ -478,11 +485,25 @@ export class NanopubStore extends N3Store {
       ? this.match(null, null, null, assertionGraph).toArray()
       : [];
     const assertionBulletPoints = assertionStatements.length
-      ? assertionStatements.map((statement) => {
+      ? assertionStatements.map((statement, idx) => {
+          const repeat = statement.subject.equals(
+            assertionStatements[idx - 1]?.subject,
+          );
+          const firstOfRepeat =
+            !repeat &&
+            statement.subject.equals(assertionStatements[idx + 1]?.subject);
+
           const subject = this.formatTermMarkdown(statement.subject);
           const predicate = this.formatTermMarkdown(statement.predicate);
           const object = this.formatTermMarkdown(statement.object);
-          return `- ${subject} ${predicate} ${object}`;
+          if (firstOfRepeat) {
+            return `- **${subject}**\n    - ${predicate} ${object}`;
+          }
+          if (repeat) {
+            return `    - ${predicate} ${object}`;
+          }
+
+          return `- **${subject}** ${predicate} ${object}`;
         })
       : ["- _No assertions found._"];
 
@@ -519,12 +540,13 @@ export class NanopubStore extends N3Store {
     if (term.termType === "NamedNode") {
       const label = this.findInternalLabel(term as NamedNode) ?? term.value;
       // Replace nanopub links with ScienceLive Platform links
-      return `[${label}](${isNanopubUri(term.value) ? toScienceLiveNPUri(term.value) : term.value})`;
+      return `[${decodeURI(label)}](${toScienceLiveNPUri(term.value, false)})`;
     }
 
     if (term.termType === "Literal") {
       const lang = term.language ? `@${term.language}` : "";
-      return `"${term.value}"${lang}`;
+      const dataType = term.datatype ? `^${term.datatype}` : "";
+      return `"${decodeURI(term.value)}"${lang + dataType}`;
     }
 
     return term.value;

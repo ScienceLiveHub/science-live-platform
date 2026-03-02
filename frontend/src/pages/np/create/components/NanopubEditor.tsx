@@ -82,6 +82,14 @@ export interface NanopubEditorProps {
   publishServer?: string;
 
   /**
+   * Callback after nanopublication generated.
+   */
+  onGenerated?: (result: {
+    uri: string;
+    signedRdf: string;
+  }) => void | Promise<void>;
+
+  /**
    * Callback after successful publish.
    */
   onPublished?: (result: {
@@ -171,6 +179,7 @@ export default function NanopubEditor({
   onTemplateUriChange,
   prefilledData,
   publishServer,
+  onGenerated,
   onPublished,
   orcidLinkAction,
   embedded = false,
@@ -284,6 +293,10 @@ export default function NanopubEditor({
       (scrollPreviewRef?.current as any)?.scrollIntoView({
         behavior: "smooth",
         block: "start",
+      });
+      await onGenerated?.({
+        uri: signed.sourceUri,
+        signedRdf: signed.signedRdf,
       });
     } catch (error) {
       console.error("Error generating nanopub:", error);

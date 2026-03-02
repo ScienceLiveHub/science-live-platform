@@ -126,7 +126,7 @@ export async function generatePrivateKey(): Promise<string> {
       name: "RSASSA-PKCS1-v1_5",
       modulusLength: 4096,
       publicExponent: new Uint8Array([1, 0, 1]), // 65537
-      hash: "SHA-512",
+      hash: "SHA-256",
     },
     true,
     ["sign", "verify"],
@@ -179,7 +179,7 @@ async function validateKey(privateKey: string) {
       bytes.buffer,
       {
         name: "RSASSA-PKCS1-v1_5",
-        hash: "SHA-512", // TODO: should we support otheers e.g. SHA-256?
+        hash: "SHA-256",
       },
       true,
       ["sign"],

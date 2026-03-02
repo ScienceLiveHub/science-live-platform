@@ -1,5 +1,8 @@
 import { getLocaleID, getString } from "../utils/locale";
-import { TEMPLATE_METADATA } from "../../../frontend/src/pages/np/create/components/templates/registry-metadata";
+import {
+  TEMPLATE_METADATA,
+  TEMPLATE_URI,
+} from "../../../frontend/src/pages/np/create/components/templates/registry-metadata";
 import { extractDoisFromText } from "../../../frontend/src/lib/uri";
 
 function logged(
@@ -36,17 +39,26 @@ function isDarkMode(win?: _ZoteroTypes.MainWindow) {
   return !!win.matchMedia("(prefers-color-scheme: dark)")?.matches;
 }
 
+type PublishResult = {
+  uri: string;
+  signedRdf: string;
+};
+
 /**
  * Open a dialog window for creating a new nanopub, using a given template
  * and optional prefilled form data.
  */
-function openNanopubCreationDialog(templateUri: string, prefilledData: any) {
+function openNanopubCreationDialog(
+  templateUri: string,
+  prefilledData: any,
+  onPublished?: (result: PublishResult) => void | Promise<void>,
+) {
   // Open the form with pre-filled data
   const win = Zotero.getMainWindow();
   const dark = isDarkMode(win);
 
   // Open an independent window (dialog=no) so it's resizable and non-modal.
-  win.openDialog(
+  const dialog = win.openDialog(
     `chrome://${addon.data.config.addonRef}/content/createNanopub.xhtml`,
     "",
     "chrome,dialog=no,modal=no,centerscreen,resizable,width=900,height=700",
@@ -55,6 +67,14 @@ function openNanopubCreationDialog(templateUri: string, prefilledData: any) {
     __api__,
     dark,
   );
+
+  // Register a callback on the dialog window to relay results back to the parent
+  // opener (chrome) context.
+  if (dialog && onPublished) {
+    (dialog as any).nanopubPublishedCallback = (result: PublishResult) => {
+      onPublished?.(result);
+    };
+  }
 }
 
 /**
@@ -649,8 +669,13 @@ export class ScienceLivePlugin {
       };
 
       openNanopubCreationDialog(
-        "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU",
+        TEMPLATE_URI.ANNOTATE_QUOTATION,
         annotationData,
+        async ({ signedRdf }) =>
+          await addon.data.displayModule.displayFromContent(
+            parentItem,
+            signedRdf,
+          ),
       );
     } catch (err: any) {
       ztoolkit.log(
@@ -713,8 +738,13 @@ export class ScienceLivePlugin {
       };
 
       openNanopubCreationDialog(
-        "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo",
+        TEMPLATE_URI.CITATION_CITO,
         annotationData,
+        async ({ signedRdf }) =>
+          await addon.data.displayModule.displayFromContent(
+            parentItem,
+            signedRdf,
+          ),
       );
     } catch (err: any) {
       ztoolkit.log(
@@ -741,6 +771,12 @@ export class ScienceLivePlugin {
       );
     } catch (err: any) {
       ztoolkit.log("ReaderIntegration: Failed to unregister:", err);
+    }
+    try {
+      Zotero.MenuManager.unregisterMenu("science-live-file-menu");
+      Zotero.MenuManager.unregisterMenu("science-live-item-context-menu");
+    } catch (err: any) {
+      ztoolkit.log("Menus: Failed to unregister:", err);
     }
   }
 }

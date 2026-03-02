@@ -20,9 +20,9 @@ import { createRoot } from "react-dom/client";
 import { Toaster } from "../../../../frontend/src/components/ui/sonner";
 import { TooltipProvider } from "../../../../frontend/src/components/ui/tooltip";
 import NanopubEditor from "../../../../frontend/src/pages/np/create/components/NanopubEditor";
+import { TEMPLATE_URI } from "../../../../frontend/src/pages/np/create/components/templates/registry-metadata";
 
-const DEFAULT_TEMPLATE_URI =
-  "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU"; // Annotating a paper quotation
+const DEFAULT_TEMPLATE_URI = TEMPLATE_URI.ANNOTATE_QUOTATION;
 
 function getInjectedPref(key: string): string | undefined {
   try {
@@ -107,8 +107,16 @@ window.addEventListener("load", async () => {
             templateUri={getInjectedPref("templateUri") ?? DEFAULT_TEMPLATE_URI}
             identity={profile}
             publishServer={"https://registry.knowledgepixels.com/"}
-            onPublished={async ({ uri }) => {
-              console.log("Published:", uri);
+            onPublished={async ({ uri, signedRdf }) => {
+              // Call the nanopubPublishedCallback injected by bridge.js
+              const callback = (window as any).nanopubPublishedCallback;
+              if (typeof callback === "function") {
+                callback({ uri, signedRdf });
+              } else {
+                console.warn(
+                  "[createNanopub] Failed to add published nanopub under parent Item",
+                );
+              }
             }}
             prefilledData={prefilledData}
             embedded

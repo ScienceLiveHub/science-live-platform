@@ -1,3 +1,6 @@
+export const SCIENCELIVE_PLATFORM_URL = "https://platform.sciencelive4all.org";
+export const SCIENCELIVE_NANOPUB_URI = "https://w3id.org/sciencelive/np/";
+
 /**
  * Returns a valid full URI based on an input in any format, including just the hash part
  */
@@ -100,10 +103,21 @@ export function getNanopubSuffix(uri: string) {
     : uri.match(/\/(RA|RB|FA)[A-Za-z0-9_-]{43}[/#]([^/#?]+)/)?.[2];
 }
 
-export function toScienceLiveNPUri(sourceUri: string) {
+/**
+ * Returns the the uri as a URL link that displays in Science Live Platform
+ * If its already a Science Live prefixed link or if its not a nanopub URI, it returns the original sourceUri
+ */
+export function toScienceLiveNPUri(sourceUri: string, relative = true) {
+  if (
+    sourceUri.startsWith(SCIENCELIVE_PLATFORM_URL) ||
+    sourceUri.startsWith(SCIENCELIVE_NANOPUB_URI)
+  ) {
+    return sourceUri;
+  }
+
   return isNanopubUri(sourceUri)
-    ? `/np/?uri=${encodeURIComponent(sourceUri)}`
-    : undefined;
+    ? `${relative ? "" : SCIENCELIVE_PLATFORM_URL}/np/?uri=${encodeURIComponent(sourceUri)}`
+    : sourceUri;
 }
 
 // TODO: use validDoi zod/regex instead?

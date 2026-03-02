@@ -2,57 +2,103 @@
   <html:link rel="localization" href="__addonRef__-preferences.ftl" />
 </linkset>
 
-<groupbox onload="Zotero.__addonInstance__.hooks.onPrefsEvent('load', { window })">
+<groupbox
+  onload="Zotero.__addonInstance__.hooks.onPrefsEvent('load', { window })"
+>
   <label>
-    <html:h2 style=" margin-top: 10px" data-l10n-id="pref-title">
-    </html:h2>
-    <html:label style="margin-bottom: 10px" data-l10n-id="pref-about-profile"></html:label>
+    <html:h2 style="margin-top: 10px" data-l10n-id="pref-title"> </html:h2>
+    <html:label
+      style="margin-bottom: 10px"
+      data-l10n-id="pref-about-profile"
+    ></html:label>
   </label>
 
-  <a
-    href="https://platform.sciencelive4all.org/settings/api-keys">https://platform.sciencelive4all.org/settings/api-keys</a>
+  <label
+    class="zotero-text-link keyboard-clickable"
+    is="zotero-text-link"
+    role="link"
+    href="https://platform.sciencelive4all.org/settings/api-keys"
+    value="Science Live API key settings"
+  ></label>
   <hbox align="center" style="margin-left: 15px; margin-top: 10px">
-    <html:label for="science-live-api-key" data-l10n-id="pref-api-key" style="width: 80px"></html:label>
-    <html:input type="password" id="science-live-api-key" preference="__prefsPrefix__.apiKey"
-      placeholder="e.g. sl_abc123..." style="flex: 1; margin-left: 10px" rows="3">
+    <html:label
+      for="science-live-api-key"
+      data-l10n-id="pref-api-key"
+      style="width: 80px"
+    ></html:label>
+    <html:input
+      type="password"
+      id="science-live-api-key"
+      preference="__prefsPrefix__.apiKey"
+      placeholder="e.g. sl_abc123..."
+      style="flex: 1; margin-left: 10px"
+      rows="3"
+    >
     </html:input>
   </hbox>
   <vbox style="margin-left: 15px; margin-top: 10px">
-    <html:button id="science-live-test-connection" data-l10n-id="pref-test-connection" onclick="(async () => {
-        const btn = document.getElementById('science-live-test-connection');
-        const apiDisplay = document.getElementById('science-live-test-api');
-        const resultDisplay = document.getElementById('science-live-test-connection-result');
-        const apiKeyInput = document.getElementById('science-live-api-key');
-        const apiKey = apiKeyInput?.value || '';
-        if (!apiKey) {
-          Services.prompt.alert(window, 'Test Connection', 'Please enter an API key first.');
-          return;
-        }
-        apiDisplay.classList.hidden = 'visible';
-        btn.disabled = true;
-        btn.textContent = 'Testing...';
-        try {
-          const result = await fetch(`__api__/signing/profile`, {
-            headers: { 'x-api-key': apiKey },
-          });
-          const profile = await result.json();
-          if (profile.name) {
-            resultDisplay.textContent = `✅ Connected to profile: ${profile.name}`;
-          } else {
-            Services.prompt.alert(window, 'Connection Failed', 'API key is invalid or not linked to a profile. Please check your key.');
+    <html:button
+      id="science-live-test-connection"
+      data-l10n-id="pref-test-connection"
+      onclick="
+        (async () => {
+          const btn = document.getElementById('science-live-test-connection');
+          const apiDisplay = document.getElementById('science-live-test-api');
+          const resultDisplay = document.getElementById(
+            'science-live-test-connection-result',
+          );
+          const apiKeyInput = document.getElementById('science-live-api-key');
+          const apiKey = apiKeyInput?.value || '';
+          if (!apiKey) {
+            Services.prompt.alert(
+              window,
+              'Test Connection',
+              'Please enter an API key first.',
+            );
+            return;
           }
-        } catch (e) {
-          Services.prompt.alert(window, 'Connection Failed', `Failed to connect to Science Live. Check your Internet connection and API key.`);
-        } finally {
-          btn.disabled = false;
-          btn.textContent = 'Test Connection';
-          btn.setAttribute('data-l10n-id', 'pref-test-connection');
-        }
-      })()" style="margin-left: 90px; width: 200px">
+          apiDisplay.classList.hidden = 'visible';
+          btn.disabled = true;
+          btn.textContent = 'Testing...';
+          try {
+            const result = await fetch(`__api__/signing/profile`, {
+              headers: { 'x-api-key': apiKey },
+            });
+            const profile = await result.json();
+            if (profile.name) {
+              resultDisplay.textContent = `✅ Connected to profile: ${profile.name}`;
+            } else {
+              Services.prompt.alert(
+                window,
+                'Connection Failed',
+                'API key is invalid or not linked to a profile. Please check your key.',
+              );
+            }
+          } catch (e) {
+            Services.prompt.alert(
+              window,
+              'Connection Failed',
+              `Failed to connect to Science Live. Check your Internet connection and API key.`,
+            );
+          } finally {
+            btn.disabled = false;
+            btn.textContent = 'Test Connection';
+            btn.setAttribute('data-l10n-id', 'pref-test-connection');
+          }
+        })()
+      "
+      style="margin-left: 90px; width: 200px"
+    >
     </html:button>
-    <html:label id="science-live-test-api" style="margin-left: 90px; margin-top: 10px; color: grey">Server:
-      __api__</html:label>
-    <html:label id="science-live-test-connection-result" style="margin-left: 90px; margin-top: 10px"></html:label>
+    <html:label
+      id="science-live-test-api"
+      style="margin-left: 90px; margin-top: 10px; color: grey"
+      >Server: __api__
+    </html:label>
+    <html:label
+      id="science-live-test-connection-result"
+      style="margin-left: 90px; margin-top: 10px"
+    ></html:label>
   </vbox>
 </groupbox>
 
@@ -60,11 +106,18 @@
   <label>
     <html:h2 data-l10n-id="pref-about"></html:h2>
   </label>
-  <label class="zotero-text-link keyboard-clickable" is="zotero-text-link" role="link"
-    href="https://sciencelive4all.org/science-live-platform/" value="Science Live - Zotero Nanopub Plugin"></label>
+  <label
+    class="zotero-text-link keyboard-clickable"
+    is="zotero-text-link"
+    role="link"
+    href="https://sciencelive4all.org/science-live-platform/"
+    value="Science Live - Zotero Nanopub Plugin"
+  ></label>
 </groupbox>
 <vbox>
-  <html:label data-l10n-id="pref-help"
-    data-l10n-args='{"time": "__buildTime__","name": "__addonName__","version":"__buildVersion__","build":"__env__"}'>
+  <html:label
+    data-l10n-id="pref-help"
+    data-l10n-args='{"time": "__buildTime__","name": "__addonName__","version":"__buildVersion__","build":"__env__"}'
+  >
   </html:label>
 </vbox>

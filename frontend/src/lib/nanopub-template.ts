@@ -10,11 +10,15 @@ import {
   fetchPossibleValuesFromQuads,
   NS,
 } from "./rdf";
-import { cleanOrcidUri, getUriEnd, isNanopubUri } from "./uri";
+import {
+  cleanOrcidUri,
+  getUriEnd,
+  isNanopubUri,
+  SCIENCELIVE_NANOPUB_URI,
+  SCIENCELIVE_PLATFORM_URL,
+} from "./uri";
 
 const { namedNode, literal, blankNode } = DataFactory;
-
-export const SCIENCELIVE_NANOPUB_URI = "https://w3id.org/sciencelive/np/";
 
 // Template placeholder types
 // Get these from https://w3id.org/np/o/ntemplate/
@@ -423,7 +427,7 @@ export class NanopubTemplate extends NanopubStore {
     outputStore.addQuad(
       outSub,
       NS.NPX("wasCreatedAt"),
-      namedNode("https://platform.sciencelive4all.org"),
+      namedNode(SCIENCELIVE_PLATFORM_URL),
       pubinfoGraph,
     );
 
