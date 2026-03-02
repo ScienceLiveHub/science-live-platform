@@ -13,8 +13,7 @@ export default defineConfig(({ mode }) => {
       react(),
       tailwindcss(),
       cloudflare({
-        configPath:
-          mode === "development" ? "./wrangler-dev.jsonc" : "./wrangler.jsonc",
+        configPath: mode === "development" ? "./wrangler-dev.jsonc" : undefined,
       }),
     ],
     resolve: {
