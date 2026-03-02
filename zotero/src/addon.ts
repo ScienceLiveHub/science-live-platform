@@ -16,6 +16,7 @@ class Addon {
     config: typeof config;
     // Env type, see build.js
     env: "development" | "production";
+    api?: string;
     initialized?: boolean;
     ztoolkit: ZToolkit;
     searchModule: NanopubSearch;
@@ -38,6 +39,7 @@ class Addon {
       alive: true,
       config,
       env: __env__,
+      api: __api__,
       initialized: false,
       ztoolkit: createZToolkit(),
       searchModule: new NanopubSearch(),

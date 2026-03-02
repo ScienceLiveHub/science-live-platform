@@ -133,7 +133,7 @@ app.get("/", async (c) => {
         type: "warning",
         title: "Check your email for verification",
         group: `verify-email`,
-        link: `${c.env.FRONTEND_URL}/account/settings`,
+        link: `${c.env.FRONTEND_URL}/settings/account`,
         content:
           "If you didn't receive a verification email, click to open settings and correct it.",
         status: "persistent",

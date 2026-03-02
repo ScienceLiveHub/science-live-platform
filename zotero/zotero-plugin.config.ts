@@ -1,6 +1,11 @@
 import { defineConfig } from "zotero-plugin-scaffold";
 import pkg from "./package.json";
 
+const server =
+  process.env.API_URL && process.env.NODE_ENV !== "production"
+    ? process.env.API_URL
+    : "https://api.sciencelive4all.org";
+
 export default defineConfig({
   source: ["src", "addon"],
   dist: ".scaffold/build",
@@ -22,6 +27,8 @@ export default defineConfig({
       homepage: pkg.homepage,
       buildVersion: pkg.version,
       buildTime: "{{buildTime}}",
+      env: process.env.NODE_ENV,
+      api: server,
     },
     prefs: {
       prefix: pkg.config.prefsPrefix,
@@ -31,6 +38,7 @@ export default defineConfig({
         entryPoints: ["src/index.ts"],
         define: {
           __env__: `"${process.env.NODE_ENV}"`,
+          __api__: `"${server}"`,
         },
         bundle: true,
         format: "esm",

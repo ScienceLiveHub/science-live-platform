@@ -1,7 +1,7 @@
 {
   "name": "zotero-sciencelive",
   "type": "module",
-  "version": "0.2.0-zotero",
+  "version": "0.3.0",
   "description": "Science Live plugin for Zotero - Create nanopublications from Zotero items and link them to your bibliography",
   "config": {
     "addonName": "Science Live",
@@ -32,21 +32,21 @@
   "dependencies": {
     "@nanopub/nanopub-js": "^0.1.0",
     "showdown": "^2.1.0",
-    "zotero-plugin-toolkit": "^5.1.0-beta.13"
+    "zotero-plugin-toolkit": "^5.1.2"
   },
   "devDependencies": {
     "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^25.2.0",
+    "@types/node": "^25.3.2",
     "@types/showdown": "^2.0.6",
     "@zotero-plugin/eslint-config": "^0.6.7",
     "chai": "^6.2.2",
-    "eslint": "^9.39.2",
+    "eslint": "^10.0.2",
     "mocha": "^11.7.5",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",
-    "zotero-plugin-scaffold": "^0.8.2",
-    "zotero-types": "^4.1.0-beta.8"
+    "zotero-plugin-scaffold": "^0.8.3",
+    "zotero-types": "^4.1.1"
   },
   "prettier": {
     "printWidth": 80,

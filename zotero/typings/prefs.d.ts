@@ -7,9 +7,7 @@
 declare namespace _ZoteroTypes {
   interface Prefs {
     PluginPrefsMap: {
-      "name": string;
-      "orcid": string;
-      "privateKey": string;
+      "apiKey": string;
     };
   }
 }

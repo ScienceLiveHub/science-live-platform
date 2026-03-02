@@ -1,4 +1,5 @@
 import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { encryptedText } from "./privatekey";
 
 /*
  * User and Auth Schema
@@ -78,7 +79,25 @@ export const notification = pgTable("notification", {
   createdAt: timestamp().notNull().defaultNow(),
 });
 
-export const schema = { user, session, account, verification, notification };
+export const signingKey = pgTable("signingKey", {
+  id: uuid().primaryKey().defaultRandom(),
+  userId: text()
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  name: text(),
+  encryptedKey: encryptedText(),
+  isDefault: boolean(),
+  createdAt: timestamp().notNull().defaultNow(),
+});
+
+export const schema = {
+  user,
+  session,
+  account,
+  verification,
+  notification,
+  signingKey,
+};
 
 export type User = typeof user.$inferSelect;
 export type Session = typeof session.$inferSelect;

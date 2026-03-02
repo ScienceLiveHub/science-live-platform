@@ -52,19 +52,33 @@ export async function fetchQuads(
   quadCallback: (quad: Quad) => void,
   prefixCallback?: (prefix: string, prefixNode: RDFT.NamedNode) => void,
 ) {
-  // TODO: does it need to be this specific format?
   const PREFERRED_FORMAT = "application/trig";
 
-  // Download RDF
+  const throwIfNotTrig = (res: Response) => {
+    const ct = (res.headers.get("content-type") || "").split(";")[0].trim();
+    if (ct != PREFERRED_FORMAT) {
+      throw new Error(`Expected content-type ${PREFERRED_FORMAT}, got: ${ct}`);
+    }
+  };
+
+  // Attempt to download RDF
   const res = await ky(url, {
     headers: {
       Accept: PREFERRED_FORMAT,
     },
     redirect: "follow",
     retry: 2,
+    hooks: {
+      afterResponse: [
+        async (_request, _options, response) => {
+          // Throw if its not trig, then later catch and retry using the registry
+          throwIfNotTrig(response);
+        },
+      ],
+    },
   }).catch(async (error) => {
     // Some hosts (e.g. purl.org) either dont support CORS headers for calling from js clients
-    // in the browser or dont currently support download of application/trig (sciencelive).
+    // in the browser or dont currently support download of application/trig (e.g. sciencelive/np/).
     // Therefore, retry getting the trig directly from known working registries
     // TODO: Add more registries to try of this fails.
     const dl = toRegistryDownloadUrl(url, "trig");
@@ -82,13 +96,9 @@ export async function fetchQuads(
       throw new Error(`HTTP ${res.status} ${res.statusText}`);
     }
 
-    const text = await res.text();
-    const ct = (res.headers.get("content-type") || "").split(";")[0].trim();
-    if (ct != PREFERRED_FORMAT) {
-      throw new Error(`Expected content-type ${PREFERRED_FORMAT}, got: ${ct}`);
-    }
+    throwIfNotTrig(res);
 
-    parseRdf(text, quadCallback, prefixCallback);
+    parseRdf(await res.text(), quadCallback, prefixCallback);
   }
 }
 
@@ -105,10 +115,10 @@ export async function parseRdf(
   const parser = new Parser();
   parser.parse(
     text,
-    (error: any, quad: Quad) => {
+    (error, quad: Quad) => {
       if (error) {
         throw new Error(
-          `N3 Failed to parse RDF, make sure it is in the TRiG format. ${error}`,
+          `Failed to parse RDF, make sure it is in the TriG format - ${error.message}`,
         );
       }
       if (quad) {

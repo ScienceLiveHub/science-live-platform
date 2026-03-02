@@ -10,11 +10,15 @@ import {
   fetchPossibleValuesFromQuads,
   NS,
 } from "./rdf";
-import { cleanOrcidUri, getUriEnd, isNanopubUri } from "./uri";
+import {
+  cleanOrcidUri,
+  getUriEnd,
+  isNanopubUri,
+  SCIENCELIVE_NANOPUB_URI,
+  SCIENCELIVE_PLATFORM_URL,
+} from "./uri";
 
 const { namedNode, literal, blankNode } = DataFactory;
-
-export const SCIENCELIVE_NANOPUB_URI = "https://w3id.org/sciencelive/np/";
 
 // Template placeholder types
 // Get these from https://w3id.org/np/o/ntemplate/
@@ -167,8 +171,7 @@ export class NanopubTemplate extends NanopubStore {
     privateKey: string,
   ) {
     const baseUri = SCIENCELIVE_NANOPUB_URI;
-    const newNanopubUri = baseUri;
-    const newSubUri = `${newNanopubUri}`;
+    const newSubUri = `${baseUri}`;
 
     // Create a new store for the generated nanopub
     const outputStore = new Store();
@@ -270,14 +273,14 @@ export class NanopubTemplate extends NanopubStore {
         : namedNode(formattedValue);
     };
 
-    const outSub = namedNode(newNanopubUri);
-    const assertionGraph = namedNode(newNanopubUri + "assertion");
-    const provenanceGraph = namedNode(newNanopubUri + "provenance");
-    const pubinfoGraph = namedNode(newNanopubUri + "pubinfo");
+    const outSub = namedNode(newSubUri);
+    const assertionGraph = namedNode(newSubUri + "assertion");
+    const provenanceGraph = namedNode(newSubUri + "provenance");
+    const pubinfoGraph = namedNode(newSubUri + "pubinfo");
 
     // ---- 1. HEAD graph, standard: declares RDF type, and points to the other three graphs
 
-    const headGraph = namedNode(newNanopubUri + "Head");
+    const headGraph = namedNode(newSubUri + "Head");
     outputStore.addQuad(
       outSub,
       NS.RDF("type"),
@@ -424,7 +427,7 @@ export class NanopubTemplate extends NanopubStore {
     outputStore.addQuad(
       outSub,
       NS.NPX("wasCreatedAt"),
-      namedNode("https://platform.sciencelive4all.org"),
+      namedNode(SCIENCELIVE_PLATFORM_URL),
       pubinfoGraph,
     );
 
@@ -474,15 +477,17 @@ export class NanopubTemplate extends NanopubStore {
 
     let signed;
     try {
+      // const base64Key = unwrapPEMKey(privateKey);
+      // signed = await sign(trigOutput, base64Key, pubData.orcid);
       signed = await sign(trigOutput, privateKey, pubData.orcid, pubData.name);
     } catch (e) {
-      // The error should be either Error object or a string if it occured in wasm
+      // The error should be either Error object or a string if it occured in native code
       if (e instanceof Error) {
         throw e;
       } else if (typeof e === "string" || e instanceof String) {
-        throw new Error(`${e}`);
+        throw new Error(`${e}`, { cause: e });
       }
-      throw new Error("An error occured during signing");
+      throw new Error("An error occured during signing", { cause: e });
     }
 
     return signed;

@@ -1,6 +1,4 @@
-"use client";
 import { authClient } from "@/lib/auth-client";
-import { EXAMPLE_privateKey } from "@/lib/uri";
 import ky from "ky";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -10,22 +8,20 @@ export default function CreateNanopub() {
   const [searchParams, setSearchParams] = useSearchParams();
   const templateUri = searchParams.get("template") || null;
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const { data: session, isPending } = authClient.useSession();
 
-  // Load current user data
+  // Load signing profile when session is available
   useEffect(() => {
-    const loadCurrentUser = async () => {
+    if (isPending || !session?.user) {
+      return;
+    }
+
+    const loadSigningProfile = async () => {
       try {
-        const { data: session, error: sessionError } =
-          await authClient.getSession();
-
-        if (sessionError || !session?.user) {
-          console.log("No user session found");
-          return;
-        }
-
-        // Fetch current user's full profile data including ORCID
+        // Fetch current user's signing profile including private key
         const response = await ky(
-          `${import.meta.env.VITE_API_URL}/user-profile/${session.user.id}`,
+          `${import.meta.env.VITE_API_URL}/signing/profile`,
+          { credentials: "include" },
         );
 
         if (response.ok) {
@@ -33,12 +29,12 @@ export default function CreateNanopub() {
           setCurrentUser(userData);
         }
       } catch (error) {
-        console.error("Error loading current user data:", error);
+        console.error("Error loading signing profile:", error);
       }
     };
 
-    loadCurrentUser();
-  }, []);
+    loadSigningProfile();
+  }, [session, isPending]);
 
   const handleTemplateChange = (uri: string | null) => {
     const next = new URLSearchParams(searchParams);
@@ -50,19 +46,11 @@ export default function CreateNanopub() {
     setSearchParams(next);
   };
 
-  const identity = currentUser
-    ? {
-        name: currentUser.name,
-        orcid: currentUser?.orcidConnected ? currentUser.orcidId : undefined,
-        privateKey: EXAMPLE_privateKey, // TODO: Replace with real key management
-      }
-    : null;
-
   return (
     <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-6xl">
       <NanopubEditor
         key={templateUri ?? "default"}
-        identity={identity}
+        identity={currentUser}
         templateUri={templateUri}
         onTemplateUriChange={handleTemplateChange}
         embedded={false}

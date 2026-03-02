@@ -173,7 +173,7 @@ export function NanopubOverview({
                   <a
                     key={c.uri}
                     className="font-mono border-2 p-0.5 px-1.5 rounded-sm font-bold text-sm text-blue-600 dark:text-blue-300 hover:underline"
-                    href={toScienceLiveNPUri(c.uri!) || c.uri}
+                    href={toScienceLiveNPUri(c.uri!)}
                     target="_blank"
                     rel="noreferrer"
                   >

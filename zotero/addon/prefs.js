@@ -1,3 +1,1 @@
-pref("name", "");
-pref("orcid", "");
-pref("privateKey", "");
+pref("apiKey", "");

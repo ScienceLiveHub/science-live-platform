@@ -28,59 +28,20 @@ async function onStartup() {
 }
 
 async function ensureProfilePrefs() {
-  const currentName = getPref("name");
-  const currentOrcid = getPref("orcid");
-  const currentPrivateKey = getPref("privateKey");
+  const currentApiKey = getPref("apiKey");
 
-  const needsProfile = !currentName || !currentOrcid || !currentPrivateKey;
-  if (!needsProfile) return;
+  if (currentApiKey) return;
 
   const win = Zotero.getMainWindow() as mozIDOMWindowProxy;
   const prompts = Services.prompt as any;
 
-  if (!currentName) {
-    const nameInput = { value: "" };
-    const result = prompts.prompt(
+  if (!currentApiKey) {
+    const apiKeyInput = { value: "" };
+    const result = prompts.promptPassword(
       win,
-      "Setup Science Live Nanopub Profile",
-      "The Science Live Nanopub extension requires initial setup, which involves entering your name, ORCID, and a RSA signing key.\nThese can be later changed in Zotero Settings.\n\nEnter your name:",
-      nameInput,
-      "",
-      { value: false },
-    );
-
-    if (!result) return;
-    const trimmed = nameInput.value.trim();
-    if (trimmed) {
-      setPref("name", trimmed);
-    }
-  }
-
-  if (!currentOrcid) {
-    const orcidInput = { value: "" };
-    const result = prompts.prompt(
-      win,
-      "Setup Nanopub Profile",
-      "Enter your ORCID (full URL e.g. https://orcid.org/0000-0002-1234-5678):",
-      orcidInput,
-      "",
-      { value: false },
-    );
-
-    if (!result) return;
-    const trimmed = orcidInput.value.trim();
-    if (trimmed) {
-      setPref("orcid", trimmed);
-    }
-  }
-
-  if (!currentPrivateKey) {
-    const privateKeyInput = { value: "" };
-    const result = prompts.prompt(
-      win,
-      "Setup Science Live Nanopub Profile",
-      "Paste your RSA secret signing key below if you have one.\ne.g.\n   -----BEGIN PRIVATE KEY-----\n   ABCD...\n   -----END PRIVATE KEY-----\n\nYou can also leave it blank and press OK to have Zotero generate one for you, or generate one yourself using https://cryptotools.net/rsagen or type `openssl genrsa` in your terminal.",
-      privateKeyInput,
+      "Connect Science Live Account",
+      "If you would like to create Nanopublications, use your verified Science Live account (linked to ORCID) to create an API key using the link below, and paste it here to connect.  You can also set this later in the Zotero settings.\n\nhttps://platform.sciencelive4all.org/settings/api-keys\n\n",
+      apiKeyInput,
       "",
       { value: false },
     );
@@ -88,39 +49,10 @@ async function ensureProfilePrefs() {
     // If cancelled, return
     if (!result) return;
 
-    let pemKey = privateKeyInput.value.trim();
+    const newApiKey = apiKeyInput.value.trim();
 
-    if (pemKey.length === 0) {
-      try {
-        // If no key is entered, generate a new one
-        const keyPair = await crypto.subtle.generateKey(
-          {
-            name: "RSASSA-PKCS1-v1_5",
-            modulusLength: 4096,
-            publicExponent: new Uint8Array([1, 0, 1]),
-            hash: "SHA-512",
-          },
-          true,
-          ["sign", "verify"],
-        );
-        // nanopub-rs has issues parsing the signature if it isn't in this exact PEM format
-        // including the line wrapping at 64 characters wide
-        pemKey = `-----BEGIN PRIVATE KEY-----\n${btoa(
-          String.fromCharCode(
-            ...new Uint8Array(
-              await crypto.subtle.exportKey("pkcs8", keyPair.privateKey),
-            ),
-          ),
-        ).replace(/(.{64})/g, "$1\n")}\n-----END PRIVATE KEY-----`;
-      } catch {
-        ztoolkit.log(
-          "ERROR: Something went wrong while generating a new key, try manually entering it in settings",
-        );
-      }
-    }
-
-    if (pemKey) {
-      setPref("privateKey", pemKey);
+    if (newApiKey) {
+      setPref("apiKey", newApiKey);
     }
   }
 }

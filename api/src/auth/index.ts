@@ -1,16 +1,22 @@
 import { createDb } from "@/db";
+import { apikeySchema } from "@/db/schema/apikey";
 import { organizationSchema } from "@/db/schema/organization";
+import { encrypt } from "@/db/schema/privatekey";
 import * as authSchema from "@/db/schema/user";
+import { signingKey } from "@/db/schema/user";
 import { sendEmail } from "@/email";
+import { generatePrivateKey } from "@/signing";
 import { isValidEmail } from "@/utils";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import {
+  apiKey,
   createAuthEndpoint,
   createAuthMiddleware,
   openAPI,
   organization,
 } from "better-auth/plugins";
+import { wrapKeyPEM } from "../../../frontend/src/lib/string-format";
 import { builtInProviders } from "./built-in-providers";
 import { customProviders } from "./custom-providers";
 import {
@@ -78,6 +84,28 @@ export const formatAllowedOrigins = (env: any) => {
 export const getAuth = (env: Env) => {
   const db = createDb(env);
   return betterAuth({
+    databaseHooks: {
+      user: {
+        create: {
+          async after(user) {
+            // Generate a new default signing key for the user
+            const keyToStore = wrapKeyPEM(await generatePrivateKey());
+
+            const encrypted = await encrypt(keyToStore, env.ENCRYPTION_KEY);
+
+            // Insert the signing key for the new user
+            if (db) {
+              await db.insert(signingKey).values({
+                userId: user.id,
+                name: "Science Live Generated Key",
+                encryptedKey: encrypted,
+                isDefault: true,
+              });
+            }
+          },
+        },
+      },
+    },
     baseURL:
       typeof env.API_URL === "string" ? env.API_URL + "/auth" : undefined,
     secret:
@@ -158,6 +186,15 @@ export const getAuth = (env: Env) => {
       openAPI(),
       customProviders(env),
       getSocialProviders(),
+      apiKey({
+        // Allows easy use of user/session in endpoints, and avoids double-incrementing the
+        // ratelimiting to manually verify session at client then use it. Downside is that now
+        // API keys technically allow full impersonation of the user which can be a security risk.
+        enableSessionForAPIKeys: true,
+        rateLimit: {
+          enabled: false,
+        },
+      }),
       organization({
         allowUserToCreateOrganization: false,
         cancelPendingInvitationsOnReInvite: true,
@@ -179,12 +216,14 @@ export const getAuth = (env: Env) => {
         // That would mitigate the potential for account takeover as suggested in the Better Auth docs, even though it is slightly inconvenient for the user.
         // This can be done by setting the custom providers config `prompt: "login"`.
         allowDifferentEmails: true,
+        encryptOAuthTokens: true,
+        trustedProviders: ["orcid"],
       },
     },
     trustedOrigins: formatAllowedOrigins(env),
     database: drizzleAdapter(db as any, {
       provider: "pg",
-      schema: { ...authSchema, ...organizationSchema },
+      schema: { ...authSchema, ...organizationSchema, ...apikeySchema },
     }),
   });
 };
