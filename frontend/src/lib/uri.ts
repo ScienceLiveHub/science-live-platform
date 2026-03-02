@@ -105,7 +105,10 @@ export function getNanopubSuffix(uri: string) {
 
 /**
  * Returns the the uri as a URL link that displays in Science Live Platform
- * If its already a Science Live prefixed link or if its not a nanopub URI, it returns the original sourceUri
+ * If its already a Science Live prefixed link or if its not a nanopub URI, it returns
+ * the original sourceUri.
+ *
+ * By default its a relative URL, use `relative = false` for absolute URL.
  */
 export function toScienceLiveNPUri(sourceUri: string, relative = true) {
   if (

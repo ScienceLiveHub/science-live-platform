@@ -453,7 +453,9 @@ export class NanopubStore extends N3Store {
     const creators = this.metadata.creators?.length
       ? this.metadata.creators
           .map((creator) =>
-            creator.href ? `[${creator.name}](${creator.href})` : creator.name,
+            creator.href
+              ? `[${creator.name}](${toScienceLiveNPUri(creator.href, false)})`
+              : creator.name,
           )
           .join(", ")
       : "Unknown";
@@ -544,9 +546,11 @@ export class NanopubStore extends N3Store {
     }
 
     if (term.termType === "Literal") {
-      const lang = term.language ? `@${term.language}` : "";
-      const dataType = term.datatype ? `^${term.datatype}` : "";
-      return `"${decodeURI(term.value)}"${lang + dataType}`;
+      // TODO: should we deal with different languages and data types?
+      // const lang = term.language ? `@${term.language}` : "";
+      // const dataType = term.datatype?.value ? `^${term.datatype.value}` : "";
+      // return `"${decodeURI(term.value)}"${lang + dataType}`;
+      return `"${decodeURI(term.value)}"`;
     }
 
     return term.value;
