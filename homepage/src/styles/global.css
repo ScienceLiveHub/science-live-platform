@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* These two directives ensure Tailwind v4 scans and includes CSS from components
+   included from outside the homepage workspace */
+@source "../../../frontend/src/components/ui";
+@source "../../../frontend/src/lib";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
