@@ -61,3 +61,4 @@ api/package-lock.json
 *.tsbuildinfo
 
 /zotero/site
+.Trash-1000

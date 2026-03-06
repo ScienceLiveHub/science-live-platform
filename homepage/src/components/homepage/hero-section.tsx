@@ -1,0 +1,66 @@
+import { Button } from "@/components/ui/button";
+import { Link } from "gatsby";
+import { ArrowRight, FlaskConical, Puzzle } from "lucide-react";
+
+export function HeroSection() {
+  return (
+    <section className="relative overflow-hidden bg-gradient-to-b from-background to-background/80 pt-20 sm:pt-32 pb-16">
+      {/* Background Pattern */}
+      <div className="absolute inset-0" />
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="mx-auto max-w-4xl text-center">
+          {/* Announcement Badge */}
+          <div className="mb-8 flex justify-center" />
+
+          {/* Main Headline */}
+          <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
+            Transform research into
+            <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              {" "}
+              connected knowledge{" "}
+            </span>
+            through stackable knowledge bricks
+          </h1>
+
+          {/* Subheading */}
+          <p className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground sm:text-xl">
+            Making scientific work FAIR: Findable, Accessible, Interoperable,
+            Reusable.
+          </p>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
+            <Button size="lg" className="text-base cursor-pointer" asChild>
+              <a href="https://github.com/ScienceLiveHub">
+                Documentation
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </a>
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="text-base cursor-pointer"
+              asChild
+            >
+              <a href="https://sciencelive4all.org/science-live-platform/">
+                <Puzzle />
+                Zotero Plugin
+              </a>
+            </Button>
+          </div>
+          <p className="mx-auto m-12 mb-5 max-w-xl text-lg text-muted-foreground sm:text-l italic flex items-center justify-center">
+            <FlaskConical className="mr-4" />
+            Full Knowledge bricks web interface coming soon.
+          </p>
+          <Button size="lg" className="text-base cursor-pointer" asChild>
+            <Link to="/np/demo">
+              Try Web Demo
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}
