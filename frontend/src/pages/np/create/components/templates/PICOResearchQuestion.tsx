@@ -117,6 +117,7 @@ export default function PICOResearchQuestion({
         interventionGroupDescription: "",
         comparatorGroupDescription: "",
         outcomeGroupDescription: "",
+        type: "Effectiveness" as const,
         ...prefilledData,
       },
       onSubmit: async ({ value }) => {
