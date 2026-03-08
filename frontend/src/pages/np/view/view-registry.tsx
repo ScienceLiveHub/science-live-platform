@@ -15,6 +15,7 @@ import { ViewAnnotateQuotation } from "./ViewAnnotateQuotation";
 import { ViewCitationWithCiTO } from "./ViewCitationWithCiTO";
 import { ViewCommentOnPaper } from "./ViewCommentOnPaper";
 import { ViewGeographicalCoverage } from "./ViewGeographicalCoverage";
+import { ViewResearchSoftware } from "./ViewResearchSoftware";
 
 /**
  * Registry mapping template URIs to their custom view components.
@@ -28,4 +29,5 @@ export const VIEW_COMPONENTS: Record<
   [TEMPLATE_URI.COMMENT_PAPER]: ViewCommentOnPaper,
   [TEMPLATE_URI.AIDA_SENTENCE]: ViewAIDASentence,
   [TEMPLATE_URI.GEO_COVERAGE]: ViewGeographicalCoverage,
+  [TEMPLATE_URI.RESEARCH_SOFTWARE]: ViewResearchSoftware,
 };

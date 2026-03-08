@@ -25,6 +25,8 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE",
   GEO_COVERAGE:
     "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao",
+  RESEARCH_SOFTWARE:
+    "https://w3id.org/np/RABBzVTxosLGT4YBCfdfNd6LyuOOTe2EVOTtWJMyOoZHk",
 };
 /**
  * Template metadata without React components
@@ -74,5 +76,14 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     icon: "📝",
     recommended: false,
     keywords: ["statement", "general", "rdf", "triple"],
+  },
+  [TEMPLATE_URI.RESEARCH_SOFTWARE]: {
+    name: "Research Software",
+    description:
+      "Describe research software with metadata including repository, supporting publications, and related resources.",
+    category: "Software",
+    icon: "💻",
+    recommended: true,
+    keywords: ["software", "code", "repository", "github", "tool"],
   },
 };
