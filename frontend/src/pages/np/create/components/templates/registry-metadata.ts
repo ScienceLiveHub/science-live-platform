@@ -25,6 +25,8 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE",
   GEO_COVERAGE:
     "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao",
+  DATASET:
+    "https://w3id.org/np/RAuVB37yyAuAlgusrUAoG84JI4_EfrEqIkpEZYDpSz3d8",
 };
 /**
  * Template metadata without React components
@@ -74,5 +76,14 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     icon: "📝",
     recommended: false,
     keywords: ["statement", "general", "rdf", "triple"],
+  },
+  [TEMPLATE_URI.DATASET]: {
+    name: "FAIR Dataset",
+    description:
+      "Describe a FAIR Digital Object dataset with metadata including creators, version, license, and access information.",
+    category: "Data",
+    icon: "📊",
+    recommended: true,
+    keywords: ["dataset", "data", "fair", "digital object", "zenodo"],
   },
 };

@@ -14,6 +14,7 @@ import { ViewAIDASentence } from "./ViewAIDASentence";
 import { ViewAnnotateQuotation } from "./ViewAnnotateQuotation";
 import { ViewCitationWithCiTO } from "./ViewCitationWithCiTO";
 import { ViewCommentOnPaper } from "./ViewCommentOnPaper";
+import { ViewDataset } from "./ViewDataset";
 import { ViewGeographicalCoverage } from "./ViewGeographicalCoverage";
 
 /**
@@ -28,4 +29,5 @@ export const VIEW_COMPONENTS: Record<
   [TEMPLATE_URI.COMMENT_PAPER]: ViewCommentOnPaper,
   [TEMPLATE_URI.AIDA_SENTENCE]: ViewAIDASentence,
   [TEMPLATE_URI.GEO_COVERAGE]: ViewGeographicalCoverage,
+  [TEMPLATE_URI.DATASET]: ViewDataset,
 };

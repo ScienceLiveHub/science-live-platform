@@ -8,6 +8,7 @@ import AIDASentence from "./AIDASentence";
 import AnnotateAPaperQuotation from "./AnnotateAPaperQuotation";
 import CitationWithCiTO from "./CitationWithCiTO";
 import CommentOnPaper from "./CommentOnPaper";
+import Dataset from "./Dataset";
 import DocumentGeographicalCoverage from "./DocumentGeographicalCoverage";
 import { TEMPLATE_URI } from "./registry-metadata";
 
@@ -29,6 +30,7 @@ export const TEMPLATE_COMPONENTS: Record<
   [TEMPLATE_URI.COMMENT_PAPER]: CommentOnPaper,
   [TEMPLATE_URI.AIDA_SENTENCE]: AIDASentence,
   [TEMPLATE_URI.GEO_COVERAGE]: DocumentGeographicalCoverage,
+  [TEMPLATE_URI.DATASET]: Dataset,
 };
 
 export const NanopubEditorOptionFields = [

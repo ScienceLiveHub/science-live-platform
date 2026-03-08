@@ -720,7 +720,12 @@ export function templateStatementsToFormedible(
     const statement = s as Statement;
 
     const makeFieldFrom = (part: "subject" | "predicate" | "object") => {
-      const v = termValue(statement[part] as unknown as RDFT.Term);
+      const term = statement[part] as unknown as RDFT.Term | undefined;
+      if (!term) {
+        // Skip statements with missing parts
+        return null;
+      }
+      const v = termValue(term);
       const objectField = fields.find((f) => f.id === v);
       let baseField: FieldConfig;
       if (objectField) {
@@ -755,7 +760,12 @@ export function templateStatementsToFormedible(
       makeFieldFrom("subject"),
       makeFieldFrom("predicate"),
       makeFieldFrom("object"),
-    ];
+    ].filter((f): f is FieldConfig => f !== null);
+
+    // Skip statements with no valid fields
+    if (formedibleFields.length === 0) {
+      continue;
+    }
 
     // If statement was detected as repeatable (a RepeatableStatement),
     // render it as an array field
