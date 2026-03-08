@@ -62,6 +62,9 @@ export default function PCCResearchQuestion({
         label: "Concept",
         placeholder: "Describe the core concept or phenomenon being examined",
         required: true,
+        section: {
+          title: "PCC Components",
+        },
       },
       {
         name: "contextDescription",
@@ -70,6 +73,9 @@ export default function PCCResearchQuestion({
         placeholder:
           "Describe the context or setting in which the review is conducted",
         required: true,
+        section: {
+          title: "PCC Components",
+        },
       },
       ...NanopubEditorOptionFields,
     ],

@@ -86,6 +86,9 @@ export default function PICOResearchQuestion({
         label: "Intervention",
         placeholder: "Describe the intervention or exposure being considered",
         required: true,
+        section: {
+          title: "PICO Components",
+        },
       },
       {
         name: "comparatorGroupDescription",
@@ -94,6 +97,9 @@ export default function PICOResearchQuestion({
         placeholder:
           "Describe the comparison or control group (if applicable)",
         required: true,
+        section: {
+          title: "PICO Components",
+        },
       },
       {
         name: "outcomeGroupDescription",
@@ -101,6 +107,9 @@ export default function PICOResearchQuestion({
         label: "Outcome",
         placeholder: "Describe the expected or measured outcome",
         required: true,
+        section: {
+          title: "PICO Components",
+        },
       },
       ...NanopubEditorOptionFields,
     ],
