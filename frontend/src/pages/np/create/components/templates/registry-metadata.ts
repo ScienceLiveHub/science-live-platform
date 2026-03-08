@@ -13,7 +13,7 @@ export interface NanopubTemplateMetadata {
   keywords?: string[];
 }
 
-/** Nanopub hash portion of each known template URI */
+/** Nanopub hash portion of each known template URI (current/latest version used for creation) */
 export const TEMPLATE_URI = {
   CITATION_CITO:
     "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo",
@@ -22,9 +22,20 @@ export const TEMPLATE_URI = {
   COMMENT_PAPER:
     "http://purl.org/np/RAVEpTdLrX5XrhNl_gnvTaBcjRRSDu_hhZix8gu2HO7jI",
   AIDA_SENTENCE:
-    "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE",
+    "https://w3id.org/np/RALmXhDw3rHcMveTgbv8VtWxijUHwnSqhCmtJFIPKWVaA",
   GEO_COVERAGE:
     "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao",
+};
+
+/**
+ * Legacy/previous versions of template URIs.
+ * Used for viewing nanopubs created with older template versions.
+ * Maps template key to array of legacy URIs.
+ */
+export const LEGACY_TEMPLATE_URIS: Partial<Record<keyof typeof TEMPLATE_URI, string[]>> = {
+  AIDA_SENTENCE: [
+    "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE",
+  ],
 };
 /**
  * Template metadata without React components
