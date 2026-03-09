@@ -3,7 +3,6 @@ import { MissingEmailDialog } from "./components/missing-email-dialog";
 import { Navbar01 } from "./components/ui/shadcn-io/navbar-01";
 import { Toaster } from "./components/ui/sonner";
 import AuthPage from "./pages/AuthPage";
-import Demo from "./pages/Demo";
 import EmailVerified from "./pages/EmailVerified";
 import { HomePage } from "./pages/homepage/page";
 import CreateNanopub from "./pages/np/create/CreateNanopub";
@@ -44,7 +43,6 @@ function App() {
           <Route path="/np/" element={<ViewNanopub />} />
           <Route path="/np/create" element={<CreateNanopub />} />
           <Route path="/np/create/:uri" element={<CreateNanopub />} />
-          <Route path="/np/demo" element={<Demo />} />
           <Route path="/email-verified" element={<EmailVerified />} />{" "}
         </Routes>
       </Providers>

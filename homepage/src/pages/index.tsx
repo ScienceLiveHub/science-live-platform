@@ -1,20 +1,20 @@
 import type { HeadFC, PageProps } from "gatsby";
 import * as React from "react";
 import { AboutSection } from "../components/homepage/about-section";
-import { CtaSection } from "../components/homepage/cta-section";
-import { FeaturesSection } from "../components/homepage/features-section";
 import { LandingFooter } from "../components/homepage/footer";
 import { HeroSection } from "../components/homepage/hero-section";
+import { Navbar } from "../components/homepage/navbar";
+import { RolesSection } from "../components/homepage/roles-section";
 import { TeamSection } from "../components/homepage/team-section";
 
 const IndexPage: React.FC<PageProps> = () => {
   return (
     <div>
+      <Navbar />
       <HeroSection />
-      <FeaturesSection />
+      <RolesSection />
       <AboutSection />
       <TeamSection />
-      <CtaSection />
       <LandingFooter />
     </div>
   );
