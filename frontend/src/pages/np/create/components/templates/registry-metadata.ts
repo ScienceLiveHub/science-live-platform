@@ -27,6 +27,8 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao",
   PICO_RESEARCH_QUESTION:
     "https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w",
+  PICO_RESEARCH_QUESTION_ALT:
+    "https://w3id.org/np/RAfZfE1gbUtc35W7xT12XTO0ptZwycN2-jj7Jow6COAoQ",
   PCC_RESEARCH_QUESTION:
     "https://w3id.org/np/RAmR-xqMgOq3oTJmOVDQFL2p5usID6zqRapizHy0UJb04",
 };
@@ -86,6 +88,23 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     category: "Research",
     icon: "🔬",
     recommended: true,
+    keywords: [
+      "pico",
+      "research",
+      "question",
+      "population",
+      "intervention",
+      "comparator",
+      "outcome",
+    ],
+  },
+  [TEMPLATE_URI.PICO_RESEARCH_QUESTION_ALT]: {
+    name: "PICO Research Question (Alternative)",
+    description:
+      "Define a research question using the PICO framework with Dublin Core vocabulary",
+    category: "Research",
+    icon: "🔬",
+    recommended: false,
     keywords: [
       "pico",
       "research",

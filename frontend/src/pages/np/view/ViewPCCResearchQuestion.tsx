@@ -79,8 +79,8 @@ function extractPCCData(store: NanopubStore): PCCData | null {
   const labelQuad = store.matchOne(subject, NS.RDFS("label"), null, assertionGraph);
   const label = labelQuad?.object.value || "PCC Review Question";
 
-  // Extract description (dc:description)
-  const descQuad = store.matchOne(subject, namedNode("http://purl.org/dc/elements/1.1/description"), null, assertionGraph);
+  // Extract description (dct:description - DC Terms)
+  const descQuad = store.matchOne(subject, NS.DCT("description"), null, assertionGraph);
   const description = descQuad?.object.value;
 
   // Helper to extract component description
