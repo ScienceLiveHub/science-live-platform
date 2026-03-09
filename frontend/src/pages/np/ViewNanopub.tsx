@@ -5,6 +5,7 @@ import { useNanopub } from "@/hooks/use-nanopub";
 import { FileCode } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import ViewerDemo from "../ViewerDemo";
 import { NanopubViewer } from "./create/components/NanopubViewer";
 
 /**
@@ -91,7 +92,9 @@ export default function ViewNanopub() {
           )}
         </>
       ) : (
-        <>Load a URI above.</>
+        <>
+          <ViewerDemo />
+        </>
       )}
     </main>
   );

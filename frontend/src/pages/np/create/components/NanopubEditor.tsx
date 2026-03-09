@@ -19,6 +19,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
@@ -43,6 +44,7 @@ import {
   KeyRound,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import AnyStatementTemplate from "./AnyStatementTemplate";
 import { NanopubViewer } from "./NanopubViewer";
@@ -59,6 +61,7 @@ export interface NanopubEditorProps {
     privateKey: string;
     keyInfo?: string;
   } | null;
+  identityPending?: boolean;
 
   /**
    * The URI of the template to use.
@@ -175,6 +178,7 @@ export function TemplateCombobox({
 
 export default function NanopubEditor({
   identity,
+  identityPending,
   templateUri,
   onTemplateUriChange,
   prefilledData,
@@ -346,7 +350,11 @@ export default function NanopubEditor({
   // Compute identity issues for profile widget
   const identityIssues: string[] = [];
   if (!identity) {
-    identityIssues.push("No profile loaded");
+    if (embedded) {
+      identityIssues.push("No profile loaded, check settings");
+    } else {
+      identityIssues.push("Sign in to publish");
+    }
   } else {
     if (!identity.orcid) {
       identityIssues.push("ORCID not linked");
@@ -382,63 +390,87 @@ export default function NanopubEditor({
       {showProfile && (
         <Card className="border-muted py-3">
           <CardContent className="">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex flex-col font-bold pr-6">
-                  Publishing as:
+            {identityPending ? (
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col font-bold pr-6">
+                    Publishing as:
+                  </div>
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-3 w-20" />
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium">
-                    {identity?.name || "Unknown User"}
-                  </span>
-                </div>
-                {identity?.orcid && (
-                  <a
-                    href={identity.orcid}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1"
-                  >
-                    {extractOrcidId(identity.orcid)}
-                  </a>
-                )}
-                {identity?.privateKey && (
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <KeyRound className="text-muted-foreground" size={14} />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{identity.keyInfo || "<Unnamed key>"}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
+                <Skeleton className="h-4 w-28" />
               </div>
-              <div className="flex items-center gap-2">
-                {hasIdentityIssues ? (
-                  <div className="flex items-center gap-2 text-amber-500">
-                    <AlertTriangle className="h-4 w-4" />
-                    <span className="text-xs">
-                      {identityIssues.join(" • ")}
+            ) : (
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col font-bold pr-6">
+                    Publishing as:
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">
+                      {identity?.name || "-"}
                     </span>
-                    {orcidLinkAction && !identity?.orcid && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-6 text-xs text-foreground"
-                        onClick={orcidLinkAction}
-                      >
-                        Link
-                      </Button>
-                    )}
                   </div>
-                ) : (
-                  <div className="flex items-center gap-1 text-green-500">
-                    <CheckCircle2 className="h-4 w-4" />
-                    <span className="text-xs">Ready to publish</span>
-                  </div>
-                )}
+                  {identity?.orcid && (
+                    <a
+                      href={identity.orcid}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1"
+                    >
+                      {extractOrcidId(identity.orcid)}
+                    </a>
+                  )}
+                  {identity?.privateKey && (
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <KeyRound className="text-muted-foreground" size={14} />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{identity.keyInfo || "<Unnamed key>"}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  {hasIdentityIssues ? (
+                    <div className="flex items-center gap-2 text-amber-500">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span className="text-xs">
+                        {identityIssues.join(" • ")}
+                      </span>
+                      {orcidLinkAction && identity && !identity.orcid && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-6 text-xs text-foreground"
+                          onClick={orcidLinkAction}
+                        >
+                          Link
+                        </Button>
+                      )}
+                      {identity && !identity.orcid && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-6 text-xs text-foreground"
+                        >
+                          <Link to="/settings/advanced" target="_blank">
+                            Add Key
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 text-green-500">
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span className="text-xs">Ready to publish</span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       )}
