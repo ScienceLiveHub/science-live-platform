@@ -9,7 +9,10 @@
 
 import { ComponentType } from "react";
 import { CustomViewerProps } from "../create/components/NanopubViewer";
-import { TEMPLATE_URI } from "../create/components/templates/registry-metadata";
+import {
+  LEGACY_TEMPLATE_URIS,
+  TEMPLATE_URI,
+} from "../create/components/templates/registry-metadata";
 import { ViewAIDASentence } from "./ViewAIDASentence";
 import { ViewAnnotateQuotation } from "./ViewAnnotateQuotation";
 import { ViewCitationWithCiTO } from "./ViewCitationWithCiTO";
@@ -17,6 +20,7 @@ import { ViewCommentOnPaper } from "./ViewCommentOnPaper";
 import { ViewGeographicalCoverage } from "./ViewGeographicalCoverage";
 import { ViewPCCResearchQuestion } from "./ViewPCCResearchQuestion";
 import { ViewPICOResearchQuestion } from "./ViewPICOResearchQuestion";
+import { ViewPICOResearchQuestionLegacy } from "./ViewPICOResearchQuestionLegacy";
 
 /**
  * Registry mapping template URIs to their custom view components.
@@ -31,6 +35,9 @@ export const VIEW_COMPONENTS: Record<
   [TEMPLATE_URI.AIDA_SENTENCE]: ViewAIDASentence,
   [TEMPLATE_URI.GEO_COVERAGE]: ViewGeographicalCoverage,
   [TEMPLATE_URI.PICO_RESEARCH_QUESTION]: ViewPICOResearchQuestion,
-  [TEMPLATE_URI.PICO_RESEARCH_QUESTION_ALT]: ViewPICOResearchQuestion,
   [TEMPLATE_URI.PCC_RESEARCH_QUESTION]: ViewPCCResearchQuestion,
+
+  // Legacy templates — remove when no longer needed
+  [LEGACY_TEMPLATE_URIS.PICO_RESEARCH_QUESTION![0]]:
+    ViewPICOResearchQuestionLegacy,
 };

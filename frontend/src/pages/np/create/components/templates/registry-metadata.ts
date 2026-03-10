@@ -27,11 +27,23 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao",
   PICO_RESEARCH_QUESTION:
     "https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w",
-  PICO_RESEARCH_QUESTION_ALT:
-    "https://w3id.org/np/RAfZfE1gbUtc35W7xT12XTO0ptZwycN2-jj7Jow6COAoQ",
   PCC_RESEARCH_QUESTION:
     "https://w3id.org/np/RAmR-xqMgOq3oTJmOVDQFL2p5usID6zqRapizHy0UJb04",
 };
+
+/**
+ * Legacy/previous versions of template URIs.
+ * Used for viewing nanopubs created with older template versions.
+ * Maps template key to array of legacy URIs.
+ */
+export const LEGACY_TEMPLATE_URIS: Partial<
+  Record<keyof typeof TEMPLATE_URI, string[]>
+> = {
+  PICO_RESEARCH_QUESTION: [
+    "https://w3id.org/np/RAfZfE1gbUtc35W7xT12XTO0ptZwycN2-jj7Jow6COAoQ",
+  ],
+};
+
 /**
  * Template metadata without React components
  * Non-React workspaces (e.g., Zotero) should import this directly
@@ -98,24 +110,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "outcome",
     ],
   },
-  [TEMPLATE_URI.PICO_RESEARCH_QUESTION_ALT]: {
-    name: "PICO Research Question (Alternative)",
-    description:
-      "Define a research question using the PICO framework with Dublin Core vocabulary",
-    category: "Research",
-    icon: "🔬",
-    recommended: false,
-    keywords: [
-      "pico",
-      "research",
-      "question",
-      "population",
-      "intervention",
-      "comparator",
-      "outcome",
-    ],
-  },
-  [TEMPLATE_URI.PCC_RESEARCH_QUESTION]: {
+[TEMPLATE_URI.PCC_RESEARCH_QUESTION]: {
     name: "PCC Research Question",
     description:
       "Define a review question using the PCC framework (Population, Concept, Context)",
