@@ -177,7 +177,9 @@ export function NanopubOverview({
                     target="_blank"
                     rel="noreferrer"
                   >
-                    {decodeURI(store.findInternalLabel(c.uri!) || "")}
+                    {decodeURIComponent(
+                      (store.findInternalLabel(c.uri!) || "").replaceAll("+", " "),
+                    )}
                   </a>
                 ))}
               </span>

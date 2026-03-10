@@ -66,7 +66,9 @@ function extractAIDASentence(store: NanopubStore): AIDASentenceData | null {
   try {
     const aidaPrefix = "http://purl.org/aida/";
     if (sentenceUri.startsWith(aidaPrefix)) {
-      sentence = decodeURIComponent(sentenceUri.substring(aidaPrefix.length));
+      sentence = decodeURIComponent(
+        sentenceUri.substring(aidaPrefix.length).replaceAll("+", " "),
+      );
     }
   } catch {
     // Keep the raw URI if decoding fails
