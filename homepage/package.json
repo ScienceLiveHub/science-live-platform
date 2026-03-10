@@ -13,7 +13,9 @@
     "build": "gatsby build",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "deploy": "GATSBY_PLATFORM_URL=https://platform.sciencelive4all.org/ gatsby build && wrangler deploy",
+    "deploy-dev": "GATSBY_PLATFORM_URL=https://platform-dev.sciencelive4all.org/ gatsby build && wrangler deploy -c wrangler-dev.jsonc"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -40,6 +42,7 @@
     "@types/node": "^25.3.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "wrangler": "^4.69.0"
   }
 }

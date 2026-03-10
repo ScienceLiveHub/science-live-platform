@@ -1,9 +1,13 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Command,
   CommandEmpty,
@@ -38,6 +42,7 @@ import {
   AlertTriangle,
   BookCheck,
   CheckCircle2,
+  ChevronRight,
   ChevronsUpDown,
   ExternalLink,
   FilePlus,
@@ -474,94 +479,100 @@ export default function NanopubEditor({
           </CardContent>
         </Card>
       )}
-      <Card>
-        <CardContent>
-          {templateUri ? (
-            // TEMPLATE SELECTED
-            <>
-              {isPredefined && TemplateComp && !isAdvancedMode ? (
-                <>
-                  <div className="font-bold inline-flex">
-                    {POPULAR_TEMPLATES[templateUri].name}{" "}
-                    <a
-                      href={toScienceLiveNPUri(templateUri)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-2 text-blue-400"
-                      title="View source template"
-                    >
-                      <ExternalLink size={20} />
-                    </a>
-                  </div>
-                  <div className="my-6">
-                    {POPULAR_TEMPLATES[templateUri].description}
-                  </div>
-                  <div className="my-8 text-muted-foreground">
-                    {POPULAR_TEMPLATES[templateUri].moreDescription}
-                  </div>
-                  <TemplateComp
-                    submit={generateNanopub}
-                    prefilledData={{
-                      ...(prefilledData ?? {}),
-                      isExampleNanopub: demoMode,
-                    }}
-                  />
-                </>
-              ) : (
-                <AnyStatementTemplate
-                  templateUri={templateUri}
+      {templateUri ? (
+        // TEMPLATE SELECTED
+        <Card>
+          <CardContent>
+            {isPredefined && TemplateComp && !isAdvancedMode ? (
+              <>
+                <div className="font-bold inline-flex">
+                  {POPULAR_TEMPLATES[templateUri].name}{" "}
+                  <a
+                    href={toScienceLiveNPUri(templateUri)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-2 text-blue-400"
+                    title="View source template"
+                  >
+                    <ExternalLink size={20} />
+                  </a>
+                </div>
+                <div className="my-6">
+                  {POPULAR_TEMPLATES[templateUri].description}
+                </div>
+                <div className="my-8 text-muted-foreground">
+                  {POPULAR_TEMPLATES[templateUri].moreDescription}
+                </div>
+                <TemplateComp
                   submit={generateNanopub}
                   prefilledData={{
                     ...(prefilledData ?? {}),
                     isExampleNanopub: demoMode,
                   }}
                 />
-              )}
-            </>
-          ) : (
-            // NO TEMPLATE SELECTED
-            <>
+              </>
+            ) : (
+              <AnyStatementTemplate
+                templateUri={templateUri}
+                submit={generateNanopub}
+                prefilledData={{
+                  ...(prefilledData ?? {}),
+                  isExampleNanopub: demoMode,
+                }}
+              />
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        // NO TEMPLATE SELECTED
+        <>
+          <Card>
+            <CardContent>
               <h1 className="text-lg font-semibold mb-8">
                 Select a Template to use
               </h1>
 
               <div className="gap-2 w-full md:w-auto space-y-4">
-                <Label>
-                  Use a predefined template:
-                  <Badge variant="default">Recommended</Badge>
-                </Label>{" "}
+                <Label>Use a predefined template:</Label>{" "}
                 <TemplateCombobox
                   setSelection={(value) => {
                     onTemplateUriChange?.(value);
                   }}
                 />
               </div>
-              <div className="space-y-4">
-                <div>
-                  <Label className="m-10" htmlFor="template-uri">
-                    OR...
-                  </Label>
-                  <Label className="my-6" htmlFor="template-uri">
-                    Enter any nanopublication template URI{" "}
-                    <Badge variant="secondary">Advanced</Badge>
-                  </Label>
-                  <Input
-                    id="template-uri"
-                    type="url"
-                    value={inputUri ?? ""}
-                    onChange={(e) => setInputUri(e.target.value)}
-                    placeholder="https://w3id.org/np/..."
-                    className="w-full"
-                  />
-                </div>
-                <Button disabled={!inputUri} onClick={handleLoadCustomTemplate}>
-                  Load Template
-                </Button>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+              <Collapsible className="mt-6">
+                <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors data-[state=open]:[&>svg]:rotate-90">
+                  <ChevronRight className="h-4 w-4 transition-transform duration-100" />
+                  Custom Template
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-4 mt-4">
+                  <div>
+                    <Label className="my-6" htmlFor="template-uri">
+                      Use a custom template by entering the URI{" "}
+                    </Label>
+                  </div>
+                  <div className="flex">
+                    <Input
+                      id="template-uri"
+                      type="url"
+                      value={inputUri ?? ""}
+                      onChange={(e) => setInputUri(e.target.value)}
+                      placeholder="https://w3id.org/np/..."
+                      className="w-full mr-2"
+                    />
+                    <Button
+                      disabled={!inputUri}
+                      onClick={handleLoadCustomTemplate}
+                    >
+                      Load Template
+                    </Button>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </CardContent>
+          </Card>
+        </>
+      )}
       {/* Generated RDF display */}
       {generatedRdf && (
         <div className="mt-20 space-y-6" ref={scrollPreviewRef}>

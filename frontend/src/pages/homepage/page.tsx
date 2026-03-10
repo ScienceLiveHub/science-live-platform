@@ -10,13 +10,14 @@ import {
   Eye,
   FileStack,
   List,
+  MessageCircleCheck,
   Rss,
   Search,
   Sparkles,
   TrendingUp,
   University,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export function HomePage() {
   const { data: session } = authClient.useSession();
@@ -54,14 +55,14 @@ export function HomePage() {
         )}
       </section>
 
-      {/* Trending Nanopublications Section */}
+      {/* Featured Nanopublications Section */}
       <section className="flex flex-col gap-4">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-primary" />
-          <h2 className="text-2xl font-semibold">Trending Nanopublications</h2>
+          <h2 className="text-2xl font-semibold">Featured Nanopublications</h2>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Placeholder cards for trending nanopubs */}
+          {/* Placeholder cards for Featured nanopubs */}
           {[1, 2, 3].map((i) => (
             <Card key={i} className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-2">
@@ -88,23 +89,25 @@ export function HomePage() {
         </div>
         <div className="flex flex-wrap gap-2">
           {[
-            "Machine Learning",
-            "Climate Science",
-            "Genomics",
+            "Machine Vision",
+            "Artificial Intelligence",
+            "Climate",
             "Quantum Computing",
-            "Neuroscience",
+            "Nanotechnology",
             "Renewable Energy",
             "Drug Discovery",
             "Biodiversity",
           ].map((topic) => (
-            <Button
-              key={topic}
-              variant="outline"
-              size="sm"
-              className="cursor-pointer"
-            >
-              {topic}
-            </Button>
+            <Link to={`/np/?q=${topic}`}>
+              <Button
+                key={topic}
+                variant="outline"
+                size="sm"
+                className="cursor-pointer"
+              >
+                {topic}
+              </Button>
+            </Link>
           ))}
         </div>
       </section>
@@ -162,6 +165,48 @@ export function HomePage() {
                 Generate papers from verified knowledge graph
               </li>
             </ul>
+          </CardContent>
+        </Card>
+      </section>
+      {/* Feedback Section */}
+      <section className="flex flex-col gap-4">
+        <Card className="border-dashed">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <MessageCircleCheck className="h-5 w-5 text-primary" />
+              Feedback and Suggestions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>
+              Post an issue on{" "}
+              <a
+                href="https://github.com/ScienceLiveHub/science-live-platform"
+                className="text-primary"
+                target="_blank"
+              >
+                Github
+              </a>{" "}
+              or{" "}
+              <a
+                href="mailto:contact@sciencelive4all.org"
+                className="text-primary"
+              >
+                Email us
+              </a>
+              .
+            </p>
+            <p>
+              Alternatively,{" "}
+              <a
+                href="https://calendly.com/anne-fouilloux/30min"
+                className="text-primary"
+                target="_blank"
+              >
+                Book a video call
+              </a>{" "}
+              to discuss in detail.
+            </p>
           </CardContent>
         </Card>
       </section>

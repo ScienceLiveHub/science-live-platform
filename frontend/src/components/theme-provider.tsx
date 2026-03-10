@@ -29,7 +29,6 @@ export function ThemeProvider({
 }: ThemeProviderProps) {
   // SSR-safe: start with defaultTheme, then sync with localStorage on mount
   const [theme, setTheme] = useState<Theme>(defaultTheme);
-  const [mounted, setMounted] = useState(false);
 
   // Read from localStorage after mount (client-side only)
   useEffect(() => {
@@ -37,7 +36,6 @@ export function ThemeProvider({
     if (stored) {
       setTheme(stored);
     }
-    setMounted(true);
   }, [storageKey]);
 
   // Apply theme to document element
