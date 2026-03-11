@@ -171,7 +171,7 @@ export class NanopubTemplate extends NanopubStore {
     },
     privateKey: string,
   ) {
-    const baseUri = SCIENCELIVE_NANOPUB_URI;
+    const baseUri = `${SCIENCELIVE_NANOPUB_URI}~~~ARTIFACTCODE~~~/`;
     const newSubUri = `${baseUri}`;
 
     // Create a new store for the generated nanopub

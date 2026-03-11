@@ -126,7 +126,7 @@ export default function ViewNanopub() {
         className={`flex flex-col items-center ${!hasActiveContent ? "justify-center flex-1" : "pt-8"}`}
       >
         {!hasActiveContent && (
-          <h1 className="flex items-center text-xl text-muted-foreground font-black mb-8">
+          <h1 className="flex items-center text-xl text-muted-foreground font-black my-8">
             <FileCode className="mr-4" />
             BROWSE NANOPUBLICATIONS
           </h1>

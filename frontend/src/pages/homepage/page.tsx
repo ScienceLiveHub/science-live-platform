@@ -62,7 +62,7 @@ export function HomePage() {
           <h2 className="text-2xl font-semibold">Featured Nanopublications</h2>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Placeholder cards for Featured nanopubs */}
+          {/* Placeholder cards for Featured nanopubs
           {[1, 2, 3].map((i) => (
             <Card key={i} className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-2">
@@ -77,7 +77,8 @@ export function HomePage() {
                 </p>
               </CardContent>
             </Card>
-          ))}
+          ))} */}
+          Coming soon...
         </div>
       </section>
 
@@ -197,15 +198,14 @@ export function HomePage() {
               .
             </p>
             <p>
-              Alternatively,{" "}
+              To discuss in detail, book a{" "}
               <a
                 href="https://calendly.com/anne-fouilloux/30min"
                 className="text-primary"
                 target="_blank"
               >
-                Book a video call
-              </a>{" "}
-              to discuss in detail.
+                Video call
+              </a>
             </p>
           </CardContent>
         </Card>

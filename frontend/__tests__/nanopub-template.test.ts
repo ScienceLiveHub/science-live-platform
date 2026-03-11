@@ -5,12 +5,26 @@ import { NanopubStore } from "../src/lib/nanopub-store";
 import { NanopubTemplate } from "../src/lib/nanopub-template";
 import { EXAMPLE_privateKey } from "../src/lib/uri";
 
-async function expectSerializedToMatch(result: string, expected: string) {
-  // Compare serialized versions to ensure quads match
-  const resultStore = await NanopubStore.loadString(result);
-  const fixtureStore = await NanopubStore.loadString(expected);
-  expect(resultStore.serialize()).toMatch(fixtureStore.serialize());
-}
+expect.extend({
+  async toMatchSerializedTrig(received: string, expected: string) {
+    // Compare serialized versions to ensure quads match
+    const receivedSerialized = (
+      await NanopubStore.loadString(received)
+    ).serialize();
+    const expectedSerialized = (
+      await NanopubStore.loadString(expected)
+    ).serialize();
+    // expect(resultStore.serialize()).toMatch(fixtureStore.serialize());
+
+    return {
+      // do not alter your "pass" based on isNot. Vitest does it for you
+      pass: receivedSerialized === expectedSerialized,
+      message: () => "Serialized TriG did not match.",
+      actual: receivedSerialized,
+      expected: expectedSerialized,
+    };
+  },
+});
 
 describe("NanopubTemplate.applyTemplate", () => {
   const fixturesSets: { input: string; params: any; outputs: string[] }[] = [
@@ -100,8 +114,16 @@ describe("NanopubTemplate.applyTemplate", () => {
           dataset: "https://abcdefg.oreo/ds1",
           publication: "https://en.wikipedia.org/wiki/Auckland_volcanic_field",
         },
+        {
+          aida: "This is a test to check for bugs.",
+          project:
+            "https://w3id.org/sciencelive/np/RAbcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN_123",
+        },
       ],
-      outputs: ["RA4fmfVF-applyTemplate_expected_output.trig"],
+      outputs: [
+        "RA4fmfVF-applyTemplate_expected_output_1.trig",
+        "RA4fmfVF-applyTemplate_expected_output_2.trig",
+      ],
     },
     {
       input: "RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao.trig",
@@ -200,7 +222,9 @@ describe("NanopubTemplate.applyTemplate", () => {
       EXAMPLE_privateKey,
     );
 
-    expectSerializedToMatch(result, loadedFixtures[fixturesSets[0].outputs[0]]);
+    await expect(result).toMatchSerializedTrig(
+      loadedFixtures[fixturesSets[0].outputs[0]],
+    );
   });
 
   it("should emit a literal object correctly", async () => {
@@ -231,7 +255,9 @@ describe("NanopubTemplate.applyTemplate", () => {
       EXAMPLE_privateKey,
     );
 
-    expectSerializedToMatch(result, loadedFixtures[fixturesSets[0].outputs[1]]);
+    await expect(result).toMatchSerializedTrig(
+      loadedFixtures[fixturesSets[0].outputs[1]],
+    );
   });
 
   it("should correctly output placeholder prefixes, AutoEscapeUriPlaceholder and IntroducedResource", async () => {
@@ -245,7 +271,25 @@ describe("NanopubTemplate.applyTemplate", () => {
       EXAMPLE_privateKey,
     );
 
-    expectSerializedToMatch(result, loadedFixtures[fixturesSets[2].outputs[0]]);
+    await expect(result).toMatchSerializedTrig(
+      loadedFixtures[fixturesSets[2].outputs[0]],
+    );
+  });
+
+  it("should correctly output nanopub URIs in subject", async () => {
+    const template = await NanopubTemplate.loadString(
+      loadedFixtures[fixturesSets[2].input],
+    );
+
+    const { signedRdf: result } = await template.generateNanopublication(
+      fixturesSets[2].params[1],
+      pubdata,
+      EXAMPLE_privateKey,
+    );
+
+    await expect(result).toMatchSerializedTrig(
+      loadedFixtures[fixturesSets[2].outputs[1]],
+    );
   });
 
   it("should correctly handle LocalResource and exclude optional statements where possible", async () => {
@@ -259,6 +303,8 @@ describe("NanopubTemplate.applyTemplate", () => {
       EXAMPLE_privateKey,
     );
 
-    expectSerializedToMatch(result, loadedFixtures[fixturesSets[3].outputs[0]]);
+    await expect(result).toMatchSerializedTrig(
+      loadedFixtures[fixturesSets[3].outputs[0]],
+    );
   });
 });
