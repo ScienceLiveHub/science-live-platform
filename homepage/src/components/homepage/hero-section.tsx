@@ -1,30 +1,17 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
-import { ArrowRight, FlaskConical, Puzzle } from "lucide-react";
-import { Link } from "react-router-dom";
-// import { Badge } from "@/components/ui/badge";
+import { Link } from "gatsby";
+import { ArrowRight, MailPlus, Puzzle } from "lucide-react";
 
 export function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-background to-background/80 pt-20 sm:pt-32 pb-16">
       {/* Background Pattern */}
-      <div className="absolute inset-0">
-        {/* Dot pattern overlay using reusable component */}
-        {/* <DotPattern className="opacity-100" size="md" fadeStyle="ellipse" /> */}
-      </div>
+      <div className="absolute inset-0" />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="mx-auto max-w-4xl text-center">
           {/* Announcement Badge */}
-          <div className="mb-8 flex justify-center">
-            {/* <Badge variant="outline" className="px-4 py-2 border-foreground">
-              <Star className="w-3 h-3 mr-2 fill-current" />
-              New: Premium Template Collection
-              <ArrowRight className="w-3 h-3 ml-2" />
-            </Badge> */}
-          </div>
-
+          <div className="mb-8 flex justify-center" />
           {/* Main Headline */}
           <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
             Transform research into
@@ -34,43 +21,62 @@ export function HeroSection() {
             </span>
             through stackable knowledge bricks
           </h1>
-
           {/* Subheading */}
           <p className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground sm:text-xl">
             Making scientific work FAIR: Findable, Accessible, Interoperable,
             Reusable.
           </p>
-
           {/* CTA Buttons */}
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-            <Button size="lg" className="text-base cursor-pointer" asChild>
-              <a href="https://github.com/ScienceLiveHub">
-                Documentation
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
             <Button
               variant="outline"
               size="lg"
               className="text-base cursor-pointer"
               asChild
             >
-              <a href="https://sciencelive4all.org/science-live-platform/">
-                <Puzzle />
-                Zotero Plugin
+              <a href="https://github.com/ScienceLiveHub">
+                <MailPlus />
+                Join our list
               </a>
             </Button>
           </div>
           <p className="mx-auto m-12 mb-5 max-w-xl text-lg text-muted-foreground sm:text-l italic flex items-center justify-center">
-            <FlaskConical className="mr-4" />
-            Full Knowledge bricks web interface coming soon.
+            Try it now on the web, or use the Zotero plugin.
           </p>
           <Button size="lg" className="text-base cursor-pointer" asChild>
             <Link to="/np/demo">
-              Try Web Demo
-              <ArrowRight className="ml-2 h-4 w-4" />
+              Web Platform
+              <ArrowRight />
             </Link>
           </Button>
+          <br />
+          <br />
+          <Button
+            variant="outline"
+            size="lg"
+            className="text-base cursor-pointer"
+            asChild
+          >
+            <a href="https://sciencelive4all.org/science-live-platform/">
+              <Puzzle />
+              Zotero Plugin
+            </a>
+          </Button>
+
+          <div className="mt-16 mx-auto max-w-4xl">
+            <div
+              className="relative w-full"
+              style={{ paddingBottom: "56.25%" }}
+            >
+              <iframe
+                className="absolute inset-0 w-full h-full rounded-lg shadow-lg"
+                src="https://www.youtube.com/embed/KBL9kcTPYRA"
+                title="Science Live Platform Video"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          </div>
         </div>
       </div>
     </section>

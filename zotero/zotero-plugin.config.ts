@@ -1,10 +1,7 @@
 import { defineConfig } from "zotero-plugin-scaffold";
 import pkg from "./package.json";
 
-const server =
-  process.env.API_URL && process.env.NODE_ENV !== "production"
-    ? process.env.API_URL
-    : "https://api.sciencelive4all.org";
+const server = process.env.API_URL || "https://api.sciencelive4all.org";
 
 export default defineConfig({
   source: ["src", "addon"],

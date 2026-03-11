@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -10,15 +8,19 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Logo } from "@/components/ui/shadcn-io/navbar-01";
-import { GitHubIcon, LinkedInIcon } from "@daveyplate/better-auth-ui";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail } from "lucide-react";
+import { Github, Linkedin, Mail } from "lucide-react";
+import * as React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+// Inline Logo component (extracted from frontend navbar to avoid heavy auth deps)
+const Logo = () => {
+  return <img src="/favicon.png" alt="SL" width="32px" className="m-3" />;
+};
+
 const newsletterSchema = z.object({
-  email: z.email({
+  email: z.string().email({
     message: "Please enter a valid email address.",
   }),
 });
@@ -30,7 +32,7 @@ const footerLinks = {
     { name: "Nanopublications", href: "http://nanopub.org/" },
   ],
   contact: [
-    { name: "Email", href: "mailt:contact@sciencelive4all.org" },
+    { name: "Email", href: "mailto:contact@sciencelive4all.org" },
     { name: "Book a Call", href: "https://calendly.com/anne-fouilloux/30min" },
     { name: "LinkedIn", href: "https://www.linkedin.com/company/sciencelive" },
   ],
@@ -40,16 +42,16 @@ const socialLinks = [
   {
     name: "GitHub",
     href: "https://github.com/ScienceLiveHub",
-    icon: GitHubIcon,
+    icon: Github,
   },
   {
     name: "LinkedIn",
     href: "https://www.linkedin.com/company/sciencelive",
-    icon: LinkedInIcon,
+    icon: Linkedin,
   },
   {
     name: "Email",
-    href: "mailt:contact@sciencelive4all.org",
+    href: "mailto:contact@sciencelive4all.org",
     icon: Mail,
   },
 ];
@@ -63,9 +65,7 @@ export function LandingFooter() {
   });
 
   function onSubmit(values: z.infer<typeof newsletterSchema>) {
-    // Here you would typically send the email to your newsletter service
     console.log(values);
-    // Show success message and reset form
     form.reset();
   }
 
@@ -116,6 +116,7 @@ export function LandingFooter() {
               <a
                 href="https://sciencelive4all.org/"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center space-x-2 cursor-pointer"
               >
                 <Logo />
