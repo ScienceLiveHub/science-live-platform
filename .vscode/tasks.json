@@ -52,6 +52,17 @@
       "problemMatcher": []
     },
     {
+      "label": "homepage",
+      "type": "shell",
+      "command": "npm run -w homepage develop",
+      "icon": {
+        "id": "globe"
+      },
+      "isBackground": true,
+      "detail": "The Science Live homepage",
+      "problemMatcher": []
+    },
+    {
       "label": "webhook",
       "type": "shell",
       "command": "bash -c \"while true; do lt -p 3001 -s sweet-poems-cover --print-requests; sleep 1; done\"",

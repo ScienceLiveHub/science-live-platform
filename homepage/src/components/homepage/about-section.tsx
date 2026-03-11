@@ -1,7 +1,6 @@
-"use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "gatsby";
 import { Check, File, FileInput, Microscope, UserCircle } from "lucide-react";
-import { NavLink } from "react-router-dom";
 
 const items = [
   {
@@ -38,14 +37,13 @@ export function AboutSection({ hideTitle }: { hideTitle?: boolean }) {
                 What are Nanopublications?
               </h2>
             )}
-            {/* <h3 className="mb-4"> */}
             <p className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground sm:text-xl">
               Nanopublications are the smallest units of publishable
               information. <br /> Each nanopublication is:
             </p>
             <ul role="list" className="space-y-3">
               {items.map((feature) => (
-                <li className="flex items-center gap-3">
+                <li key={feature.label} className="flex items-center gap-3">
                   <Check
                     className="text-muted-foreground size-4 flex-shrink-0"
                     strokeWidth={2.5}
@@ -106,12 +104,12 @@ export function AboutSection({ hideTitle }: { hideTitle?: boolean }) {
         {!hideTitle && (
           <div className="flex items-center">
             <FileInput className="mr-2" /> Example nanopublication:
-            <NavLink
+            <Link
               to="/np/?uri=https://w3id.org/np/RAuoXvJWbbzZsFslswYaajgjeEl-040X6SCQFXHfVtjf0#Garfield"
               className="text-purple-500 hover:underline ml-3"
             >
               Garfield
-            </NavLink>
+            </Link>
           </div>
         )}
       </div>

@@ -21,7 +21,10 @@
   "homepage": "https://sciencelive4all.org/science-live-platform/",
   "scripts": {
     "start": "npm run build:embedded-css && zotero-plugin serve",
-    "build": "npm run build:embedded-css && zotero-plugin build && tsc --noEmit",
+    "dev": "npm run build:embedded-css && API_URL=http://localhost:3001 zotero-plugin dev",
+    "start-dev": "npm run build:embedded-css && API_URL=https://api-dev.sciencelive4all.org zotero-plugin dev",
+    "build": "npm run build:embedded-css && zotero-plugin build --dist dist && tsc --noEmit",
+    "build-dev": "npm run build:embedded-css && API_URL=https://api-dev.sciencelive4all.org zotero-plugin build && tsc --noEmit",
     "build:embedded-css": "cd ../frontend && npm run build:embedded-css && cp ./dist-embedded-css/sciencelive.css ../zotero/addon/content/styles/sciencelive.css",
     "lint:check": "prettier --check . && eslint .",
     "lint:fix": "prettier --write . && eslint . --fix",
@@ -30,23 +33,23 @@
     "update-deps": "npm update --save"
   },
   "dependencies": {
-    "@nanopub/nanopub-js": "^0.1.0",
+    "@nanopub/nanopub-js": "file:../../nanopub-js",
     "showdown": "^2.1.0",
     "zotero-plugin-toolkit": "^5.1.2"
   },
   "devDependencies": {
     "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^25.3.2",
+    "@types/node": "^25.3.3",
     "@types/showdown": "^2.0.6",
     "@zotero-plugin/eslint-config": "^0.6.7",
     "chai": "^6.2.2",
-    "eslint": "^10.0.2",
+    "eslint": "~9.39.3",
     "mocha": "^11.7.5",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",
     "zotero-plugin-scaffold": "^0.8.3",
-    "zotero-types": "^4.1.1"
+    "zotero-types": "^4.1.2"
   },
   "prettier": {
     "printWidth": 80,
