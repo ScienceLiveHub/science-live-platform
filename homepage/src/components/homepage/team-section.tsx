@@ -1,11 +1,8 @@
-"use client";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CardDecorator } from "@/components/ui/card-decorator";
-import { GitHubIcon, LinkedInIcon } from "@daveyplate/better-auth-ui";
-import { Globe } from "lucide-react";
+import { Github, Globe, Linkedin } from "lucide-react";
 
 const team = [
   {
@@ -119,7 +116,7 @@ export function TeamSection() {
                           rel="noopener noreferrer"
                           aria-label={`${member.name} LinkedIn`}
                         >
-                          <LinkedInIcon className="h-4 w-4 saturate-0" />
+                          <Linkedin className="h-4 w-4 saturate-0" />
                         </a>
                       </Button>
                     )}
@@ -136,7 +133,7 @@ export function TeamSection() {
                           rel="noopener noreferrer"
                           aria-label={`${member.name} GitHub`}
                         >
-                          <GitHubIcon className="h-4 w-4 saturate-0" />
+                          <Github className="h-4 w-4 saturate-0" />
                         </a>
                       </Button>
                     )}

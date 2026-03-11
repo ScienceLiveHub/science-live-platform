@@ -21,6 +21,7 @@ import { ViewGeographicalCoverage } from "./ViewGeographicalCoverage";
 import { ViewPCCResearchQuestion } from "./ViewPCCResearchQuestion";
 import { ViewPICOResearchQuestion } from "./ViewPICOResearchQuestion";
 import { ViewPICOResearchQuestionLegacy } from "./ViewPICOResearchQuestionLegacy";
+import { ViewResearchSoftware } from "./ViewResearchSoftware";
 
 /**
  * Registry mapping template URIs to their custom view components.
@@ -36,7 +37,7 @@ export const VIEW_COMPONENTS: Record<
   [TEMPLATE_URI.GEO_COVERAGE]: ViewGeographicalCoverage,
   [TEMPLATE_URI.PICO_RESEARCH_QUESTION]: ViewPICOResearchQuestion,
   [TEMPLATE_URI.PCC_RESEARCH_QUESTION]: ViewPCCResearchQuestion,
-
+  [TEMPLATE_URI.RESEARCH_SOFTWARE]: ViewResearchSoftware,
   // Legacy templates — remove when no longer needed
   [LEGACY_TEMPLATE_URIS.PICO_RESEARCH_QUESTION![0]]:
     ViewPICOResearchQuestionLegacy,

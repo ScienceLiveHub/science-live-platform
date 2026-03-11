@@ -29,6 +29,8 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w",
   PCC_RESEARCH_QUESTION:
     "https://w3id.org/np/RAmR-xqMgOq3oTJmOVDQFL2p5usID6zqRapizHy0UJb04",
+  RESEARCH_SOFTWARE:
+    "https://w3id.org/np/RABBzVTxosLGT4YBCfdfNd6LyuOOTe2EVOTtWJMyOoZHk",
 };
 
 /**
@@ -118,5 +120,13 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     icon: "📋",
     recommended: true,
     keywords: ["pcc", "review", "question", "population", "concept", "context"],
+  [TEMPLATE_URI.RESEARCH_SOFTWARE]: {
+    name: "Research Software",
+    description:
+      "Describe research software with metadata including repository, supporting publications, and related resources.",
+    category: "Software",
+    icon: "💻",
+    recommended: true,
+    keywords: ["software", "code", "repository", "github", "tool"],
   },
 };

@@ -82,9 +82,8 @@ export interface Navbar01Props extends React.HTMLAttributes<HTMLElement> {
 // Default navigation links
 const defaultNavigationLinks: Navbar01NavLink[] = [
   { href: "/", label: "Home", active: true },
-  { href: "#features", label: "Features" },
-  { href: "#about", label: "About" },
-  { href: "/np/demo", label: "Demo" },
+  { href: "/np/", label: "Browse" },
+  { href: "/np/create", label: "Create" },
 ];
 
 export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
@@ -103,7 +102,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
   ) => {
     const {
       data: session,
-      // isPending, //loading state
+      isPending, //loading state
       // error, //error object
       // refetch, //refetch the session
     } = authClient.useSession();
@@ -222,6 +221,9 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                 <span className="hidden font-bold text-xl sm:inline-block">
                   Live
                 </span>
+                <span className="mt-0 pt-0 hidden text-xs sm:inline-block text-muted-foreground">
+                  Platform
+                </span>
               </button>
               {/* Navigation menu */}
               {!isMobile && (
@@ -256,7 +258,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
           </div>
           {/* Right side */}
           <div className="flex items-center gap-3">
-            {!session ? (
+            {!session && !isPending ? (
               <Button
                 variant="ghost"
                 size="sm"

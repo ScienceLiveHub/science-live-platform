@@ -1,4 +1,11 @@
-import { DataFactory, Store as N3Store, NamedNode, Term, Util } from "n3";
+import {
+  DataFactory,
+  Store as N3Store,
+  NamedNode,
+  Term,
+  Util,
+  Writer,
+} from "n3";
 import {
   extractSubjectProps,
   fetchQuads,
@@ -441,6 +448,40 @@ export class NanopubStore extends N3Store {
    */
   getCitation(format: CitationFormats = "apa") {
     return generateCitation(this.metadata, format);
+  }
+
+  /**
+   * Serialize quads to an RDF string.
+   * Sorted by graph/subject/predicate/object for consistency.
+   */
+  serialize() {
+    // Serialize to TRIG format, with predicable sorting of quads
+    const writer = new Writer();
+    let trigOutput = "";
+    const quads = this.getQuads(null, null, null, null).sort((a, b) => {
+      const graphCompare = (a.graph?.value ?? "").localeCompare(
+        b.graph?.value ?? "",
+      );
+      if (graphCompare !== 0) return graphCompare;
+      const subjectCompare = (a.subject?.value ?? "").localeCompare(
+        b.subject?.value ?? "",
+      );
+      if (subjectCompare !== 0) return subjectCompare;
+      const predicateCompare = (a.predicate?.value ?? "").localeCompare(
+        b.predicate?.value ?? "",
+      );
+      if (predicateCompare !== 0) return predicateCompare;
+      return (a.object?.value ?? "").localeCompare(b.object?.value ?? "");
+    });
+
+    writer.addQuads(quads);
+    writer.end((error, result: string) => {
+      if (error) {
+        throw new Error(`Failed to serialize TRIG: ${error}`);
+      }
+      trigOutput = result;
+    });
+    return trigOutput;
   }
 
   /**
