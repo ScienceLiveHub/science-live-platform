@@ -24,7 +24,7 @@ jobs:
           repository: vijay-prema/nanopub-js
           path: nanopub-js
           ref: custom-uri-fix
-          token: ${{ env.GITHUB_TOKEN }}
+          token: ${{ env.GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
