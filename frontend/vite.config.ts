@@ -32,21 +32,10 @@ export default defineConfig(({ mode }) => {
       cors: true,
     },
     build: {
-      target: "esnext", // Required for top-level await in WASM
-      // Increase chunk size limit for large WASM files
-      chunkSizeWarningLimit: 5000,
-      commonjsOptions: {
-        transformMixedEsModules: true,
-      },
+      chunkSizeWarningLimit: 3000,
     },
     optimizeDeps: {
-      // Don't pre-bundle WASM modules
-      exclude: ["nanopub-js"],
       include: ["react", "react-dom", "react-router-dom"],
-      // Force optimization even for large dependencies
-      esbuildOptions: {
-        target: "esnext",
-      },
     },
   };
 });
