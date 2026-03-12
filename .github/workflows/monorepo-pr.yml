@@ -1,11 +1,13 @@
-# Run quick checks on PRs that span multiple workspaces.
+# Run quick checks on PRs/main that span multiple workspaces.
 
-name: Monorepo PR Checks
+name: Full Monorepo Checks
 
 on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
   workflow_dispatch:
     description: Check the code and build for all workspaces
 
@@ -73,6 +75,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      # Build and cache the output of npm install to use in other workflows
       - name: Cache node_modules
         id: cache-nm
         uses: actions/cache@v4
