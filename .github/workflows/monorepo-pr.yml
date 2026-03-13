@@ -17,47 +17,10 @@ env:
 jobs:
   # Only needed when relying on local nanopub-js, not npm package
   build-nanopub-js:
-    name: Build nanopub-js
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout nanopub-js repo
-        uses: actions/checkout@v6
-        with:
-          repository: vijay-prema/nanopub-js
-          path: nanopub-js
-          ref: custom-uri-fix
-          token: ${{ env.GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Setup yarn
-        run: corepack enable
-
-      - name: Disable yarn global cache for workflow environment
-        working-directory: ./nanopub-js
-        run: 'echo "enableGlobalCache: false" >> .yarnrc.yml'
-
-      - name: Switch from prepare to prepack to prevent npm install error
-        working-directory: ./nanopub-js
-        run: sed -i 's/prepare/prepack/g' package.json
-
-      - name: Install dependencies
-        working-directory: ./nanopub-js
-        run: yarn install
-
-      - name: Build
-        working-directory: ./nanopub-js
-        run: yarn build
-
-      - name: Upload nanopub-js artifact
-        uses: actions/upload-artifact@v5
-        with:
-          name: nanopub-js
-          path: nanopub-js
-          retention-days: 1
+    uses: ./.github/workflows/build-nanopub-js.yml
+    with:
+      node-version: "24"
+    secrets: inherit
 
   install:
     name: Install Dependencies
