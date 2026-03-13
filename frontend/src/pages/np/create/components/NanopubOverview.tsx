@@ -31,9 +31,9 @@ export function NanopubOverview({
       {/* Overview */}
       <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
         <div className="relative mb-6">
-          <div className="pr-16">
-            <h2 className=" text-2xl md:text-3xl font-bold flex">
-              {/* TODO: peform this during store.metadata generation and store in metadata.title? */}
+          <div className="flex justify-between">
+            <h2 className="text-2xl md:text-3xl font-bold flex">
+              {/* TODO: perform this during store.metadata generation and store in metadata.title? */}
               {store.metadata.title ||
                 store.metadata.introduces?.[0]?.label ||
                 (store.metadata.introduces?.[0]?.uri &&
@@ -42,6 +42,50 @@ export function NanopubOverview({
                   )) ||
                 `${getNanopubHash(store.metadata.uri!)?.substring(0, 10)}...`}{" "}
             </h2>
+            <div className="flex">
+              {/* TODO: this should actually check for trustworthiness somehow */}
+              {!isExample && (
+                <BadgeCheck
+                  className="m-1.5"
+                  color="#33aa33"
+                  strokeWidth={2}
+                  fill="#33dd3333"
+                >
+                  <title>This nanopub is trustworthy</title>
+                </BadgeCheck>
+              )}
+              {isExample && (
+                <NotepadTextDashed
+                  className="m-1.5"
+                  color="#999999"
+                  strokeWidth={2}
+                >
+                  <title>
+                    This is an EXAMPLE nanopub, for demo purposes and not to be
+                    taken seriously
+                  </title>
+                </NotepadTextDashed>
+              )}
+              {!!store.metadata.introduces?.length && (
+                <LayersPlus className="m-1.5" color="#aaaa00" strokeWidth={2}>
+                  <title>This nanopub introduces something</title>
+                </LayersPlus>
+              )}
+              {isTemplate && (
+                <Link to={`/np/create?template=${store.metadata.uri}`}>
+                  {" "}
+                  <FilePlus className="m-1.5" color="#9999ff" strokeWidth={2}>
+                    <title>
+                      This is a template, click to create a new nanopub using
+                      this template
+                    </title>
+                  </FilePlus>
+                </Link>
+              )}
+              {showShareMenu && store.metadata.uri && (
+                <ShareMenu uri={store.metadata.uri} />
+              )}
+            </div>
           </div>
 
           <div>
@@ -88,53 +132,6 @@ export function NanopubOverview({
               <span className="text-muted-foreground">-</span>
             )}
           </div>
-
-          <div className="flex absolute right-0 top-0">
-            <div className="flex right-0 top-0">
-              {/* TODO: this should actually check for trustworthiness somehow */}
-              {!isExample && (
-                <BadgeCheck
-                  className="m-1.5"
-                  color="#33aa33"
-                  strokeWidth={2}
-                  fill="#33dd3333"
-                >
-                  <title>This nanopub is trustworthy</title>
-                </BadgeCheck>
-              )}
-              {isExample && (
-                <NotepadTextDashed
-                  className="m-1.5"
-                  color="#999999"
-                  strokeWidth={2}
-                >
-                  <title>
-                    This is an EXAMPLE nanopub, for demo purposes and not to be
-                    taken seriously
-                  </title>
-                </NotepadTextDashed>
-              )}
-              {!!store.metadata.introduces?.length && (
-                <LayersPlus className="m-1.5" color="#aaaa00" strokeWidth={2}>
-                  <title>This nanopub introduces something</title>
-                </LayersPlus>
-              )}
-              {isTemplate && (
-                <Link to={`/np/create?template=${store.metadata.uri}`}>
-                  {" "}
-                  <FilePlus className="m-1.5" color="#9999ff" strokeWidth={2}>
-                    <title>
-                      This is a template, click to create a new nanopub using
-                      this template
-                    </title>
-                  </FilePlus>
-                </Link>
-              )}
-            </div>
-            {showShareMenu && store.metadata.uri && (
-              <ShareMenu uri={store.metadata.uri} />
-            )}
-          </div>
           <div className="text-sm">
             <span className="">Published </span>{" "}
             {store.metadata.created ? (
@@ -178,7 +175,10 @@ export function NanopubOverview({
                     rel="noreferrer"
                   >
                     {decodeURIComponent(
-                      (store.findInternalLabel(c.uri!) || "").replaceAll("+", " "),
+                      (store.findInternalLabel(c.uri!) || "").replaceAll(
+                        "+",
+                        " ",
+                      ),
                     )}
                   </a>
                 ))}
