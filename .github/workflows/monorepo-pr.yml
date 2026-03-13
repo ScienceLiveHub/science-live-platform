@@ -12,7 +12,7 @@ on:
     description: Check the code and build for all workspaces
 
 env:
-  NODE_VERSION: "22"
+  NODE_VERSION: "24"
 
 jobs:
   # Only needed when relying on local nanopub-js, not npm package
@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout nanopub-js repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: vijay-prema/nanopub-js
           path: nanopub-js
@@ -29,7 +29,7 @@ jobs:
           token: ${{ env.GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -64,14 +64,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-nanopub-js
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: nanopub-js
           path: ../nanopub-js
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -98,17 +98,17 @@ jobs:
     needs: [build-nanopub-js, install]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # Only needed when relying on local nanopub-js, not npm package
       - name: Download nanopub-js artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: nanopub-js
           path: ../nanopub-js
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -145,17 +145,17 @@ jobs:
     needs: [build-nanopub-js, install]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # Only needed when relying on local nanopub-js, not npm package
       - name: Download nanopub-js artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: nanopub-js
           path: ../nanopub-js
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -192,17 +192,17 @@ jobs:
     needs: [build-nanopub-js, install]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # Only needed when relying on local nanopub-js, not npm package
       - name: Download nanopub-js artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: nanopub-js
           path: ../nanopub-js
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
 
