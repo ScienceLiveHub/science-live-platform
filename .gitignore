@@ -62,3 +62,6 @@ api/package-lock.json
 
 /zotero/site
 .Trash-1000
+
+# Artifacts generated from running nektos act to simulate github actions (npm run pr-check)
+.artifacts

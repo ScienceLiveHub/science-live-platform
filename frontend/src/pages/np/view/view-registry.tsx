@@ -14,6 +14,7 @@ import {
   TEMPLATE_URI,
 } from "../create/components/templates/registry-metadata";
 import { ViewAIDASentence } from "./ViewAIDASentence";
+import { ViewAIDASentenceLegacy } from "./ViewAIDASentenceLegacy";
 import { ViewAnnotateQuotation } from "./ViewAnnotateQuotation";
 import { ViewCitationWithCiTO } from "./ViewCitationWithCiTO";
 import { ViewCommentOnPaper } from "./ViewCommentOnPaper";
@@ -41,4 +42,5 @@ export const VIEW_COMPONENTS: Record<
   // Legacy templates — remove when no longer needed
   [LEGACY_TEMPLATE_URIS.PICO_RESEARCH_QUESTION![0]]:
     ViewPICOResearchQuestionLegacy,
+  [LEGACY_TEMPLATE_URIS.AIDA_SENTENCE![0]]: ViewAIDASentenceLegacy,
 };

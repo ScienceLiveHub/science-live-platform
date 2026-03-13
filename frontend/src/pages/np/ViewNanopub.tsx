@@ -4,7 +4,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useNanopub } from "@/hooks/use-nanopub";
 import { getNanopubHash, isNanopubUri, toScienceLiveNPUri } from "@/lib/uri";
 import { NanopubClient } from "@nanopub/nanopub-js";
-import { Calendar, FileCode, Hash, Search } from "lucide-react";
+import { Calendar, FileCode, FileSymlink, Hash, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import ViewerDemo from "../ViewerDemo";
@@ -123,7 +123,7 @@ export default function ViewNanopub() {
     <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-4xl">
       {/* Prominent Search Field - always visible but different styles based on context */}
       <div
-        className={`flex flex-col items-center ${!hasActiveContent ? "justify-center flex-1" : "pt-8"}`}
+        className={`flex flex-col items-center ${!hasActiveContent ? "justify-center flex-1" : ""}`}
       >
         {!hasActiveContent && (
           <h1 className="flex items-center text-xl text-muted-foreground font-black my-8">
@@ -154,10 +154,13 @@ export default function ViewNanopub() {
               {loading ? (
                 <Spinner className="h-5 w-5" />
               ) : isNanopubInput ? (
-                "Load"
+                <>
+                  {!hasActiveContent && <FileSymlink className="h-5 w-5" />}
+                  View
+                </>
               ) : (
                 <>
-                  <Search className="mr-2 h-5 w-5" />
+                  {!hasActiveContent && <Search className="h-5 w-5" />}
                   Go
                 </>
               )}

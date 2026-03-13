@@ -41,8 +41,8 @@ interface AIDASentenceData {
   topics: { uri: string; label?: string }[];
   /** Related nanopublication URI */
   relatedNanopub?: string;
-  /** Supporting dataset URL */
-  supportingDataset?: string;
+  /** Supporting dataset/publication URLs */
+  supportingUrls?: string[];
 }
 
 function extractAIDASentence(store: NanopubStore): AIDASentenceData | null {
@@ -66,7 +66,9 @@ function extractAIDASentence(store: NanopubStore): AIDASentenceData | null {
   try {
     const aidaPrefix = "http://purl.org/aida/";
     if (sentenceUri.startsWith(aidaPrefix)) {
-      sentence = decodeURIComponent(sentenceUri.substring(aidaPrefix.length));
+      sentence = decodeURIComponent(
+        sentenceUri.substring(aidaPrefix.length).replaceAll("+", " "),
+      );
     }
   } catch {
     // Keep the raw URI if decoding fails
@@ -95,21 +97,21 @@ function extractAIDASentence(store: NanopubStore): AIDASentenceData | null {
   );
   const relatedNanopub = relatedQuad?.object.value;
 
-  // Find supporting dataset (cito:obtainsSupportFrom)
-  const datasetQuad = store.matchOne(
+  // Find supporting supportingUrls (cito:obtainsSupportFrom)
+  const supportingUrlQuads = store.getQuads(
     namedNode(sentenceUri),
     NS.CITO("obtainsSupportFrom"),
     null,
     assertionGraph,
   );
-  const supportingDataset = datasetQuad?.object.value;
+  const supportingUrls = supportingUrlQuads?.map((q) => q.object.value);
 
   return {
     sentence,
     sentenceUri,
     topics,
     relatedNanopub,
-    supportingDataset,
+    supportingUrls,
   };
 }
 
@@ -170,21 +172,31 @@ export function ViewAIDASentence({ store }: CustomViewerProps) {
           />
         )}
 
-        {/* Supporting Dataset */}
-        {data.supportingDataset && (
+        {/* Supporting Urls */}
+        {data.supportingUrls && data.supportingUrls.length > 0 && (
           <div>
-            <ItemTitle title="Supporting Dataset" />
-            <div className="flex items-center gap-2">
-              <Database className="h-4 w-4 text-muted-foreground shrink-0" />
-              <a
-                href={data.supportingDataset}
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 break-all text-sm"
-              >
-                {getLabel(data.supportingDataset)}
-                <ExternalLink className="h-3 w-3 shrink-0" />
-              </a>
+            <ItemTitle
+              title="Supported by"
+              icon={<Database className="h-4 w-4 inline-block mr-1" />}
+              className="mb-2"
+            />
+            <div className="gap-2">
+              <ul>
+                {data.supportingUrls.map((supportingurl) => (
+                  <li>
+                    <a
+                      key={supportingurl}
+                      href={supportingurl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 break-all text-sm"
+                    >
+                      {getLabel(supportingurl)}
+                      <ExternalLink className="h-3 w-3 shrink-0" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         )}

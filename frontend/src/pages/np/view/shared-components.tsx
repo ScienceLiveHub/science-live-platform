@@ -4,7 +4,7 @@
  */
 
 import { cn } from "@/lib/utils";
-import { ExternalLink, Link2, MessageCircle, Quote } from "lucide-react";
+import { ExternalLink, Link, Link2, MessageCircle, Quote } from "lucide-react";
 import { ReactNode } from "react";
 
 // =============================================================================
@@ -242,13 +242,16 @@ export function RelatedNanopubLink({
 }: RelatedNanopubLinkProps) {
   return (
     <div className={className}>
-      <ItemTitle title={title} />
+      <ItemTitle
+        title={title}
+        icon={<Link className="h-4 w-4 inline-block mr-1" />}
+      />
       <div className="flex items-center gap-2">
-        <Link2 className="h-4 w-4 text-muted-foreground shrink-0" />
+        {/* <Link2 className="h-4 w-4 text-muted-foreground shrink-0" /> */}
         <a
           href={href || uri}
           rel="noreferrer"
-          className="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 break-all text-sm"
+          className="font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 break-all text-md"
         >
           {label}
         </a>

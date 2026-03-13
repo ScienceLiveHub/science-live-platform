@@ -14,7 +14,7 @@ Transform your Zotero library into a semantic web publishing platform. Create, s
 
 - **All In-Zotero** - Complete workflow in Zotero tabs, no external websites
 - **Smart Forms** - Auto-generated forms from nanopub templates
-- **ORCID Signing** - Cryptographic signing with your ORCID (WASM-powered)
+- **ORCID Signing** - Cryptographic signing with your Science Live Platform profile
 - **Multiple Templates** - CiTO, AIDA, Rosetta, and custom templates
 - **Discovery** - Search for related nanopublications
 - **Import** - Add nanopubs from the network to your library
@@ -31,13 +31,13 @@ Transform your Zotero library into a semantic web publishing platform. Create, s
 2. In Zotero: **Tools → Plugins**
 3. Click gear icon → **Install Plugin From File**
 4. Select the downloaded XPI
-5. Restart Zotero
+5. Restart Zotero. Plugin should be updated automatically by default thereafter.
 
 ### First Nanopub (5 minutes)
 
-1. **Setup Profile:** File → Setup Nanopub Profile
-   - Enter your name and ORCID
-   - Keys generated automatically
+1. **Connect to Science Live Platform:** Zotero Settings → Science Live
+   - Create a Science Live API key if required
+   - Paste it in the Zotero settings screen, and optionally test connection to confirm
 
 2. **Choose a Paper:** Select any item in your library
 
@@ -45,7 +45,7 @@ Transform your Zotero library into a semantic web publishing platform. Create, s
 
 4. **Fill Form:** Complete the form in the new Zotero tab
 
-5. **Publish:** Click "Create & Publish" - done!
+5. **Publish:** Click "Generate" to preview and then "Publish" - done!
 
 A rich note with your nanopub is automatically attached.
 
@@ -118,9 +118,9 @@ Flexible semantic statements:
 
 ## 🛠️ Requirements
 
-- Zotero 7.0 or later
+- Zotero 8.0 or later
 - Internet connection
-- ORCID account ([free signup](https://orcid.org))
+- For publishing: Science Live Platform account (verified and ORCID linked)
 
 ---
 
@@ -170,9 +170,7 @@ MIT License - see [LICENSE](LICENSE)
 
 Built on:
 
-- [@sciencelivehub/nanopub-create](https://github.com/ScienceLiveHub/nanopub-create)
-- [@sciencelivehub/nanopub-view](https://github.com/ScienceLiveHub/nanopub-view)
-- [nanopub-rs](https://github.com/vemonet/nanopub-rs) (WASM signing)
+- [nanopub-js](https://github.com/Nanopublication/nanopub-js) (signing)
 - [Nanopub Network](http://nanopub.org) (Knowledge Pixels)
 
 ---
