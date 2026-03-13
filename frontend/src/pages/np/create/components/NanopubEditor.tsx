@@ -549,6 +549,9 @@ export default function NanopubEditor({
                   <div>
                     <Label className="my-6" htmlFor="template-uri">
                       Use a custom template by entering the URI{" "}
+                      <span className="italic text-muted-foreground">
+                        (BETA)
+                      </span>{" "}
                     </Label>
                   </div>
                   <div className="flex">

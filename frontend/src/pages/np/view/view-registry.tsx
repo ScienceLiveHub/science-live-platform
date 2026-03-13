@@ -9,8 +9,12 @@
 
 import { ComponentType } from "react";
 import { CustomViewerProps } from "../create/components/NanopubViewer";
-import { TEMPLATE_URI } from "../create/components/templates/registry-metadata";
+import {
+  LEGACY_TEMPLATE_URIS,
+  TEMPLATE_URI,
+} from "../create/components/templates/registry-metadata";
 import { ViewAIDASentence } from "./ViewAIDASentence";
+import { ViewAIDASentenceLegacy } from "./ViewAIDASentenceLegacy";
 import { ViewAnnotateQuotation } from "./ViewAnnotateQuotation";
 import { ViewCitationWithCiTO } from "./ViewCitationWithCiTO";
 import { ViewCommentOnPaper } from "./ViewCommentOnPaper";
@@ -30,4 +34,6 @@ export const VIEW_COMPONENTS: Record<
   [TEMPLATE_URI.AIDA_SENTENCE]: ViewAIDASentence,
   [TEMPLATE_URI.GEO_COVERAGE]: ViewGeographicalCoverage,
   [TEMPLATE_URI.RESEARCH_SOFTWARE]: ViewResearchSoftware,
+  // Legacy templates — remove when no longer needed
+  [LEGACY_TEMPLATE_URIS.AIDA_SENTENCE![0]]: ViewAIDASentenceLegacy,
 };

@@ -94,7 +94,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
           variant="outline"
           size="sm"
           onClick={onRemove}
-          className="mt-2 h-8 w-8 p-0 text-destructive hover:text-destructive"
+          className="mt-0.5 h-8 w-8 p-0 text-destructive hover:text-destructive"
           title={removeButtonLabel}
           disabled={isDisabled}
         >
@@ -436,14 +436,14 @@ export const ArrayField: React.FC<ArrayFieldProps> = ({
                 </SortableItem>
               ))}
 
-              {value.length === 0 && (
+              {/* {value.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
                   <p className="text-sm">No items added yet</p>
                   <p className="text-xs mt-1">
                     Click &quot;{addButtonLabel}&quot; to add your first item
                   </p>
                 </div>
-              )}
+              )} */}
             </div>
           </SortableContext>
 
