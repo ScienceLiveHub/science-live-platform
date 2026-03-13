@@ -5,7 +5,7 @@ const server = process.env.API_URL || "https://api.sciencelive4all.org";
 
 export default defineConfig({
   source: ["src", "addon"],
-  dist: ".scaffold/build",
+  dist: process.env.NODE_ENV === "production" ? "dist" : ".scaffold/build",
   name: pkg.config.addonName,
   id: pkg.config.addonID,
   namespace: pkg.config.addonRef,

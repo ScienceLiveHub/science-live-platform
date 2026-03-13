@@ -85,7 +85,7 @@ Currently the `frontend` is a static SPA, with no SSR required, and client-side 
   - vscode (or other IDE that supports devcontainer)
   - Docker
 - **If NOT using the recommended devcontainer** (which has everything built in), you need to manually install:
-  - Node.js v22 or higher
+  - Node.js v24 or higher
   - npm (comes with Node.js)
 - **If you want to deploy to Cloudflare:**
   - A [Cloudflare](https://dash.cloudflare.com) account (free tier works fine)
@@ -220,7 +220,7 @@ curl http://localhost:3001/health
 
 #### Both Frontend and Backend
 
-- **Node.js 22** - Runtime
+- **Node.js 24** - Runtime
 - **TypeScript** - Type safety
 - **Vitest** - Tests
 
