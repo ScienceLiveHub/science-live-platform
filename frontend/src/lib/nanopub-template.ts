@@ -79,13 +79,14 @@ function isOptional(statement: Statement) {
 /**
  * Are all the placeholders for this statement empty?
  */
-function isAllEmpty(
-  statement: Statement,
-  values: Record<string, string>,
-  uri: string,
-) {
+function isAllEmpty(statement: Statement, values: FormValues, uri: string) {
   const getPlaceholderName = (v: string) =>
     v.startsWith(uri) ? getUriEnd(v) : undefined;
+
+  if (isRepeatable(statement) && Array.isArray(values[statement.id])) {
+    const arrayValues = values[statement.id] as unknown as Array<unknown>;
+    return arrayValues.length === 0;
+  }
 
   // TODO: we assume only the object matters, is this correct?
   // const subject = getPlaceholderName(statement.subject.value);
@@ -117,6 +118,11 @@ export type TemplateMetadata = {
   targetNanopubType?: string;
   targetlabelPattern?: string;
 };
+
+export type FormValues = Record<
+  string,
+  string | Record<string, Record<string, string>>
+>;
 
 export class NanopubTemplate extends NanopubStore {
   /**
@@ -159,7 +165,7 @@ export class NanopubTemplate extends NanopubStore {
    * Generate a nanopub in trig format, using this template and the specified values for the placeholders
    */
   async generateNanopublication(
-    placeholderValues: Record<string, string>,
+    placeholderValues: FormValues,
     pubData: {
       orcid: string;
       name: string;
@@ -178,10 +184,7 @@ export class NanopubTemplate extends NanopubStore {
     const outputStore = new Store();
 
     // Helper function to correctly format values outputted to generated nanopub
-    const formatValue = (
-      uri: string,
-      values: Record<string, string>,
-    ): string => {
+    const formatValue = (uri: string, values: FormValues): string => {
       let placeholderName = uri;
       if (uri.startsWith("sub:")) {
         placeholderName = uri.substring(4); // Remove "sub:" prefix
@@ -193,15 +196,15 @@ export class NanopubTemplate extends NanopubStore {
       // Add any field-specific augmentations (prefix etc)
       const placeholderField = this.fields.find((f) => f.id === uri);
       if (placeholderField?.type === PlaceholderType.AUTO_ESCAPE_URI) {
-        outputValue = encodeURI(outputValue);
+        outputValue = encodeURI(outputValue as string);
       }
       if (placeholderField?.prefix) {
         outputValue = `${placeholderField.prefix}${outputValue}`;
       }
       if (placeholderField?.types?.includes(NS.NPTs("LocalResource").value)) {
-        outputValue = baseUri + encodeURI(outputValue);
+        outputValue = baseUri + encodeURI(outputValue as string);
       }
-      return outputValue;
+      return outputValue as string;
     };
 
     const shouldPlaceholderBeLiteral = (placeholderId: string): boolean => {
@@ -225,7 +228,7 @@ export class NanopubTemplate extends NanopubStore {
 
     const createSubjectTerm = (
       templateTerm: RDFT.Quad_Subject,
-      values: Record<string, string>,
+      values: FormValues,
     ): RDFT.Quad_Subject => {
       if (templateTerm.termType === "BlankNode") {
         return blankNode(templateTerm.value);
@@ -243,7 +246,7 @@ export class NanopubTemplate extends NanopubStore {
 
     const createPredicateTerm = (
       templateTerm: RDFT.Quad_Predicate,
-      values: Record<string, string>,
+      values: FormValues,
     ): RDFT.Quad_Predicate => {
       const placeholderId = templateTerm.value;
       const formattedValue = formatValue(placeholderId, values);
@@ -257,7 +260,7 @@ export class NanopubTemplate extends NanopubStore {
 
     const createObjectTerm = (
       templateTerm: RDFT.Quad_Object,
-      values: Record<string, string>,
+      values: FormValues,
     ): RDFT.Quad_Object => {
       if (templateTerm.termType === "Literal") {
         return createLiteralFromTemplate(templateTerm);
@@ -311,7 +314,7 @@ export class NanopubTemplate extends NanopubStore {
 
     // Process each statement from the template
     for (const [statementId, statement] of this.statements) {
-      const addStatement = (s: Statement, values: Record<string, string>) => {
+      const addStatement = (s: Statement, values: FormValues) => {
         const subject = createSubjectTerm(s.subject, values);
         const predicate = createPredicateTerm(s.predicate, values);
         const object = createObjectTerm(s.object, values);
@@ -437,7 +440,7 @@ export class NanopubTemplate extends NanopubStore {
       ? this.templateMetadata.targetlabelPattern.replaceAll(
           /\$\{([^}]+)\}/g,
           (match, placeholder) => {
-            const value = placeholderValues[placeholder];
+            const value = placeholderValues[placeholder] as string;
             if (!value) return match;
 
             // If the value looks like a URI, use getUriEnd, otherwise use the literal value
@@ -570,6 +573,10 @@ export class NanopubTemplate extends NanopubStore {
       this.graphUris.assertion,
       true,
     );
+
+    for (const [sk, sv] of statements) {
+      sv.id = getUriEnd(sk) || sk;
+    }
 
     // ---- 4. match up properties of statements to contained placeholders
     for (const [pk, pv] of placeholders) {
