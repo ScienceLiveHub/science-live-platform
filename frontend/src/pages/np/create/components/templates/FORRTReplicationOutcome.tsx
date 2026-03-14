@@ -332,7 +332,7 @@ export default function FORRTReplicationOutcome({
         label: "",
         study: "",
         repo: "",
-        date: "",
+        date: undefined as unknown as Date,
         validationStatus: "",
         confidenceLevel: "",
         conclusion: "",

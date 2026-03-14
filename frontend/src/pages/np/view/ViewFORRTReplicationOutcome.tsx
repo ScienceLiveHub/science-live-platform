@@ -15,7 +15,7 @@ import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
 import { toScienceLiveNPUri } from "@/lib/uri";
 import { ClipboardCheck, Tag } from "lucide-react";
-import { DataFactory, Util } from "n3";
+import { DataFactory } from "n3";
 import { useMemo } from "react";
 import { CustomViewerProps } from "../create/components/NanopubViewer";
 import {
