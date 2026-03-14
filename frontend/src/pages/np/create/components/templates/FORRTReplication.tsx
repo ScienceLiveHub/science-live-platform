@@ -374,7 +374,7 @@ export default function FORRTReplication({
         methodology: "",
         deviation: "",
         keywordSelection: [],
-        disciplineSelection: null,
+        disciplineSelection: undefined,
         ...prefilledData,
       },
       onSubmit: async ({ value }) => {
