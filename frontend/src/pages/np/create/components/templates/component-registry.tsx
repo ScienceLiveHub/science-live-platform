@@ -9,6 +9,7 @@ import AnnotateAPaperQuotation from "./AnnotateAPaperQuotation";
 import CitationWithCiTO from "./CitationWithCiTO";
 import CommentOnPaper from "./CommentOnPaper";
 import DocumentGeographicalCoverage from "./DocumentGeographicalCoverage";
+import FORRTReplication from "./FORRTReplication";
 import ResearchSoftware from "./ResearchSoftware";
 import { TEMPLATE_URI } from "./registry-metadata";
 
@@ -31,6 +32,7 @@ export const TEMPLATE_COMPONENTS: Record<
   [TEMPLATE_URI.AIDA_SENTENCE]: AIDASentence,
   [TEMPLATE_URI.GEO_COVERAGE]: DocumentGeographicalCoverage,
   [TEMPLATE_URI.RESEARCH_SOFTWARE]: ResearchSoftware,
+  [TEMPLATE_URI.FORRT_REPLICATION]: FORRTReplication,
 };
 
 export const NanopubEditorOptionFields = [

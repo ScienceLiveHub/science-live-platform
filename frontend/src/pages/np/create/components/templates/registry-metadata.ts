@@ -27,6 +27,8 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao",
   RESEARCH_SOFTWARE:
     "https://w3id.org/np/RABBzVTxosLGT4YBCfdfNd6LyuOOTe2EVOTtWJMyOoZHk",
+  FORRT_REPLICATION:
+    "https://w3id.org/np/RAuLEjPp-4dTvPwMkfHggTto1CgjIftiGRAgHlyeEonjQ",
 };
 
 /**
@@ -96,5 +98,21 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     icon: "💻",
     recommended: true,
     keywords: ["software", "code", "repository", "github", "tool"],
+  },
+  [TEMPLATE_URI.FORRT_REPLICATION]: {
+    name: "FORRT Replication Study",
+    description:
+      "Declare a replication or reproduction study design according to FORRT, targeting a specific claim.",
+    category: "Scientific",
+    icon: "🔁",
+    recommended: true,
+    keywords: [
+      "forrt",
+      "replication",
+      "reproduction",
+      "study",
+      "claim",
+      "scientific",
+    ],
   },
 };
