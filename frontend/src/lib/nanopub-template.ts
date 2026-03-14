@@ -727,7 +727,11 @@ export function templateStatementsToFormedible(
     const statement = s as Statement;
 
     const makeFieldFrom = (part: "subject" | "predicate" | "object") => {
+      // TODO: this and the filter() below are a fallbacks to prevent a crash in advanced template mode, due to
+      // some special template features which we haven't yet implemented, such as `GroupedStatement`
+      // (https://w3id.org/np/RAuVB37yyAuAlgusrUAoG84JI4_EfrEqIkpEZYDpSz3d8)
       const term = statement[part] as unknown as RDFT.Term | undefined;
+
       if (!term) {
         // Skip statements with missing parts
         return null;
