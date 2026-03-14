@@ -98,6 +98,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     icon: "📊",
     recommended: true,
     keywords: ["dataset", "data", "fair", "digital object", "zenodo"],
+  },
   [TEMPLATE_URI.RESEARCH_SOFTWARE]: {
     name: "Research Software",
     description:
