@@ -2,8 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { useNanopub } from "@/hooks/use-nanopub";
+import {
+  executeSparql,
+  SEARCH_NANOPUBS,
+  sparqlBindString,
+} from "@/lib/sparql";
 import { getNanopubHash, isNanopubUri, toScienceLiveNPUri } from "@/lib/uri";
-import { NanopubClient } from "@nanopub/nanopub-js";
 import { Calendar, FileCode, FileSymlink, Hash, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -63,18 +67,21 @@ export default function ViewNanopub() {
 
     const performSearch = async () => {
       try {
-        const client = new NanopubClient({
-          endpoints: ["https://query.knowledgepixels.com/"],
-        });
-        const generator = client.findNanopubsWithText(searchQuery);
-        const results: SearchResult[] = [];
-
-        for await (const result of generator) {
-          results.push(result as unknown as SearchResult);
-        }
+        const query = sparqlBindString(
+          SEARCH_NANOPUBS,
+          "?_searchTerm",
+          searchQuery,
+        );
+        const rows = await executeSparql(query);
 
         if (mounted) {
-          setSearchResults(results);
+          setSearchResults(
+            rows.map((row) => ({
+              np: row.np,
+              label: row.label || "",
+              date: row.date || "",
+            })),
+          );
         }
       } catch (e: any) {
         if (mounted) {
