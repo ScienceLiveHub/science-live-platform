@@ -5,7 +5,7 @@ import ApiComboboxMultipleExpandable, {
 import { useFormedible } from "@/hooks/use-formedible";
 import { isNanopubUri } from "@/lib/uri";
 import { KyResponse } from "ky";
-import z from "zod";
+import z, { object } from "zod";
 import {
   NanopubEditorOptionFields,
   NanopubTemplateDefComponentProps,
@@ -69,8 +69,20 @@ export default function AIDASentence({
     project: z
       .string()
       .refine(isNanopubUri, "Must be a valid Nanopublication URI"),
-    dataset: z.url().optional(),
-    publication: z.url().optional(),
+    st3: z
+      .array(
+        object({
+          dataset: z.url(),
+        }),
+      )
+      .optional(),
+    st4: z
+      .array(
+        object({
+          publication: z.url(),
+        }),
+      )
+      .optional(),
     // This placeholder is needed because we translate from `topic` (compatible with
     // ApiComboboxMultipleExpandable) to `st1` (compatible with generateNanopublication())
     st1: z.array(z.object<{ topic: string }>()).optional(),
@@ -124,10 +136,40 @@ export default function AIDASentence({
         required: true,
       },
       {
-        name: "dataset",
-        type: "text",
-        label: "Supported by dataset",
-        placeholder: "URI of related published dataset",
+        name: "st3",
+        type: "array",
+        label: "Supported by datasets",
+        arrayConfig: {
+          minItems: 0,
+          itemType: "object",
+          objectConfig: {
+            fields: [
+              {
+                name: "dataset",
+                type: "text",
+                placeholder: "Enter dataset URI",
+              },
+            ],
+          },
+        },
+      },
+      {
+        name: "st4",
+        type: "array",
+        label: "Supported by other publications",
+        arrayConfig: {
+          minItems: 0,
+          itemType: "object",
+          objectConfig: {
+            fields: [
+              {
+                name: "publication",
+                type: "text",
+                placeholder: "Enter publication URI",
+              },
+            ],
+          },
+        },
       },
       ...NanopubEditorOptionFields,
     ],

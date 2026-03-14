@@ -1,9 +1,13 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Command,
   CommandEmpty,
@@ -19,6 +23,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
@@ -37,12 +42,14 @@ import {
   AlertTriangle,
   BookCheck,
   CheckCircle2,
+  ChevronRight,
   ChevronsUpDown,
   ExternalLink,
   FilePlus,
   KeyRound,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import AnyStatementTemplate from "./AnyStatementTemplate";
 import { NanopubViewer } from "./NanopubViewer";
@@ -59,6 +66,7 @@ export interface NanopubEditorProps {
     privateKey: string;
     keyInfo?: string;
   } | null;
+  identityPending?: boolean;
 
   /**
    * The URI of the template to use.
@@ -175,6 +183,7 @@ export function TemplateCombobox({
 
 export default function NanopubEditor({
   identity,
+  identityPending,
   templateUri,
   onTemplateUriChange,
   prefilledData,
@@ -346,7 +355,11 @@ export default function NanopubEditor({
   // Compute identity issues for profile widget
   const identityIssues: string[] = [];
   if (!identity) {
-    identityIssues.push("No profile loaded");
+    if (embedded) {
+      identityIssues.push("No profile loaded, check settings");
+    } else {
+      identityIssues.push("Sign in to publish");
+    }
   } else {
     if (!identity.orcid) {
       identityIssues.push("ORCID not linked");
@@ -382,154 +395,187 @@ export default function NanopubEditor({
       {showProfile && (
         <Card className="border-muted py-3">
           <CardContent className="">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex flex-col font-bold pr-6">
-                  Publishing as:
+            {identityPending ? (
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col font-bold pr-6">
+                    Publishing as:
+                  </div>
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-3 w-20" />
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium">
-                    {identity?.name || "Unknown User"}
-                  </span>
-                </div>
-                {identity?.orcid && (
-                  <a
-                    href={identity.orcid}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1"
-                  >
-                    {extractOrcidId(identity.orcid)}
-                  </a>
-                )}
-                {identity?.privateKey && (
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <KeyRound className="text-muted-foreground" size={14} />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{identity.keyInfo || "<Unnamed key>"}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
+                <Skeleton className="h-4 w-28" />
               </div>
-              <div className="flex items-center gap-2">
-                {hasIdentityIssues ? (
-                  <div className="flex items-center gap-2 text-amber-500">
-                    <AlertTriangle className="h-4 w-4" />
-                    <span className="text-xs">
-                      {identityIssues.join(" • ")}
+            ) : (
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col font-bold pr-6">
+                    Publishing as:
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">
+                      {identity?.name || "-"}
                     </span>
-                    {orcidLinkAction && !identity?.orcid && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-6 text-xs text-foreground"
-                        onClick={orcidLinkAction}
-                      >
-                        Link
-                      </Button>
-                    )}
                   </div>
-                ) : (
-                  <div className="flex items-center gap-1 text-green-500">
-                    <CheckCircle2 className="h-4 w-4" />
-                    <span className="text-xs">Ready to publish</span>
-                  </div>
-                )}
+                  {identity?.orcid && (
+                    <a
+                      href={identity.orcid}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1"
+                    >
+                      {extractOrcidId(identity.orcid)}
+                    </a>
+                  )}
+                  {identity?.privateKey && (
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <KeyRound className="text-muted-foreground" size={14} />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{identity.keyInfo || "<Unnamed key>"}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  {hasIdentityIssues ? (
+                    <div className="flex items-center gap-2 text-amber-500">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span className="text-xs">
+                        {identityIssues.join(" • ")}
+                      </span>
+                      {orcidLinkAction && identity && !identity.orcid && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-6 text-xs text-foreground"
+                          onClick={orcidLinkAction}
+                        >
+                          Link
+                        </Button>
+                      )}
+                      {identity && !identity.orcid && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-6 text-xs text-foreground"
+                        >
+                          <Link to="/settings/advanced" target="_blank">
+                            Add Key
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 text-green-500">
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span className="text-xs">Ready to publish</span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       )}
-      <Card>
-        <CardContent>
-          {templateUri ? (
-            // TEMPLATE SELECTED
-            <>
-              {isPredefined && TemplateComp && !isAdvancedMode ? (
-                <>
-                  <div className="font-bold inline-flex">
-                    {POPULAR_TEMPLATES[templateUri].name}{" "}
-                    <a
-                      href={toScienceLiveNPUri(templateUri)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="ml-2 text-blue-400"
-                      title="View source template"
-                    >
-                      <ExternalLink size={20} />
-                    </a>
-                  </div>
-                  <div className="my-6">
-                    {POPULAR_TEMPLATES[templateUri].description}
-                  </div>
-                  <div className="my-8 text-muted-foreground">
-                    {POPULAR_TEMPLATES[templateUri].moreDescription}
-                  </div>
-                  <TemplateComp
-                    submit={generateNanopub}
-                    prefilledData={{
-                      ...(prefilledData ?? {}),
-                      isExampleNanopub: demoMode,
-                    }}
-                  />
-                </>
-              ) : (
-                <AnyStatementTemplate
-                  templateUri={templateUri}
+      {templateUri ? (
+        // TEMPLATE SELECTED
+        <Card>
+          <CardContent>
+            {isPredefined && TemplateComp && !isAdvancedMode ? (
+              <>
+                <div className="font-bold inline-flex">
+                  {POPULAR_TEMPLATES[templateUri].name}{" "}
+                  <a
+                    href={toScienceLiveNPUri(templateUri)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-2 text-blue-400"
+                    title="View source template"
+                  >
+                    <ExternalLink size={20} />
+                  </a>
+                </div>
+                <div className="my-6">
+                  {POPULAR_TEMPLATES[templateUri].description}
+                </div>
+                <div className="my-8 text-muted-foreground">
+                  {POPULAR_TEMPLATES[templateUri].moreDescription}
+                </div>
+                <TemplateComp
                   submit={generateNanopub}
                   prefilledData={{
                     ...(prefilledData ?? {}),
                     isExampleNanopub: demoMode,
                   }}
                 />
-              )}
-            </>
-          ) : (
-            // NO TEMPLATE SELECTED
-            <>
+              </>
+            ) : (
+              <AnyStatementTemplate
+                templateUri={templateUri}
+                submit={generateNanopub}
+                prefilledData={{
+                  ...(prefilledData ?? {}),
+                  isExampleNanopub: demoMode,
+                }}
+              />
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        // NO TEMPLATE SELECTED
+        <>
+          <Card>
+            <CardContent>
               <h1 className="text-lg font-semibold mb-8">
                 Select a Template to use
               </h1>
 
               <div className="gap-2 w-full md:w-auto space-y-4">
-                <Label>
-                  Use a predefined template:
-                  <Badge variant="default">Recommended</Badge>
-                </Label>{" "}
+                <Label>Use a predefined template:</Label>{" "}
                 <TemplateCombobox
                   setSelection={(value) => {
                     onTemplateUriChange?.(value);
                   }}
                 />
               </div>
-              <div className="space-y-4">
-                <div>
-                  <Label className="m-10" htmlFor="template-uri">
-                    OR...
-                  </Label>
-                  <Label className="my-6" htmlFor="template-uri">
-                    Enter any nanopublication template URI{" "}
-                    <Badge variant="secondary">Advanced</Badge>
-                  </Label>
-                  <Input
-                    id="template-uri"
-                    type="url"
-                    value={inputUri ?? ""}
-                    onChange={(e) => setInputUri(e.target.value)}
-                    placeholder="https://w3id.org/np/..."
-                    className="w-full"
-                  />
-                </div>
-                <Button disabled={!inputUri} onClick={handleLoadCustomTemplate}>
-                  Load Template
-                </Button>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+              <Collapsible className="mt-6">
+                <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors data-[state=open]:[&>svg]:rotate-90">
+                  <ChevronRight className="h-4 w-4 transition-transform duration-100" />
+                  Custom Template
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-4 mt-4">
+                  <div>
+                    <Label className="my-6" htmlFor="template-uri">
+                      Use a custom template by entering the URI{" "}
+                      <span className="italic text-muted-foreground">
+                        (BETA)
+                      </span>{" "}
+                    </Label>
+                  </div>
+                  <div className="flex">
+                    <Input
+                      id="template-uri"
+                      type="url"
+                      value={inputUri ?? ""}
+                      onChange={(e) => setInputUri(e.target.value)}
+                      placeholder="https://w3id.org/np/..."
+                      className="w-full mr-2"
+                    />
+                    <Button
+                      disabled={!inputUri}
+                      onClick={handleLoadCustomTemplate}
+                    >
+                      Load Template
+                    </Button>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </CardContent>
+          </Card>
+        </>
+      )}
       {/* Generated RDF display */}
       {generatedRdf && (
         <div className="mt-20 space-y-6" ref={scrollPreviewRef}>

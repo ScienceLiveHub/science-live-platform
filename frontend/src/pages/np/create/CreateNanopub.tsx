@@ -51,6 +51,9 @@ export default function CreateNanopub() {
       <NanopubEditor
         key={templateUri ?? "default"}
         identity={currentUser}
+        identityPending={
+          isPending || (!isPending && session?.user && !currentUser)
+        }
         templateUri={templateUri}
         onTemplateUriChange={handleTemplateChange}
         embedded={false}

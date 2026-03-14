@@ -22,16 +22,18 @@ Transform bibliography items into semantic, machine-readable statements using an
 ### Access Points
 
 **File Menu:**
+
 - File → Create Nanopublication → [Choose Template]
 
 **Right-Click Context Menu:**
+
 - Right-click any item → Create Nanopublication → [Choose Template]
 
 ![Screenshot: File menu showing Create Nanopublication submenu](../../assets/images/File-menu.png)
 
 ### What You Get
 
-- Embedded form in Zotero tab (powered by `@sciencelivehub/nanopub-create`)
+- Embedded form in Zotero dialog/tab (powered by Science Live Platform components)
 - Auto-filled with item metadata (title, DOI, authors)
 - Smart form fields based on template
 - Dark mode support (matches Zotero theme)
@@ -49,16 +51,19 @@ Choose from popular nanopub templates or load any template by URI.
 ### Built-in Templates
 
 **📝 Research Summary (CiTO)**
+
 - Comment on or evaluate papers
 - Describe relationships between papers
 - Use Citation Typing Ontology (cites, extends, critiques, etc.)
 
 **🔬 Scientific Claim (AIDA)**
+
 - Make formal research assertions
 - Subject-predicate-object statements
 - Structured, machine-readable claims
 
 **🌍 Geographical Coverage**
+
 - Identify the geographical area or region covered by the study.
 - Support your selection with a quote from the paper.
 - Helps document and discover research by spatial scope.
@@ -82,11 +87,13 @@ Manage your ORCID identity and cryptographic keys.
 **Zotero → Settings** or **Edit → Settings** (depending on the Zotero version and your Operating System).
 
 Enter:
+
 - Your full name
 - Your ORCID (with or without https://orcid.org/ prefix)
 - Click on **Save Profile**
 
 The plugin:
+
 - Generates RSA key pairs for signing
 - Stores keys securely in Zotero's data directory
 - Links everything to your ORCID
@@ -112,6 +119,7 @@ Every nanopub you create or import is displayed as a beautifully formatted note.
 ### Powered by @sciencelivehub/nanopub-view
 
 The notes include:
+
 - Formatted title (extracted from template)
 - Author name and ORCID (clickable)
 - Publication timestamp
@@ -151,7 +159,6 @@ Discover what other researchers have published about papers in your library.
 - Research claims about the paper
 - Related work and connections
 
-
 ### Working with Results
 
 - View full nanopub details
@@ -164,10 +171,10 @@ Discover what other researchers have published about papers in your library.
 ## 6. Integration with Zotero PDFViewer to annotate quotation
 
 You can create nanopublications directly from the Zotero's PDF viewer:
+
 - Select text directly in PDFs
 - Create annotation from the highlighted passage
 - Right-click from the note in the PDFViwer to create a nanopublication.
-
 
 Check the video below to view the entire workflow step by step:
 
@@ -217,6 +224,7 @@ Or:
 ## 8. ORCID Authentication
 
 Your nanopublications are cryptographically signed with your ORCID for:
+
 - Proper attribution
 - Verification
 - Discoverability
@@ -230,7 +238,7 @@ Your nanopublications are cryptographically signed with your ORCID for:
 4. Private key signs each nanopub
 5. Signature proves you created it
 
-**No passwords sent, no API keys needed** - all handled locally by the plugin using WASM cryptography.
+**No passwords sent, no API keys needed** - all handled locally by the plugin using cryptography.
 
 ---
 
@@ -278,9 +286,7 @@ We're working on refactoring the complete zotero plugin to make it easier for en
 
 ## Technical Details
 
-**Form Generation:** `@sciencelivehub/nanopub-create`  
-**Display Rendering:** `@sciencelivehub/nanopub-view`  
-**Signing:** nanopub-rs WASM library  
+**Signing:** nanopub-js library  
 **Storage:** Nanopub network (Knowledge Pixels infrastructure)
 
 ---

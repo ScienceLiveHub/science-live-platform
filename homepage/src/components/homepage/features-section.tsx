@@ -1,5 +1,3 @@
-"use client";
-
 import { Card, CardContent } from "@/components/ui/card";
 import { CardDecorator } from "@/components/ui/card-decorator";
 import {
@@ -40,7 +38,7 @@ const values = [
     icon: Search,
     title: "Discover Knowledge",
     description:
-      "PSearch and find relevant nanopublications across the scientific community.",
+      "Search and find relevant nanopublications across the scientific community.",
   },
   {
     icon: ChartBar,

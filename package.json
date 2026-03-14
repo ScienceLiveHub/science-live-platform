@@ -6,6 +6,7 @@
   "workspaces": [
     "frontend",
     "api",
+    "homepage",
     "zotero"
   ],
   "scripts": {
@@ -19,11 +20,12 @@
     "deploy:frontend": "npm --workspace=frontend run deploy",
     "deploy:api": "npm --workspace=api run deploy",
     "deploy": "npm run deploy:frontend && npm run deploy:api",
-    "pr-check": "act -W .github/workflows/monorepo-pr.yml workflow_dispatch"
+    "pr-check": "act --artifact-server-path $(pwd)/.artifacts -W .github/workflows/monorepo-pr.yml workflow_dispatch",
+    "clean": "trash node_modules frontend/node_modules frontend/.wrangler frontend/dist frontend/dist-embedded-css api/node_modules api/.wrangler api/dist homepage/node_modules zotero/node_modules zotero/.scaffold zotero/dist"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
-    "@types/node": "^25.3.2",
+    "@types/node": "^25.3.3",
     "prettier-plugin-organize-imports": "^4.3.0",
     "typescript": "^5.9.3"
   },

@@ -12,9 +12,18 @@ permissions:
   pull-requests: write
 
 jobs:
+  # Only needed when relying on local nanopub-js, not npm package
+  build-nanopub-js:
+    uses: ./.github/workflows/build-nanopub-js.yml
+    with:
+      node-version: "24"
+    secrets: inherit
+
   zotero-release:
-    # https://github.com/zotero-plugin-dev/workflows/blob/main/.github/workflows/release-plugin.yml
-    # We use the above linked workflow, which will:
+    needs: [build-nanopub-js]
+    runs-on: ubuntu-latest
+    # Based on: https://github.com/zotero-plugin-dev/workflows/blob/main/.github/workflows/release-plugin.yml
+    # This job will:
     #  - Setup JS
     #  - Build plugin
     #  - Release plugin on Github
@@ -23,8 +32,31 @@ jobs:
     #    - Create a secondary release under tag `release` to host update(-beta).json
     #    - Create a comment for the release using apexskier/github-release-commenter
     #  - Post a comment in related issues and close them using apexskier/github-release-commenter
-    uses: zotero-plugin-dev/workflows/.github/workflows/release-plugin.yml@main
-    with:
-      build: "cd zotero && npm run build"
-      release: "cd zotero && npm run release"
-    secrets: inherit
+
+    # Previously used instead of copied steps:
+    # uses: zotero-plugin-dev/workflows/.github/workflows/release-plugin.yml@main
+    # with:
+    #   build: "cd zotero && npm run build"
+    #   release: "cd zotero && npm run release"
+    # secrets: inherit
+
+    steps:
+      # Only needed when relying on local nanopub-js, not npm package
+      - name: Download nanopub-js artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: nanopub-js
+          path: ../nanopub-js
+
+      - name: Setup JS
+        uses: zotero-plugin-dev/workflows/setup-js@main
+        with:
+          fetch-all: true
+
+      - name: Build
+        run: cd zotero && npm run build
+
+      - name: Release to GitHub
+        run: cd zotero && npm run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

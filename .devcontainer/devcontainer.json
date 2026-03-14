@@ -1,7 +1,7 @@
 {
   "name": "Science Live Platform",
-  /* Node v22 is current default. This image also includes yarn classic and pnpm */
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:22-trixie",
+  /* Node v24 is current default. This image also includes yarn classic and pnpm */
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:24-trixie",
   "workspaceFolder": "/workspaces/science-live-platform",
   "remoteUser": "node",
   "runArgs": [

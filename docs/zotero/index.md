@@ -25,17 +25,17 @@ The Zotero Nanopublication Plugin brings semantic web publishing **directly into
 
 === "For Readers"
 
-    **Annotate your readings semantically.**  
+    **Annotate your readings semantically.**
     Transform reading notes into structured, citable statements. Create nanopubs about papers as you read them - all in Zotero.
 
 === "For Reviewers"
 
-    **Write machine-readable reviews.**  
+    **Write machine-readable reviews.**
     Use CiTO (Citation Typing Ontology) to describe paper relationships. Others can discover and build upon your evaluations.
 
 === "For Researchers"
 
-    **Publish semantic claims.**  
+    **Publish semantic claims.**
     Make formal research assertions with AIDA templates. Your claims become part of the global knowledge graph, signed with your ORCID.
 
 ---
@@ -46,7 +46,7 @@ The Zotero Nanopublication Plugin brings semantic web publishing **directly into
 - **Template Browser** - Choose from popular templates with one click
 - **Multiple Templates** - CiTO, AIDA, quote & annotate, geographical coverage, and more
 - **Auto-fill** - Paper metadata automatically populated
-- **Automatic Signing** - Uses WASM cryptography with your ORCID
+- **Automatic Signing** - Uses cryptography with your ORCID
 - **Direct Publishing** - Publishes to nanopub network instantly
 - **Rich Notes** - Beautiful display of nanopubs with `@sciencelivehub/nanopub-view`
 - **Search Integration** - Discover nanopubs about papers in your library
@@ -104,11 +104,11 @@ Want updates? [Watch the repository](https://github.com/ScienceLiveHub/science-l
 !!! question "New to Nanopublications?"
 
     Nanopublications are the smallest units of publishable information in machine-readable format:
-    
+
     - **Assertion** - The core claim or statement
     - **Provenance** - Who made it, when, and how
     - **Publication Info** - Metadata about the nanopub itself
-    
+
     This plugin helps you create nanopublications from your Zotero workflow, making your insights part of the semantic web of scientific knowledge.
 
     [Learn More →](http://nanopub.net){ .md-button }
@@ -123,7 +123,7 @@ This plugin is part of [Science Live](https://sciencelive4all.org) - transformin
 
 - 🧱 **Knowledge Bricks**: Stackable, reusable research components
 - 🎯 **FAIR Principles**: Findable, Accessible, Interoperable, Reusable
-- 💰 **Credit System**: Recognition for quality contributions *(coming soon)*
+- 💰 **Credit System**: Recognition for quality contributions _(coming soon)_
 - 🌍 **Open Science**: Transparent, collaborative research
 
 **Roadmap Integration:**
@@ -139,9 +139,9 @@ This plugin is part of [Science Live](https://sciencelive4all.org) - transformin
 
 ## System Requirements
 
-- **Zotero:** Version 7.0 or later
+- **Zotero:** Version 8.0 or later
 - **Internet:** Required for loading templates and publishing
-- **ORCID:** Free account at [orcid.org](https://orcid.org)
+- For publishing: **Science Live Platform account** (verified and ORCID linked)
 
 **Supported Platforms:**
 
@@ -169,13 +169,10 @@ This plugin is part of [Science Live](https://sciencelive4all.org) - transformin
 
 **Built with:**
 
-- [@sciencelivehub/nanopub-create](https://github.com/ScienceLiveHub/nanopub-create) - Form generation and signing
-- [@sciencelivehub/nanopub-view](https://github.com/ScienceLiveHub/nanopub-view) - Rich note display
-- [nanopub-rs](https://github.com/vemonet/nanopub-rs) - WASM signing library
+- [nanopub-js](https://github.com/Nanopublication/nanopub-js) - signing library
 
 **Powered by:** [Nanopublication Network](http://nanopub.net) via [Knowledge Pixels](https://knowledgepixels.com)
 
 ---
 
 **Start publishing semantic knowledge today!** 🚀
-

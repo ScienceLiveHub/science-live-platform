@@ -1,10 +1,7 @@
 import { defineConfig } from "zotero-plugin-scaffold";
 import pkg from "./package.json";
 
-const server =
-  process.env.API_URL && process.env.NODE_ENV !== "production"
-    ? process.env.API_URL
-    : "https://api.sciencelive4all.org";
+const server = process.env.API_URL || "https://api.sciencelive4all.org";
 
 export default defineConfig({
   source: ["src", "addon"],
@@ -41,7 +38,6 @@ export default defineConfig({
           __api__: `"${server}"`,
         },
         bundle: true,
-        format: "esm",
         platform: "browser",
         target: "firefox115",
         outfile: `.scaffold/build/addon/content/scripts/${pkg.config.addonRef}.js`,
@@ -51,12 +47,10 @@ export default defineConfig({
           ".svg": "file",
         },
       },
+      // React dialogs running in an iframe context need their own entrypoint and outdir
       {
         entryPoints: ["src/dialogs/createNanopub/index.tsx"],
         bundle: true,
-        // Required because nanopub-js contains top-level await, which isn't supported in IIFE output.
-        // This dialog script is loaded directly by the XUL/XHTML window, so ESM is fine.
-        format: "esm",
         target: "firefox115",
         outdir: `.scaffold/build/addon/content/scripts/dialogs/createNanopub`,
         loader: {
