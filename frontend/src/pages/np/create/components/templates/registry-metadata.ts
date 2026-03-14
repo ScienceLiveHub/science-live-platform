@@ -27,6 +27,8 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao",
   RESEARCH_SOFTWARE:
     "https://w3id.org/np/RABBzVTxosLGT4YBCfdfNd6LyuOOTe2EVOTtWJMyOoZHk",
+  FORRT_CLAIM:
+    "https://w3id.org/np/RAVdxfm3fgFahBItmNmJX_Xkmg1xlimDtoSMjZgNIs2bQ",
 };
 
 /**
@@ -96,5 +98,14 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     icon: "💻",
     recommended: true,
     keywords: ["software", "code", "repository", "github", "tool"],
+  },
+  [TEMPLATE_URI.FORRT_CLAIM]: {
+    name: "FORRT Claim",
+    description:
+      "Declare an original claim according to FORRT, linking it to an AIDA sentence with a specific FORRT type.",
+    category: "Scientific",
+    icon: "🎓",
+    recommended: true,
+    keywords: ["forrt", "claim", "aida", "scientific", "replication"],
   },
 };
