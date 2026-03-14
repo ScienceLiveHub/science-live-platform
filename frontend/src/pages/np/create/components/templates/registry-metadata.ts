@@ -27,6 +27,8 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao",
   RESEARCH_SOFTWARE:
     "https://w3id.org/np/RABBzVTxosLGT4YBCfdfNd6LyuOOTe2EVOTtWJMyOoZHk",
+  SYSTEMATIC_DB_SEARCH:
+    "https://w3id.org/np/RA8MyCoRqMdgGqqOwN4MIQfe6Htwt5FPgiHXlXK4RKiic",
 };
 
 /**
@@ -96,5 +98,20 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     icon: "💻",
     recommended: true,
     keywords: ["software", "code", "repository", "github", "tool"],
+  },
+  [TEMPLATE_URI.SYSTEMATIC_DB_SEARCH]: {
+    name: "Systematic Database Search",
+    description:
+      "Document a systematic database search, recording the exact query, database, date, and number of results retrieved.",
+    category: "Systematic Review",
+    icon: "🗄️",
+    recommended: true,
+    keywords: [
+      "prisma",
+      "systematic review",
+      "database search",
+      "query",
+      "literature",
+    ],
   },
 };

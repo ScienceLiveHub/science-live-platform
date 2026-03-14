@@ -20,6 +20,7 @@ import { ViewCitationWithCiTO } from "./ViewCitationWithCiTO";
 import { ViewCommentOnPaper } from "./ViewCommentOnPaper";
 import { ViewGeographicalCoverage } from "./ViewGeographicalCoverage";
 import { ViewResearchSoftware } from "./ViewResearchSoftware";
+import { ViewSystematicDbSearch } from "./ViewSystematicDbSearch";
 
 /**
  * Registry mapping template URIs to their custom view components.
@@ -34,6 +35,7 @@ export const VIEW_COMPONENTS: Record<
   [TEMPLATE_URI.AIDA_SENTENCE]: ViewAIDASentence,
   [TEMPLATE_URI.GEO_COVERAGE]: ViewGeographicalCoverage,
   [TEMPLATE_URI.RESEARCH_SOFTWARE]: ViewResearchSoftware,
+  [TEMPLATE_URI.SYSTEMATIC_DB_SEARCH]: ViewSystematicDbSearch,
   // Legacy templates — remove when no longer needed
   [LEGACY_TEMPLATE_URIS.AIDA_SENTENCE![0]]: ViewAIDASentenceLegacy,
 };

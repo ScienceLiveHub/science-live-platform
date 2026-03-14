@@ -10,6 +10,7 @@ import CitationWithCiTO from "./CitationWithCiTO";
 import CommentOnPaper from "./CommentOnPaper";
 import DocumentGeographicalCoverage from "./DocumentGeographicalCoverage";
 import ResearchSoftware from "./ResearchSoftware";
+import SystematicDbSearch from "./SystematicDbSearch";
 import { TEMPLATE_URI } from "./registry-metadata";
 
 export interface NanopubTemplateDefComponentProps {
@@ -31,6 +32,7 @@ export const TEMPLATE_COMPONENTS: Record<
   [TEMPLATE_URI.AIDA_SENTENCE]: AIDASentence,
   [TEMPLATE_URI.GEO_COVERAGE]: DocumentGeographicalCoverage,
   [TEMPLATE_URI.RESEARCH_SOFTWARE]: ResearchSoftware,
+  [TEMPLATE_URI.SYSTEMATIC_DB_SEARCH]: SystematicDbSearch,
 };
 
 export const NanopubEditorOptionFields = [
