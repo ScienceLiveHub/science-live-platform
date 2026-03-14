@@ -27,6 +27,8 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao",
   RESEARCH_SOFTWARE:
     "https://w3id.org/np/RABBzVTxosLGT4YBCfdfNd6LyuOOTe2EVOTtWJMyOoZHk",
+  PRISMA_SEARCH_STRATEGY:
+    "https://w3id.org/np/RAvcJKm2DZPEKOBevGdPGcKL6sEw04JXwgzx2lH5DE5LU",
 };
 
 /**
@@ -96,5 +98,22 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     icon: "💻",
     recommended: true,
     keywords: ["software", "code", "repository", "github", "tool"],
+  },
+  [TEMPLATE_URI.PRISMA_SEARCH_STRATEGY]: {
+    name: "Systematic Review Search Strategy",
+    description:
+      "Document a systematic review search strategy following PRISMA 2020 guidelines.",
+    moreDescription:
+      "Captures search terms, databases, date ranges, languages, and methodology notes. Corresponds to PRISMA 2020 Item 7 (Search) for transparent, reproducible literature searches.",
+    category: "Systematic Review",
+    icon: "🔍",
+    recommended: true,
+    keywords: [
+      "prisma",
+      "systematic review",
+      "search strategy",
+      "literature",
+      "meta-analysis",
+    ],
   },
 };

@@ -144,15 +144,18 @@ export function extractDoisFromText(input: string) {
  * Returns true if it is a Wikidata entity such as http://www.wikidata.org/entity/Q12345
  */
 export function isWikidataEntityUri(uri: string) {
-  return /^https?:\/\/www\.wikidata\.org\/entity\//.test(uri);
+  return /^https?:\/\/www\.wikidata\.org\/(entity|wiki)\//.test(uri);
 }
 
 /**
  * Returns the QID (aka Q number) of the Wikidata entity
  * e.g. http://www.wikidata.org/entity/Q12345 -> Q12345
+ * e.g. https://www.wikidata.org/wiki/Q12345 -> Q12345
  */
 export function extractWikidataEntityId(uri: string): string | undefined {
-  const match = uri.match(/^https?:\/\/www\.wikidata\.org\/entity\/(Q\d+)$/);
+  const match = uri.match(
+    /^https?:\/\/www\.wikidata\.org\/(?:entity|wiki)\/(Q\d+)$/,
+  );
   return match ? match[1] : undefined;
 }
 
