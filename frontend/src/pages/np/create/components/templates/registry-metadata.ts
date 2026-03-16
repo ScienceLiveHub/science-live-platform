@@ -160,6 +160,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "claim",
       "scientific",
     ],
+  },
   [TEMPLATE_URI.FORRT_CLAIM]: {
     name: "FORRT Claim",
     description:
