@@ -206,7 +206,7 @@ export function CommentBlock({
         }
         className="mb-2"
       />
-      <div className="rounded-md border bg-muted/30 p-4 text-base leading-relaxed">
+      <div className="rounded-md border bg-muted/30 p-4 text-base leading-relaxed whitespace-pre-wrap">
         {text}
       </div>
     </div>
