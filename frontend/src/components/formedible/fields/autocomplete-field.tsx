@@ -55,6 +55,8 @@ export const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loadingDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Normalize options to consistent format
   const normalizeOptions = (
@@ -85,17 +87,45 @@ export const AutocompleteField: React.FC<AutocompleteFieldProps> = ({
   // Handle async options
   const fetchAsyncOptions = React.useCallback(
     async (query: string) => {
-      if (!asyncOptions || query.length < minChars) return;
+      if (!asyncOptions || query.length < minChars) {
+        setFilteredOptions([]);
+        setIsLoading(false);
+        return;
+      }
 
-      setIsLoading(true);
+      // Cancel previous request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+
+      // Clear previous loading delay
+      if (loadingDelayRef.current) {
+        clearTimeout(loadingDelayRef.current);
+      }
+
+      // Only show loading after 200ms delay to avoid flashing
+      loadingDelayRef.current = setTimeout(() => {
+        setIsLoading(true);
+      }, 200);
+
       try {
         const results = await asyncOptions(query);
+        // Clear loading delay if results came back quickly
+        if (loadingDelayRef.current) {
+          clearTimeout(loadingDelayRef.current);
+        }
         const normalizedResults = normalizeOptions(results);
         setFilteredOptions(normalizedResults.slice(0, maxResults));
+        setIsLoading(false);
       } catch (error) {
-        console.error("Autocomplete async options error:", error);
-        setFilteredOptions([]);
-      } finally {
+        if ((error as Error).name !== "AbortError") {
+          console.error("Autocomplete async options error:", error);
+          setFilteredOptions([]);
+        }
+        if (loadingDelayRef.current) {
+          clearTimeout(loadingDelayRef.current);
+        }
         setIsLoading(false);
       }
     },
