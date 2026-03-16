@@ -6,11 +6,10 @@ import { Separator } from "@/components/ui/separator";
 import { SnippetCopyButton } from "@/components/ui/shadcn-io/snippet";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
-import { usersLatestNanopubs } from "@/lib/queries";
+import { executeBindSparql, USERS_LATEST_NANOPUBS } from "@/lib/sparql";
 import { formatDate } from "@/lib/string-format";
 import { getUriEnd } from "@/lib/uri";
 import { SiOrcid } from "@icons-pack/react-simple-icons";
-import { NanopubClient } from "@nanopub/nanopub-js";
 import ky from "ky";
 import {
   Calendar,
@@ -94,12 +93,9 @@ export default function UserProfile() {
         }
 
         if (data.orcidConnected && data.orcidId) {
-          const client = new NanopubClient();
-          const result = await client.querySparql(
-            usersLatestNanopubs(data.orcidId),
-            "json",
-          );
-
+          const result = await executeBindSparql(USERS_LATEST_NANOPUBS, {
+            orcidUri: data.orcidId,
+          });
           data.latestContent = typeof result === "string" ? [result] : result;
         }
         setProfile(data);
