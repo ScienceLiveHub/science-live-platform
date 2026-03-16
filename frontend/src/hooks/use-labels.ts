@@ -72,16 +72,39 @@ export function useLabels(storeLabelCache: Record<string, string>): LabelStore {
               error,
             );
           }
-        } else if (uri.startsWith("http://purl.obolibrary.org/obo/")) {
-          // Resolve ontology term labels via the EBI Ontology Lookup Service
-          const data = (await ky
-            .get(
-              `https://www.ebi.ac.uk/ols4/api/terms?iri=${encodeURIComponent(uri)}`,
-            )
-            .json()) as {
-            _embedded?: { terms?: { label?: string }[] };
-          };
-          label = data?._embedded?.terms?.[0]?.label;
+        } else if (uri.includes("purl.obolibrary.org/obo/")) {
+          // OBO Foundry ontology terms - use EBI's Ontology Lookup Service API
+          try {
+            const data = (await ky
+              .get(
+                `https://www.ebi.ac.uk/ols4/api/terms?iri=${encodeURIComponent(uri)}`,
+              )
+              .json()) as {
+              _embedded?: { terms?: Array<{ label?: string }> };
+            };
+            label = data?._embedded?.terms?.[0]?.label;
+          } catch (error) {
+            console.warn(`Failed to fetch OBO term label for ${uri}:`, error);
+          }
+        } else if (
+          uri.includes("omg.org/spec/LCC/Languages") ||
+          uri.includes("lexvo.org")
+        ) {
+          // Language URIs - extract code and use Intl.DisplayNames
+          const code = uri.split("/").pop();
+          if (code && (code.length === 2 || code.length === 3)) {
+            try {
+              const displayNames = new Intl.DisplayNames(["en"], {
+                type: "language",
+              });
+              const name = displayNames.of(code.toLowerCase());
+              if (name && name !== code) {
+                label = name;
+              }
+            } catch {
+              // Fallback if Intl API fails
+            }
+          }
         } else {
           // Try to fetch RDF and look for labels or names
           await fetchQuads(uri, (quad) => {
