@@ -11,16 +11,22 @@ permissions:
   issues: write
   pull-requests: write
 
+env:
+  NODE_VERSION: "24"
+  CUSTOM_NANOPUB_JS: false
+
 jobs:
   # Only needed when relying on local nanopub-js, not npm package
   build-nanopub-js:
+    if: ${{ vars.CUSTOM_NANOPUB_JS == 'true' }}
     uses: ./.github/workflows/build-nanopub-js.yml
     with:
-      node-version: "24"
+      node-version: ${{ vars.NODE_VERSION }}
     secrets: inherit
 
   zotero-release:
     needs: [build-nanopub-js]
+    if: ${{ !cancelled() && (needs.build-nanopub-js.result == 'success' || needs.build-nanopub-js.result == 'skipped') }}
     runs-on: ubuntu-latest
     # Based on: https://github.com/zotero-plugin-dev/workflows/blob/main/.github/workflows/release-plugin.yml
     # This job will:
@@ -43,6 +49,7 @@ jobs:
     steps:
       # Only needed when relying on local nanopub-js, not npm package
       - name: Download nanopub-js artifact
+        if: ${{ vars.CUSTOM_NANOPUB_JS == 'true' }}
         uses: actions/download-artifact@v8
         with:
           name: nanopub-js

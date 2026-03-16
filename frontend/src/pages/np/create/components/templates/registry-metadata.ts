@@ -25,10 +25,20 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RALmXhDw3rHcMveTgbv8VtWxijUHwnSqhCmtJFIPKWVaA",
   GEO_COVERAGE:
     "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao",
+  DATASET:
+    "https://w3id.org/np/RAuVB37yyAuAlgusrUAoG84JI4_EfrEqIkpEZYDpSz3d8",
+  PICO_RESEARCH_QUESTION:
+    "https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w",
+  PCC_RESEARCH_QUESTION:
+    "https://w3id.org/np/RAmR-xqMgOq3oTJmOVDQFL2p5usID6zqRapizHy0UJb04",
   RESEARCH_SOFTWARE:
     "https://w3id.org/np/RABBzVTxosLGT4YBCfdfNd6LyuOOTe2EVOTtWJMyOoZHk",
   FORRT_REPLICATION_OUTCOME:
     "https://w3id.org/np/RA2zljn0Nw9SadppOyxZoh-_Rxosslrq-vYG-p9SttnJE",
+  FORRT_REPLICATION:
+    "https://w3id.org/np/RAuLEjPp-4dTvPwMkfHggTto1CgjIftiGRAgHlyeEonjQ",
+  FORRT_CLAIM:
+    "https://w3id.org/np/RAVdxfm3fgFahBItmNmJX_Xkmg1xlimDtoSMjZgNIs2bQ",
 };
 
 /**
@@ -39,6 +49,9 @@ export const TEMPLATE_URI = {
 export const LEGACY_TEMPLATE_URIS: Partial<Record<keyof typeof TEMPLATE_URI, string[]>> = {
   AIDA_SENTENCE: [
     "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE",
+  ],
+  PICO_RESEARCH_QUESTION: [
+    "https://w3id.org/np/RAfZfE1gbUtc35W7xT12XTO0ptZwycN2-jj7Jow6COAoQ",
   ],
 };
 /**
@@ -90,6 +103,41 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     recommended: false,
     keywords: ["statement", "general", "rdf", "triple"],
   },
+  [TEMPLATE_URI.DATASET]: {
+    name: "FAIR Dataset",
+    description:
+      "Describe a FAIR Digital Object dataset with metadata including creators, version, license, and access information.",
+    category: "Data",
+    icon: "📊",
+    recommended: true,
+    keywords: ["dataset", "data", "fair", "digital object", "zenodo"],
+  },
+  [TEMPLATE_URI.PICO_RESEARCH_QUESTION]: {
+    name: "PICO Research Question",
+    description:
+      "Define a research question using the PICO framework (Population, Intervention, Comparator, Outcome)",
+    category: "Research",
+    icon: "🔬",
+    recommended: true,
+    keywords: [
+      "pico",
+      "research",
+      "question",
+      "population",
+      "intervention",
+      "comparator",
+      "outcome",
+    ],
+  },
+[TEMPLATE_URI.PCC_RESEARCH_QUESTION]: {
+    name: "PCC Research Question",
+    description:
+      "Define a review question using the PCC framework (Population, Concept, Context)",
+    category: "Research",
+    icon: "📋",
+    recommended: true,
+    keywords: ["pcc", "review", "question", "population", "concept", "context"],
+  },
   [TEMPLATE_URI.RESEARCH_SOFTWARE]: {
     name: "Research Software",
     description:
@@ -114,5 +162,30 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "reproduction",
       "result",
     ],
+  },
+  [TEMPLATE_URI.FORRT_REPLICATION]: {
+    name: "FORRT Replication Study",
+    description:
+      "Declare a replication or reproduction study design according to FORRT, targeting a specific claim.",
+    category: "Scientific",
+    icon: "🔁",
+    recommended: true,
+    keywords: [
+      "forrt",
+      "replication",
+      "reproduction",
+      "study",
+      "claim",
+      "scientific",
+    ],
+  },
+  [TEMPLATE_URI.FORRT_CLAIM]: {
+    name: "FORRT Claim",
+    description:
+      "Declare an original claim according to FORRT, linking it to an AIDA sentence with a specific FORRT type.",
+    category: "Scientific",
+    icon: "🎓",
+    recommended: true,
+    keywords: ["forrt", "claim", "aida", "scientific", "replication"],
   },
 };
