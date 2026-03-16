@@ -21,7 +21,7 @@ jobs:
     if: ${{ vars.CUSTOM_NANOPUB_JS == 'true' }}
     uses: ./.github/workflows/build-nanopub-js.yml
     with:
-      node-version: ${{ env.NODE_VERSION }}
+      node-version: ${{ vars.NODE_VERSION }}
     secrets: inherit
 
   zotero-release:
