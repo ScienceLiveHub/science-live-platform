@@ -28,7 +28,7 @@ on:
       environment:
         description: "Deployment environment"
         required: true
-        default: "prod"
+        default: "dev"
         type: choice
         options:
           - prod
@@ -76,7 +76,7 @@ jobs:
 
       - name: Cache node_modules
         id: cache-nm
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             node_modules
@@ -114,7 +114,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Restore node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             node_modules
@@ -163,7 +163,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Restore node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             node_modules
@@ -185,6 +185,6 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: frontend
-          preCommands: npm run build
+          preCommands: ${{ github.event.inputs.environment == 'prod' && 'npm run build' || 'npm run build-dev' }}
         env:
           VITE_API_URL: ${{ github.event.inputs.environment == 'prod' && vars.VITE_API_URL || vars.VITE_API_URL_DEV }}
