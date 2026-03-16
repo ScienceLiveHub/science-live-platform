@@ -9,6 +9,8 @@ import AnnotateAPaperQuotation from "./AnnotateAPaperQuotation";
 import CitationWithCiTO from "./CitationWithCiTO";
 import CommentOnPaper from "./CommentOnPaper";
 import DocumentGeographicalCoverage from "./DocumentGeographicalCoverage";
+import PCCResearchQuestion from "./PCCResearchQuestion";
+import PICOResearchQuestion from "./PICOResearchQuestion";
 import ResearchSoftware from "./ResearchSoftware";
 import { TEMPLATE_URI } from "./registry-metadata";
 
@@ -30,6 +32,8 @@ export const TEMPLATE_COMPONENTS: Record<
   [TEMPLATE_URI.COMMENT_PAPER]: CommentOnPaper,
   [TEMPLATE_URI.AIDA_SENTENCE]: AIDASentence,
   [TEMPLATE_URI.GEO_COVERAGE]: DocumentGeographicalCoverage,
+  [TEMPLATE_URI.PICO_RESEARCH_QUESTION]: PICOResearchQuestion,
+  [TEMPLATE_URI.PCC_RESEARCH_QUESTION]: PCCResearchQuestion,
   [TEMPLATE_URI.RESEARCH_SOFTWARE]: ResearchSoftware,
 };
 

@@ -25,6 +25,10 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RALmXhDw3rHcMveTgbv8VtWxijUHwnSqhCmtJFIPKWVaA",
   GEO_COVERAGE:
     "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao",
+  PICO_RESEARCH_QUESTION:
+    "https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w",
+  PCC_RESEARCH_QUESTION:
+    "https://w3id.org/np/RAmR-xqMgOq3oTJmOVDQFL2p5usID6zqRapizHy0UJb04",
   RESEARCH_SOFTWARE:
     "https://w3id.org/np/RABBzVTxosLGT4YBCfdfNd6LyuOOTe2EVOTtWJMyOoZHk",
 };
@@ -37,6 +41,9 @@ export const TEMPLATE_URI = {
 export const LEGACY_TEMPLATE_URIS: Partial<Record<keyof typeof TEMPLATE_URI, string[]>> = {
   AIDA_SENTENCE: [
     "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE",
+  ],
+  PICO_RESEARCH_QUESTION: [
+    "https://w3id.org/np/RAfZfE1gbUtc35W7xT12XTO0ptZwycN2-jj7Jow6COAoQ",
   ],
 };
 /**
@@ -87,6 +94,32 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     icon: "📝",
     recommended: false,
     keywords: ["statement", "general", "rdf", "triple"],
+  },
+  [TEMPLATE_URI.PICO_RESEARCH_QUESTION]: {
+    name: "PICO Research Question",
+    description:
+      "Define a research question using the PICO framework (Population, Intervention, Comparator, Outcome)",
+    category: "Research",
+    icon: "🔬",
+    recommended: true,
+    keywords: [
+      "pico",
+      "research",
+      "question",
+      "population",
+      "intervention",
+      "comparator",
+      "outcome",
+    ],
+  },
+[TEMPLATE_URI.PCC_RESEARCH_QUESTION]: {
+    name: "PCC Research Question",
+    description:
+      "Define a review question using the PCC framework (Population, Concept, Context)",
+    category: "Research",
+    icon: "📋",
+    recommended: true,
+    keywords: ["pcc", "review", "question", "population", "concept", "context"],
   },
   [TEMPLATE_URI.RESEARCH_SOFTWARE]: {
     name: "Research Software",
