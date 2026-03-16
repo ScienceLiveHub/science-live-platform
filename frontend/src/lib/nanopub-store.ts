@@ -110,6 +110,26 @@ export const COMMON_LABELS: Record<string, string> = {
   "https://w3id.org/np/o/ntemplate/hasLabelFromApi": "has label from API",
 };
 
+/** Well-known URI labels (matched with and without trailing slash) */
+const WELL_KNOWN_URI_LABELS: Record<string, string> = {
+  "https://pubmed.ncbi.nlm.nih.gov": "PubMed",
+  "https://www.scopus.com": "Scopus",
+  "https://www.webofscience.com": "Web of Science",
+  "https://arxiv.org": "arXiv",
+  "https://scholar.google.com": "Google Scholar",
+  "https://www.cochranelibrary.com": "Cochrane Library",
+  "https://ieeexplore.ieee.org": "IEEE Xplore",
+  "https://dl.acm.org": "ACM Digital Library",
+  "https://www.embase.com": "Embase",
+  "https://eric.ed.gov": "ERIC",
+  "https://www.jstor.org": "JSTOR",
+};
+
+/** Look up a well-known URI label, normalizing trailing slashes */
+export function getWellKnownLabel(uri: string): string | undefined {
+  return WELL_KNOWN_URI_LABELS[uri] ?? WELL_KNOWN_URI_LABELS[uri.replace(/\/+$/, "")];
+}
+
 export const COMMON_LICENSES: Record<string, string> = {
   "https://creativecommons.org/licenses/by/4.0/":
     "Attribution 4.0 International (CC BY 4.0)",
@@ -214,8 +234,21 @@ export class NanopubStore extends N3Store {
       if (uri.startsWith("https://orcid.org/")) {
         return undefined;
       }
-      if (uri.startsWith("http://www.wikidata.org/entity/")) {
+      if (
+        uri.startsWith("http://www.wikidata.org/entity/") ||
+        uri.startsWith("https://www.wikidata.org/wiki/") ||
+        uri.startsWith("https://www.wikidata.org/entity/")
+      ) {
         return undefined;
+      }
+      if (uri.startsWith("http://purl.obolibrary.org/obo/")) {
+        return undefined;
+      }
+
+      // Check well-known URIs (e.g. academic databases)
+      const wellKnown = getWellKnownLabel(uri);
+      if (wellKnown) {
+        return wellKnown;
       }
 
       // Failing that, use the end-most part of the URL converted to space case

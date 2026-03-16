@@ -20,6 +20,7 @@ import { ViewCitationWithCiTO } from "./ViewCitationWithCiTO";
 import { ViewCommentOnPaper } from "./ViewCommentOnPaper";
 import { ViewDataset } from "./ViewDataset";
 import { ViewGeographicalCoverage } from "./ViewGeographicalCoverage";
+import { ViewPRISMASearchStrategy } from "./ViewPRISMASearchStrategy";
 import { ViewFORRTReplicationOutcome } from "./ViewFORRTReplicationOutcome";
 import { ViewFORRTReplication } from "./ViewFORRTReplication";
 import { ViewFORRTClaim } from "./ViewFORRTClaim";
@@ -44,6 +45,7 @@ export const VIEW_COMPONENTS: Record<
   [TEMPLATE_URI.PICO_RESEARCH_QUESTION]: ViewPICOResearchQuestion,
   [TEMPLATE_URI.PCC_RESEARCH_QUESTION]: ViewPCCResearchQuestion,
   [TEMPLATE_URI.RESEARCH_SOFTWARE]: ViewResearchSoftware,
+  [TEMPLATE_URI.PRISMA_SEARCH_STRATEGY]: ViewPRISMASearchStrategy,
   [TEMPLATE_URI.FORRT_REPLICATION_OUTCOME]: ViewFORRTReplicationOutcome,
   [TEMPLATE_URI.FORRT_REPLICATION]: ViewFORRTReplication,
   [TEMPLATE_URI.FORRT_CLAIM]: ViewFORRTClaim,

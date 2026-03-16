@@ -10,6 +10,7 @@ import CitationWithCiTO from "./CitationWithCiTO";
 import CommentOnPaper from "./CommentOnPaper";
 import Dataset from "./Dataset";
 import DocumentGeographicalCoverage from "./DocumentGeographicalCoverage";
+import PRISMASearchStrategy from "./PRISMASearchStrategy";
 import FORRTReplicationOutcome from "./FORRTReplicationOutcome";
 import FORRTReplication from "./FORRTReplication";
 import FORRTClaim from "./FORRTClaim";
@@ -40,6 +41,7 @@ export const TEMPLATE_COMPONENTS: Record<
   [TEMPLATE_URI.PICO_RESEARCH_QUESTION]: PICOResearchQuestion,
   [TEMPLATE_URI.PCC_RESEARCH_QUESTION]: PCCResearchQuestion,
   [TEMPLATE_URI.RESEARCH_SOFTWARE]: ResearchSoftware,
+  [TEMPLATE_URI.PRISMA_SEARCH_STRATEGY]: PRISMASearchStrategy,
   [TEMPLATE_URI.FORRT_REPLICATION_OUTCOME]: FORRTReplicationOutcome,
   [TEMPLATE_URI.FORRT_REPLICATION]: FORRTReplication,
   [TEMPLATE_URI.FORRT_CLAIM]: FORRTClaim,

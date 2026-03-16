@@ -1,4 +1,4 @@
-import { COMMON_LABELS } from "@/lib/nanopub-store";
+import { COMMON_LABELS, getWellKnownLabel } from "@/lib/nanopub-store";
 import { fetchQuads, NS, shrinkUri } from "@/lib/rdf";
 import {
   extractDoisFromText,
@@ -151,6 +151,12 @@ export function useLabels(storeLabelCache: Record<string, string>): LabelStore {
       // Also check common labels
       if (COMMON_LABELS[uri]) {
         return COMMON_LABELS[uri];
+      }
+
+      // Check well-known URIs (e.g. academic databases)
+      const wellKnown = getWellKnownLabel(uri);
+      if (wellKnown) {
+        return wellKnown;
       }
 
       // Otherwise return shortened URI as label for now, and start an async fetch for something better
