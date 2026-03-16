@@ -1,0 +1,24 @@
+# Search for nanopubs of a specific RDF type.
+# Excludes invalidated and superseded nanopubs.
+#
+# Placeholder: `?_searchTerm` - the user's search string.
+# Placeholder: `?_rdfType` - URI: the full type.
+
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix npa: <http://purl.org/nanopub/admin/>
+prefix npx: <http://purl.org/nanopub/x/>
+
+select ?thing ?label where {
+  graph ?g {
+    ?thing a ?_rdfType .
+  }
+  optional {
+    graph ?g2 {
+      ?thing rdfs:label ?label .
+    }
+  }
+  filter(
+    contains(lcase(str(?thing)), ?_searchTerm)
+    || contains(lcase(str(?label)), ?_searchTerm)
+  )
+} limit 10
