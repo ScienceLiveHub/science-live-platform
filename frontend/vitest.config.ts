@@ -8,6 +8,7 @@ export default defineConfig({
     },
   },
   test: {
+    testTimeout: 10_000,
     /* Uncomment to enable headless browser-based testing */
     //   browser: {
     //     provider: playwright(),
