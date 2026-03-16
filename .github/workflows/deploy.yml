@@ -1,0 +1,190 @@
+# Deploy API and Frontend to Cloudflare Workers
+#
+# Manually triggered workflow.
+#
+# Required GitHub Secrets:
+#   CLOUDFLARE_API_TOKEN      - Cloudflare API token with Workers deploy permissions
+#   CLOUDFLARE_ACCOUNT_ID     - Cloudflare account ID
+#
+# Required GitHub Variables (non-sensitive, set in repo Settings > Variables):
+#   Production:
+#     API_WRANGLER_CONFIG       - Full contents of api/wrangler.jsonc (gitignored, deployment-specific)
+#     FRONTEND_WRANGLER_CONFIG  - Full contents of frontend/wrangler.jsonc (gitignored, deployment-specific)
+#     VITE_API_URL              - The deployed API URL (e.g. https://api.sciencelive4all.org)
+#   Development:
+#     API_WRANGLER_CONFIG_DEV   - Full contents of api/wrangler-dev.jsonc
+#     FRONTEND_WRANGLER_CONFIG_DEV - Full contents of frontend/wrangler-dev.jsonc
+#     VITE_API_URL_DEV          - The dev API URL (e.g. https://api-dev.sciencelive4all.org)
+#
+# Note: Worker secrets (BETTER_AUTH_SECRET, ENCRYPTION_KEY, ORCID_CLIENT_SECRET,
+#       RESEND_API_KEY, DATABASE_URL) should be configured directly in the
+#       Cloudflare dashboard or via `wrangler secret put` locally.
+
+name: Deploy to Cloudflare
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment environment"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
+      deploy_target:
+        description: "What to deploy"
+        required: true
+        default: "both"
+        type: choice
+        options:
+          - both
+          - api
+          - frontend
+
+env:
+  NODE_VERSION: "24"
+  CUSTOM_NANOPUB_JS: false
+
+jobs:
+  # Only needed when relying on local nanopub-js, not npm package
+  build-nanopub-js:
+    if: ${{ vars.CUSTOM_NANOPUB_JS == 'true' }}
+    uses: ./.github/workflows/build-nanopub-js.yml
+    with:
+      node-version: ${{ env.NODE_VERSION }}
+    secrets: inherit
+
+  install:
+    name: Install Dependencies
+    runs-on: ubuntu-latest
+    needs: build-nanopub-js
+    if: ${{ !cancelled() && (needs.build-nanopub-js.result == 'success' || needs.build-nanopub-js.result == 'skipped') }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/download-artifact@v8
+        if: ${{ vars.CUSTOM_NANOPUB_JS == 'true' }}
+        with:
+          name: nanopub-js
+          path: ../nanopub-js
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Cache node_modules
+        id: cache-nm
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            frontend/node_modules
+            api/node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.cache-nm.outputs.cache-hit != 'true'
+        run: npm ci
+
+  deploy-api:
+    name: Deploy API
+    runs-on: ubuntu-latest
+    needs: [build-nanopub-js, install]
+    if: >-
+      !cancelled() &&
+      (needs.build-nanopub-js.result == 'success' || needs.build-nanopub-js.result == 'skipped') &&
+      needs.install.result == 'success' &&
+      (github.event.inputs.deploy_target == 'both' || github.event.inputs.deploy_target == 'api')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Download nanopub-js artifact
+        if: ${{ vars.CUSTOM_NANOPUB_JS == 'true' }}
+        uses: actions/download-artifact@v8
+        with:
+          name: nanopub-js
+          path: ../nanopub-js
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            frontend/node_modules
+            api/node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Write wrangler config (prod)
+        if: github.event.inputs.environment == 'prod'
+        run: echo '${{ vars.API_WRANGLER_CONFIG }}' > api/wrangler.jsonc
+
+      - name: Write wrangler config (dev)
+        if: github.event.inputs.environment == 'dev'
+        run: echo '${{ vars.API_WRANGLER_CONFIG_DEV }}' > api/wrangler.jsonc
+
+      - name: Deploy API Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: api
+
+  deploy-frontend:
+    name: Deploy Frontend
+    runs-on: ubuntu-latest
+    needs: [build-nanopub-js, install]
+    if: >-
+      !cancelled() &&
+      (needs.build-nanopub-js.result == 'success' || needs.build-nanopub-js.result == 'skipped') &&
+      needs.install.result == 'success' &&
+      (github.event.inputs.deploy_target == 'both' || github.event.inputs.deploy_target == 'frontend')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Download nanopub-js artifact
+        if: ${{ vars.CUSTOM_NANOPUB_JS == 'true' }}
+        uses: actions/download-artifact@v8
+        with:
+          name: nanopub-js
+          path: ../nanopub-js
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            frontend/node_modules
+            api/node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Write wrangler config (prod)
+        if: github.event.inputs.environment == 'prod'
+        run: echo '${{ vars.FRONTEND_WRANGLER_CONFIG }}' > frontend/wrangler.jsonc
+
+      - name: Write wrangler config (dev)
+        if: github.event.inputs.environment == 'dev'
+        run: echo '${{ vars.FRONTEND_WRANGLER_CONFIG_DEV }}' > frontend/wrangler.jsonc
+
+      - name: Deploy Frontend Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: frontend
+          preCommands: npm run build
+        env:
+          VITE_API_URL: ${{ github.event.inputs.environment == 'prod' && vars.VITE_API_URL || vars.VITE_API_URL_DEV }}
