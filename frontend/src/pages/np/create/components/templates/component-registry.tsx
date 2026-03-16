@@ -10,6 +10,7 @@ import CitationWithCiTO from "./CitationWithCiTO";
 import CommentOnPaper from "./CommentOnPaper";
 import Dataset from "./Dataset";
 import DocumentGeographicalCoverage from "./DocumentGeographicalCoverage";
+import FORRTClaim from "./FORRTClaim";
 import PCCResearchQuestion from "./PCCResearchQuestion";
 import PICOResearchQuestion from "./PICOResearchQuestion";
 import ResearchSoftware from "./ResearchSoftware";
@@ -37,6 +38,7 @@ export const TEMPLATE_COMPONENTS: Record<
   [TEMPLATE_URI.PICO_RESEARCH_QUESTION]: PICOResearchQuestion,
   [TEMPLATE_URI.PCC_RESEARCH_QUESTION]: PCCResearchQuestion,
   [TEMPLATE_URI.RESEARCH_SOFTWARE]: ResearchSoftware,
+  [TEMPLATE_URI.FORRT_CLAIM]: FORRTClaim,
 };
 
 export const NanopubEditorOptionFields = [
