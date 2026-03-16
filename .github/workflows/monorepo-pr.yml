@@ -13,23 +13,27 @@ on:
 
 env:
   NODE_VERSION: "24"
+  CUSTOM_NANOPUB_JS: false
 
 jobs:
   # Only needed when relying on local nanopub-js, not npm package
   build-nanopub-js:
+    if: ${{ vars.CUSTOM_NANOPUB_JS == 'true' }}
     uses: ./.github/workflows/build-nanopub-js.yml
     with:
-      node-version: "24"
+      node-version: ${{ vars.NODE_VERSION }}
     secrets: inherit
 
   install:
     name: Install Dependencies
     runs-on: ubuntu-latest
     needs: build-nanopub-js
+    if: ${{ !cancelled() && (needs.build-nanopub-js.result == 'success' || needs.build-nanopub-js.result == 'skipped') }}
     steps:
       - uses: actions/checkout@v6
 
       - uses: actions/download-artifact@v8
+        if: ${{ vars.CUSTOM_NANOPUB_JS == 'true' }}
         with:
           name: nanopub-js
           path: ../nanopub-js
@@ -41,7 +45,7 @@ jobs:
       # Build and cache the output of npm install to use in other workflows
       - name: Cache node_modules
         id: cache-nm
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             node_modules
@@ -59,12 +63,14 @@ jobs:
     name: Frontend Checks
     runs-on: ubuntu-latest
     needs: [build-nanopub-js, install]
+    if: ${{ !cancelled() && (needs.build-nanopub-js.result == 'success' || needs.build-nanopub-js.result == 'skipped') && needs.install.result == 'success' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
       # Only needed when relying on local nanopub-js, not npm package
       - name: Download nanopub-js artifact
+        if: ${{ vars.CUSTOM_NANOPUB_JS == 'true' }}
         uses: actions/download-artifact@v8
         with:
           name: nanopub-js
@@ -76,7 +82,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Restore node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             node_modules
@@ -106,12 +112,14 @@ jobs:
     name: API Checks
     runs-on: ubuntu-latest
     needs: [build-nanopub-js, install]
+    if: ${{ !cancelled() && (needs.build-nanopub-js.result == 'success' || needs.build-nanopub-js.result == 'skipped') && needs.install.result == 'success' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
       # Only needed when relying on local nanopub-js, not npm package
       - name: Download nanopub-js artifact
+        if: ${{ vars.CUSTOM_NANOPUB_JS == 'true' }}
         uses: actions/download-artifact@v8
         with:
           name: nanopub-js
@@ -123,7 +131,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Restore node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             node_modules
@@ -153,12 +161,14 @@ jobs:
     name: Zotero Checks
     runs-on: ubuntu-latest
     needs: [build-nanopub-js, install]
+    if: ${{ !cancelled() && (needs.build-nanopub-js.result == 'success' || needs.build-nanopub-js.result == 'skipped') && needs.install.result == 'success' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
       # Only needed when relying on local nanopub-js, not npm package
       - name: Download nanopub-js artifact
+        if: ${{ vars.CUSTOM_NANOPUB_JS == 'true' }}
         uses: actions/download-artifact@v8
         with:
           name: nanopub-js
@@ -170,7 +180,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Restore node_modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             node_modules
