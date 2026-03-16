@@ -72,7 +72,12 @@ export default defineConfig(({ mode }) => {
       tailwindcss(),
       sparqlFiles(),
       cloudflare({
-        configPath: mode === "development" ? "./wrangler-dev.jsonc" : undefined,
+        config(config) {
+          if (mode === "development") {
+            config.name = "platform-dev";
+          }
+          return config;
+        },
       }),
     ],
     resolve: {
