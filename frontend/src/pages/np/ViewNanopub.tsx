@@ -2,11 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { useNanopub } from "@/hooks/use-nanopub";
-import {
-  executeSparql,
-  SEARCH_NANOPUBS,
-  sparqlBindString,
-} from "@/lib/sparql";
+import { executeBindSparql, SEARCH_NANOPUBS } from "@/lib/sparql";
 import { getNanopubHash, isNanopubUri, toScienceLiveNPUri } from "@/lib/uri";
 import { Calendar, FileCode, FileSymlink, Hash, Search } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -67,12 +63,9 @@ export default function ViewNanopub() {
 
     const performSearch = async () => {
       try {
-        const query = sparqlBindString(
-          SEARCH_NANOPUBS,
-          "?_searchTerm",
-          searchQuery,
-        );
-        const rows = await executeSparql(query);
+        const rows = await executeBindSparql(SEARCH_NANOPUBS, {
+          searchTerm: searchQuery,
+        });
 
         if (mounted) {
           setSearchResults(
