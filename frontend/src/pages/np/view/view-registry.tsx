@@ -18,6 +18,7 @@ import { ViewAIDASentenceLegacy } from "./ViewAIDASentenceLegacy";
 import { ViewAnnotateQuotation } from "./ViewAnnotateQuotation";
 import { ViewCitationWithCiTO } from "./ViewCitationWithCiTO";
 import { ViewCommentOnPaper } from "./ViewCommentOnPaper";
+import { ViewDataset } from "./ViewDataset";
 import { ViewGeographicalCoverage } from "./ViewGeographicalCoverage";
 import { ViewPCCResearchQuestion } from "./ViewPCCResearchQuestion";
 import { ViewPICOResearchQuestion } from "./ViewPICOResearchQuestion";
@@ -36,6 +37,7 @@ export const VIEW_COMPONENTS: Record<
   [TEMPLATE_URI.COMMENT_PAPER]: ViewCommentOnPaper,
   [TEMPLATE_URI.AIDA_SENTENCE]: ViewAIDASentence,
   [TEMPLATE_URI.GEO_COVERAGE]: ViewGeographicalCoverage,
+  [TEMPLATE_URI.DATASET]: ViewDataset,
   [TEMPLATE_URI.PICO_RESEARCH_QUESTION]: ViewPICOResearchQuestion,
   [TEMPLATE_URI.PCC_RESEARCH_QUESTION]: ViewPCCResearchQuestion,
   [TEMPLATE_URI.RESEARCH_SOFTWARE]: ViewResearchSoftware,

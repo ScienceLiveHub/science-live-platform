@@ -25,6 +25,8 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RALmXhDw3rHcMveTgbv8VtWxijUHwnSqhCmtJFIPKWVaA",
   GEO_COVERAGE:
     "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao",
+  DATASET:
+    "https://w3id.org/np/RAuVB37yyAuAlgusrUAoG84JI4_EfrEqIkpEZYDpSz3d8",
   PICO_RESEARCH_QUESTION:
     "https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w",
   PCC_RESEARCH_QUESTION:
@@ -94,6 +96,15 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     icon: "📝",
     recommended: false,
     keywords: ["statement", "general", "rdf", "triple"],
+  },
+  [TEMPLATE_URI.DATASET]: {
+    name: "FAIR Dataset",
+    description:
+      "Describe a FAIR Digital Object dataset with metadata including creators, version, license, and access information.",
+    category: "Data",
+    icon: "📊",
+    recommended: true,
+    keywords: ["dataset", "data", "fair", "digital object", "zenodo"],
   },
   [TEMPLATE_URI.PICO_RESEARCH_QUESTION]: {
     name: "PICO Research Question",
