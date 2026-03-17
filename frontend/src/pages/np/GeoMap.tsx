@@ -13,7 +13,6 @@ import { Input } from "@/components/ui/input";
 import { Map, MapTileLayer, MapZoomControl } from "@/components/ui/map";
 import { Spinner } from "@/components/ui/spinner";
 import { AsyncLabel } from "@/hooks/use-labels";
-import { useNanopub } from "@/hooks/use-nanopub";
 import GEOLOCATION_QUERY from "@/lib/queries/geolocation.rq";
 import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
 import { wktToGeoJSON } from "@terraformer/wkt";
@@ -29,7 +28,6 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GeoJSON, useMap } from "react-leaflet";
 import { Link } from "react-router-dom";
-import { NanopubViewer } from "./create/components/NanopubViewer";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -305,41 +303,6 @@ function LocationDetail({ location }: { location: GeoLocation }) {
         )}
       </CardContent>
     </Card>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Nanopub detail panel (loads and displays the full nanopub)
-// ---------------------------------------------------------------------------
-
-function NanopubDetail({ uri }: { uri: string }) {
-  const { store, loading, error, creatorUserIdsByOrcid } = useNanopub(uri);
-
-  if (loading) {
-    return (
-      <div className="rounded-md border bg-muted/30 p-4 flex items-center gap-3 text-muted-foreground">
-        <Spinner /> <span>Loading nanopublication…</span>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="rounded-md border border-red-300 bg-red-50 dark:bg-red-950/20 p-4 text-red-900 dark:text-red-300 text-sm">
-        Failed to load nanopublication: {error}
-      </div>
-    );
-  }
-
-  if (!store) return null;
-
-  return (
-    <NanopubViewer
-      store={store}
-      creatorUserIdsByOrcid={creatorUserIdsByOrcid}
-      showShareMenu={true}
-      showCitation={false}
-    />
   );
 }
 
