@@ -7,16 +7,15 @@
  * corresponding nanopublication below the map.
  */
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Map, MapTileLayer, MapZoomControl } from "@/components/ui/map";
 import { Spinner } from "@/components/ui/spinner";
+import { AsyncLabel } from "@/hooks/use-labels";
 import { useNanopub } from "@/hooks/use-nanopub";
 import GEOLOCATION_QUERY from "@/lib/queries/geolocation.rq";
-import {
-  executeSparql,
-  NANOPUB_SPARQL_ENDPOINT_FULL,
-  sparqlBind,
-} from "@/lib/sparql";
+import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
 import { wktToGeoJSON } from "@terraformer/wkt";
 import type { LatLngExpression } from "leaflet";
 import {
@@ -25,9 +24,11 @@ import {
   MapPin,
   MessageCircle,
   Quote,
+  Search,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GeoJSON, useMap } from "react-leaflet";
+import { Link } from "react-router-dom";
 import { NanopubViewer } from "./create/components/NanopubViewer";
 
 // ---------------------------------------------------------------------------
@@ -151,6 +152,13 @@ function GeoLayers({ locations, onSelect, selectedNanopub }: GeoLayerProps) {
               fillColor: isSelected ? "#8b5cf6" : "#14b8a6",
               fillOpacity: isSelected ? 0.35 : 0.2,
             }}
+            pointToLayer={(_feature, latlng) => {
+              const L = (window as any).L;
+              if (!L) return null as any;
+              return L.circleMarker(latlng, {
+                radius: 10,
+              });
+            }}
             eventHandlers={{
               click: () => onSelect(loc),
             }}
@@ -168,6 +176,48 @@ function GeoLayers({ locations, onSelect, selectedNanopub }: GeoLayerProps) {
   );
 }
 
+/**
+ * Tracks the current map bounds and reports them via callback.
+ */
+function MapBoundsTracker({
+  onBoundsChange,
+}: {
+  onBoundsChange: (bounds: {
+    minLng: number;
+    minLat: number;
+    maxLng: number;
+    maxLat: number;
+  }) => void;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    const updateBounds = () => {
+      const bounds = map.getBounds();
+      onBoundsChange({
+        minLng: bounds.getWest(),
+        minLat: bounds.getSouth(),
+        maxLng: bounds.getEast(),
+        maxLat: bounds.getNorth(),
+      });
+    };
+
+    // Update bounds on initial load
+    updateBounds();
+
+    // Update bounds on map move/zoom
+    map.on("moveend", updateBounds);
+    map.on("zoomend", updateBounds);
+
+    return () => {
+      map.off("moveend", updateBounds);
+      map.off("zoomend", updateBounds);
+    };
+  }, [map, onBoundsChange]);
+
+  return null;
+}
+
 // ---------------------------------------------------------------------------
 // Detail panel for selected location (before nanopub loads)
 // ---------------------------------------------------------------------------
@@ -179,6 +229,9 @@ function LocationDetail({ location }: { location: GeoLocation }) {
         <CardTitle className="flex items-center gap-2 text-lg">
           <MapPin className="h-5 w-5 text-teal-600" />
           {location.locationLabel}
+          <Link to={`/np/?uri=${location.nanopub}`} target="_blank">
+            <ExternalLink className="h-4 w-4" />
+          </Link>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -194,7 +247,7 @@ function LocationDetail({ location }: { location: GeoLocation }) {
               rel="noreferrer"
               className="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 break-all text-sm"
             >
-              {location.paper}
+              <AsyncLabel uri={location.paper} />
               <ExternalLink className="h-3 w-3 shrink-0" />
             </a>
           </div>
@@ -242,7 +295,7 @@ function LocationDetail({ location }: { location: GeoLocation }) {
               rel="noreferrer"
               className="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 break-all text-sm"
             >
-              {location.creator}
+              <AsyncLabel uri={location.creator} />
               <ExternalLink className="h-3 w-3 shrink-0" />
             </a>
           </div>
@@ -298,43 +351,65 @@ export default function GeoMap() {
   const [selectedLocation, setSelectedLocation] = useState<GeoLocation | null>(
     null,
   );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [mapBounds, setMapBounds] = useState<{
+    minLng: number;
+    minLat: number;
+    maxLng: number;
+    maxLat: number;
+  } | null>(null);
 
   const detailRef = useRef<HTMLDivElement>(null);
 
-  // Fetch geolocation data on mount
-  useEffect(() => {
-    let mounted = true;
-
-    const fetchData = async () => {
+  // Fetch geolocation data
+  const fetchData = useCallback(
+    async (search: string, bounds: typeof mapBounds) => {
       try {
         setLoading(true);
         setError(null);
 
-        const boundQuery = sparqlBind(GEOLOCATION_QUERY, {});
-        const rows = await executeSparql(
-          boundQuery,
+        // Build bind parameters
+        const bindParams: Record<string, string> = {};
+
+        // Add search term if provided
+        if (search.trim()) {
+          bindParams.searchTerm = search.trim();
+        }
+
+        // Add bounding box if provided
+        if (bounds) {
+          bindParams.bboxMinX = bounds.minLng.toString();
+          bindParams.bboxMinY = bounds.minLat.toString();
+          bindParams.bboxMaxX = bounds.maxLng.toString();
+          bindParams.bboxMaxY = bounds.maxLat.toString();
+        }
+
+        const rows = await executeBindSparql(
+          GEOLOCATION_QUERY,
+          bindParams,
           NANOPUB_SPARQL_ENDPOINT_FULL,
         );
 
-        if (mounted) {
-          setLocations(parseResults(rows));
-        }
+        setLocations(parseResults(rows));
       } catch (e: any) {
-        if (mounted) {
-          console.error("Failed to fetch geolocation data:", e);
-          setError(e?.message || "Failed to fetch geolocation data");
-        }
+        console.error("Failed to fetch geolocation data:", e);
+        setError(e?.message || "Failed to fetch geolocation data");
       } finally {
-        if (mounted) setLoading(false);
+        setLoading(false);
       }
-    };
+    },
+    [],
+  );
 
-    fetchData();
+  // Fetch all data on initial mount
+  useEffect(() => {
+    fetchData("", null);
+  }, [fetchData]);
 
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  // Handle search button click
+  const handleSearch = useCallback(() => {
+    fetchData(searchTerm, mapBounds);
+  }, [searchTerm, mapBounds, fetchData]);
 
   const handleSelect = useCallback((loc: GeoLocation) => {
     setSelectedLocation(loc);
@@ -350,12 +425,14 @@ export default function GeoMap() {
     <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-6xl">
       {/* Page Header */}
       <div className="flex items-center gap-3">
-        <Globe className="h-6 w-6 text-teal-600" />
-        <h1 className="text-2xl font-bold">Nanopublication Map</h1>
+        <h1 className="flex items-center text-xl text-muted-foreground font-black my-8">
+          <Globe className="mr-4" />
+          BROWSE BY REGION
+        </h1>
       </div>
       <p className="text-muted-foreground text-sm -mt-4">
-        Explore nanopublications with geographical coverage. Click on a region
-        to view the associated nanopublication.
+        Explore nanopublications with geographical coverage. Zoom and pan the
+        map to narrow search region.
       </p>
 
       {/* Loading State */}
@@ -372,31 +449,63 @@ export default function GeoMap() {
         </div>
       )}
 
-      {/* Map */}
-      {!loading && !error && (
-        <>
-          <div className="rounded-md border overflow-hidden h-[500px] md:h-[600px]">
-            <Map
-              center={defaultCenter}
-              zoom={2}
-              className="h-full w-full"
-              scrollWheelZoom={true}
+      {/* Search Controls */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Input
+            type="text"
+            placeholder="Enter a search term or leave empty to show everything in the region."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            className="pr-10"
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
-              <MapTileLayer />
-              <MapZoomControl />
-              <GeoLayers
-                locations={locations}
-                onSelect={handleSelect}
-                selectedNanopub={selectedLocation?.nanopub ?? null}
-              />
-            </Map>
-          </div>
+              ×
+            </button>
+          )}
+        </div>
+        <Button onClick={handleSearch} disabled={loading} className="shrink-0">
+          {loading ? (
+            <Spinner className="h-4 w-4 mr-2" />
+          ) : (
+            <Search className="h-4 w-4 mr-2" />
+          )}
+          Search Here
+        </Button>
+      </div>
 
-          {/* Results count */}
-          <p className="text-sm text-muted-foreground">
-            {locations.length} location{locations.length !== 1 ? "s" : ""} found
-          </p>
-        </>
+      {/* Map */}
+      <div className="rounded-md border overflow-hidden h-[500px] md:h-[600px]">
+        <Map
+          center={defaultCenter}
+          zoom={2}
+          className="h-full w-full"
+          scrollWheelZoom={true}
+        >
+          <MapTileLayer />
+          <MapZoomControl />
+          <MapBoundsTracker onBoundsChange={setMapBounds} />
+          {!loading && !error && (
+            <GeoLayers
+              locations={locations}
+              onSelect={handleSelect}
+              selectedNanopub={selectedLocation?.nanopub ?? null}
+            />
+          )}
+        </Map>
+      </div>
+
+      {/* Results count */}
+      {!loading && !error && (
+        <p className="text-sm text-muted-foreground">
+          {locations.length} location{locations.length !== 1 ? "s" : ""} found
+          {mapBounds && " (filtered by map area)"}
+        </p>
       )}
 
       {/* Selected Location Detail */}
@@ -404,9 +513,6 @@ export default function GeoMap() {
         <div ref={detailRef} className="flex flex-col gap-4">
           {/* Location summary card */}
           <LocationDetail location={selectedLocation} />
-
-          {/* Full nanopub viewer */}
-          <NanopubDetail uri={selectedLocation.nanopub} />
         </div>
       )}
     </main>

@@ -7,7 +7,7 @@ import {
 } from "@/lib/uri";
 import ky from "ky";
 import { NamedNode, Term, Util } from "n3";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 const { isNamedNode } = Util;
 
@@ -17,7 +17,12 @@ export interface LabelStore {
 }
 
 export function useLabels(storeLabelCache: Record<string, string>): LabelStore {
-  const [loadingUris, setLoadingUris] = useState<Set<string>>(new Set());
+  // Use a ref for the loading set to avoid re-render loops.
+  // The ref provides a stable dedup guard that doesn't cause new closures
+  // on every state change, preventing infinite fetch/render cycles.
+  const loadingUrisRef = useRef<Set<string>>(new Set());
+  // A simple counter state to trigger re-renders when labels resolve.
+  const [, setLabelVersion] = useState(0);
 
   const fetchAndCacheRemoteLabel = useCallback(
     async (uri: string) => {
@@ -25,11 +30,11 @@ export function useLabels(storeLabelCache: Record<string, string>): LabelStore {
         return storeLabelCache[uri];
       }
       // Cancel if already loading
-      if (loadingUris.has(uri)) {
+      if (loadingUrisRef.current.has(uri)) {
         return;
       }
       // Add to loading set so we only fetch once
-      setLoadingUris((prev) => new Set(prev.add(uri)));
+      loadingUrisRef.current.add(uri);
 
       let label: string | undefined = undefined;
 
@@ -128,13 +133,12 @@ export function useLabels(storeLabelCache: Record<string, string>): LabelStore {
         // TODO: if it failed, is it better to save uri, short uri or nothing?
         storeLabelCache[uri] = label ?? uri;
         // Always remove from loading set regardless of whether it failed or succeeded
-        setLoadingUris((prev) => {
-          prev.delete(uri);
-          return new Set(prev);
-        });
+        loadingUrisRef.current.delete(uri);
+        // Bump version to trigger a re-render so the resolved label is displayed
+        setLabelVersion((v) => v + 1);
       }
     },
-    [loadingUris, storeLabelCache],
+    [storeLabelCache],
   );
 
   const getLabel = useCallback(
@@ -160,25 +164,34 @@ export function useLabels(storeLabelCache: Record<string, string>): LabelStore {
       }
 
       // Otherwise return shortened URI as label for now, and start an async fetch for something better
-      if (!loadingUris.has(uri)) {
+      if (!loadingUrisRef.current.has(uri)) {
         fetchAndCacheRemoteLabel(uri);
       }
 
       return shrinkUri(uri, prefixes || {});
     },
-    [fetchAndCacheRemoteLabel, loadingUris, storeLabelCache],
+    [fetchAndCacheRemoteLabel, storeLabelCache],
   );
 
   // For checking whether any URIs are loading, or a specific URI if specified
-  const isLoading = useCallback(
-    (uri?: string): boolean => {
-      return uri ? loadingUris.has(uri) : !!loadingUris.size;
-    },
-    [loadingUris],
-  );
+  const isLoading = useCallback((uri?: string): boolean => {
+    return uri
+      ? loadingUrisRef.current.has(uri)
+      : !!loadingUrisRef.current.size;
+  }, []);
 
   return {
     getLabel,
     isLoading,
   };
+}
+
+/**
+ * Resolves a URI label asynchronously using the useLabels hook,
+ * displaying a shortened URI while loading and the resolved label once ready.
+ */
+export function AsyncLabel({ uri }: { uri: string }) {
+  const [labelCache] = useState<Record<string, string>>(() => ({}));
+  const { getLabel } = useLabels(labelCache);
+  return <>{getLabel(uri)}</>;
 }

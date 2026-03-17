@@ -1,4 +1,11 @@
 # Comprehensive query to get all location information with provenance.
+# Optionally filter by bounding box area and/or search term.
+#
+# Placeholder: `?_searchTerm` - optional search string to filter within quotation, quotation_end, comment, and location_label fields.
+# Placeholder: `?_bboxMinX` - optional bounding box minimum X (longitude) coordinate.
+# Placeholder: `?_bboxMinY` - optional bounding box minimum Y (latitude) coordinate.
+# Placeholder: `?_bboxMaxX` - optional bounding box maximum X (longitude) coordinate.
+# Placeholder: `?_bboxMaxY` - optional bounding box maximum Y (latitude) coordinate.
 
 PREFIX np: <http://www.nanopub.org/nschema#>
 PREFIX dct: <http://purl.org/dc/terms/>
@@ -7,17 +14,18 @@ PREFIX geo: <http://www.opengis.net/ont/geosparql#>
 PREFIX dcat: <http://www.w3.org/ns/dcat#>
 PREFIX cito: <http://purl.org/spar/cito/>
 PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
 
-SELECT DISTINCT 
-  ?nanopub 
-  ?paper 
-  ?location 
-  ?location_label 
-  ?wkt 
-  ?bbox 
-  ?quotation 
+SELECT DISTINCT
+  ?nanopub
+  ?paper
+  ?location
+  ?location_label
+  ?wkt
+  ?bbox
+  ?quotation
   ?quotation_end
-  ?comment 
+  ?comment
   ?creator
 WHERE {
   # Find the nanopublication
@@ -60,6 +68,44 @@ WHERE {
     OPTIONAL {
       ?location dcat:bbox ?bbox .
     }
+    
+    # Optional: Filter by search term in quotation, quotation_end, or comment
+    # Uses BIND to create a variable that works whether ?_searchTerm is substituted (literal) or unbound
+    # If ?_searchTerm is not provided or is empty, this filter passes all results
+    # STR() is used to strip language tags from literals so CONTAINS() comparisons work reliably
+    BIND(?_searchTerm AS ?searchFilter)
+    FILTER (
+      !BOUND(?searchFilter) ||
+      STR(?searchFilter) = "" ||
+      CONTAINS(LCASE(STR(?quotation)), LCASE(STR(?searchFilter))) ||
+      CONTAINS(LCASE(STR(COALESCE(?quotation_end, ""))), LCASE(STR(?searchFilter))) ||
+      CONTAINS(LCASE(STR(?comment)), LCASE(STR(?searchFilter))) ||
+      CONTAINS(LCASE(STR(?location_label)), LCASE(STR(?searchFilter)))
+    )
+    
+    # Optional: Filter by bounding box using WKT geometry
+    # Uses BIND to create variables that work whether placeholders are substituted (raw values) or unbound
+    # If any bbox coordinate is not provided, this filter passes all results
+    BIND(?_bboxMinX AS ?bboxMinXVal)
+    BIND(?_bboxMinY AS ?bboxMinYVal)
+    BIND(?_bboxMaxX AS ?bboxMaxXVal)
+    BIND(?_bboxMaxY AS ?bboxMaxYVal)
+    FILTER (
+      !BOUND(?bboxMinXVal) ||
+      !BOUND(?bboxMinYVal) ||
+      !BOUND(?bboxMaxXVal) ||
+      !BOUND(?bboxMaxYVal) ||
+      (
+        BOUND(?wkt) &&
+        geof:sfWithin(?wkt, STRDT(CONCAT("POLYGON((",
+          STR(?bboxMinXVal), " ", STR(?bboxMinYVal), ", ",
+          STR(?bboxMaxXVal), " ", STR(?bboxMinYVal), ", ",
+          STR(?bboxMaxXVal), " ", STR(?bboxMaxYVal), ", ",
+          STR(?bboxMinXVal), " ", STR(?bboxMaxYVal), ", ",
+          STR(?bboxMinXVal), " ", STR(?bboxMinYVal),
+          "))"), geo:wktLiteral))
+      )
+    )
   }
 }
 ORDER BY ?paper ?location_label
