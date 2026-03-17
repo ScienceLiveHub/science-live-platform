@@ -74,7 +74,7 @@ export default defineConfig(({ mode }) => {
       cloudflare({
         config(config) {
           if (mode === "development") {
-            config.name = "platform-dev";
+            config.name = `${config.name}-dev`;
           }
           return config;
         },
