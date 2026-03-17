@@ -6,6 +6,7 @@ import AuthPage from "./pages/AuthPage";
 import EmailVerified from "./pages/EmailVerified";
 import { HomePage } from "./pages/homepage/page";
 import CreateNanopub from "./pages/np/create/CreateNanopub";
+import GeoMap from "./pages/np/GeoMap";
 import ViewNanopub from "./pages/np/ViewNanopub";
 import AccountSettings from "./pages/settings/AccountSettings";
 import OrganizationSettings from "./pages/settings/OrganizationSettings";
@@ -41,6 +42,7 @@ function App() {
           {/* Main App Pages */}
           <Route path="/" element={<HomePage />} />
           <Route path="/np/" element={<ViewNanopub />} />
+          <Route path="/np/map" element={<GeoMap />} />
           <Route path="/np/create" element={<CreateNanopub />} />
           <Route path="/np/create/:uri" element={<CreateNanopub />} />
           <Route path="/email-verified" element={<EmailVerified />} />{" "}

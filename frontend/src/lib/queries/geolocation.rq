@@ -1,0 +1,65 @@
+# Comprehensive query to get all location information with provenance.
+
+PREFIX np: <http://www.nanopub.org/nschema#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX cito: <http://purl.org/spar/cito/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+
+SELECT DISTINCT 
+  ?nanopub 
+  ?paper 
+  ?location 
+  ?location_label 
+  ?wkt 
+  ?bbox 
+  ?quotation 
+  ?quotation_end
+  ?comment 
+  ?creator
+WHERE {
+  # Find the nanopublication
+  ?nanopub a np:Nanopublication ;
+           np:hasAssertion ?assertion ;
+           np:hasProvenance ?provenance .
+  
+  # Get creator from provenance graph
+  GRAPH ?provenance {
+    ?assertion prov:wasAttributedTo ?creator .
+  }
+  
+  # Within the assertion graph, find all location details
+  GRAPH ?assertion {
+    # Find papers that have spatial coverage
+    ?paper dct:spatial ?location .
+    
+    # Get the location details
+    ?location a geo:Feature ;
+              rdfs:label ?location_label .
+    
+    # Get quotation supporting the geographical claim
+    ?paper cito:hasQuotedText ?quotation .
+    
+    # Optional: Get end of quotation for longer passages
+    OPTIONAL {
+      ?paper cito:hasQuotedTextEnd ?quotation_end .
+    }
+    
+    # Get explanation of how quotation supports the conclusion
+    ?paper rdfs:comment ?comment .
+    
+    # Optional: Get WKT geometry representation
+    OPTIONAL {
+      ?location geo:hasGeometry ?geometry .
+      ?geometry geo:asWKT ?wkt .
+    }
+    
+    # Optional: Get bounding box
+    OPTIONAL {
+      ?location dcat:bbox ?bbox .
+    }
+  }
+}
+ORDER BY ?paper ?location_label
