@@ -127,7 +127,10 @@ function GeoLayers({ locations, onSelect, selectedNanopub }: GeoLayerProps) {
           }
         }
         if (allBounds.isValid()) {
-          map.fitBounds(allBounds, { padding: [40, 40] });
+          map.fitBounds(allBounds, {
+            padding: [40, 40],
+            maxZoom: 12,
+          });
         }
         hasInitialFit.current = true;
       } catch (e) {
@@ -346,7 +349,7 @@ function NanopubDetail({ uri }: { uri: string }) {
 
 export default function GeoMap() {
   const [locations, setLocations] = useState<GeoLocation[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<GeoLocation | null>(
     null,
@@ -401,11 +404,6 @@ export default function GeoMap() {
     [],
   );
 
-  // Fetch all data on initial mount
-  useEffect(() => {
-    fetchData("", null);
-  }, [fetchData]);
-
   // Handle search button click
   const handleSearch = useCallback(() => {
     fetchData(searchTerm, mapBounds);
@@ -427,7 +425,7 @@ export default function GeoMap() {
       <div className="flex items-center gap-3">
         <h1 className="flex items-center text-xl text-muted-foreground font-black my-8">
           <Globe className="mr-4" />
-          BROWSE BY REGION
+          BROWSE NANOPUBLICATIONS BY REGION
         </h1>
       </div>
       <p className="text-muted-foreground text-sm -mt-4">
@@ -501,7 +499,7 @@ export default function GeoMap() {
       </div>
 
       {/* Results count */}
-      {!loading && !error && (
+      {!loading && !error && locations.length > 0 && (
         <p className="text-sm text-muted-foreground">
           {locations.length} location{locations.length !== 1 ? "s" : ""} found
           {mapBounds && " (filtered by map area)"}
