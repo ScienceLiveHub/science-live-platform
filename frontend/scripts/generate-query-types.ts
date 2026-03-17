@@ -37,17 +37,24 @@ function parseQueryFile(content: string): {
   const lines = content.split("\n");
   const descriptionLines: string[] = [];
   const placeholders: Placeholder[] = [];
+  let endedDescription = false;
 
   for (const line of lines) {
     const trimmed = line.trim();
 
     // Extract description from leading comment lines
-    if (trimmed.startsWith("#") && !trimmed.includes("Placeholder:")) {
+    if (
+      trimmed.startsWith("#") &&
+      !trimmed.includes("Placeholder:") &&
+      !endedDescription
+    ) {
       const commentText = trimmed.slice(1).trim();
       // Skip prefix declarations in comments
       if (!commentText.startsWith("prefix ") && commentText.length > 0) {
         descriptionLines.push(commentText);
       }
+    } else {
+      endedDescription = true;
     }
 
     // Parse placeholder annotations
