@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
-export function HomePage() {
+export function Home() {
   const { data: session } = authClient.useSession();
   const navigate = useNavigate();
 
