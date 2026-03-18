@@ -1,7 +1,7 @@
+import { NanopubIcon } from "@/components/nanopub-icon";
 import { RelativeDateTime } from "@/components/relative-datetime";
 import { AsyncLabel } from "@/hooks/use-labels";
 import { getNanopubHash, toScienceLiveNPUri } from "@/lib/uri";
-import { Hash } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export interface SearchResult {
@@ -22,7 +22,7 @@ export default function SearchResultList({
   return (
     <div className="flex flex-col gap-3">
       {searchResults.map((result, index) => (
-        <div className="flex flex-col gap-2 block rounded-lg border bg-card p-4">
+        <div className="flex flex-col gap-2 rounded-lg border bg-card p-4">
           {/* Label/Title */}
           <Link
             key={result.np || index}
@@ -43,7 +43,7 @@ export default function SearchResultList({
 
           {/* Nanopub URI */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Hash className="h-3.5 w-3.5 flex-shrink-0" />
+            <NanopubIcon className="w-3 h-3" />
             <span className="font-mono text-xs truncate">
               {getNanopubHash(result.np)?.substring(0, 10)}...
             </span>
