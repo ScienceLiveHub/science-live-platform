@@ -61,7 +61,7 @@ function TripleRow({
   excludeSub?: boolean;
   className?: string;
 }) {
-  const { getLabel } = useLabels(store.labelCache);
+  const { getLabel } = useLabels();
   const s = !excludeSub
     ? {
         text: decodeURI(
@@ -128,7 +128,7 @@ export function GraphSection({
   extraClasses?: string;
   collapsible?: boolean;
 }) {
-  const { getLabel } = useLabels(store.labelCache);
+  const { getLabel } = useLabels();
 
   const header = (
     <CardTitle className="flex items-center gap-2">

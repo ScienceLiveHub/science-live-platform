@@ -118,7 +118,7 @@ function extractAIDASentence(store: NanopubStore): AIDASentenceData | null {
 export function ViewAIDASentence({ store }: CustomViewerProps) {
   const data = useMemo(() => extractAIDASentence(store), [store]);
 
-  const { getLabel } = useLabels(store.labelCache);
+  const { getLabel } = useLabels();
 
   if (!data) return null;
 

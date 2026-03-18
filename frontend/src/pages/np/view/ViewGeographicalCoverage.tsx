@@ -118,7 +118,7 @@ const ReadOnlyMap = lazy(() => import("../../../components/map-viewer"));
 export function ViewGeographicalCoverage({ store }: CustomViewerProps) {
   const data = useMemo(() => extractGeographicalCoverage(store), [store]);
 
-  const { getLabel } = useLabels(store.labelCache);
+  const { getLabel } = useLabels();
 
   if (!data) return null;
 

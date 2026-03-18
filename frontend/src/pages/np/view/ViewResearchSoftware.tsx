@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
-import { Code2, ExternalLink, FolderGit2, FileText, Link2 } from "lucide-react";
+import { Code2, ExternalLink, FileText, FolderGit2, Link2 } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
 import { CustomViewerProps } from "../create/components/NanopubViewer";
@@ -68,7 +68,10 @@ function extractResearchSoftware(
     null,
     assertionGraph,
   );
-  const title = titleQuad?.object.value || store.findInternalLabel(softwareUri) || softwareUri;
+  const title =
+    titleQuad?.object.value ||
+    store.findInternalLabel(softwareUri) ||
+    softwareUri;
 
   // Get repository/maintainer
   const maintainerQuad = store.matchOne(
@@ -131,7 +134,10 @@ function formatUrlForDisplay(url: string): string {
       return `github.com${parsed.pathname}`;
     }
     // For DOIs, keep the full identifier
-    if (url.startsWith("https://doi.org/") || url.startsWith("http://doi.org/")) {
+    if (
+      url.startsWith("https://doi.org/") ||
+      url.startsWith("http://doi.org/")
+    ) {
       return url.replace(/^https?:\/\//, "");
     }
     return parsed.hostname + parsed.pathname;
@@ -142,7 +148,7 @@ function formatUrlForDisplay(url: string): string {
 
 export function ViewResearchSoftware({ store }: CustomViewerProps) {
   const data = useMemo(() => extractResearchSoftware(store), [store]);
-  const { getLabel } = useLabels(store.labelCache);
+  const { getLabel } = useLabels();
 
   if (!data) return null;
 

@@ -211,10 +211,9 @@ function formatOrcid(uri: string): string {
   return uri;
 }
 
-
 export function ViewDataset({ store }: CustomViewerProps) {
   const data = useMemo(() => extractDataset(store), [store]);
-  const { getLabel } = useLabels(store.labelCache);
+  const { getLabel } = useLabels();
 
   if (!data) return null;
 

@@ -85,7 +85,7 @@ function extractCommentOnPaper(store: NanopubStore): CommentOnPaperData | null {
 export function ViewCommentOnPaper({ store }: CustomViewerProps) {
   const data = useMemo(() => extractCommentOnPaper(store), [store]);
 
-  const { getLabel } = useLabels(store.labelCache);
+  const { getLabel } = useLabels();
 
   if (!data) return null;
 

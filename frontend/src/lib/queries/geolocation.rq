@@ -1,0 +1,123 @@
+# Comprehensive query to get all location information with provenance.
+# Optionally filter by bounding box area and/or search term.
+#
+# Placeholder: `?_searchTerm` - optional search string to filter within quotation, quotation_end, comment, and location_label fields.
+# Placeholder: `?_bboxMinX` - optional bounding box minimum X (longitude) coordinate.
+# Placeholder: `?_bboxMinY` - optional bounding box minimum Y (latitude) coordinate.
+# Placeholder: `?_bboxMaxX` - optional bounding box maximum X (longitude) coordinate.
+# Placeholder: `?_bboxMaxY` - optional bounding box maximum Y (latitude) coordinate.
+
+prefix np: <http://www.nanopub.org/nschema#>
+prefix npa: <http://purl.org/nanopub/admin/>
+prefix npx: <http://purl.org/nanopub/x/>
+prefix dct: <http://purl.org/dc/terms/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix dcat: <http://www.w3.org/ns/dcat#>
+prefix cito: <http://purl.org/spar/cito/>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix geof: <http://www.opengis.net/def/function/geosparql/>
+
+select distinct
+  ?np
+  ?paper
+  ?location
+  ?location_label
+  ?date
+  ?wkt
+  ?bbox
+  ?quotation
+  ?quotation_end
+  ?comment
+  ?creator
+where {
+
+  # Get valid nanopubs only
+  graph npa:graph {
+    ?np npa:hasValidSignatureForPublicKey ?pubkey .
+    filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKey ?pubkey . }
+    filter not exists { ?npx npx:supersedes ?np ; npa:hasValidSignatureForPublicKey ?pubkey . }
+    ?np dct:created ?date .
+  }
+
+  # Find the nanopublication
+  ?np a np:Nanopublication ;
+           np:hasAssertion ?assertion ;
+           np:hasProvenance ?provenance .
+  
+  # Get creator from provenance graph
+  graph ?provenance {
+    ?assertion prov:wasAttributedTo ?creator .
+  }
+  
+  # Within the assertion graph, find all location details
+  graph ?assertion {
+    # Find papers that have spatial coverage
+    ?paper dct:spatial ?location .
+    
+    # Get the location details
+    ?location a geo:Feature ;
+              rdfs:label ?location_label .
+    
+    # Get quotation supporting the geographical claim
+    ?paper cito:hasQuotedText ?quotation .
+    
+    # Optional: Get end of quotation for longer passages
+    optional {
+      ?paper cito:hasQuotedTextEnd ?quotation_end .
+    }
+    
+    # Get explanation of how quotation supports the conclusion
+    ?paper rdfs:comment ?comment .
+    
+    # Optional: Get WKT geometry representation
+    optional {
+      ?location geo:hasGeometry ?geometry .
+      ?geometry geo:asWKT ?wkt .
+    }
+    
+    # Optional: Get bounding box
+    optional {
+      ?location dcat:bbox ?bbox .
+    }
+    
+    # Optional: Filter by search term in quotation, quotation_end, or comment
+    # Uses BIND to create a variable that works whether ?_searchTerm is substituted (literal) or unbound
+    # If ?_searchTerm is not provided or is empty, this filter passes all results
+    # STR() is used to strip language tags from literals so CONTAINS() comparisons work reliably
+    bind(?_searchTerm AS ?searchFilter)
+    filter (
+      !BOUND(?searchFilter) ||
+      STR(?searchFilter) = "" ||
+      CONTAINS(LCASE(STR(?quotation)), LCASE(STR(?searchFilter))) ||
+      CONTAINS(LCASE(STR(COALESCE(?quotation_end, ""))), LCASE(STR(?searchFilter))) ||
+      CONTAINS(LCASE(STR(?comment)), LCASE(STR(?searchFilter))) ||
+      CONTAINS(LCASE(STR(?location_label)), LCASE(STR(?searchFilter)))
+    )
+    
+    # Optional: Filter by bounding box using WKT geometry
+    # Uses BIND to create variables that work whether placeholders are substituted (raw values) or unbound
+    # If any bbox coordinate is not provided, this filter passes all results
+    bind(?_bboxMinX AS ?bboxMinXVal)
+    bind(?_bboxMinY AS ?bboxMinYVal)
+    bind(?_bboxMaxX AS ?bboxMaxXVal)
+    bind(?_bboxMaxY AS ?bboxMaxYVal)
+    filter (
+      !BOUND(?bboxMinXVal) ||
+      !BOUND(?bboxMinYVal) ||
+      !BOUND(?bboxMaxXVal) ||
+      !BOUND(?bboxMaxYVal) ||
+      (
+        BOUND(?wkt) &&
+        geof:sfWithin(?wkt, STRDT(CONCAT("POLYGON((",
+          STR(?bboxMinXVal), " ", STR(?bboxMinYVal), ", ",
+          STR(?bboxMaxXVal), " ", STR(?bboxMinYVal), ", ",
+          STR(?bboxMaxXVal), " ", STR(?bboxMaxYVal), ", ",
+          STR(?bboxMinXVal), " ", STR(?bboxMaxYVal), ", ",
+          STR(?bboxMinXVal), " ", STR(?bboxMinYVal),
+          "))"), geo:wktLiteral))
+      )
+    )
+  }
+}
+order by ?paper ?location_label
