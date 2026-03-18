@@ -1,14 +1,13 @@
-import { RelativeDateTime } from "@/components/relative-datetime";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { AsyncLabel } from "@/hooks/use-labels";
 import { useNanopub } from "@/hooks/use-nanopub";
 import { executeBindSparql, SEARCH_NANOPUBS } from "@/lib/sparql";
-import { getNanopubHash, isNanopubUri, toScienceLiveNPUri } from "@/lib/uri";
-import { FileCode, FileSymlink, Hash, Search } from "lucide-react";
+import { isNanopubUri } from "@/lib/uri";
+import { FileCode, FileSymlink, Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import SearchResultList, { SearchResult } from "./SearchResultList";
 import ViewerDemo from "./ViewerDemo";
 import { NanopubViewer } from "./create/components/NanopubViewer";
 
@@ -19,16 +18,6 @@ import { NanopubViewer } from "./create/components/NanopubViewer";
  * If the input is a nanopub URI (detected via isNanopubUri), loads and displays it.
  * Otherwise, performs a text search across the nanopub network and displays results.
  */
-
-interface SearchResult {
-  np: string;
-  label: string;
-  date: Date;
-  author: string;
-  isExample: boolean;
-  maxScore: number;
-  referenceCount: number;
-}
 
 export default function ViewNanopub() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -79,7 +68,7 @@ export default function ViewNanopub() {
               np: row.np,
               label: row.label || "",
               date: new Date(row.date),
-              author: row.author || "",
+              creator: row.creator || "",
               isExample: row.isExample === "true",
               maxScore: parseFloat(row.maxScore),
               referenceCount: parseInt(row.referenceCount),
@@ -225,44 +214,7 @@ export default function ViewNanopub() {
             for "{searchQuery}"
           </h2>
           {searchResults.length > 0 ? (
-            <div className="flex flex-col gap-3">
-              {searchResults.map((result, index) => (
-                <div className="flex flex-col gap-2 block rounded-lg border bg-card p-4">
-                  {/* Label/Title */}
-                  <Link
-                    key={result.np || index}
-                    to={toScienceLiveNPUri(result.np)}
-                    className="text-purple-600 dark:text-purple-400 hover:underline"
-                  >
-                    <div className="font-medium">
-                      {result.label || "Untitled Nanopublication"}
-                    </div>
-                  </Link>
-
-                  {/* Author */}
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span className="text-xs truncate">
-                      By <AsyncLabel uri={result.author} link />
-                    </span>
-                  </div>
-
-                  {/* Nanopub URI */}
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Hash className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span className="font-mono text-xs truncate">
-                      {getNanopubHash(result.np)?.substring(0, 10)}...
-                    </span>
-                  </div>
-
-                  {/* Date */}
-                  {result.date && (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <RelativeDateTime date={result.date} />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+            <SearchResultList searchResults={searchResults} />
           ) : (
             <div className="rounded-md border bg-muted/30 p-4 text-muted-foreground">
               No results found for your search.

@@ -11,7 +11,7 @@ prefix dct: <http://purl.org/dc/terms/>
 prefix search: <http://www.openrdf.org/contrib/lucenesail#>
 prefix nt: <https://w3id.org/np/o/ntemplate/>
 
-select ?np ?label ?date ?author ?isExample (count(?refNp) as ?referenceCount) (max(?score) as ?maxScore) where {
+select ?np ?label ?date ?creator ?isExample (count(?refNp) as ?referenceCount) (max(?score) as ?maxScore) where {
   graph npa:graph {
     ?np npa:hasValidSignatureForPublicKey ?pubkey .
     filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKey ?pubkey . }
@@ -25,8 +25,8 @@ select ?np ?label ?date ?author ?isExample (count(?refNp) as ?referenceCount) (m
     search:query ?_searchTerm ;
     search:property rdfs:label ;
     search:score ?score ] .
-  # Get the author (creator) from pubinfo graph
-  graph ?pg { ?np dct:creator ?author . }
+  # Get the creator from pubinfo graph
+  graph ?pg { ?np dct:creator ?creator . }
   # Check if this is an ExampleNanopub
   bind(exists { graph ?pg { ?np a npx:ExampleNanopub . } } as ?isExample)
   # Count references from other nanopubs (via supersedes or invalidates)
@@ -36,5 +36,5 @@ select ?np ?label ?date ?author ?isExample (count(?refNp) as ?referenceCount) (m
     }
     { ?refNp npx:supersedes ?np . } union { ?refNp npx:invalidates ?np . }
   }
-} group by ?np ?label ?date ?author ?isExample order by desc(?maxScore) limit 100
+} group by ?np ?label ?date ?creator ?isExample order by desc(?maxScore) limit 100
 

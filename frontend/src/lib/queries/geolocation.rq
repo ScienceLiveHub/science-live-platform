@@ -7,39 +7,51 @@
 # Placeholder: `?_bboxMaxX` - optional bounding box maximum X (longitude) coordinate.
 # Placeholder: `?_bboxMaxY` - optional bounding box maximum Y (latitude) coordinate.
 
-PREFIX np: <http://www.nanopub.org/nschema#>
-PREFIX dct: <http://purl.org/dc/terms/>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX geo: <http://www.opengis.net/ont/geosparql#>
-PREFIX dcat: <http://www.w3.org/ns/dcat#>
-PREFIX cito: <http://purl.org/spar/cito/>
-PREFIX prov: <http://www.w3.org/ns/prov#>
-PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
+prefix np: <http://www.nanopub.org/nschema#>
+prefix npa: <http://purl.org/nanopub/admin/>
+prefix npx: <http://purl.org/nanopub/x/>
+prefix dct: <http://purl.org/dc/terms/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+prefix dcat: <http://www.w3.org/ns/dcat#>
+prefix cito: <http://purl.org/spar/cito/>
+prefix prov: <http://www.w3.org/ns/prov#>
+prefix geof: <http://www.opengis.net/def/function/geosparql/>
 
-SELECT DISTINCT
-  ?nanopub
+select distinct
+  ?np
   ?paper
   ?location
   ?location_label
+  ?date
   ?wkt
   ?bbox
   ?quotation
   ?quotation_end
   ?comment
   ?creator
-WHERE {
+where {
+
+  # Get valid nanopubs only
+  graph npa:graph {
+    ?np npa:hasValidSignatureForPublicKey ?pubkey .
+    filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKey ?pubkey . }
+    filter not exists { ?npx npx:supersedes ?np ; npa:hasValidSignatureForPublicKey ?pubkey . }
+    ?np dct:created ?date .
+  }
+
   # Find the nanopublication
-  ?nanopub a np:Nanopublication ;
+  ?np a np:Nanopublication ;
            np:hasAssertion ?assertion ;
            np:hasProvenance ?provenance .
   
   # Get creator from provenance graph
-  GRAPH ?provenance {
+  graph ?provenance {
     ?assertion prov:wasAttributedTo ?creator .
   }
   
   # Within the assertion graph, find all location details
-  GRAPH ?assertion {
+  graph ?assertion {
     # Find papers that have spatial coverage
     ?paper dct:spatial ?location .
     
@@ -51,7 +63,7 @@ WHERE {
     ?paper cito:hasQuotedText ?quotation .
     
     # Optional: Get end of quotation for longer passages
-    OPTIONAL {
+    optional {
       ?paper cito:hasQuotedTextEnd ?quotation_end .
     }
     
@@ -59,13 +71,13 @@ WHERE {
     ?paper rdfs:comment ?comment .
     
     # Optional: Get WKT geometry representation
-    OPTIONAL {
+    optional {
       ?location geo:hasGeometry ?geometry .
       ?geometry geo:asWKT ?wkt .
     }
     
     # Optional: Get bounding box
-    OPTIONAL {
+    optional {
       ?location dcat:bbox ?bbox .
     }
     
@@ -73,8 +85,8 @@ WHERE {
     # Uses BIND to create a variable that works whether ?_searchTerm is substituted (literal) or unbound
     # If ?_searchTerm is not provided or is empty, this filter passes all results
     # STR() is used to strip language tags from literals so CONTAINS() comparisons work reliably
-    BIND(?_searchTerm AS ?searchFilter)
-    FILTER (
+    bind(?_searchTerm AS ?searchFilter)
+    filter (
       !BOUND(?searchFilter) ||
       STR(?searchFilter) = "" ||
       CONTAINS(LCASE(STR(?quotation)), LCASE(STR(?searchFilter))) ||
@@ -86,11 +98,11 @@ WHERE {
     # Optional: Filter by bounding box using WKT geometry
     # Uses BIND to create variables that work whether placeholders are substituted (raw values) or unbound
     # If any bbox coordinate is not provided, this filter passes all results
-    BIND(?_bboxMinX AS ?bboxMinXVal)
-    BIND(?_bboxMinY AS ?bboxMinYVal)
-    BIND(?_bboxMaxX AS ?bboxMaxXVal)
-    BIND(?_bboxMaxY AS ?bboxMaxYVal)
-    FILTER (
+    bind(?_bboxMinX AS ?bboxMinXVal)
+    bind(?_bboxMinY AS ?bboxMinYVal)
+    bind(?_bboxMaxX AS ?bboxMaxXVal)
+    bind(?_bboxMaxY AS ?bboxMaxYVal)
+    filter (
       !BOUND(?bboxMinXVal) ||
       !BOUND(?bboxMinYVal) ||
       !BOUND(?bboxMaxXVal) ||
@@ -108,4 +120,4 @@ WHERE {
     )
   }
 }
-ORDER BY ?paper ?location_label
+order by ?paper ?location_label

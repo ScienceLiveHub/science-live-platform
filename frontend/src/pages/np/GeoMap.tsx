@@ -28,6 +28,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GeoJSON, useMap } from "react-leaflet";
 import { Link } from "react-router-dom";
+import SearchResultList from "./SearchResultList";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -35,10 +36,11 @@ import { Link } from "react-router-dom";
 
 /** A single result row from the geolocation SPARQL query. */
 interface GeoLocation {
-  nanopub: string;
+  np: string;
   paper: string;
   location: string;
   locationLabel: string;
+  date: Date;
   wkt?: string;
   bbox?: string;
   quotation: string;
@@ -56,10 +58,11 @@ function parseResults(rows: Record<string, string>[]): GeoLocation[] {
   return rows
     .filter((row) => row.wkt || row.bbox)
     .map((row) => ({
-      nanopub: row.nanopub,
+      np: row.np,
       paper: row.paper,
       location: row.location,
       locationLabel: row.location_label ?? "",
+      date: new Date(row.date),
       wkt: row.wkt,
       bbox: row.bbox,
       quotation: row.quotation ?? "",
@@ -142,10 +145,10 @@ function GeoLayers({ locations, onSelect, selectedNanopub }: GeoLayerProps) {
   return (
     <>
       {parsed.map(({ loc, geoJson }, idx) => {
-        const isSelected = loc.nanopub === selectedNanopub;
+        const isSelected = loc.np === selectedNanopub;
         return (
           <GeoJSON
-            key={`${loc.nanopub}-${loc.location}-${idx}`}
+            key={`${loc.np}-${loc.location}-${idx}`}
             data={geoJson as any}
             style={{
               color: isSelected ? "#7c3aed" : "#0d9488",
@@ -230,7 +233,7 @@ function LocationDetail({ location }: { location: GeoLocation }) {
         <CardTitle className="flex items-center gap-2 text-lg">
           <MapPin className="h-5 w-5 text-teal-600" />
           {location.locationLabel}
-          <Link to={`/np/?uri=${location.nanopub}`} target="_blank">
+          <Link to={`/np/?uri=${location.np}`} target="_blank">
             <ExternalLink className="h-4 w-4" />
           </Link>
         </CardTitle>
@@ -455,19 +458,11 @@ export default function GeoMap() {
             <GeoLayers
               locations={locations}
               onSelect={handleSelect}
-              selectedNanopub={selectedLocation?.nanopub ?? null}
+              selectedNanopub={selectedLocation?.np ?? null}
             />
           )}
         </Map>
       </div>
-
-      {/* Results count */}
-      {!loading && !error && locations.length > 0 && (
-        <p className="text-sm text-muted-foreground">
-          {locations.length} location{locations.length !== 1 ? "s" : ""} found
-          {mapBounds && " (filtered by map area)"}
-        </p>
-      )}
 
       {/* Selected Location Detail */}
       {selectedLocation && (
@@ -475,6 +470,24 @@ export default function GeoMap() {
           {/* Location summary card */}
           <LocationDetail location={selectedLocation} />
         </div>
+      )}
+
+      {/* Results count */}
+      {!loading && !error && locations.length > 0 && (
+        <>
+          <p className="text-sm text-muted-foreground">
+            {locations.length} location{locations.length !== 1 ? "s" : ""} found
+            {mapBounds && " (filtered by map area)"}
+          </p>
+          <SearchResultList
+            searchResults={locations.map((l) => ({
+              np: l.np,
+              creator: l.creator,
+              date: l.date,
+              label: l.locationLabel,
+            }))}
+          />
+        </>
       )}
     </main>
   );
