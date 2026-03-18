@@ -137,6 +137,73 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Markdown typography prose styles */
+  /* e.g. for use in Terms & Policies page content */
+  .prose {
+    @apply text-foreground leading-relaxed;
+  }
+  .prose h1 {
+    @apply text-3xl font-bold tracking-tight mb-6 mt-8 first:mt-0;
+  }
+  .prose h2 {
+    @apply text-2xl font-semibold tracking-tight mb-4 mt-8 first:mt-0;
+  }
+  .prose h3 {
+    @apply text-xl font-semibold mb-3 mt-6 first:mt-0;
+  }
+  .prose h4 {
+    @apply text-lg font-semibold mb-2 mt-4 first:mt-0;
+  }
+  .prose p {
+    @apply mb-4 last:mb-0;
+  }
+  .prose a {
+    @apply text-primary underline underline-offset-4 hover:text-primary/80 transition-colors;
+  }
+  .prose ul {
+    @apply list-disc list-outside mb-4 pl-6;
+  }
+  .prose ol {
+    @apply list-decimal list-outside mb-4 pl-6;
+  }
+  .prose li {
+    @apply mb-1;
+  }
+  .prose li > ul,
+  .prose li > ol {
+    @apply mt-1 mb-2;
+  }
+  .prose blockquote {
+    @apply border-l-4 border-primary/50 pl-4 italic my-4 text-muted-foreground;
+  }
+  .prose code {
+    @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono;
+  }
+  .prose pre {
+    @apply bg-muted p-4 rounded-lg overflow-x-auto my-4;
+  }
+  .prose pre code {
+    @apply bg-transparent p-0;
+  }
+  .prose hr {
+    @apply border-border my-8;
+  }
+  .prose strong {
+    @apply font-semibold;
+  }
+  .prose em {
+    @apply italic;
+  }
+  .prose table {
+    @apply w-full border-collapse my-4;
+  }
+  .prose th {
+    @apply border border-border px-3 py-2 text-left font-semibold bg-muted;
+  }
+  .prose td {
+    @apply border border-border px-3 py-2;
+  }
+  /* END Markdown typography prose styles */
   .leaflet-container {
     @apply bg-card! font-[inherit]! text-primary;
   }

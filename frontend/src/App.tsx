@@ -8,6 +8,7 @@ import { Home } from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import CreateNanopub from "./pages/np/create/CreateNanopub";
 import ViewNanopub from "./pages/np/ViewNanopub";
+import Policies from "./pages/Policies";
 import AccountSettings from "./pages/settings/AccountSettings";
 import OrganizationSettings from "./pages/settings/OrganizationSettings";
 import SigningKeysSettings from "./pages/settings/SigningKeysSettings";
@@ -45,6 +46,8 @@ function App() {
           <Route path="/np/create" element={<CreateNanopub />} />
           <Route path="/np/create/:uri" element={<CreateNanopub />} />
           <Route path="/email-verified" element={<EmailVerified />} />
+          {/* Policy Pages */}
+          <Route path="/policies" element={<Policies />} />{" "}
           {/* 404 - Catch all unmatched routes */}
           <Route path="*" element={<NotFound />} />
         </Routes>

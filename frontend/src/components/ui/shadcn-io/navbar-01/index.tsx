@@ -16,7 +16,7 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { OrganizationSwitcher, UserButton } from "@daveyplate/better-auth-ui";
-import { UserCircle } from "lucide-react";
+import { Handshake, UserCircle } from "lucide-react";
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -299,6 +299,12 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                       href: "/profile",
                       icon: <UserCircle />,
                       label: "Profile",
+                      signedIn: true,
+                    },
+                    {
+                      href: "/policies",
+                      icon: <Handshake />,
+                      label: "Terms & Privacy",
                       signedIn: true,
                     },
                   ]}
