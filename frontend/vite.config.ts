@@ -137,14 +137,7 @@ export default defineConfig(({ mode }) => {
       tailwindcss(),
       markdownFiles(),
       sparqlFiles(),
-      cloudflare({
-        config(config) {
-          if (mode === "development") {
-            config.name = `${config.name}-dev`;
-          }
-          return config;
-        },
-      }),
+      cloudflare(),
     ],
     resolve: {
       alias: {
