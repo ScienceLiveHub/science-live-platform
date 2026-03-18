@@ -29,16 +29,13 @@ const { namedNode } = DataFactory;
 
 const FORRT_REPLICATION_TYPE =
   "https://w3id.org/sciencelive/o/terms/FORRT-Replication-Study";
-const TARGETS_CLAIM =
-  "https://w3id.org/sciencelive/o/terms/targetsClaim";
-const HAS_SCOPE =
-  "https://w3id.org/sciencelive/o/terms/hasScopeDescription";
+const TARGETS_CLAIM = "https://w3id.org/sciencelive/o/terms/targetsClaim";
+const HAS_SCOPE = "https://w3id.org/sciencelive/o/terms/hasScopeDescription";
 const HAS_METHODOLOGY =
   "https://w3id.org/sciencelive/o/terms/hasMethodologyDescription";
 const HAS_DEVIATION =
   "https://w3id.org/sciencelive/o/terms/hasDeviationDescription";
-const HAS_DISCIPLINE =
-  "https://w3id.org/sciencelive/o/terms/hasDiscipline";
+const HAS_DISCIPLINE = "https://w3id.org/sciencelive/o/terms/hasDiscipline";
 const SKOS_RELATED = "http://www.w3.org/2004/02/skos/core#related";
 
 interface FORRTReplicationData {
@@ -78,8 +75,7 @@ function extractFORRTReplication(
     .getQuads(sNode, NS.RDF("type"), null, g)
     .filter(
       (q) =>
-        Util.isNamedNode(q.object) &&
-        q.object.value !== FORRT_REPLICATION_TYPE,
+        Util.isNamedNode(q.object) && q.object.value !== FORRT_REPLICATION_TYPE,
     )
     .map((q) => ({
       uri: q.object.value,
@@ -95,12 +91,8 @@ function extractFORRTReplication(
     .value;
 
   // Methodology
-  const methodology = store.matchOne(
-    sNode,
-    namedNode(HAS_METHODOLOGY),
-    null,
-    g,
-  )?.object.value;
+  const methodology = store.matchOne(sNode, namedNode(HAS_METHODOLOGY), null, g)
+    ?.object.value;
 
   // Deviation
   const deviation = store.matchOne(sNode, namedNode(HAS_DEVIATION), null, g)
@@ -138,7 +130,7 @@ function extractFORRTReplication(
 
 export function ViewFORRTReplication({ store }: CustomViewerProps) {
   const data = useMemo(() => extractFORRTReplication(store), [store]);
-  const { getLabel } = useLabels(store.labelCache);
+  const { getLabel } = useLabels();
 
   if (!data) return null;
 
@@ -156,7 +148,9 @@ export function ViewFORRTReplication({ store }: CustomViewerProps) {
           <div>
             <ItemTitle title="Study" className="mb-2" />
             <div className="rounded-md border-l-4 border-violet-400 bg-violet-50 p-4 dark:bg-violet-950/20">
-              <p className="text-lg font-medium leading-relaxed">{data.label}</p>
+              <p className="text-lg font-medium leading-relaxed">
+                {data.label}
+              </p>
             </div>
           </div>
         )}

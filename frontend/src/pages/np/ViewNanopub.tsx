@@ -1,13 +1,15 @@
+import { RelativeDateTime } from "@/components/relative-datetime";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { AsyncLabel } from "@/hooks/use-labels";
 import { useNanopub } from "@/hooks/use-nanopub";
 import { executeBindSparql, SEARCH_NANOPUBS } from "@/lib/sparql";
 import { getNanopubHash, isNanopubUri, toScienceLiveNPUri } from "@/lib/uri";
-import { Calendar, FileCode, FileSymlink, Hash, Search } from "lucide-react";
+import { FileCode, FileSymlink, Hash, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import ViewerDemo from "../ViewerDemo";
+import ViewerDemo from "./ViewerDemo";
 import { NanopubViewer } from "./create/components/NanopubViewer";
 
 /**
@@ -21,7 +23,11 @@ import { NanopubViewer } from "./create/components/NanopubViewer";
 interface SearchResult {
   np: string;
   label: string;
-  date: string;
+  date: Date;
+  author: string;
+  isExample: boolean;
+  maxScore: number;
+  referenceCount: number;
 }
 
 export default function ViewNanopub() {
@@ -72,7 +78,11 @@ export default function ViewNanopub() {
             rows.map((row) => ({
               np: row.np,
               label: row.label || "",
-              date: row.date || "",
+              date: new Date(row.date),
+              author: row.author || "",
+              isExample: row.isExample === "true",
+              maxScore: parseFloat(row.maxScore),
+              referenceCount: parseInt(row.referenceCount),
             })),
           );
         }
@@ -229,6 +239,13 @@ export default function ViewNanopub() {
                     </div>
                   </Link>
 
+                  {/* Author */}
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span className="text-xs truncate">
+                      By <AsyncLabel uri={result.author} link />
+                    </span>
+                  </div>
+
                   {/* Nanopub URI */}
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Hash className="h-3.5 w-3.5 flex-shrink-0" />
@@ -240,8 +257,7 @@ export default function ViewNanopub() {
                   {/* Date */}
                   {result.date && (
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
-                      <span>{new Date(result.date).toLocaleString()}</span>
+                      <RelativeDateTime date={result.date} />
                     </div>
                   )}
                 </div>

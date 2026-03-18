@@ -19,7 +19,7 @@ export function NanopubOverview({
   creatorUserIdsByOrcid = {},
   showShareMenu = true,
 }: NanopubViewerProps) {
-  const { getLabel } = useLabels(store.labelCache);
+  const { getLabel } = useLabels();
   const isExample = store.metadata.types?.some(
     (t) => t.href === "http://purl.org/nanopub/x/ExampleNanopub",
   );

@@ -29,8 +29,7 @@ const { namedNode } = DataFactory;
 
 const FORRT_OUTCOME_TYPE =
   "https://w3id.org/sciencelive/o/terms/FORRT-Replication-Outcome";
-const IS_OUTCOME_OF =
-  "https://w3id.org/sciencelive/o/terms/isOutcomeOf";
+const IS_OUTCOME_OF = "https://w3id.org/sciencelive/o/terms/isOutcomeOf";
 const HAS_OUTCOME_REPO =
   "https://w3id.org/sciencelive/o/terms/hasOutcomeRepository";
 const SCHEMA_END_DATE = "http://schema.org/endDate";
@@ -58,9 +57,7 @@ interface FORRTOutcomeData {
   limitations?: string;
 }
 
-function extractFORRTOutcome(
-  store: NanopubStore,
-): FORRTOutcomeData | null {
+function extractFORRTOutcome(store: NanopubStore): FORRTOutcomeData | null {
   if (!store.graphUris.assertion) return null;
   const g = namedNode(store.graphUris.assertion);
 
@@ -136,7 +133,7 @@ function extractFORRTOutcome(
 
 export function ViewFORRTReplicationOutcome({ store }: CustomViewerProps) {
   const data = useMemo(() => extractFORRTOutcome(store), [store]);
-  const { getLabel } = useLabels(store.labelCache);
+  const { getLabel } = useLabels();
 
   if (!data) return null;
 

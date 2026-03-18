@@ -17,28 +17,20 @@ import { SearchCheck, Tag } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
 import { CustomViewerProps } from "../create/components/NanopubViewer";
-import {
-  CommentBlock,
-  ExternalUriLink,
-  ItemTitle,
-} from "./shared-components";
+import { CommentBlock, ExternalUriLink, ItemTitle } from "./shared-components";
 
 const { namedNode } = DataFactory;
 
 const SEARCH_STRATEGY_TYPE =
   "https://w3id.org/sciencelive/o/terms/SystematicReviewSearchStrategy";
-const HAS_SEARCH_TERMS =
-  "https://w3id.org/sciencelive/o/terms/hasSearchTerms";
+const HAS_SEARCH_TERMS = "https://w3id.org/sciencelive/o/terms/hasSearchTerms";
 const HAS_SEARCH_DATABASE =
   "https://w3id.org/sciencelive/o/terms/hasSearchDatabase";
 const COVERS_TIME_PERIOD =
   "https://w3id.org/sciencelive/o/terms/coversTimePeriod";
-const TEMPORAL_START_DATE =
-  "http://www.w3.org/ns/dcat#temporalStartDate";
-const TEMPORAL_END_DATE =
-  "http://www.w3.org/ns/dcat#temporalEndDate";
-const COVERS_LANGUAGE =
-  "https://w3id.org/sciencelive/o/terms/coversLanguage";
+const TEMPORAL_START_DATE = "http://www.w3.org/ns/dcat#temporalStartDate";
+const TEMPORAL_END_DATE = "http://www.w3.org/ns/dcat#temporalEndDate";
+const COVERS_LANGUAGE = "https://w3id.org/sciencelive/o/terms/coversLanguage";
 const HAS_METHODOLOGY_NOTES =
   "https://w3id.org/sciencelive/o/terms/hasMethodologyNotes";
 const DCT_IS_PART_OF = "http://purl.org/dc/terms/isPartOf";
@@ -138,7 +130,7 @@ function extractPRISMASearchStrategy(
 
 export function ViewPRISMASearchStrategy({ store }: CustomViewerProps) {
   const data = useMemo(() => extractPRISMASearchStrategy(store), [store]);
-  const { getLabel } = useLabels(store.labelCache);
+  const { getLabel } = useLabels();
 
   if (!data) return null;
 
