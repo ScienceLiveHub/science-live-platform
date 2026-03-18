@@ -24,8 +24,7 @@ import {
 
 const { namedNode } = DataFactory;
 
-const FORRT_CLAIM_TYPE =
-  "https://w3id.org/sciencelive/o/terms/FORRT-Claim";
+const FORRT_CLAIM_TYPE = "https://w3id.org/sciencelive/o/terms/FORRT-Claim";
 const AS_AIDA_STATEMENT =
   "https://w3id.org/sciencelive/o/terms/asAidaStatement";
 // --- FORRT Claim extraction ------------------------------------------------
@@ -79,9 +78,7 @@ function extractFORRTClaim(store: NanopubStore): FORRTClaimData | null {
   );
   const forrtTypes = typeQuads
     .filter(
-      (q) =>
-        Util.isNamedNode(q.object) &&
-        q.object.value !== FORRT_CLAIM_TYPE,
+      (q) => Util.isNamedNode(q.object) && q.object.value !== FORRT_CLAIM_TYPE,
     )
     .map((q) => ({
       uri: q.object.value,
@@ -134,7 +131,7 @@ function extractFORRTClaim(store: NanopubStore): FORRTClaimData | null {
 export function ViewFORRTClaim({ store }: CustomViewerProps) {
   const data = useMemo(() => extractFORRTClaim(store), [store]);
 
-  const { getLabel } = useLabels(store.labelCache);
+  const { getLabel } = useLabels();
 
   if (!data) return null;
 

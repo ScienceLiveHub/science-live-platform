@@ -74,7 +74,7 @@ function extractCitationWithCiTO(
 export function ViewCitationWithCiTO({ store }: CustomViewerProps) {
   const data = useMemo(() => extractCitationWithCiTO(store), [store]);
 
-  const { getLabel } = useLabels(store.labelCache);
+  const { getLabel } = useLabels();
 
   if (!data) return null;
 

@@ -93,7 +93,7 @@ function extractAnnotateQuotation(
 export function ViewAnnotateQuotation({ store }: CustomViewerProps) {
   const data = useMemo(() => extractAnnotateQuotation(store), [store]);
 
-  const { getLabel } = useLabels(store.labelCache);
+  const { getLabel } = useLabels();
 
   if (!data) return null;
 

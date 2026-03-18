@@ -4,7 +4,8 @@ import { Navbar01 } from "./components/ui/shadcn-io/navbar-01";
 import { Toaster } from "./components/ui/sonner";
 import AuthPage from "./pages/AuthPage";
 import EmailVerified from "./pages/EmailVerified";
-import { HomePage } from "./pages/homepage/page";
+import { Home } from "./pages/Home";
+import NotFound from "./pages/NotFound";
 import CreateNanopub from "./pages/np/create/CreateNanopub";
 import ViewNanopub from "./pages/np/ViewNanopub";
 import Policies from "./pages/Policies";
@@ -40,13 +41,15 @@ function App() {
           {/* View the current users own profile */}
           <Route path="/profile" element={<UserProfile />} />
           {/* Main App Pages */}
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<Home />} />
           <Route path="/np/" element={<ViewNanopub />} />
           <Route path="/np/create" element={<CreateNanopub />} />
           <Route path="/np/create/:uri" element={<CreateNanopub />} />
           <Route path="/email-verified" element={<EmailVerified />} />
           {/* Policy Pages */}
           <Route path="/policies" element={<Policies />} />{" "}
+          {/* 404 - Catch all unmatched routes */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Providers>
     </BrowserRouter>
