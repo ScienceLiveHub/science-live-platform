@@ -21,7 +21,7 @@
     "typecheck": "tsc -b",
     "check": "vite build && wrangler deploy --dry-run",
     "deploy": "npm run build && wrangler deploy",
-    "deploy-dev": "VITE_API_URL=https://api-dev.sciencelive4all.org npm run build-dev && wrangler deploy -e dev",
+    "deploy-dev": "VITE_API_URL=https://api-dev.sciencelive4all.org npm run build-dev && wrangler deploy --name platform-dev",
     "ui:add": "npx shadcn@latest add",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
