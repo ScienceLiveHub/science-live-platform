@@ -181,5 +181,6 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: frontend
           preCommands: ${{ github.event.inputs.environment == 'prod' && 'npm run build' || 'npm run build-dev' }}
+          command: ${{ github.event.inputs.environment == 'prod' && 'deploy' || 'deploy --name platform-dev' }}
         env:
           VITE_API_URL: ${{ github.event.inputs.environment == 'prod' && vars.VITE_API_URL || vars.VITE_API_URL_DEV }}
