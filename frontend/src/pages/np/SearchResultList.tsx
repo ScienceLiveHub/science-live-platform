@@ -1,7 +1,7 @@
 import { NanopubIcon } from "@/components/nanopub-icon";
 import { RelativeDateTime } from "@/components/relative-datetime";
 import { AsyncLabel } from "@/hooks/use-labels";
-import { getNanopubHash, toScienceLiveNPUri } from "@/lib/uri";
+import { toScienceLiveNPUri } from "@/lib/uri";
 import { Link } from "react-router-dom";
 
 export interface SearchResult {
@@ -29,7 +29,8 @@ export default function SearchResultList({
             to={toScienceLiveNPUri(result.np)}
             className="text-purple-600 dark:text-purple-400 hover:underline"
           >
-            <div className="font-medium">
+            <div className="font-medium flex flex-row">
+              <NanopubIcon className="w-3 h-3 min-w-3 min-h-3 mt-1.5 mr-2" />
               {result.label || "Untitled Nanopublication"}
             </div>
           </Link>
@@ -38,14 +39,6 @@ export default function SearchResultList({
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span className="text-xs truncate">
               By <AsyncLabel uri={result.creator} link />
-            </span>
-          </div>
-
-          {/* Nanopub URI */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <NanopubIcon className="w-3 h-3" />
-            <span className="font-mono text-xs truncate">
-              {getNanopubHash(result.np)?.substring(0, 10)}...
             </span>
           </div>
 
