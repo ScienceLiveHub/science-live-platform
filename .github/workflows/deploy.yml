@@ -9,12 +9,12 @@
 # Required GitHub Variables (non-sensitive, set in repo Settings > Variables):
 #   Production:
 #     API_WRANGLER_CONFIG       - Full contents of api/wrangler.jsonc (gitignored, deployment-specific)
-#     FRONTEND_WRANGLER_CONFIG  - Full contents of frontend/wrangler.jsonc (gitignored, deployment-specific)
 #     VITE_API_URL              - The deployed API URL (e.g. https://api.sciencelive4all.org)
 #   Development:
 #     API_WRANGLER_CONFIG_DEV   - Full contents of api/wrangler-dev.jsonc
-#     FRONTEND_WRANGLER_CONFIG_DEV - Full contents of frontend/wrangler-dev.jsonc
 #     VITE_API_URL_DEV          - The dev API URL (e.g. https://api-dev.sciencelive4all.org)
+#   Both:
+#     FRONTEND_WRANGLER_CONFIG  - Full contents of frontend/wrangler.jsonc (gitignored, deployment-specific)
 #
 # Note: Worker secrets (BETTER_AUTH_SECRET, ENCRYPTION_KEY, ORCID_CLIENT_SECRET,
 #       RESEND_API_KEY, DATABASE_URL) should be configured directly in the
@@ -171,13 +171,8 @@ jobs:
             api/node_modules
           key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
-      - name: Write wrangler config (prod)
-        if: github.event.inputs.environment == 'prod'
+      - name: Write wrangler config (defaults)
         run: echo '${{ vars.FRONTEND_WRANGLER_CONFIG }}' > frontend/wrangler.jsonc
-
-      - name: Write wrangler config (dev)
-        if: github.event.inputs.environment == 'dev'
-        run: echo '${{ vars.FRONTEND_WRANGLER_CONFIG_DEV }}' > frontend/wrangler.jsonc
 
       - name: Deploy Frontend Worker
         uses: cloudflare/wrangler-action@v3
