@@ -51,8 +51,8 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { NanopubViewer } from "../../view/NanopubViewer";
 import AnyStatementTemplate from "./AnyStatementTemplate";
-import { NanopubViewer } from "./NanopubViewer";
 import { POPULAR_TEMPLATES } from "./templates/registry";
 
 export interface NanopubEditorProps {

@@ -17,7 +17,7 @@ import { toScienceLiveNPUri } from "@/lib/uri";
 import { ClipboardCheck, Tag } from "lucide-react";
 import { DataFactory } from "n3";
 import { useMemo } from "react";
-import { CustomViewerProps } from "../create/components/NanopubViewer";
+import { CustomViewerProps } from "./NanopubViewer";
 import {
   CommentBlock,
   ExternalUriLink,

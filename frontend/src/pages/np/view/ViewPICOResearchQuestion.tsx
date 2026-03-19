@@ -16,7 +16,7 @@ import { NS } from "@/lib/rdf";
 import { Microscope } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
-import { CustomViewerProps } from "../create/components/NanopubViewer";
+import { CustomViewerProps } from "./NanopubViewer";
 import { CommentBlock, ItemTitle } from "./shared-components";
 
 const { namedNode } = DataFactory;
@@ -41,11 +41,11 @@ const COCHRANE_PICO = {
 // ============================================================================
 const ALT_PICO = {
   title: namedNode("http://purl.org/dc/terms/title"),
-  audience: namedNode("http://purl.org/dc/terms/audience"),      // Population
-  subject: namedNode("http://purl.org/dc/terms/subject"),        // Intervention
-  relation: namedNode("http://purl.org/dc/terms/relation"),      // Comparator
+  audience: namedNode("http://purl.org/dc/terms/audience"), // Population
+  subject: namedNode("http://purl.org/dc/terms/subject"), // Intervention
+  relation: namedNode("http://purl.org/dc/terms/relation"), // Comparator
   expectedResult: namedNode("http://schema.org/expectedResult"), // Outcome
-  type: namedNode("http://purl.org/dc/terms/type"),              // Question type
+  type: namedNode("http://purl.org/dc/terms/type"), // Question type
   comment: namedNode("http://www.w3.org/2000/01/rdf-schema#comment"), // Rationale
 };
 
@@ -54,22 +54,67 @@ const SL_TERMS = "https://w3id.org/sciencelive/o/terms/";
 
 // Question type mappings: suffix -> { label, uri }
 const QUESTION_TYPES: Record<string, { label: string; uri: string }> = {
-  "CausationResearchQuestion": { label: "Causation", uri: SL_TERMS + "CausationResearchQuestion" },
-  "CausationResearchQuestions": { label: "Causation", uri: SL_TERMS + "CausationResearchQuestion" },
-  "DescriptiveResearchQuestion": { label: "Descriptive", uri: SL_TERMS + "DescriptiveResearchQuestion" },
-  "DescriptiveResearchQuestions": { label: "Descriptive", uri: SL_TERMS + "DescriptiveResearchQuestion" },
-  "EffectivenessResearchQuestion": { label: "Effectiveness", uri: SL_TERMS + "EffectivenessResearchQuestion" },
-  "EffectivenessResearchQuestions": { label: "Effectiveness", uri: SL_TERMS + "EffectivenessResearchQuestion" },
-  "ExperienceResearchQuestion": { label: "Experience", uri: SL_TERMS + "ExperienceResearchQuestion" },
-  "ExperienceResearchQuestions": { label: "Experience", uri: SL_TERMS + "ExperienceResearchQuestion" },
-  "PredictionResearchQuestion": { label: "Prediction", uri: SL_TERMS + "PredictionResearchQuestion" },
-  "PredictionResearchQuestions": { label: "Prediction", uri: SL_TERMS + "PredictionResearchQuestion" },
+  CausationResearchQuestion: {
+    label: "Causation",
+    uri: SL_TERMS + "CausationResearchQuestion",
+  },
+  CausationResearchQuestions: {
+    label: "Causation",
+    uri: SL_TERMS + "CausationResearchQuestion",
+  },
+  DescriptiveResearchQuestion: {
+    label: "Descriptive",
+    uri: SL_TERMS + "DescriptiveResearchQuestion",
+  },
+  DescriptiveResearchQuestions: {
+    label: "Descriptive",
+    uri: SL_TERMS + "DescriptiveResearchQuestion",
+  },
+  EffectivenessResearchQuestion: {
+    label: "Effectiveness",
+    uri: SL_TERMS + "EffectivenessResearchQuestion",
+  },
+  EffectivenessResearchQuestions: {
+    label: "Effectiveness",
+    uri: SL_TERMS + "EffectivenessResearchQuestion",
+  },
+  ExperienceResearchQuestion: {
+    label: "Experience",
+    uri: SL_TERMS + "ExperienceResearchQuestion",
+  },
+  ExperienceResearchQuestions: {
+    label: "Experience",
+    uri: SL_TERMS + "ExperienceResearchQuestion",
+  },
+  PredictionResearchQuestion: {
+    label: "Prediction",
+    uri: SL_TERMS + "PredictionResearchQuestion",
+  },
+  PredictionResearchQuestions: {
+    label: "Prediction",
+    uri: SL_TERMS + "PredictionResearchQuestion",
+  },
   // Alternative template uses lowercase
-  "causation": { label: "Causation", uri: SL_TERMS + "CausationResearchQuestion" },
-  "descriptive": { label: "Descriptive", uri: SL_TERMS + "DescriptiveResearchQuestion" },
-  "effectiveness": { label: "Effectiveness", uri: SL_TERMS + "EffectivenessResearchQuestion" },
-  "experience": { label: "Experience", uri: SL_TERMS + "ExperienceResearchQuestion" },
-  "prediction": { label: "Prediction", uri: SL_TERMS + "PredictionResearchQuestion" },
+  causation: {
+    label: "Causation",
+    uri: SL_TERMS + "CausationResearchQuestion",
+  },
+  descriptive: {
+    label: "Descriptive",
+    uri: SL_TERMS + "DescriptiveResearchQuestion",
+  },
+  effectiveness: {
+    label: "Effectiveness",
+    uri: SL_TERMS + "EffectivenessResearchQuestion",
+  },
+  experience: {
+    label: "Experience",
+    uri: SL_TERMS + "ExperienceResearchQuestion",
+  },
+  prediction: {
+    label: "Prediction",
+    uri: SL_TERMS + "PredictionResearchQuestion",
+  },
 };
 
 interface PICOData {
@@ -125,17 +170,35 @@ function extractCochranePICO(store: NanopubStore): PICOData | null {
   const subject = namedNode(mainSubject);
 
   // Extract label (rdfs:label)
-  const labelQuad = store.matchOne(subject, NS.RDFS("label"), null, assertionGraph);
+  const labelQuad = store.matchOne(
+    subject,
+    NS.RDFS("label"),
+    null,
+    assertionGraph,
+  );
   const label = labelQuad?.object.value || "PICO Research Question";
 
   // Extract description (dct:description)
-  const descQuad = store.matchOne(subject, NS.DCT("description"), null, assertionGraph);
+  const descQuad = store.matchOne(
+    subject,
+    NS.DCT("description"),
+    null,
+    assertionGraph,
+  );
   const description = descQuad?.object.value;
 
   // Helper to extract component description from nested blank node
-  const getComponentDescription = (predicate: typeof COCHRANE_PICO.population): string | undefined => {
-    const componentQuad = store.matchOne(subject, predicate, null, assertionGraph);
-    if (!componentQuad || !Util.isNamedNode(componentQuad.object)) return undefined;
+  const getComponentDescription = (
+    predicate: typeof COCHRANE_PICO.population,
+  ): string | undefined => {
+    const componentQuad = store.matchOne(
+      subject,
+      predicate,
+      null,
+      assertionGraph,
+    );
+    if (!componentQuad || !Util.isNamedNode(componentQuad.object))
+      return undefined;
 
     const componentUri = namedNode(componentQuad.object.value);
     const descriptionQuad = store.matchOne(
@@ -154,7 +217,12 @@ function extractCochranePICO(store: NanopubStore): PICOData | null {
   const outcome = getComponentDescription(COCHRANE_PICO.outcomeGroup);
 
   // Extract question type from rdf:type
-  const typeQuads = store.getQuads(subject, NS.RDF("type"), null, assertionGraph);
+  const typeQuads = store.getQuads(
+    subject,
+    NS.RDF("type"),
+    null,
+    assertionGraph,
+  );
   let questionType: string | undefined;
   let questionTypeUri: string | undefined;
   for (const q of typeQuads) {
@@ -196,7 +264,12 @@ function extractAlternativePICO(store: NanopubStore): PICOData | null {
   if (titleQuad && Util.isNamedNode(titleQuad.subject)) {
     mainSubject = titleQuad.subject.value;
   } else {
-    const audienceQuad = store.matchOne(null, ALT_PICO.audience, null, assertionGraph);
+    const audienceQuad = store.matchOne(
+      null,
+      ALT_PICO.audience,
+      null,
+      assertionGraph,
+    );
     if (audienceQuad && Util.isNamedNode(audienceQuad.subject)) {
       mainSubject = audienceQuad.subject.value;
     }
@@ -207,7 +280,9 @@ function extractAlternativePICO(store: NanopubStore): PICOData | null {
   const subject = namedNode(mainSubject);
 
   // Extract fields directly from the subject
-  const getLiteralValue = (predicate: ReturnType<typeof namedNode>): string | undefined => {
+  const getLiteralValue = (
+    predicate: ReturnType<typeof namedNode>,
+  ): string | undefined => {
     const quad = store.matchOne(subject, predicate, null, assertionGraph);
     return quad?.object.value;
   };
@@ -227,7 +302,9 @@ function extractAlternativePICO(store: NanopubStore): PICOData | null {
   if (typeQuad) {
     const typeValue = typeQuad.object.value;
     // Extract type name from URI or use literal directly
-    const typeName = typeValue.includes("/") ? typeValue.split("/").pop() : typeValue;
+    const typeName = typeValue.includes("/")
+      ? typeValue.split("/").pop()
+      : typeValue;
     if (typeName && QUESTION_TYPES[typeName]) {
       questionType = QUESTION_TYPES[typeName].label;
       questionTypeUri = QUESTION_TYPES[typeName].uri;
@@ -272,15 +349,18 @@ export function ViewPICOResearchQuestion({ store }: CustomViewerProps) {
         <CardTitle className="flex items-center gap-2 text-lg">
           <Microscope className="h-5 w-5 text-indigo-600" />
           PICO Research Question
-          {data.questionType && (
-            data.questionTypeUri ? (
+          {data.questionType &&
+            (data.questionTypeUri ? (
               <a
                 href={data.questionTypeUri}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="ml-2"
               >
-                <Badge variant="secondary" className="cursor-pointer hover:bg-secondary/80">
+                <Badge
+                  variant="secondary"
+                  className="cursor-pointer hover:bg-secondary/80"
+                >
                   {data.questionType}
                 </Badge>
               </a>
@@ -288,8 +368,7 @@ export function ViewPICOResearchQuestion({ store }: CustomViewerProps) {
               <Badge variant="secondary" className="ml-2">
                 {data.questionType}
               </Badge>
-            )
-          )}
+            ))}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">

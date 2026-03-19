@@ -14,7 +14,7 @@ import { NS } from "@/lib/rdf";
 import { Globe, MapPin } from "lucide-react";
 import { DataFactory } from "n3";
 import { lazy, Suspense, useMemo } from "react";
-import { CustomViewerProps } from "../create/components/NanopubViewer";
+import { CustomViewerProps } from "./NanopubViewer";
 import {
   CommentBlock,
   ItemTitle,

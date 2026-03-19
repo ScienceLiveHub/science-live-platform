@@ -13,7 +13,7 @@ import { NS } from "@/lib/rdf";
 import { Quote } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
-import { CustomViewerProps } from "../create/components/NanopubViewer";
+import { CustomViewerProps } from "./NanopubViewer";
 import { CommentBlock, PaperLink, QuotationBlock } from "./shared-components";
 
 const { namedNode } = DataFactory;

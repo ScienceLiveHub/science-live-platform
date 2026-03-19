@@ -9,5 +9,17 @@ declare const query: import("../sparql").SparqlQuery<{
   bboxMinY: "literal";
   bboxMaxX: "literal";
   bboxMaxY: "literal";
+}, {
+  np: "string";
+  paper: "string";
+  location: "string";
+  location_label: "string";
+  date: "string";
+  wkt: "string";
+  bbox: "string";
+  quotation: "string";
+  quotation_end: "string";
+  comment: "string";
+  creator: "string";
 }>;
 export default query;

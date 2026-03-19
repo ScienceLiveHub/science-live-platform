@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Map, MapTileLayer, MapZoomControl } from "@/components/ui/map";
 import { Spinner } from "@/components/ui/spinner";
 import { AsyncLabel } from "@/hooks/use-labels";
-import GEOLOCATION_QUERY from "@/lib/queries/geolocation.rq";
+import { GEOLOCATION } from "@/lib/queries";
 import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
 import { wktToGeoJSON } from "@terraformer/wkt";
 import type { LatLngExpression } from "leaflet";
@@ -354,7 +354,7 @@ export default function GeoMap() {
         }
 
         const rows = await executeBindSparql(
-          GEOLOCATION_QUERY,
+          GEOLOCATION,
           bindParams,
           NANOPUB_SPARQL_ENDPOINT_FULL,
         );

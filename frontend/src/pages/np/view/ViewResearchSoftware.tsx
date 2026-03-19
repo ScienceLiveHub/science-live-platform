@@ -12,7 +12,7 @@ import { NS } from "@/lib/rdf";
 import { Code2, ExternalLink, FileText, FolderGit2, Link2 } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
-import { CustomViewerProps } from "../create/components/NanopubViewer";
+import { CustomViewerProps } from "./NanopubViewer";
 import { ExternalUriLink, ItemTitle } from "./shared-components";
 
 const { namedNode } = DataFactory;

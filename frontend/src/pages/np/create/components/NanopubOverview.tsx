@@ -11,7 +11,7 @@ import {
   User,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { NanopubViewerProps, ShareMenu } from "./NanopubViewer";
+import { NanopubViewerProps, ShareMenu } from "../../view/NanopubViewer";
 import { TEMPLATE_METADATA } from "./templates/registry-metadata";
 
 export function NanopubOverview({

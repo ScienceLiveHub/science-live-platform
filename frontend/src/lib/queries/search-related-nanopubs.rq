@@ -1,0 +1,25 @@
+# Get related nanopubs.
+# Search for nanopubs which mention the specified nanopubUri.
+#
+# Placeholder: `?_nanopubUri` - URI: the URI of the nanopub.
+
+prefix np: <http://www.nanopub.org/nschema#>
+prefix npa: <http://purl.org/nanopub/admin/>
+
+select distinct ?np where {
+  ?np a np:Nanopublication ;
+      np:hasAssertion ?assertion .
+  
+  graph ?assertion {
+    ?s ?p ?o .
+    filter (
+      CONTAINS(STR(?s), "${nanopubUri}") ||
+      CONTAINS(STR(?p), "${nanopubUri}") ||
+      CONTAINS(STR(?o), "${nanopubUri}")
+    )
+  }
+  
+  # Don't return the nanopub itself
+  filter(?np != ?_nanopubUri)
+}
+limit 100

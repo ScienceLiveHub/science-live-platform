@@ -14,7 +14,7 @@ import { NS } from "@/lib/rdf";
 import { ClipboardList } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
-import { CustomViewerProps } from "../create/components/NanopubViewer";
+import { CustomViewerProps } from "./NanopubViewer";
 import { CommentBlock, ItemTitle } from "./shared-components";
 
 const { namedNode } = DataFactory;
@@ -54,7 +54,12 @@ function extractPCCData(store: NanopubStore): PCCData | null {
     mainSubject = pccTypeQuad.subject.value;
   } else {
     // Fallback: look for subjects with PCC predicates
-    const labelQuads = store.getQuads(null, NS.RDFS("label"), null, assertionGraph);
+    const labelQuads = store.getQuads(
+      null,
+      NS.RDFS("label"),
+      null,
+      assertionGraph,
+    );
     for (const quad of labelQuads) {
       if (Util.isNamedNode(quad.subject)) {
         const hasPopulation = store.matchOne(
@@ -76,17 +81,35 @@ function extractPCCData(store: NanopubStore): PCCData | null {
   const subject = namedNode(mainSubject);
 
   // Extract label
-  const labelQuad = store.matchOne(subject, NS.RDFS("label"), null, assertionGraph);
+  const labelQuad = store.matchOne(
+    subject,
+    NS.RDFS("label"),
+    null,
+    assertionGraph,
+  );
   const label = labelQuad?.object.value || "PCC Review Question";
 
   // Extract description (dct:description - DC Terms)
-  const descQuad = store.matchOne(subject, NS.DCT("description"), null, assertionGraph);
+  const descQuad = store.matchOne(
+    subject,
+    NS.DCT("description"),
+    null,
+    assertionGraph,
+  );
   const description = descQuad?.object.value;
 
   // Helper to extract component description
-  const getComponentDescription = (predicate: typeof PCC.hasPccPopulation): string | undefined => {
-    const componentQuad = store.matchOne(subject, predicate, null, assertionGraph);
-    if (!componentQuad || !Util.isNamedNode(componentQuad.object)) return undefined;
+  const getComponentDescription = (
+    predicate: typeof PCC.hasPccPopulation,
+  ): string | undefined => {
+    const componentQuad = store.matchOne(
+      subject,
+      predicate,
+      null,
+      assertionGraph,
+    );
+    if (!componentQuad || !Util.isNamedNode(componentQuad.object))
+      return undefined;
 
     const componentUri = namedNode(componentQuad.object.value);
     // Try dct:description first, then dc:description
@@ -97,7 +120,12 @@ function extractPCCData(store: NanopubStore): PCCData | null {
       assertionGraph,
     );
     if (!descriptionQuad) {
-      descriptionQuad = store.matchOne(componentUri, namedNode("http://purl.org/dc/elements/1.1/description"), null, assertionGraph);
+      descriptionQuad = store.matchOne(
+        componentUri,
+        namedNode("http://purl.org/dc/elements/1.1/description"),
+        null,
+        assertionGraph,
+      );
     }
     return descriptionQuad?.object.value;
   };

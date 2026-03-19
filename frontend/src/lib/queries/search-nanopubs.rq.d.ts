@@ -5,5 +5,14 @@
  */
 declare const query: import("../sparql").SparqlQuery<{
   searchTerm: "literal";
+}, {
+  referenceCount: "string";
+  maxScore: "string";
+  np: "string";
+  label: "string";
+  date: "string";
+  creator: "string";
+  isExample: "string";
+  template: "string";
 }>;
 export default query;

@@ -5,5 +5,11 @@
  */
 declare const query: import("../sparql").SparqlQuery<{
   orcidUri: "uri";
+}, {
+  paper: "string";
+  comment: "string";
+  label: "string";
+  np: "string";
+  date: "string";
 }>;
 export default query;

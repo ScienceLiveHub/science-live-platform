@@ -148,8 +148,6 @@ export default defineConfig(({ mode }) => {
       strictPort: true,
       port: Number(env.PORT),
       hmr: {
-        // TODO: I expected this to add an error overlay for all errors in dev
-        // but it didn't always catch everything, so I rolled my own top level ErrorBoundary in addition to it
         overlay: true,
       },
       cors: true,
