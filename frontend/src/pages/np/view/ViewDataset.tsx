@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
-import { CustomViewerProps } from "../create/components/NanopubViewer";
+import { CustomViewerProps } from "./NanopubViewer";
 import { ExternalUriLink, ItemTitle } from "./shared-components";
 
 const { namedNode } = DataFactory;

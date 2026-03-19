@@ -1,3 +1,4 @@
+import { NanopubIcon } from "@/components/nanopub-icon";
 import { RelativeDateTime } from "@/components/relative-datetime";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +7,8 @@ import { Separator } from "@/components/ui/separator";
 import { SnippetCopyButton } from "@/components/ui/shadcn-io/snippet";
 import { Spinner } from "@/components/ui/spinner";
 import { authClient } from "@/lib/auth-client";
-import { executeBindSparql, USERS_LATEST_NANOPUBS } from "@/lib/sparql";
+import { USERS_LATEST } from "@/lib/queries";
+import { executeBindSparql } from "@/lib/sparql";
 import { formatDate } from "@/lib/string-format";
 import { getUriEnd } from "@/lib/uri";
 import { SiOrcid } from "@icons-pack/react-simple-icons";
@@ -93,7 +95,7 @@ export default function UserProfile() {
         }
 
         if (data.orcidConnected && data.orcidId) {
-          const result = await executeBindSparql(USERS_LATEST_NANOPUBS, {
+          const result = await executeBindSparql(USERS_LATEST, {
             orcidUri: data.orcidId,
           });
           data.latestContent = typeof result === "string" ? [result] : result;
@@ -287,7 +289,10 @@ export default function UserProfile() {
                   profile.latestContent?.map((c) => {
                     return (
                       <>
-                        <Link to={"/np?uri=" + c.np}>{c.label}</Link>
+                        <Link to={"/np?uri=" + c.np} className="flex flex-row">
+                          <NanopubIcon className="min-w-4 min-h-4 mr-2 mt-1" />{" "}
+                          {c.label}
+                        </Link>
                         <RelativeDateTime date={c.date} />
                         <hr className="my-4" />
                       </>

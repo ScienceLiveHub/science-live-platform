@@ -8,25 +8,25 @@
  */
 
 import { ComponentType } from "react";
-import { CustomViewerProps } from "../create/components/NanopubViewer";
 import {
   LEGACY_TEMPLATE_URIS,
   TEMPLATE_URI,
 } from "../create/components/templates/registry-metadata";
+import { CustomViewerProps } from "./NanopubViewer";
 import { ViewAIDASentence } from "./ViewAIDASentence";
 import { ViewAIDASentenceLegacy } from "./ViewAIDASentenceLegacy";
 import { ViewAnnotateQuotation } from "./ViewAnnotateQuotation";
 import { ViewCitationWithCiTO } from "./ViewCitationWithCiTO";
 import { ViewCommentOnPaper } from "./ViewCommentOnPaper";
 import { ViewDataset } from "./ViewDataset";
-import { ViewGeographicalCoverage } from "./ViewGeographicalCoverage";
-import { ViewPRISMASearchStrategy } from "./ViewPRISMASearchStrategy";
-import { ViewFORRTReplicationOutcome } from "./ViewFORRTReplicationOutcome";
-import { ViewFORRTReplication } from "./ViewFORRTReplication";
 import { ViewFORRTClaim } from "./ViewFORRTClaim";
+import { ViewFORRTReplication } from "./ViewFORRTReplication";
+import { ViewFORRTReplicationOutcome } from "./ViewFORRTReplicationOutcome";
+import { ViewGeographicalCoverage } from "./ViewGeographicalCoverage";
 import { ViewPCCResearchQuestion } from "./ViewPCCResearchQuestion";
 import { ViewPICOResearchQuestion } from "./ViewPICOResearchQuestion";
 import { ViewPICOResearchQuestionLegacy } from "./ViewPICOResearchQuestionLegacy";
+import { ViewPRISMASearchStrategy } from "./ViewPRISMASearchStrategy";
 import { ViewResearchSoftware } from "./ViewResearchSoftware";
 
 /**

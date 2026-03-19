@@ -6,11 +6,11 @@ import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AsyncLabel } from "@/hooks/use-labels";
 import { useNanopub } from "@/hooks/use-nanopub";
-import GEOLOCATION_QUERY from "@/lib/queries/geolocation.rq";
+import { GEOLOCATION, SEARCH_NANOPUBS } from "@/lib/queries";
 import {
   executeBindSparql,
   NANOPUB_SPARQL_ENDPOINT_FULL,
-  SEARCH_NANOPUBS,
+  NANOPUB_SPARQL_ENDPOINT_TEXT,
 } from "@/lib/sparql";
 import { isNanopubUri } from "@/lib/uri";
 import { wktToGeoJSON } from "@terraformer/wkt";
@@ -30,7 +30,7 @@ import { GeoJSON, useMap } from "react-leaflet";
 import { Link, useSearchParams } from "react-router-dom";
 import SearchResultList, { SearchResult } from "./SearchResultList";
 import ViewerDemo from "./ViewerDemo";
-import { NanopubViewer } from "./create/components/NanopubViewer";
+import { NanopubViewer } from "./view/NanopubViewer";
 
 // ---------------------------------------------------------------------------
 // Types for GeoLocation
@@ -49,29 +49,6 @@ interface GeoLocation {
   quotationEnd?: string;
   comment: string;
   creator: string;
-}
-
-// ---------------------------------------------------------------------------
-// Helpers for GeoLocation
-// ---------------------------------------------------------------------------
-
-/** Parse SPARQL result rows into typed GeoLocation objects. */
-function parseGeoResults(rows: Record<string, string>[]): GeoLocation[] {
-  return rows
-    .filter((row) => row.wkt || row.bbox)
-    .map((row) => ({
-      np: row.np,
-      paper: row.paper,
-      location: row.location,
-      locationLabel: row.location_label ?? "",
-      date: new Date(row.date),
-      wkt: row.wkt,
-      bbox: row.bbox,
-      quotation: row.quotation ?? "",
-      quotationEnd: row.quotation_end,
-      comment: row.comment ?? "",
-      creator: row.creator ?? "",
-    }));
 }
 
 // ---------------------------------------------------------------------------
@@ -365,44 +342,47 @@ export default function ViewNanopub() {
       return;
     }
 
-    let mounted = true;
+    const controller = new AbortController();
     setSearchLoading(true);
     setSearchError(null);
 
     const performSearch = async () => {
       try {
-        const rows = await executeBindSparql(SEARCH_NANOPUBS, {
-          searchTerm: searchQuery,
-        });
+        const rows = await executeBindSparql(
+          SEARCH_NANOPUBS,
+          { searchTerm: searchQuery },
+          NANOPUB_SPARQL_ENDPOINT_TEXT,
+          controller.signal,
+        );
 
-        if (mounted) {
-          setSearchResults(
-            rows.map((row) => ({
-              np: row.np,
-              label: row.label || "",
-              date: new Date(row.date),
-              creator: row.creator || "",
-              isExample: row.isExample === "true",
-              maxScore: parseFloat(row.maxScore),
-              referenceCount: parseInt(row.referenceCount),
-            })),
-          );
-        }
+        setSearchResults(
+          rows.map((row) => ({
+            np: row.np,
+            label: row.label || "",
+            date: new Date(row.date),
+            creator: row.creator || "",
+            isExample: row.isExample === "true",
+            maxScore: parseFloat(row.maxScore),
+            referenceCount: parseInt(row.referenceCount),
+          })),
+        );
       } catch (e: any) {
-        if (mounted) {
-          console.error("Search failed:", e);
-          setSearchError(e?.message || "Search failed");
-          setSearchResults(null);
+        // Ignore errors from aborted requests
+        if (e?.name === "AbortError") {
+          return;
         }
+        console.error("Search failed:", e);
+        setSearchError(e?.message || "Search failed");
+        setSearchResults(null);
       } finally {
-        if (mounted) setSearchLoading(false);
+        setSearchLoading(false);
       }
     };
 
     performSearch();
 
     return () => {
-      mounted = false;
+      controller.abort();
     };
   }, [searchQuery]);
 
@@ -430,13 +410,33 @@ export default function ViewNanopub() {
         }
 
         const rows = await executeBindSparql(
-          GEOLOCATION_QUERY,
+          GEOLOCATION,
           bindParams,
           NANOPUB_SPARQL_ENDPOINT_FULL,
         );
 
-        setMapLocations(parseGeoResults(rows));
+        setMapLocations(
+          rows
+            .filter((row) => row.wkt || row.bbox)
+            .map((row) => ({
+              np: row.np,
+              paper: row.paper,
+              location: row.location,
+              locationLabel: row.location_label ?? "",
+              date: new Date(row.date),
+              wkt: row.wkt,
+              bbox: row.bbox,
+              quotation: row.quotation ?? "",
+              quotationEnd: row.quotation_end,
+              comment: row.comment ?? "",
+              creator: row.creator ?? "",
+            })),
+        );
       } catch (e: any) {
+        // Ignore errors from aborted requests
+        if (e?.name === "AbortError") {
+          return;
+        }
         console.error("Failed to fetch geolocation data:", e);
         setMapError(e?.message || "Failed to fetch geolocation data");
       } finally {

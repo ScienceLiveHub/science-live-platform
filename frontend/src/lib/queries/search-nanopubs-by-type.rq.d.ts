@@ -6,5 +6,8 @@
 declare const query: import("../sparql").SparqlQuery<{
   searchTerm: "literal";
   rdfType: "uri";
+}, {
+  thing: "string";
+  label: "string";
 }>;
 export default query;

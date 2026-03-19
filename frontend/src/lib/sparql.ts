@@ -8,10 +8,6 @@
  *   — Standard SPARQL endpoint for structured queries (no full-text search).
  */
 
-import SEARCH_NANOPUBS_BY_TYPE from "./queries/search-nanopubs-by-type.rq";
-import SEARCH_NANOPUBS from "./queries/search-nanopubs.rq";
-import USERS_LATEST_NANOPUBS from "./queries/users-latest.rq";
-
 import ky from "ky";
 
 export const NANOPUB_SPARQL_ENDPOINT_TEXT =
@@ -19,8 +15,6 @@ export const NANOPUB_SPARQL_ENDPOINT_TEXT =
 
 export const NANOPUB_SPARQL_ENDPOINT_FULL =
   "https://query.knowledgepixels.com/repo/full";
-
-export { SEARCH_NANOPUBS, SEARCH_NANOPUBS_BY_TYPE, USERS_LATEST_NANOPUBS };
 
 // =============================================================================
 // TYPED SPARQL QUERY TYPES
@@ -35,14 +29,17 @@ export { SEARCH_NANOPUBS, SEARCH_NANOPUBS_BY_TYPE, USERS_LATEST_NANOPUBS };
 export type PlaceholderKind = "uri" | "literal" | "raw";
 
 /**
- * A SPARQL query object with content and typed placeholder information.
+ * A SPARQL query object with content and typed placeholder and output information.
  * T is a map from placeholder name to its expected type kind.
+ * O is a map from output variable name to its type (always string at runtime).
  */
 export type SparqlQuery<
   T extends Record<string, PlaceholderKind> = Record<string, never>,
+  O extends Record<string, "string"> = Record<string, never>,
 > = {
   readonly content: string;
   readonly __placeholders?: T;
+  readonly __outputs?: O;
 };
 
 /**
@@ -50,6 +47,12 @@ export type SparqlQuery<
  */
 export type PlaceholderNames<Q> =
   Q extends SparqlQuery<infer T> ? keyof T : never;
+
+/**
+ * Extract output names from a SparqlQuery type.
+ */
+export type OutputNames<Q> =
+  Q extends SparqlQuery<infer _T, infer O> ? keyof O : never;
 
 /**
  * Build the values object type for a query's placeholders.
@@ -61,6 +64,13 @@ export type SparqlValues<Q, Required extends boolean = false> =
       ? { [K in keyof T]: string }
       : Partial<{ [K in keyof T]: string }>
     : never;
+
+/**
+ * Build the result row type for a query's outputs.
+ * Each output maps to a string value.
+ */
+export type SparqlOutputs<Q> =
+  Q extends SparqlQuery<infer _T, infer O> ? { [K in keyof O]: string } : never;
 
 // =============================================================================
 // QUERY EXECUTION
@@ -83,10 +93,12 @@ type SparqlResults = {
  *
  * @param query     The SPARQL query string (with placeholders already substituted).
  * @param endpoint  The SPARQL endpoint URL (defaults to text endpoint for full-text search).
+ * @param signal    Optional AbortSignal for request cancellation.
  */
 export async function executeSparql(
   query: string,
   endpoint: string = NANOPUB_SPARQL_ENDPOINT_TEXT,
+  signal?: AbortSignal,
 ): Promise<Record<string, string>[]> {
   const res = await ky.post(endpoint, {
     body: new URLSearchParams({ query }),
@@ -94,6 +106,7 @@ export async function executeSparql(
       Accept: "application/sparql-results+json",
       "Content-Type": "application/x-www-form-urlencoded",
     },
+    signal,
   });
 
   const data = await res.json<SparqlResults>();
@@ -155,8 +168,11 @@ function formatValue(kind: PlaceholderKind, value: string): string {
  * });
  * ```
  */
-export function sparqlBind<T extends Record<string, PlaceholderKind>>(
-  query: SparqlQuery<T>,
+export function sparqlBind<
+  T extends Record<string, PlaceholderKind>,
+  O extends Record<string, "string">,
+>(
+  query: SparqlQuery<T, O>,
   values: Partial<{ [K in keyof T]: string }>,
 ): string {
   let result = query.content;
@@ -176,10 +192,10 @@ export function sparqlBind<T extends Record<string, PlaceholderKind>>(
  * Substitute all placeholders in a SPARQL query (all required values must be provided).
  * Same as sparqlBind but enforces that all placeholders have values.
  */
-export function sparqlBindAll<T extends Record<string, PlaceholderKind>>(
-  query: SparqlQuery<T>,
-  values: { [K in keyof T]: string },
-): string {
+export function sparqlBindAll<
+  T extends Record<string, PlaceholderKind>,
+  O extends Record<string, "string">,
+>(query: SparqlQuery<T, O>, values: { [K in keyof T]: string }): string {
   return sparqlBind(query, values);
 }
 
@@ -187,6 +203,7 @@ export function sparqlBindAll<T extends Record<string, PlaceholderKind>>(
  * Bind placeholders in a SPARQL query and execute it in a single call.
  *
  * This is a convenience function that combines `sparqlBind` and `executeSparql`.
+ * Returns typed results based on the query's output variables.
  *
  * @example
  * ```ts
@@ -201,15 +218,28 @@ export function sparqlBindAll<T extends Record<string, PlaceholderKind>>(
  *   { searchTerm: "my search" },
  *   NANOPUB_SPARQL_ENDPOINT_FULL
  * );
+ *
+ * // With AbortSignal for cancellation
+ * const controller = new AbortController();
+ * const results = await executeBindSparql(
+ *   SEARCH_NANOPUBS,
+ *   { searchTerm: "my search" },
+ *   NANOPUB_SPARQL_ENDPOINT_TEXT,
+ *   controller.signal
+ * );
  * ```
  */
 export async function executeBindSparql<
   T extends Record<string, PlaceholderKind>,
+  O extends Record<string, "string">,
 >(
-  query: SparqlQuery<T>,
+  query: SparqlQuery<T, O>,
   values: Partial<{ [K in keyof T]: string }>,
   endpoint: string = NANOPUB_SPARQL_ENDPOINT_TEXT,
-): Promise<Record<string, string>[]> {
+  signal?: AbortSignal,
+): Promise<SparqlOutputs<SparqlQuery<T, O>>[]> {
   const boundQuery = sparqlBind(query, values);
-  return executeSparql(boundQuery, endpoint);
+  return executeSparql(boundQuery, endpoint, signal) as Promise<
+    SparqlOutputs<SparqlQuery<T, O>>[]
+  >;
 }
