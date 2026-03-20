@@ -28,9 +28,9 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GeoJSON, useMap } from "react-leaflet";
 import { Link, useSearchParams } from "react-router-dom";
-import SearchResultList, { SearchResult } from "./SearchResultList";
-import ViewerDemo from "./ViewerDemo";
+import SearchResultList, { SearchResult } from "./components/SearchResultList";
 import { NanopubViewer } from "./view/NanopubViewer";
+import ViewerDemo from "./ViewerDemo";
 
 // ---------------------------------------------------------------------------
 // Types for GeoLocation

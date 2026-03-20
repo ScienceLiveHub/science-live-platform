@@ -71,7 +71,7 @@ These should be defined in `frontend/src/lib/queries`. Each query has its own qu
 # Placeholder: `?_rdfType` - URI: the full type.
 ```
 
-Each query also has a \*.d.ts file but this is (re)generated automatically using `npm run generate:query-types` in the frontend workspace. The query can be run (including binding parameters) using functions in `frontend/src/lib/sparql.ts`
+Each query also has a \*.d.ts file which is (re)generated automatically using `npm run generate:query-types` in the frontend workspace. That same npm script will also generate `frontend/src/lib/queries/index.ts` barrel exports for convenient usage. A query can be run (including binding parameters) using functions in `frontend/src/lib/sparql.ts`, usually via `executeBindSparql()`. When using those query execution functions, especially within a React hook that could get run twice in dev mode (React Strict Mode), make sure you implement AbortSignal as per the comment above where `executeBindSparql()` is defined.
 
 # Library preferences
 

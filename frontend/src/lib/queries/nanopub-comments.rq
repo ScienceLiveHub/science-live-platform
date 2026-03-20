@@ -1,0 +1,28 @@
+# Retrieve all comments for a given nanopublication.
+# A comment nanopub has rdfs:comment as predicate with the nanopubUri as object.
+# Returns the comment nanopub URI, the comment text, creator, and creation date.
+#
+# Placeholder: `?_nanopubUri` - URI: the URI of the nanopub to get comments for.
+
+prefix np: <http://www.nanopub.org/nschema#>
+prefix npa: <http://purl.org/nanopub/admin/>
+prefix npx: <http://purl.org/nanopub/x/>
+prefix dct: <http://purl.org/dc/terms/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+select distinct ?commentNp ?commentText ?creator ?createdDate
+where {
+  # Get valid signed comment nanopubs
+  graph npa:graph {
+    ?commentNp npa:hasValidSignatureForPublicKey ?pubkey .
+    ?commentNp dct:created ?createdDate .
+    ?commentNp dct:creator ?creator .
+  }
+  
+  # Find the assertion graph with the comment
+  ?commentNp np:hasAssertion ?assertion .
+  graph ?assertion {
+    ?_nanopubUri rdfs:comment ?commentText .
+  }  
+}
+order by desc(?createdDate)

@@ -28,7 +28,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GeoJSON, useMap } from "react-leaflet";
 import { Link } from "react-router-dom";
-import SearchResultList from "./SearchResultList";
+import SearchResultList from "./components/SearchResultList";
 
 // ---------------------------------------------------------------------------
 // Types

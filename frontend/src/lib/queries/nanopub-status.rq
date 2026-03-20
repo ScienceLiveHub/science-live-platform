@@ -1,5 +1,5 @@
 # Get status attributes for a nanopublication.
-# Returns the latest supersedes, latest retracts, approvals count, and disapprovals count.
+# Returns the latest supersedes, latest retracts, approvals count, disapprovals count, and comments count.
 #
 # Placeholder: `?_nanopubUri` - URI: the URI of the nanopub.
 
@@ -7,8 +7,9 @@ prefix np: <http://www.nanopub.org/nschema#>
 prefix npa: <http://purl.org/nanopub/admin/>
 prefix npx: <http://purl.org/nanopub/x/>
 prefix dct: <http://purl.org/dc/terms/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-select ?supercededBy ?retractedBy ?approvals ?disapprovals
+select ?supercededBy ?retractedBy ?approvals ?disapprovals ?comments
 where {
   # Approval count - always returns one row
   {
@@ -36,15 +37,26 @@ where {
     }
   }
 
-  # Optional: Latest superseding nanopub (from pubinfo graph)
-  # npx:supersedes is checked in the pubinfo graph
+  # Comments count - always returns one row
+  # A comment nanopub has rdfs:comment as predicate with the nanopubUri as object
+  {
+    select (count(distinct ?commentNp) as ?comments) where {
+      graph npa:graph {
+        ?commentNp npa:hasValidSignatureForPublicKey ?commentPubkey .
+      }
+      ?commentNp np:hasAssertion ?commentAssertion .
+      graph ?commentAssertion {
+        ?_nanopubUri rdfs:comment ?_s .
+      }
+    }
+  }
+
+  # Optional: Latest superseding nanopub
+  # npx:supersedes is stored in npa:graph (admin graph)
   optional {
     graph npa:graph {
       ?supercededBy npa:hasValidSignatureForPublicKey ?supersedePubkey .
       ?supercededBy dct:created ?supersedeDate .
-    }
-    ?supercededBy np:hasPubinfo ?pubinfo .
-    graph ?pubinfo {
       ?supercededBy npx:supersedes ?_nanopubUri .
     }
     # Keep only the latest by filtering out any that have a newer one
@@ -52,37 +64,28 @@ where {
       graph npa:graph {
         ?newerSupersede npa:hasValidSignatureForPublicKey ?newerSupersedePubkey .
         ?newerSupersede dct:created ?newerSupersedeDate .
-      }
-      ?newerSupersede np:hasPubinfo ?newerPubinfo .
-      graph ?newerPubinfo {
         ?newerSupersede npx:supersedes ?_nanopubUri .
+        filter(?newerSupersedeDate > ?supersedeDate)
       }
-      filter(?newerSupersedeDate > ?supersedeDate)
     }
   }
 
-  # Optional: Latest retracting nanopub (from assertion graph)
-  # npx:retracts is checked in the assertion graph
+  # Optional: Latest retracting/invalidating nanopub
+  # npx:invalidates is stored in npa:graph (admin graph)
   optional {
     graph npa:graph {
       ?retractedBy npa:hasValidSignatureForPublicKey ?retractPubkey .
       ?retractedBy dct:created ?retractDate .
-    }
-    ?retractedBy np:hasAssertion ?retractAssertion .
-    graph ?retractAssertion {
-      ?retractedBy npx:retracts ?_nanopubUri .
+      ?retractedBy npx:invalidates ?_nanopubUri .
     }
     # Keep only the latest by filtering out any that have a newer one
     filter not exists {
       graph npa:graph {
         ?newerRetract npa:hasValidSignatureForPublicKey ?newerRetractPubkey .
         ?newerRetract dct:created ?newerRetractDate .
+        ?newerRetract npx:invalidates ?_nanopubUri .
+        filter(?newerRetractDate > ?retractDate)
       }
-      ?newerRetract np:hasAssertion ?newerRetractAssertion .
-      graph ?newerRetractAssertion {
-        ?newerRetract npx:retracts ?_nanopubUri .
-      }
-      filter(?newerRetractDate > ?retractDate)
     }
   }
 }

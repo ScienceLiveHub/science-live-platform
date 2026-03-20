@@ -11,8 +11,9 @@ import {
   User,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { NanopubViewerProps, ShareMenu } from "../../view/NanopubViewer";
-import { TEMPLATE_METADATA } from "./templates/registry-metadata";
+import { TEMPLATE_METADATA } from "../create/components/templates/registry-metadata";
+import { NanopubViewerProps, ShareMenu } from "../view/NanopubViewer";
+import { NanopubStatus } from "./NanopubStatus";
 
 export function NanopubOverview({
   store,
@@ -204,6 +205,13 @@ export function NanopubOverview({
                 : "-"}
             </a>
           </div>
+
+          {/* Status Card */}
+          {showShareMenu && store.metadata.uri && (
+            <div className="my-4">
+              <NanopubStatus nanopubUri={store.metadata.uri} />
+            </div>
+          )}
         </div>
       </div>
     </>

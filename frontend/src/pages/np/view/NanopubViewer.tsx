@@ -25,7 +25,7 @@ import {
   UserCircle,
 } from "lucide-react";
 import { useMemo } from "react";
-import { NanopubOverview } from "../create/components/NanopubOverview";
+import { NanopubOverview } from "../components/NanopubOverview";
 import { VIEW_COMPONENTS } from "./view-registry";
 
 const MenuItem = ({
