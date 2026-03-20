@@ -281,9 +281,7 @@ export default function UserProfile() {
               </div>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-3">
-                Latest Nanopublications
-              </h3>
+              <h3 className="text-lg font-semibold mb-3">Latest Activity</h3>
               <div className="flex-col m-4">
                 {profile.latestContent?.length ? (
                   profile.latestContent?.map((c) => {

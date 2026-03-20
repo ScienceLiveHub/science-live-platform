@@ -5,7 +5,6 @@ import { NANOPUB_COMMENTS, NANOPUB_STATUS } from "@/lib/queries";
 import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
 import {
   AlertTriangle,
-  CheckCircle,
   ChevronDown,
   ChevronRight,
   ExternalLink,
@@ -16,6 +15,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { CommentEntry } from "./CommentEntry";
 
 /**
  * Status information for a nanopublication.
@@ -31,7 +31,7 @@ interface NanopubStatus {
 /**
  * Comment data for a nanopublication.
  */
-interface NanopubComment {
+export interface NanopubComment {
   commentNp: string;
   commentText: string;
   creator?: string;
@@ -153,7 +153,7 @@ export function NanopubStatus({ nanopubUri }: { nanopubUri: string }) {
     <>
       {/* Retraction Status */}
       {isRetracted && (
-        <div className="flex items-start gap-3 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+        <div className="flex items-start gap-3 p-3 bg-destructive/10 rounded-lg border border-destructive/20 m-2">
           <XCircle className="size-5 text-destructive shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-destructive">Retracted</p>
@@ -175,7 +175,7 @@ export function NanopubStatus({ nanopubUri }: { nanopubUri: string }) {
 
       {/* Superseded Status */}
       {isSuperceded && (
-        <div className="flex items-start gap-3 p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+        <div className="flex items-start gap-3 p-3 bg-amber-500/10 rounded-lg border border-amber-500/20 m-2">
           <AlertTriangle className="size-5 text-amber-600 shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-amber-600">Superseded</p>
@@ -198,7 +198,6 @@ export function NanopubStatus({ nanopubUri }: { nanopubUri: string }) {
       {/* Valid Status */}
       {!hasIssues && (
         <div className="flex items-center gap-2 text-green-600">
-          <CheckCircle className="size-5" />
           <span className="font-medium">Latest valid version</span>
         </div>
       )}
@@ -218,27 +217,41 @@ export function NanopubStatus({ nanopubUri }: { nanopubUri: string }) {
           <span className="font-medium">{status.disapprovals}</span>
         </div>
         <button
-          className={`flex items-center gap-2 ${status.comments > 0 ? "cursor-pointer hover:text-primary" : "cursor-default"}`}
-          onClick={() => status.comments > 0 && setShowComments(!showComments)}
-          disabled={status.comments === 0}
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => setShowComments(!showComments)}
         >
           <MessageSquare className="size-4 text-blue-600" />
           <span className="font-medium">{status.comments}</span>
           <span className="text-muted-foreground text-sm">
             {status.comments === 1 ? "comment" : "comments"}
           </span>
-          {status.comments > 0 &&
-            (showComments ? (
-              <ChevronDown className="size-4 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="size-4 text-muted-foreground" />
-            ))}
+          {showComments ? (
+            <ChevronDown className="size-4 text-muted-foreground" />
+          ) : (
+            <ChevronRight className="size-4 text-muted-foreground" />
+          )}
         </button>
       </div>
 
-      {/* Comments List */}
-      {showComments && status.comments > 0 && (
-        <div className="pt-3">
+      {/* Comments Section */}
+      {showComments && (
+        <div className="pt-3 space-y-4">
+          <CommentEntry
+            existingComments={comments}
+            nanopubUri={nanopubUri}
+            onComment={(newComments) => {
+              if (newComments) {
+                // Increment comment count (avoiding a refetch) and refresh comments list
+                setStatus((prev) =>
+                  prev ? { ...prev, comments: newComments.length } : prev,
+                );
+
+                setComments(newComments);
+              }
+            }}
+          />
+
+          {/* Comments List */}
           {isLoadingComments ? (
             <div className="flex items-center justify-center py-4">
               <Spinner className="size-5" />
