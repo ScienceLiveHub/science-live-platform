@@ -6,7 +6,8 @@
     "../frontend/src/pages/np/create/components/templates/registry-metadata.ts",
     "../frontend/src/lib/nanopub-store.ts",
     "../frontend/src/lib/uri.ts",
-    "../frontend/src/lib/rdf.ts"
+    "../frontend/src/lib/rdf.ts",
+    "../shared/sparql-plugin"
   ],
   "exclude": ["build", "addon", "src/dialogs"],
   "compilerOptions": {

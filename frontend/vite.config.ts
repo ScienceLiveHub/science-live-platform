@@ -6,6 +6,7 @@ import { gfmHeadingId } from "marked-gfm-heading-id";
 import path from "path";
 import TOML from "smol-toml";
 import { defineConfig, loadEnv } from "vite";
+import { sparqlFiles } from "../shared/sparql-plugin/vite";
 
 // Configure marked with GFM heading ID support for anchor links
 marked.use(gfmHeadingId());
@@ -65,64 +66,6 @@ export default function MarkdownContent() {
   return parse(${JSON.stringify(html)});
 }
 `;
-    },
-  };
-}
-
-/**
- * Vite plugin to import SPARQL query files as SparqlQuery objects.
- * Handles .sparql and .rq file extensions.
- *
- * Parses placeholder comments in the format:
- *   # Placeholder: `?_name` — replaced with description (type: uri/literal/raw)
- *
- * The type is inferred from the description:
- *   - "URI:" → "uri"
- *   - "RAW:" → "raw"
- *   - "string" → "literal"
- *   - Otherwise defaults to "literal"
- */
-function sparqlFiles() {
-  return {
-    name: "sparql-files",
-    enforce: "pre" as const,
-    transform(code: string, id: string) {
-      if (id.endsWith(".sparql") || id.endsWith(".rq")) {
-        // Parse placeholder comments
-        // Format: # Placeholder: `?_name` — replaced with description
-        const placeholderRegex = /# Placeholder: `(\?\w+)`/g;
-        const placeholders: Record<string, "uri" | "literal" | "raw"> = {};
-
-        let match;
-        while ((match = placeholderRegex.exec(code)) !== null) {
-          const placeholderName = match[1].startsWith("?_")
-            ? match[1].substring(2)
-            : match[1];
-          // Look at the rest of the line to infer type
-          const lineStart = code.lastIndexOf("#", match.index);
-          const lineEnd = code.indexOf("\n", match.index);
-          const line = code.slice(lineStart, lineEnd);
-
-          // Infer type from description
-          const lowerLine = line.toLowerCase();
-          if (lowerLine.includes("uri:")) {
-            placeholders[placeholderName] = "uri";
-          } else if (lowerLine.includes("raw:")) {
-            placeholders[placeholderName] = "raw";
-          } else {
-            placeholders[placeholderName] = "literal";
-          }
-        }
-
-        // Create a SparqlQuery object with __placeholders
-        const queryObj = {
-          content: code,
-          __placeholders: placeholders,
-        };
-
-        return `export default ${JSON.stringify(queryObj)};`;
-      }
-      return null;
     },
   };
 }
