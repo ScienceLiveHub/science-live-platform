@@ -256,8 +256,6 @@ export function NanopubStatus({ nanopubUri }: { nanopubUri: string }) {
   const isSuperceded = !!status.supercededBy;
   const hasIssues = isRetracted || isSuperceded;
 
-  const isSubmitting = isSubmittingApproval || isSubmittingDisapproval;
-
   return (
     <>
       {/* Retraction Status */}
