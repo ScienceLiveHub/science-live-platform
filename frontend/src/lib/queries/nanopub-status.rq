@@ -20,7 +20,7 @@ where {
         ?approvalNp np:hasAssertion ?assertion .
       }
       graph ?assertion {
-        ?approvalNp npx:approvesOf ?_nanopubUri .
+        ?approvalCreator npx:approvesOf ?_nanopubUri .
       }
     }
   }
@@ -34,7 +34,7 @@ where {
         ?disapprovalNp np:hasAssertion ?assertion .
       }
       graph ?assertion {
-        ?disapprovalNp npx:disapprovesOf ?_nanopubUri .
+        ?disapprovalCreator npx:disapprovesOf ?_nanopubUri .
       }
     }
   }

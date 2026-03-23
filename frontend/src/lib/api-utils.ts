@@ -1,7 +1,17 @@
 import ky from "ky";
 
+/**
+ * User identity for publishing nanopublications.
+ */
+export interface UserIdentity {
+  name: string;
+  orcid: string;
+  privateKey: string;
+  keyInfo?: string;
+}
+
 export const loadSigningProfile = async (
-  setProfile: (profile: any | null) => void,
+  setProfile: (profile: UserIdentity | null) => void,
 ) => {
   try {
     // Fetch current user's signing profile including private key
@@ -11,7 +21,7 @@ export const loadSigningProfile = async (
     );
 
     if (response.ok) {
-      const userData = await response.json();
+      const userData: UserIdentity = await response.json();
       setProfile(userData);
     } else {
       setProfile(null);

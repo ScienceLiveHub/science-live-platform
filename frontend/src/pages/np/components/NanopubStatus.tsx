@@ -1,7 +1,11 @@
 import { RelativeDateTime } from "@/components/relative-datetime";
 import { Spinner } from "@/components/ui/spinner";
 import { AsyncLabel } from "@/hooks/use-labels";
+import { loadSigningProfile, UserIdentity } from "@/lib/api-utils";
+import { authClient } from "@/lib/auth-client";
+import { NanopubTemplate } from "@/lib/nanopub-template";
 import { NANOPUB_COMMENTS, NANOPUB_STATUS } from "@/lib/queries";
+import { publishRdf } from "@/lib/rdf";
 import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
 import {
   AlertTriangle,
@@ -13,14 +17,16 @@ import {
   ThumbsUp,
   XCircle,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
+import { TEMPLATE_URI } from "../create/components/templates/registry-metadata";
 import { CommentEntry } from "./CommentEntry";
 
 /**
  * Status information for a nanopublication.
  */
-interface NanopubStatus {
+interface NanopubStatusData {
   supercededBy?: string;
   retractedBy?: string;
   approvals: number;
@@ -43,13 +49,35 @@ export interface NanopubComment {
  * Shows retraction/superseding status and approval/disapproval counts, and comments.
  */
 export function NanopubStatus({ nanopubUri }: { nanopubUri: string }) {
-  const [status, setStatus] = useState<NanopubStatus | null>(null);
+  const [status, setStatus] = useState<NanopubStatusData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<NanopubComment[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [commentsError, setCommentsError] = useState<string | null>(null);
+
+  // Approval/disapproval state
+  const [signingProfile, setSigningProfile] = useState<UserIdentity | null>(
+    null,
+  );
+  const [isSubmittingApproval, setIsSubmittingApproval] = useState(false);
+  const [isSubmittingDisapproval, setIsSubmittingDisapproval] = useState(false);
+
+  // Get session to check if user is signed in
+  const { data: session } = authClient.useSession();
+
+  // Fetch user identity (ORCID and signing key) when signed in
+  useEffect(() => {
+    if (!session?.user) {
+      setSigningProfile(null);
+      return;
+    }
+
+    loadSigningProfile((profile: UserIdentity | null) => {
+      setSigningProfile(profile);
+    });
+  }, [session]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -135,6 +163,85 @@ export function NanopubStatus({ nanopubUri }: { nanopubUri: string }) {
     };
   }, [showComments, status?.comments, nanopubUri]);
 
+  /**
+   * Handle approval or disapproval of the nanopub
+   */
+  const handleApproveOrDisapprove = useCallback(
+    async (isApproval: boolean) => {
+      if (
+        !signingProfile ||
+        !signingProfile.orcid ||
+        !signingProfile.privateKey
+      ) {
+        toast.error(
+          "You must be signed in and verified with an ORCID and default signing key to " +
+            (isApproval ? "approve" : "disapprove"),
+        );
+        return;
+      }
+
+      if (isApproval) {
+        setIsSubmittingApproval(true);
+      } else {
+        setIsSubmittingDisapproval(true);
+      }
+
+      try {
+        // Load the approve/disapprove template
+        const template = await NanopubTemplate.load(
+          TEMPLATE_URI.APPROVE_OR_DISAPPROVE,
+        );
+
+        // Generate the signed nanopublication
+        const signed = await template.generateNanopublication(
+          {
+            nanopub: nanopubUri,
+            approveOrDisapprove: isApproval
+              ? "http://purl.org/nanopub/x/approvesOf"
+              : "http://purl.org/nanopub/x/disapprovesOf",
+          },
+          {
+            orcid: signingProfile.orcid,
+            name: signingProfile.name,
+          },
+          signingProfile.privateKey,
+        );
+
+        // Publish the nanopublication
+        await publishRdf(signed.signedRdf);
+
+        toast.success(
+          `${isApproval ? "Approval" : "Disapproval"} published successfully!`,
+        );
+
+        // Update the count locally
+        setStatus((prev) =>
+          prev
+            ? {
+                ...prev,
+                [isApproval ? "approvals" : "disapprovals"]:
+                  (isApproval ? prev.approvals : prev.disapprovals) + 1,
+              }
+            : prev,
+        );
+      } catch (err) {
+        console.error("Failed to submit approval/disapproval:", err);
+        toast.error(
+          err instanceof Error
+            ? err.message
+            : `Failed to publish ${isApproval ? "approval" : "disapproval"}`,
+        );
+      } finally {
+        if (isApproval) {
+          setIsSubmittingApproval(false);
+        } else {
+          setIsSubmittingDisapproval(false);
+        }
+      }
+    },
+    [signingProfile, nanopubUri],
+  );
+
   if (isLoading) {
     return <Spinner className="size-6" />;
   }
@@ -148,6 +255,8 @@ export function NanopubStatus({ nanopubUri }: { nanopubUri: string }) {
   const isRetracted = !!status.retractedBy;
   const isSuperceded = !!status.supercededBy;
   const hasIssues = isRetracted || isSuperceded;
+
+  const isSubmitting = isSubmittingApproval || isSubmittingDisapproval;
 
   return (
     <>
@@ -204,18 +313,51 @@ export function NanopubStatus({ nanopubUri }: { nanopubUri: string }) {
 
       {/* Approvals/Disapprovals/Comments */}
       <div className="flex gap-4 pt-2 border-t mt-2">
-        <div className="flex items-center gap-2">
-          <ThumbsUp className="size-4 text-green-600">
-            <title>Approvals</title>
-          </ThumbsUp>
+        {/* Approve button */}
+        <button
+          className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-50"
+          onClick={() => handleApproveOrDisapprove(true)}
+          title={
+            !session?.user
+              ? "Sign in to approve"
+              : !signingProfile
+                ? "Configure signing key to approve"
+                : "Click to approve this nanopub"
+          }
+        >
+          {isSubmittingApproval ? (
+            <Spinner className="size-4" />
+          ) : (
+            <ThumbsUp className="size-4 text-green-600 hover:text-green-700">
+              <title>Approve</title>
+            </ThumbsUp>
+          )}
           <span className="font-medium">{status.approvals}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <ThumbsDown className="size-4 text-destructive">
-            <title>Disapprovals</title>
-          </ThumbsDown>
+        </button>
+
+        {/* Disapprove button */}
+        <button
+          className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-50"
+          onClick={() => handleApproveOrDisapprove(false)}
+          title={
+            !session?.user
+              ? "Sign in to disapprove"
+              : !signingProfile
+                ? "Configure signing key to disapprove"
+                : "Click to disapprove this nanopub"
+          }
+        >
+          {isSubmittingDisapproval ? (
+            <Spinner className="size-4" />
+          ) : (
+            <ThumbsDown className="size-4 text-destructive hover:text-red-700">
+              <title>Disapprove</title>
+            </ThumbsDown>
+          )}
           <span className="font-medium">{status.disapprovals}</span>
-        </div>
+        </button>
+
+        {/* Comments toggle */}
         <button
           className="flex items-center gap-2 cursor-pointer"
           onClick={() => setShowComments(!showComments)}

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
-import { loadSigningProfile } from "@/lib/api-utils";
+import { loadSigningProfile, UserIdentity } from "@/lib/api-utils";
 import { authClient } from "@/lib/auth-client";
 import { NanopubTemplate } from "@/lib/nanopub-template";
 import { NANOPUB_COMMENTS } from "@/lib/queries";
@@ -13,15 +13,6 @@ import { Link, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { TEMPLATE_URI } from "../create/components/templates/registry-metadata";
 import { NanopubComment } from "./NanopubStatus";
-
-/**
- * User identity for publishing nanopublications.
- */
-interface UserIdentity {
-  name: string;
-  orcid: string;
-  privateKey: string;
-}
 
 /**
  * Component for entering and publishing a comment on a nanopub, using signed in users profile.
