@@ -30,6 +30,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { UserIdentity } from "@/lib/api-utils";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NanopubTemplate } from "@/lib/nanopub-template";
 import { publishRdf } from "@/lib/rdf";
@@ -60,12 +61,7 @@ export interface NanopubEditorProps {
    * The identity to sign the nanopub with.
    * If null, publishing will be blocked/prompt for auth.
    */
-  identity?: {
-    name: string;
-    orcid: string;
-    privateKey: string;
-    keyInfo?: string;
-  } | null;
+  identity?: UserIdentity | null;
   identityPending?: boolean;
 
   /**

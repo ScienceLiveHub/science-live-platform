@@ -112,8 +112,9 @@ export function getNanopubSuffix(uri: string) {
  */
 export function toScienceLiveNPUri(sourceUri: string, relative = true) {
   if (
-    sourceUri.startsWith(SCIENCELIVE_PLATFORM_URL) ||
-    sourceUri.startsWith(SCIENCELIVE_NANOPUB_URI)
+    !relative &&
+    (sourceUri.startsWith(SCIENCELIVE_PLATFORM_URL) ||
+      sourceUri.startsWith(SCIENCELIVE_NANOPUB_URI))
   ) {
     return sourceUri;
   }

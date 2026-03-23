@@ -1,0 +1,33 @@
+# Get all nanopubs that refer to a specified nanopub URI.
+# Uses npa:networkGraph to efficiently find references.
+# Excludes invalidated and superseded nanopubs.
+#
+# Placeholder: `?_nanopubUri` - URI: the URI of the nanopub to find references to.
+
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix np: <http://www.nanopub.org/nschema#>
+prefix npa: <http://purl.org/nanopub/admin/>
+prefix npx: <http://purl.org/nanopub/x/>
+prefix dct: <http://purl.org/dc/terms/>
+
+select ?np ?label ?date ?creator ?template where {
+  # Use npa:networkGraph to find nanopubs that refer to the specified nanopub
+  graph npa:networkGraph {
+    ?np npa:refersToNanopub ?_nanopubUri .
+  }
+  
+  # Get metadata from npa:graph and exclude invalidated/superseded nanopubs
+  graph npa:graph {
+    ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
+    filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+    optional { ?np rdfs:label ?label . }
+    ?np np:hasProvenance ?provenance ;
+        dct:created ?date ;
+        dct:creator ?creator .
+  }
+  
+  # Optionally get the template this nanopub was created from
+  optional { graph ?provenance { ?np npx:wasCreatedFromTemplate ?template . } }
+}
+order by desc(?date)
+limit 100

@@ -13,7 +13,7 @@ export interface NanopubTemplateMetadata {
   keywords?: string[];
 }
 
-/** Nanopub hash portion of each known template URI (current/latest version used for creation) */
+/** Nanopub URI of each known template (current/latest version used for creation or utility) */
 export const TEMPLATE_URI = {
   CITATION_CITO:
     "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo",
@@ -25,8 +25,7 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RALmXhDw3rHcMveTgbv8VtWxijUHwnSqhCmtJFIPKWVaA",
   GEO_COVERAGE:
     "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao",
-  DATASET:
-    "https://w3id.org/np/RAuVB37yyAuAlgusrUAoG84JI4_EfrEqIkpEZYDpSz3d8",
+  DATASET: "https://w3id.org/np/RAuVB37yyAuAlgusrUAoG84JI4_EfrEqIkpEZYDpSz3d8",
   PICO_RESEARCH_QUESTION:
     "https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w",
   PCC_RESEARCH_QUESTION:
@@ -41,6 +40,12 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RAuLEjPp-4dTvPwMkfHggTto1CgjIftiGRAgHlyeEonjQ",
   FORRT_CLAIM:
     "https://w3id.org/np/RAVdxfm3fgFahBItmNmJX_Xkmg1xlimDtoSMjZgNIs2bQ",
+  // The following are "utility" templates which are not intended to be used in the nanopub editor
+  COMMENT: "http://purl.org/np/RA3gQDMnYbKCTiQeiUYJYBaH6HUhz8f3HIg71itlsZDgA",
+  APPROVE_OR_DISAPPROVE:
+    "http://purl.org/np/RAx2PsXNbCcxYh3sOSScV9H0-tqyETuKjyHsgD6FPC3_E",
+  APPROVE_INTRO:
+    "http://purl.org/np/RAOmr2G967CF1gAfHH49W1VJdAdjE967OxWm7G_-Vq6yc",
 };
 
 /**
@@ -48,7 +53,9 @@ export const TEMPLATE_URI = {
  * Used for viewing nanopubs created with older template versions.
  * Maps template key to array of legacy URIs.
  */
-export const LEGACY_TEMPLATE_URIS: Partial<Record<keyof typeof TEMPLATE_URI, string[]>> = {
+export const LEGACY_TEMPLATE_URIS: Partial<
+  Record<keyof typeof TEMPLATE_URI, string[]>
+> = {
   AIDA_SENTENCE: [
     "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE",
   ],
@@ -131,7 +138,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "outcome",
     ],
   },
-[TEMPLATE_URI.PCC_RESEARCH_QUESTION]: {
+  [TEMPLATE_URI.PCC_RESEARCH_QUESTION]: {
     name: "PCC Research Question",
     description:
       "Define a review question using the PCC framework (Population, Concept, Context)",

@@ -219,14 +219,25 @@ export function sparqlBindAll<
  *   NANOPUB_SPARQL_ENDPOINT_FULL
  * );
  *
- * // With AbortSignal for cancellation
+ * // With AbortSignal for cancellation e.g. within React hook:
  * const controller = new AbortController();
- * const results = await executeBindSparql(
- *   SEARCH_NANOPUBS,
- *   { searchTerm: "my search" },
- *   NANOPUB_SPARQL_ENDPOINT_TEXT,
- *   controller.signal
- * );
+ * try {
+ *   const results = await executeBindSparql(
+ *     SEARCH_NANOPUBS,
+ *     { searchTerm: "my search" },
+ *     NANOPUB_SPARQL_ENDPOINT_TEXT,
+ *     controller.signal
+ *   );
+ * } catch (e: any) {
+ *   // Ignore errors from aborted requests
+ *   if (e?.name === "AbortError") {
+ *     return;
+ *   }
+ * }
+ *
+ * return () => {
+ *     controller.abort();
+ * };
  * ```
  */
 export async function executeBindSparql<

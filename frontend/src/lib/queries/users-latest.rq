@@ -10,13 +10,12 @@ prefix np: <http://www.nanopub.org/nschema#>
 prefix npa: <http://purl.org/nanopub/admin/>
 prefix npx: <http://purl.org/nanopub/x/>
 
-select ?paper ?comment ?label ?np ?date where {
+select ?np ?label ?date where {
 graph npa:graph {
     ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
     filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
-    ?np dct:created ?date .
-    ?np rdfs:label ?label .
-    ?np npx:signedBy ?_orcidUri .
-    ?np np:hasAssertion ?a .
+    ?np dct:created ?date ;
+        rdfs:label ?label ;
+        dct:creator ?_orcidUri .
 }
 } order by desc(?date) limit 10

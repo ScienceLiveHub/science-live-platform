@@ -2,6 +2,7 @@ import { NanopubIcon } from "@/components/nanopub-icon";
 import { RelativeDateTime } from "@/components/relative-datetime";
 import { AsyncLabel } from "@/hooks/use-labels";
 import { toScienceLiveNPUri } from "@/lib/uri";
+import { FileSymlink } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export interface SearchResult {
@@ -46,6 +47,16 @@ export default function SearchResultList({
           {result.date && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <RelativeDateTime date={result.date} />
+              {!!result.referenceCount && (
+                <>
+                  •{" "}
+                  <FileSymlink size={15}>
+                    {" "}
+                    <title>Number of other nanopubs linking to this one</title>
+                  </FileSymlink>
+                  {result.referenceCount}
+                </>
+              )}
             </div>
           )}
         </div>

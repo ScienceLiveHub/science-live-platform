@@ -1,5 +1,5 @@
+import { loadSigningProfile } from "@/lib/api-utils";
 import { authClient } from "@/lib/auth-client";
-import ky from "ky";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import NanopubEditor from "./components/NanopubEditor";
@@ -7,7 +7,7 @@ import NanopubEditor from "./components/NanopubEditor";
 export default function CreateNanopub() {
   const [searchParams, setSearchParams] = useSearchParams();
   const templateUri = searchParams.get("template") || null;
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [signingProfile, setSigningProfile] = useState<any>(null);
   const { data: session, isPending } = authClient.useSession();
 
   // Load signing profile when session is available
@@ -16,24 +16,7 @@ export default function CreateNanopub() {
       return;
     }
 
-    const loadSigningProfile = async () => {
-      try {
-        // Fetch current user's signing profile including private key
-        const response = await ky(
-          `${import.meta.env.VITE_API_URL}/signing/profile`,
-          { credentials: "include" },
-        );
-
-        if (response.ok) {
-          const userData = await response.json();
-          setCurrentUser(userData);
-        }
-      } catch (error) {
-        console.error("Error loading signing profile:", error);
-      }
-    };
-
-    loadSigningProfile();
+    loadSigningProfile(setSigningProfile);
   }, [session, isPending]);
 
   const handleTemplateChange = (uri: string | null) => {
@@ -50,9 +33,9 @@ export default function CreateNanopub() {
     <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-6xl">
       <NanopubEditor
         key={templateUri ?? "default"}
-        identity={currentUser}
+        identity={signingProfile}
         identityPending={
-          isPending || (!isPending && session?.user && !currentUser)
+          isPending || (!isPending && session?.user && !signingProfile)
         }
         templateUri={templateUri}
         onTemplateUriChange={handleTemplateChange}
