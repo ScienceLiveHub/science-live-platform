@@ -10,19 +10,20 @@ prefix npx: <http://purl.org/nanopub/x/>
 prefix dct: <http://purl.org/dc/terms/>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-select distinct ?commentNp ?commentText ?creator ?createdDate
+select distinct ?np ?commentText ?creator ?date
 where {
-  # Get valid signed comment nanopubs
+  # Get only valid nanopubs (`npx:invalidates` excludes anything superseded or retracted)
   graph npa:graph {
-    ?commentNp npa:hasValidSignatureForPublicKey ?pubkey .
-    ?commentNp dct:created ?createdDate .
-    ?commentNp dct:creator ?creator .
+    ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
+    filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+    ?np np:hasAssertion ?assertion ;
+        dct:created ?date ;
+        dct:creator ?creator .
   }
   
-  # Find the assertion graph with the comment
-  ?commentNp np:hasAssertion ?assertion .
+  # Find the comment
   graph ?assertion {
     ?_nanopubUri rdfs:comment ?commentText .
   }  
 }
-order by desc(?createdDate)
+order by desc(?date)

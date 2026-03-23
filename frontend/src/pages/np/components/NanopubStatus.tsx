@@ -111,10 +111,10 @@ export function NanopubStatus({ nanopubUri }: { nanopubUri: string }) {
         );
         setComments(
           results.map((row) => ({
-            commentNp: row.commentNp,
+            commentNp: row.np,
             commentText: row.commentText,
             creator: row.creator || undefined,
-            createdDate: row.createdDate || undefined,
+            createdDate: row.date || undefined,
           })),
         );
       } catch (err: any) {

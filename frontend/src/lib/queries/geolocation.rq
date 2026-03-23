@@ -32,24 +32,16 @@ select distinct
   ?creator
 where {
 
-  # Get valid nanopubs only
+  # Get only valid nanopubs (`npx:invalidates` excludes anything superseded or retracted)
   graph npa:graph {
-    ?np npa:hasValidSignatureForPublicKey ?pubkey .
-    filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKey ?pubkey . }
-    filter not exists { ?npx npx:supersedes ?np ; npa:hasValidSignatureForPublicKey ?pubkey . }
-    ?np dct:created ?date .
+    ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
+    filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+    ?np np:hasAssertion ?assertion ;
+        np:hasProvenance ?provenance ;
+        dct:created ?date ;
+        dct:creator ?creator .
   }
 
-  # Find the nanopublication
-  ?np a np:Nanopublication ;
-           np:hasAssertion ?assertion ;
-           np:hasProvenance ?provenance .
-  
-  # Get creator from provenance graph
-  graph ?provenance {
-    ?assertion prov:wasAttributedTo ?creator .
-  }
-  
   # Within the assertion graph, find all location details
   graph ?assertion {
     # Find papers that have spatial coverage

@@ -15,9 +15,10 @@ where {
   {
     select (count(distinct ?approvalNp) as ?approvals) where {
       graph npa:graph {
-        ?approvalNp npa:hasValidSignatureForPublicKey ?pubkey .
+        ?approvalNp npa:hasValidSignatureForPublicKeyHash ?pubkey .
+        filter not exists { ?npx npx:invalidates ?approvalNp ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+        ?approvalNp np:hasAssertion ?assertion .
       }
-      ?approvalNp np:hasAssertion ?assertion .
       graph ?assertion {
         ?approvalNp npx:approvesOf ?_nanopubUri .
       }
@@ -28,9 +29,10 @@ where {
   {
     select (count(distinct ?disapprovalNp) as ?disapprovals) where {
       graph npa:graph {
-        ?disapprovalNp npa:hasValidSignatureForPublicKey ?pubkey .
+        ?disapprovalNp npa:hasValidSignatureForPublicKeyHash ?pubkey .
+        filter not exists { ?npx npx:invalidates ?disapprovalNp ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+        ?disapprovalNp np:hasAssertion ?assertion .
       }
-      ?disapprovalNp np:hasAssertion ?assertion .
       graph ?assertion {
         ?disapprovalNp npx:disapprovesOf ?_nanopubUri .
       }
@@ -42,9 +44,10 @@ where {
   {
     select (count(distinct ?commentNp) as ?comments) where {
       graph npa:graph {
-        ?commentNp npa:hasValidSignatureForPublicKey ?commentPubkey .
+        ?commentNp npa:hasValidSignatureForPublicKeyHash ?commentPubkey .
+        filter not exists { ?npx npx:invalidates ?commentNp ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+        ?commentNp np:hasAssertion ?commentAssertion .
       }
-      ?commentNp np:hasAssertion ?commentAssertion .
       graph ?commentAssertion {
         ?_nanopubUri rdfs:comment ?_s .
       }
@@ -55,14 +58,14 @@ where {
   # npx:supersedes is stored in npa:graph (admin graph)
   optional {
     graph npa:graph {
-      ?supercededBy npa:hasValidSignatureForPublicKey ?supersedePubkey .
+      ?supercededBy npa:hasValidSignatureForPublicKeyHash ?supersedePubkey .
       ?supercededBy dct:created ?supersedeDate .
       ?supercededBy npx:supersedes ?_nanopubUri .
     }
     # Keep only the latest by filtering out any that have a newer one
     filter not exists {
       graph npa:graph {
-        ?newerSupersede npa:hasValidSignatureForPublicKey ?newerSupersedePubkey .
+        ?newerSupersede npa:hasValidSignatureForPublicKeyHash ?newerSupersedePubkey .
         ?newerSupersede dct:created ?newerSupersedeDate .
         ?newerSupersede npx:supersedes ?_nanopubUri .
         filter(?newerSupersedeDate > ?supersedeDate)
@@ -74,14 +77,14 @@ where {
   # npx:invalidates is stored in npa:graph (admin graph)
   optional {
     graph npa:graph {
-      ?retractedBy npa:hasValidSignatureForPublicKey ?retractPubkey .
+      ?retractedBy npa:hasValidSignatureForPublicKeyHash ?retractPubkey .
       ?retractedBy dct:created ?retractDate .
       ?retractedBy npx:invalidates ?_nanopubUri .
     }
     # Keep only the latest by filtering out any that have a newer one
     filter not exists {
       graph npa:graph {
-        ?newerRetract npa:hasValidSignatureForPublicKey ?newerRetractPubkey .
+        ?newerRetract npa:hasValidSignatureForPublicKeyHash ?newerRetractPubkey .
         ?newerRetract dct:created ?newerRetractDate .
         ?newerRetract npx:invalidates ?_nanopubUri .
         filter(?newerRetractDate > ?retractDate)

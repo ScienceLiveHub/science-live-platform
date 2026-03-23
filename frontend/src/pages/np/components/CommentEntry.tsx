@@ -115,10 +115,10 @@ export function CommentEntry({
           );
 
           const fetchedComments = results.map((row) => ({
-            commentNp: row.commentNp,
+            commentNp: row.np,
             commentText: row.commentText,
             creator: row.creator || undefined,
-            createdDate: row.createdDate || undefined,
+            createdDate: row.date || undefined,
           }));
 
           // If we got more comments than before, return them

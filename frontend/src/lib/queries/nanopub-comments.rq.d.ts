@@ -6,9 +6,9 @@
 declare const query: import("../sparql").SparqlQuery<{
   nanopubUri: "uri";
 }, {
-  commentNp: "string";
+  np: "string";
   commentText: "string";
   creator: "string";
-  createdDate: "string";
+  date: "string";
 }>;
 export default query;

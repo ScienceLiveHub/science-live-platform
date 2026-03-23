@@ -38,7 +38,11 @@ interface UserProfileData {
     slug: string;
     logo: string;
   }[];
-  latestContent?: any[];
+  latestContent?: {
+    np: string;
+    label: string;
+    date: string;
+  }[];
 }
 
 export default function UserProfile() {
@@ -98,7 +102,7 @@ export default function UserProfile() {
           const result = await executeBindSparql(USERS_LATEST, {
             orcidUri: data.orcidId,
           });
-          data.latestContent = typeof result === "string" ? [result] : result;
+          data.latestContent = result;
         }
         setProfile(data);
       } catch (err) {

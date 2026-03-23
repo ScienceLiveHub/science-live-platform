@@ -6,6 +6,7 @@
 
 export { default as GEOLOCATION } from "./geolocation.rq";
 export { default as NANOPUB_COMMENTS } from "./nanopub-comments.rq";
+export { default as NANOPUB_REFERENCES } from "./nanopub-references.rq";
 export { default as NANOPUB_STATUS } from "./nanopub-status.rq";
 export { default as SEARCH_NANOPUBS } from "./search-nanopubs.rq";
 export { default as SEARCH_NANOPUBS_BY_TYPE } from "./search-nanopubs-by-type.rq";
