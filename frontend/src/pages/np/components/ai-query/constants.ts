@@ -15,6 +15,16 @@ import type {
 export const AI_CONFIG_KEY = "science-live-ai-config";
 
 /**
+ * LocalStorage key for query history.
+ */
+export const QUERY_HISTORY_KEY = "science-live-query-history";
+
+/**
+ * Maximum number of history items to keep.
+ */
+export const MAX_HISTORY_ITEMS = 10;
+
+/**
  * Default AI configuration.
  */
 export const DEFAULT_CONFIG: AIConfig = {

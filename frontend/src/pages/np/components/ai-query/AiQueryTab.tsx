@@ -7,12 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Play, Settings, Sparkles } from "lucide-react";
 import { useCallback, useState } from "react";
 import { ConfigDialog } from "./ConfigDialog";
+import { QueryHistory } from "./QueryHistory";
 import { QueryResults } from "./QueryResults";
 import { SparqlEditor } from "./SparqlEditor";
 import { EXAMPLE_PROMPTS } from "./constants";
-import type { QueryStep } from "./types";
+import type { QueryHistoryItem, QueryResultItem, QueryStep } from "./types";
 import { useAIConfig } from "./use-ai-config";
 import { useLLMClient } from "./use-llm-client";
+import { useQueryHistory } from "./use-query-history";
 
 export function AiQueryTab() {
   // Configuration state
@@ -25,6 +27,10 @@ export function AiQueryTab() {
     error: llmError,
     clearError,
   } = useLLMClient(config);
+
+  // Query history
+  const { history, addToHistory, clearHistory, removeFromHistory } =
+    useQueryHistory();
 
   // Query state
   const [prompt, setPrompt] = useState("");
@@ -83,15 +89,37 @@ export function AiQueryTab() {
   /**
    * Handle query execution results.
    */
-  const handleResults = useCallback(() => {
-    setStep("results");
-  }, []);
+  const handleResults = useCallback(
+    (results: QueryResultItem[] | null) => {
+      setStep("results");
+      const count = results?.length ?? -1;
+
+      // Add to history when query completes successfully
+      if (editedQuery) {
+        addToHistory(editedQuery, count, originalPrompt ?? undefined);
+      }
+    },
+    [editedQuery, originalPrompt, addToHistory],
+  );
 
   /**
    * Handle query execution error.
    */
   const handleError = useCallback(() => {
     setStep("error");
+  }, []);
+
+  /**
+   * Handle selecting a query from history.
+   */
+  const handleHistorySelect = useCallback((item: QueryHistoryItem) => {
+    // Load the query from history
+    setEditedQuery(item.query);
+    setGeneratedQuery(item.query);
+    setPrompt(item.prompt ?? "");
+    setOriginalPrompt(item.prompt ?? null);
+    // Execute immediately
+    setStep("executing");
   }, []);
 
   /**
@@ -214,7 +242,7 @@ export function AiQueryTab() {
 
         {/* Example prompts - only show for initial query */}
         {!hasExistingQuery && (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 my-10">
             <span className="text-sm text-muted-foreground">Examples:</span>
             <div className="flex flex-wrap gap-2">
               {EXAMPLE_PROMPTS.map((example, i) => (
@@ -240,6 +268,16 @@ export function AiQueryTab() {
               {llmError}
             </div>
           </div>
+        )}
+
+        {/* Query History */}
+        {!hasExistingQuery && (
+          <QueryHistory
+            history={history}
+            onSelect={handleHistorySelect}
+            onClear={clearHistory}
+            onRemove={removeFromHistory}
+          />
         )}
       </div>
 

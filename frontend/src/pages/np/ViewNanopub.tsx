@@ -1,18 +1,10 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { LatLngBoundsExpression } from "leaflet";
 import { Brain, FileCode, Globe, Search } from "lucide-react";
-import { useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AiQueryTab } from "./components/ai-query";
 import { GeneralSearch } from "./components/GeneralSearch";
-import { GeoSearchWithRef, type GeoSearchHandle } from "./components/GeoSearch";
+import { GeoSearch } from "./components/GeoSearch";
 import { NanopubView } from "./components/NanopubView";
-
-/** Approximate bounding box for Southern Europe, used in Geo example. */
-const EUROPE_BOUNDS: LatLngBoundsExpression = [
-  [34, -10], // south-west (lat, lng)
-  [48, 35], // north-east (lat, lng)
-];
 
 // ---------------------------------------------------------------------------
 // Main Page Component
@@ -37,15 +29,8 @@ export default function ViewNanopub() {
   const uri = searchParams.get("uri") || "";
   const searchQuery = searchParams.get("q") || "";
 
-  const geoSearchRef = useRef<GeoSearchHandle>(null);
-
   // Check if we have active content (URI loaded or search performed)
   const hasActiveContent = uri || searchQuery;
-
-  /** Example: fly the map to Southern Europe and search for "crab". */
-  const handleCrabExample = useCallback(() => {
-    geoSearchRef.current?.flyToAndSearch(EUROPE_BOUNDS, "crab");
-  }, []);
 
   return (
     <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-4xl">
@@ -95,22 +80,7 @@ export default function ViewNanopub() {
 
               {/* Geographic Search Tab */}
               <TabsContent value="geo" className="mt-4">
-                <GeoSearchWithRef ref={geoSearchRef} />
-                <div className="mt-10 mb-4 gap-2 w-full md:w-auto">
-                  Some examples:
-                  <ul className="mt-2 space-y-2">
-                    <li className="flex items-start gap-2">
-                      <FileCode className="h-4 w-4 mt-1 text-purple-600 dark:text-purple-400" />
-                      <button
-                        type="button"
-                        onClick={handleCrabExample}
-                        className="text-purple-600 dark:text-purple-400 hover:underline text-left cursor-pointer"
-                      >
-                        Data about Crabs around Southern Europe
-                      </button>
-                    </li>
-                  </ul>
-                </div>
+                <GeoSearch />
               </TabsContent>
             </Tabs>
           </div>

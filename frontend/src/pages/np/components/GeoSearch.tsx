@@ -5,15 +5,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { GEOLOCATION } from "@/lib/queries";
 import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
 import type { LatLngBoundsExpression, LatLngExpression } from "leaflet";
-import { Globe } from "lucide-react";
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import { Globe, MapPinned } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useMap } from "react-leaflet";
 import SearchResultList from "./SearchResultList";
 import {
@@ -24,6 +17,12 @@ import {
   type GeoLocation,
   type MapBounds,
 } from "./geo";
+
+/** Approximate bounding box for Southern Europe, used in Geo example. */
+const EUROPE_BOUNDS: LatLngBoundsExpression = [
+  [34, -10], // south-west (lat, lng)
+  [48, 35], // north-east (lat, lng)
+];
 
 interface GeoSearchProps {
   /** Optional initial keyword to filter geographic results. */
@@ -62,9 +61,18 @@ export function GeoSearch({
   const [bounds, setBounds] = useState<MapBounds | null>(null);
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
 
+  /** Ref to always have the latest bounds available for imperative calls. */
+  const boundsRef = useRef<MapBounds | null>(null);
+
+  /** Ref to the map's flyToBounds helper, set once the map is ready. */
+  const mapFlyToRef = useRef<
+    ((bounds: LatLngBoundsExpression, onComplete: () => void) => void) | null
+  >(null);
+
   const handleBoundsChange = useCallback(
     (newBounds: MapBounds) => {
       setBounds(newBounds);
+      boundsRef.current = newBounds;
       onBoundsChange?.(newBounds);
     },
     [onBoundsChange],
@@ -115,6 +123,32 @@ export function GeoSearch({
     fetchMapData(searchTerm, bounds);
   }, [fetchMapData, searchTerm, bounds]);
 
+  /** Called once the map is ready, to capture the flyToBounds helper. */
+  const handleMapReady = useCallback(
+    (
+      flyTo: (bounds: LatLngBoundsExpression, onComplete: () => void) => void,
+    ) => {
+      mapFlyToRef.current = flyTo;
+    },
+    [],
+  );
+
+  /**
+   * Fly the map to the given bounds, update the search term, then search.
+   * Used by example buttons inside GeoSearchInner.
+   */
+  const flyToAndSearch = useCallback(
+    (targetBounds: LatLngBoundsExpression, term: string) => {
+      setSearchTerm(term);
+      if (mapFlyToRef.current) {
+        mapFlyToRef.current(targetBounds, () => {
+          fetchMapData(term, boundsRef.current);
+        });
+      }
+    },
+    [fetchMapData],
+  );
+
   const handleLocationSelect = useCallback((loc: GeoLocation) => {
     setSelectedLocation(loc);
   }, []);
@@ -130,160 +164,12 @@ export function GeoSearch({
       onSearchTermChange={setSearchTerm}
       onBoundsChange={handleBoundsChange}
       onLocationSelect={handleLocationSelect}
+      onMapReady={handleMapReady}
       onSearch={search}
+      onFlyToAndSearch={flyToAndSearch}
     />
   );
 }
-
-// ---------------------------------------------------------------------------
-// Expose search trigger via ref for parent components
-// ---------------------------------------------------------------------------
-
-export interface GeoSearchHandle {
-  /** Trigger a geographic search with the current bounds and search term. */
-  search: () => void;
-  /** Whether a search is currently in progress. */
-  loading: boolean;
-  /** Fly the map to the given bounds, then trigger a search with the given term. */
-  flyToAndSearch: (bounds: LatLngBoundsExpression, searchTerm: string) => void;
-}
-
-/**
- * GeoSearch with ref-based imperative handle.
- *
- * The parent can call `ref.current.search()` to trigger a search,
- * and read `ref.current.loading` to check loading state.
- */
-export const GeoSearchWithRef = forwardRef<GeoSearchHandle, GeoSearchProps>(
-  function GeoSearchWithRef(
-    { initialSearchTerm = "", onBoundsChange, onSearchStart, onSearchEnd },
-    ref,
-  ) {
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [locations, setLocations] = useState<GeoLocation[]>([]);
-    const [selectedLocation, setSelectedLocation] =
-      useState<GeoLocation | null>(null);
-    const [bounds, setBounds] = useState<MapBounds | null>(null);
-    const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
-    const boundsRef = useRef<MapBounds | null>(null);
-    const mapFlyToRef = useRef<
-      ((bounds: LatLngBoundsExpression, onComplete: () => void) => void) | null
-    >(null);
-
-    const handleBoundsChange = useCallback(
-      (newBounds: MapBounds) => {
-        setBounds(newBounds);
-        boundsRef.current = newBounds;
-        onBoundsChange?.(newBounds);
-      },
-      [onBoundsChange],
-    );
-
-    const fetchMapData = useCallback(
-      async (search: string, mapBounds: MapBounds | null) => {
-        try {
-          setLoading(true);
-          setError(null);
-          onSearchStart?.();
-
-          const bindParams: Record<string, string> = {};
-
-          if (search.trim()) {
-            bindParams.searchTerm = search.trim();
-          }
-
-          if (mapBounds) {
-            bindParams.bboxMinX = mapBounds.minLng.toString();
-            bindParams.bboxMinY = mapBounds.minLat.toString();
-            bindParams.bboxMaxX = mapBounds.maxLng.toString();
-            bindParams.bboxMaxY = mapBounds.maxLat.toString();
-          }
-
-          const rows = await executeBindSparql(
-            GEOLOCATION,
-            bindParams,
-            NANOPUB_SPARQL_ENDPOINT_FULL,
-          );
-
-          setLocations(parseGeoResults(rows));
-        } catch (e: any) {
-          if (e?.name === "AbortError") return;
-          console.error("Failed to fetch geolocation data:", e);
-          setError(e?.message || "Failed to fetch geolocation data");
-        } finally {
-          setLoading(false);
-          onSearchEnd?.();
-        }
-      },
-      [onSearchStart, onSearchEnd],
-    );
-
-    // We need a ref to searchTerm so the imperative handle always has the latest
-    const searchTermRef = useRef(searchTerm);
-    searchTermRef.current = searchTerm;
-
-    useImperativeHandle(
-      ref,
-      () => ({
-        search: () => {
-          fetchMapData(searchTermRef.current, boundsRef.current);
-        },
-        get loading() {
-          return loading;
-        },
-        flyToAndSearch: (
-          targetBounds: LatLngBoundsExpression,
-          term: string,
-        ) => {
-          // Update the search term when flying to a location
-          setSearchTerm(term);
-          if (mapFlyToRef.current) {
-            mapFlyToRef.current(targetBounds, () => {
-              // After the fly animation completes, search with the final bounds
-              fetchMapData(term, boundsRef.current);
-            });
-          }
-        },
-      }),
-      [fetchMapData, loading],
-    );
-
-    const handleLocationSelect = useCallback((loc: GeoLocation) => {
-      setSelectedLocation(loc);
-    }, []);
-
-    const handleMapReady = useCallback(
-      (
-        flyTo: (bounds: LatLngBoundsExpression, onComplete: () => void) => void,
-      ) => {
-        mapFlyToRef.current = flyTo;
-      },
-      [],
-    );
-
-    /** Trigger a search using the current bounds and search term. */
-    const search = useCallback(() => {
-      fetchMapData(searchTerm, bounds);
-    }, [fetchMapData, searchTerm, bounds]);
-
-    return (
-      <GeoSearchInner
-        loading={loading}
-        error={error}
-        locations={locations}
-        selectedLocation={selectedLocation}
-        bounds={bounds}
-        searchTerm={searchTerm}
-        onSearchTermChange={setSearchTerm}
-        onBoundsChange={handleBoundsChange}
-        onLocationSelect={handleLocationSelect}
-        onMapReady={handleMapReady}
-        onSearch={search}
-      />
-    );
-  },
-);
 
 // ---------------------------------------------------------------------------
 // Shared inner rendering component
@@ -301,9 +187,11 @@ interface GeoSearchInnerProps {
   onLocationSelect: (loc: GeoLocation) => void;
   onSearch: () => void;
   /** Callback to expose the map's flyToBounds function to the parent. */
-  onMapReady?: (
+  onMapReady: (
     flyTo: (bounds: LatLngBoundsExpression, onComplete: () => void) => void,
   ) => void;
+  /** Fly the map to the given bounds, set the search term, and search. */
+  onFlyToAndSearch: (bounds: LatLngBoundsExpression, term: string) => void;
 }
 
 /**
@@ -345,7 +233,13 @@ function GeoSearchInner({
   onLocationSelect,
   onMapReady,
   onSearch,
+  onFlyToAndSearch,
 }: GeoSearchInnerProps) {
+  /** Example: fly the map to Southern Europe and search for "crab". */
+  const handleCrabExample = useCallback(() => {
+    onFlyToAndSearch(EUROPE_BOUNDS, "crab");
+  }, [onFlyToAndSearch]);
+
   return (
     <div className="flex flex-col gap-4">
       {/* Search Input */}
@@ -405,7 +299,7 @@ function GeoSearchInner({
         >
           <MapTileLayer />
           <MapZoomControl />
-          {onMapReady && <MapFlyToController onReady={onMapReady} />}
+          <MapFlyToController onReady={onMapReady} />
           <MapBoundsTracker onBoundsChange={onBoundsChange} />
           {!loading && !error && (
             <GeoLayers
@@ -440,6 +334,22 @@ function GeoSearchInner({
           }))}
         />
       )}
+
+      <div className="mt-10 mb-4 gap-2 w-full md:w-auto">
+        <span className="text-sm text-muted-foreground">Examples:</span>
+        <ul className="mt-2 space-y-2">
+          <li className="flex items-start gap-2">
+            <MapPinned className="h-4 w-4 mt-1 text-purple-600 dark:text-purple-400" />
+            <button
+              type="button"
+              onClick={handleCrabExample}
+              className="text-purple-600 dark:text-purple-400 hover:underline text-left cursor-pointer"
+            >
+              Data about Crabs around Southern Europe
+            </button>
+          </li>
+        </ul>
+      </div>
     </div>
   );
 }

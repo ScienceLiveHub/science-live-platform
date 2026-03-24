@@ -97,3 +97,19 @@ export interface ExamplePrompt {
  * A single result row from a SPARQL query.
  */
 export type QueryResultItem = Record<string, string>;
+
+/**
+ * An item in the SPARQL query history.
+ */
+export interface QueryHistoryItem {
+  /** Unique identifier for the history item */
+  id: string;
+  /** The SPARQL query text */
+  query: string;
+  /** The natural language prompt that generated the query (if any) */
+  prompt?: string;
+  /** Number of results returned by the query or -1 if error */
+  resultCount: number;
+  /** ISO timestamp when the query was executed */
+  timestamp: string;
+}
