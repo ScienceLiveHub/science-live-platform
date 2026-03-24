@@ -1,9 +1,19 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Map, MapTileLayer, MapZoomControl } from "@/components/ui/map";
 import { Spinner } from "@/components/ui/spinner";
 import { GEOLOCATION } from "@/lib/queries";
 import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
 import type { LatLngBoundsExpression, LatLngExpression } from "leaflet";
-import { useCallback, useEffect, useState } from "react";
+import { Globe } from "lucide-react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { useMap } from "react-leaflet";
 import SearchResultList from "./SearchResultList";
 import {
@@ -16,8 +26,8 @@ import {
 } from "./geo";
 
 interface GeoSearchProps {
-  /** Optional keyword to filter geographic results. */
-  searchTerm: string;
+  /** Optional initial keyword to filter geographic results. */
+  initialSearchTerm?: string;
   /** Called when map bounds change so the parent can track them. */
   onBoundsChange?: (bounds: MapBounds) => void;
   /** Called when a search is initiated (for parent loading state). */
@@ -34,9 +44,11 @@ const DEFAULT_CENTER: LatLngExpression = [20, 0];
  * Displays a map-based geographic search interface for nanopublications.
  * Users can pan/zoom the map to define a region, optionally enter a keyword,
  * and search for nanopubs with geographical coverage in that area.
+ *
+ * This component manages its own search input state.
  */
 export function GeoSearch({
-  searchTerm,
+  initialSearchTerm = "",
   onBoundsChange,
   onSearchStart,
   onSearchEnd,
@@ -48,6 +60,7 @@ export function GeoSearch({
     null,
   );
   const [bounds, setBounds] = useState<MapBounds | null>(null);
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
 
   const handleBoundsChange = useCallback(
     (newBounds: MapBounds) => {
@@ -106,11 +119,6 @@ export function GeoSearch({
     setSelectedLocation(loc);
   }, []);
 
-  // Expose the search function so the parent can trigger it
-  // We use a ref-style pattern via the component's imperative API
-  // but for simplicity, we expose it via a custom hook pattern.
-  // Instead, the parent calls search via the exposed prop.
-
   return (
     <GeoSearchInner
       loading={loading}
@@ -118,6 +126,8 @@ export function GeoSearch({
       locations={locations}
       selectedLocation={selectedLocation}
       bounds={bounds}
+      searchTerm={searchTerm}
+      onSearchTermChange={setSearchTerm}
       onBoundsChange={handleBoundsChange}
       onLocationSelect={handleLocationSelect}
       onSearch={search}
@@ -128,8 +138,6 @@ export function GeoSearch({
 // ---------------------------------------------------------------------------
 // Expose search trigger via ref for parent components
 // ---------------------------------------------------------------------------
-
-import { forwardRef, useImperativeHandle, useRef } from "react";
 
 export interface GeoSearchHandle {
   /** Trigger a geographic search with the current bounds and search term. */
@@ -148,7 +156,7 @@ export interface GeoSearchHandle {
  */
 export const GeoSearchWithRef = forwardRef<GeoSearchHandle, GeoSearchProps>(
   function GeoSearchWithRef(
-    { searchTerm, onBoundsChange, onSearchStart, onSearchEnd },
+    { initialSearchTerm = "", onBoundsChange, onSearchStart, onSearchEnd },
     ref,
   ) {
     const [loading, setLoading] = useState(false);
@@ -157,6 +165,7 @@ export const GeoSearchWithRef = forwardRef<GeoSearchHandle, GeoSearchProps>(
     const [selectedLocation, setSelectedLocation] =
       useState<GeoLocation | null>(null);
     const [bounds, setBounds] = useState<MapBounds | null>(null);
+    const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
     const boundsRef = useRef<MapBounds | null>(null);
     const mapFlyToRef = useRef<
       ((bounds: LatLngBoundsExpression, onComplete: () => void) => void) | null
@@ -220,11 +229,15 @@ export const GeoSearchWithRef = forwardRef<GeoSearchHandle, GeoSearchProps>(
         search: () => {
           fetchMapData(searchTermRef.current, boundsRef.current);
         },
-        loading,
+        get loading() {
+          return loading;
+        },
         flyToAndSearch: (
           targetBounds: LatLngBoundsExpression,
           term: string,
         ) => {
+          // Update the search term when flying to a location
+          setSearchTerm(term);
           if (mapFlyToRef.current) {
             mapFlyToRef.current(targetBounds, () => {
               // After the fly animation completes, search with the final bounds
@@ -249,6 +262,11 @@ export const GeoSearchWithRef = forwardRef<GeoSearchHandle, GeoSearchProps>(
       [],
     );
 
+    /** Trigger a search using the current bounds and search term. */
+    const search = useCallback(() => {
+      fetchMapData(searchTerm, bounds);
+    }, [fetchMapData, searchTerm, bounds]);
+
     return (
       <GeoSearchInner
         loading={loading}
@@ -256,9 +274,12 @@ export const GeoSearchWithRef = forwardRef<GeoSearchHandle, GeoSearchProps>(
         locations={locations}
         selectedLocation={selectedLocation}
         bounds={bounds}
+        searchTerm={searchTerm}
+        onSearchTermChange={setSearchTerm}
         onBoundsChange={handleBoundsChange}
         onLocationSelect={handleLocationSelect}
         onMapReady={handleMapReady}
+        onSearch={search}
       />
     );
   },
@@ -274,9 +295,11 @@ interface GeoSearchInnerProps {
   locations: GeoLocation[];
   selectedLocation: GeoLocation | null;
   bounds: MapBounds | null;
+  searchTerm: string;
+  onSearchTermChange: (term: string) => void;
   onBoundsChange: (bounds: MapBounds) => void;
   onLocationSelect: (loc: GeoLocation) => void;
-  onSearch?: () => void;
+  onSearch: () => void;
   /** Callback to expose the map's flyToBounds function to the parent. */
   onMapReady?: (
     flyTo: (bounds: LatLngBoundsExpression, onComplete: () => void) => void,
@@ -316,12 +339,50 @@ function GeoSearchInner({
   locations,
   selectedLocation,
   bounds,
+  searchTerm,
+  onSearchTermChange,
   onBoundsChange,
   onLocationSelect,
   onMapReady,
+  onSearch,
 }: GeoSearchInnerProps) {
   return (
     <div className="flex flex-col gap-4">
+      {/* Search Input */}
+      <div className="flex gap-2">
+        <Input
+          type="text"
+          className="h-12 text-lg px-6"
+          placeholder="Enter search query..."
+          value={searchTerm}
+          onChange={(e) => onSearchTermChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              onSearch();
+            }
+          }}
+        />
+        <Button
+          className="inline-flex items-center rounded-md bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 h-12 px-8 text-lg"
+          disabled={loading}
+          onClick={onSearch}
+        >
+          {loading ? (
+            <Spinner className="h-5 w-5" />
+          ) : (
+            <>
+              <Globe className="h-5 w-5 mr-2" />
+              Search Area
+            </>
+          )}
+        </Button>
+      </div>
+
+      <p className="text-center text-muted-foreground text-sm">
+        Move/Pan the map to select an area of interest then submit a search
+        query
+      </p>
+
       {/* Map loading/error states */}
       {loading && (
         <div className="rounded-md border bg-muted/30 p-4 flex items-center gap-3 text-muted-foreground">

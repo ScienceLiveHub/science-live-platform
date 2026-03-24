@@ -19,19 +19,32 @@ export function useLLMClient(config: AIConfig) {
 
   /**
    * Generate a SPARQL query from a natural language prompt.
+   * Optionally takes an existing query to edit based on the prompt.
    */
   const generateSparqlQuery = useCallback(
-    async (prompt: string): Promise<string | null> => {
+    async (prompt: string, existingQuery?: string): Promise<string | null> => {
       setIsGenerating(true);
       setError(null);
 
       try {
         const model = getModelForConfig(config);
 
+        const userPrompt = existingQuery
+          ? `The user has the following SPARQL query:
+
+\`\`\`sparql
+${existingQuery}
+\`\`\`
+
+They want to make this change: ${prompt}
+
+Please modify the query according to their request. Only output the modified SPARQL query, nothing else.`
+          : `Generate a SPARQL query for: ${prompt}`;
+
         const result = await generateText({
           model,
           system: SPARQL_GENERATION_SYSTEM_PROMPT,
-          prompt: `Generate a SPARQL query for: ${prompt}`,
+          prompt: userPrompt,
           temperature: 0.3, // Lower temperature for more deterministic output
         });
 

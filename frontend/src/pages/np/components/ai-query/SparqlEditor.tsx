@@ -68,10 +68,7 @@ export function SparqlEditor({
     <div className={cn("flex flex-col gap-2", className)}>
       {/* Toolbar */}
       <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          SPARQL Query
-          {readOnly && <span className="ml-2">(read-only)</span>}
-        </div>
+        <div className="text-sm text-muted-foreground"></div>
         <div className="flex items-center gap-2">
           {/* Reset button - only show if edited and original exists */}
           {originalQuery &&

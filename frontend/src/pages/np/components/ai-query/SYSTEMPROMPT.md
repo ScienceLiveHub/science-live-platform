@@ -37,7 +37,7 @@ select ?np ?label ?date ?creator where {
 
 ### Exclude Invalidated Nanopubs
 
-Always add this filter to exclude invalidated nanopubs:
+Always add this filter inside of `graph npa:graph {}` to exclude invalidated nanopubs (remember to include the `npx` prefix, if missing):
 
 ```sparql
 filter not exists {
@@ -48,7 +48,7 @@ filter not exists {
 
 ## Rules
 
-1. Always include proper prefix declarations
+1. Always include proper prefix declarations, including additional ones from the Knowledge Graph Schema list above where required.
 2. Use graph npa:graph for nanopub metadata
 3. Filter out invalidated nanopubs using the pattern above
 4. Return valid SPARQL 1.1 query syntax only
