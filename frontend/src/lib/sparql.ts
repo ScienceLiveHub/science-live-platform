@@ -8,7 +8,7 @@
  *   — Standard SPARQL endpoint for structured queries (no full-text search).
  */
 
-import ky from "ky";
+import ky, { HTTPError } from "ky";
 
 export const NANOPUB_SPARQL_ENDPOINT_TEXT =
   "https://query.knowledgepixels.com/repo/text";
@@ -100,24 +100,50 @@ export async function executeSparql(
   endpoint: string = NANOPUB_SPARQL_ENDPOINT_TEXT,
   signal?: AbortSignal,
 ): Promise<Record<string, string>[]> {
-  const res = await ky.post(endpoint, {
-    body: new URLSearchParams({ query }),
-    headers: {
-      Accept: "application/sparql-results+json",
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    signal,
-  });
+  try {
+    const res = await ky.post(endpoint, {
+      body: new URLSearchParams({ query }),
+      headers: {
+        Accept: "application/sparql-results+json",
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      signal,
+    });
 
-  const data = await res.json<SparqlResults>();
+    const data = await res.json<SparqlResults>();
 
-  return data.results.bindings.map((row) => {
-    const parsed: Record<string, string> = {};
-    for (const [k, v] of Object.entries(row)) {
-      parsed[k] = v.value;
+    return data.results.bindings.map((row) => {
+      const parsed: Record<string, string> = {};
+      for (const [k, v] of Object.entries(row)) {
+        parsed[k] = v.value;
+      }
+      return parsed;
+    });
+  } catch (err) {
+    // Handle HTTP errors (like 400 Bad Request) by extracting the response body
+    if (err instanceof HTTPError) {
+      const response = err.response;
+      let errorDetail: string;
+
+      try {
+        // Try to get the error details from the response body
+        errorDetail = await response.text();
+      } catch {
+        // If we can't read the body, fall back to status text
+        errorDetail = response.statusText || `HTTP ${response.status}`;
+      }
+
+      // Create a new error with the detailed message, preserving the original as cause
+      throw new Error(
+        errorDetail ||
+          `SPARQL query failed: ${response.status} ${response.statusText}`,
+        { cause: err },
+      );
     }
-    return parsed;
-  });
+
+    // Re-throw other errors (including AbortError)
+    throw err;
+  }
 }
 
 // =============================================================================
