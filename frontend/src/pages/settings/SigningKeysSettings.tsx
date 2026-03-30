@@ -3,6 +3,7 @@ import SettingsLayout from "@/components/settings-layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { CopyButton } from "@/components/ui/copy-button";
 import {
   Dialog,
   DialogClose,
@@ -21,8 +22,6 @@ import { SettingsCard } from "@daveyplate/better-auth-ui";
 import ky from "ky";
 import {
   AlertCircle,
-  Check,
-  Copy,
   Eye,
   EyeOff,
   FileKey,
@@ -332,16 +331,6 @@ function SigningKeyCard({
       showKey ? `/signing/key/${signingKey.id}` : null,
       fetcher,
     );
-  const [isCopied, setIsCopied] = useState(false);
-
-  const handleCopy = () => {
-    if (keyDetail?.privateKey) {
-      navigator.clipboard.writeText(keyDetail.privateKey);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-      toast.success("Private key copied to clipboard");
-    }
-  };
 
   return (
     <Card>
@@ -429,18 +418,11 @@ function SigningKeyCard({
                     <pre className="p-3 rounded-md bg-muted text-xs font-mono break-all whitespace-pre-wrap max-h-40 overflow-y-auto">
                       {keyDetail?.privateKey}
                     </pre>
-                    <Button
+                    <CopyButton
+                      text={keyDetail?.privateKey ?? ""}
                       size="icon"
-                      variant="ghost"
                       className="absolute top-1 right-1 h-6 w-6"
-                      onClick={handleCopy}
-                    >
-                      {isCopied ? (
-                        <Check className="h-3 w-3 text-green-500" />
-                      ) : (
-                        <Copy className="h-3 w-3" />
-                      )}
-                    </Button>
+                    />
                   </>
                 )}
               </div>

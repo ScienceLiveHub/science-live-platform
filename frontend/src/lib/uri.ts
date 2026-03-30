@@ -1,5 +1,6 @@
 export const SCIENCELIVE_PLATFORM_URL = "https://platform.sciencelive4all.org";
 export const SCIENCELIVE_NANOPUB_URI = "https://w3id.org/sciencelive/np/";
+export const API_PROXY_URI = `${import.meta.env.VITE_API_URL}/proxy`;
 
 /**
  * Returns a valid full URI based on an input in any format, including just the hash part
