@@ -2,6 +2,7 @@
  * Component to display and manage SPARQL query history.
  */
 
+import { RelativeDateTime } from "@/components/relative-datetime";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -21,25 +22,6 @@ interface QueryHistoryProps {
   onClear: () => void;
   /** Callback to remove a specific item */
   onRemove: (id: string) => void;
-}
-
-/**
- * Format a timestamp for display.
- */
-function formatTimestamp(isoString: string): string {
-  const date = new Date(isoString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-
-  return date.toLocaleDateString();
 }
 
 /**
@@ -85,7 +67,10 @@ export function QueryHistory({
               Clear History
             </Button>
           </div>
-          <div className="flex flex-col gap-1 max-h-64 overflow-y-auto">
+          <div
+            className="flex flex-col gap-1 max-h-64 overflow-y-auto"
+            onWheel={(e) => e.stopPropagation()}
+          >
             {history.map((item) => (
               <div
                 key={item.id}
@@ -99,7 +84,12 @@ export function QueryHistory({
                     {truncateQuery(item.query)}
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                    <span>{formatTimestamp(item.timestamp)}</span>
+                    <span>
+                      <RelativeDateTime
+                        className="text-xs"
+                        date={item.timestamp}
+                      />
+                    </span>
                     <span>•</span>
                     <span>
                       {item.resultCount === -1

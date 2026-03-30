@@ -4,10 +4,12 @@
 
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
+import { CopyButton } from "@/components/ui/copy-button";
 import { cn } from "@/lib/utils";
 import CodeEditor from "@uiw/react-textarea-code-editor";
-import { Check, Copy, RotateCcw } from "lucide-react";
-import { useCallback, useState } from "react";
+import { RotateCcw } from "lucide-react";
+import { useCallback } from "react";
+import rehypePrism from "rehype-prism-plus";
 
 interface SparqlEditorProps {
   /** The SPARQL query content */
@@ -32,18 +34,7 @@ export function SparqlEditor({
   originalQuery,
   className,
 }: SparqlEditorProps) {
-  const [copied, setCopied] = useState(false);
   const { resolvedTheme } = useTheme();
-
-  const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(value);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy query:", err);
-    }
-  }, [value]);
 
   const handleReset = useCallback(() => {
     if (originalQuery && onChange) {
@@ -87,29 +78,19 @@ export function SparqlEditor({
               </Button>
             )}
           {/* Copy button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCopy}
-            disabled={loading || !value}
-            title="Copy to clipboard"
-          >
-            {copied ? (
-              <Check className="h-4 w-4 text-green-500" />
-            ) : (
-              <Copy className="h-4 w-4" />
-            )}
-            <span className="ml-1 sr-only">Copy</span>
-          </Button>
+          <CopyButton text={value} disabled={loading} />
         </div>
       </div>
 
       {/* Editor */}
-      <div className="relative">
+      <div className="relative" onWheel={(e) => e.stopPropagation()}>
         <CodeEditor
           value={value}
           language="sparql"
           onChange={(e) => handleChange(e.target.value)}
+          rehypePlugins={[
+            [rehypePrism, { ignoreMissing: true, showLineNumbers: true }],
+          ]}
           readOnly={readOnly}
           disabled={loading}
           placeholder="SPARQL query will appear here..."
@@ -121,7 +102,6 @@ export function SparqlEditor({
           )}
           data-color-mode={resolvedTheme === "dark" ? "dark" : "light"}
           spellCheck={false}
-          padding={10}
           style={{
             fontFamily:
               "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",

@@ -5,12 +5,14 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Play, Settings, Sparkles } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ConfigDialog } from "./ConfigDialog";
+import { EXAMPLE_PROMPTS } from "./constants";
+import { parsePlaceholders } from "./parse-placeholders";
+import { PlaceholderInputs } from "./PlaceholderInputs";
 import { QueryHistory } from "./QueryHistory";
 import { QueryResults } from "./QueryResults";
 import { SparqlEditor } from "./SparqlEditor";
-import { EXAMPLE_PROMPTS } from "./constants";
 import type { QueryHistoryItem, QueryResultItem, QueryStep } from "./types";
 import { useAIConfig } from "./use-ai-config";
 import { useLLMClient } from "./use-llm-client";
@@ -18,7 +20,7 @@ import { useQueryHistory } from "./use-query-history";
 
 export function AiQueryTab() {
   // Configuration state
-  const { config, isConfigured, updateConfig } = useAIConfig();
+  const { config, isConfigured, saveProviderConfig } = useAIConfig();
 
   // LLM client
   const {
@@ -39,6 +41,19 @@ export function AiQueryTab() {
   const [editedQuery, setEditedQuery] = useState<string | null>(null);
   const [step, setStep] = useState<QueryStep>("idle");
 
+  // Placeholder state
+  const [queryWithPlaceholders, setQueryWithPlaceholders] = useState<
+    string | null
+  >(null);
+  const [placeholdersValid, setPlaceholdersValid] = useState(true);
+
+  // Parse placeholders from the edited query
+  const placeholders = useMemo(
+    () => parsePlaceholders(editedQuery ?? ""),
+    [editedQuery],
+  );
+  const hasPlaceholders = placeholders.length > 0;
+
   /**
    * Handle generating a SPARQL query from the prompt.
    * If there's an existing query, the prompt is treated as an edit request.
@@ -53,11 +68,13 @@ export function AiQueryTab() {
       // Pass existing query if we're editing
       const query = await generateSparqlQuery(
         prompt.trim(),
-        editedQuery ?? undefined,
+        editedQuery || undefined,
       );
       if (query) {
         setGeneratedQuery(query);
         setEditedQuery(query);
+        // Clear placeholder state when query changes
+        setQueryWithPlaceholders(null);
         // Store the original prompt for context
         if (!originalPrompt) {
           setOriginalPrompt(prompt.trim());
@@ -82,7 +99,9 @@ export function AiQueryTab() {
    * Handle executing the query.
    */
   const handleExecute = () => {
-    if (!editedQuery) return;
+    // Use query with placeholders filled in if available, otherwise use edited query
+    const queryToExecute = queryWithPlaceholders ?? editedQuery;
+    if (!queryToExecute) return;
     setStep("executing");
   };
 
@@ -95,6 +114,7 @@ export function AiQueryTab() {
       const count = results?.length ?? -1;
 
       // Add to history when query completes successfully
+      // Store the original query with placeholders, not the filled-in version
       if (editedQuery) {
         addToHistory(editedQuery, count, originalPrompt ?? undefined);
       }
@@ -118,8 +138,15 @@ export function AiQueryTab() {
     setGeneratedQuery(item.query);
     setPrompt(item.prompt ?? "");
     setOriginalPrompt(item.prompt ?? null);
-    // Execute immediately
-    setStep("executing");
+    // Clear placeholder state
+    setQueryWithPlaceholders(null);
+    // Execute immediately if no placeholders
+    const parsedPlaceholders = parsePlaceholders(item.query);
+    if (parsedPlaceholders.length === 0) {
+      setStep("executing");
+    } else {
+      setStep("editing");
+    }
   }, []);
 
   /**
@@ -131,6 +158,8 @@ export function AiQueryTab() {
     setGeneratedQuery(null);
     setEditedQuery(null);
     setStep("idle");
+    setQueryWithPlaceholders(null);
+    setPlaceholdersValid(true);
     clearError();
   }, [clearError]);
 
@@ -140,6 +169,9 @@ export function AiQueryTab() {
   const handleExampleClick = useCallback((examplePrompt: string) => {
     setPrompt(examplePrompt);
   }, []);
+
+  // The query to pass to QueryResults (with placeholders filled if applicable)
+  const executableQuery = queryWithPlaceholders ?? editedQuery;
 
   // Show config dialog if not configured
   const showConfigPrompt = !isConfigured;
@@ -161,11 +193,11 @@ export function AiQueryTab() {
         </div>
         <ConfigDialog
           config={config}
-          onSave={updateConfig}
+          onSave={saveProviderConfig}
           trigger={
             <Button variant="outline" size="sm">
               <Settings className="h-4 w-4 mr-2" />
-              Settings
+              AI Provider
             </Button>
           }
         />
@@ -197,6 +229,7 @@ export function AiQueryTab() {
           <Textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
+            onWheel={(e) => e.stopPropagation()}
             placeholder={
               hasExistingQuery
                 ? "e.g., Add a filter for year > 2020"
@@ -219,7 +252,7 @@ export function AiQueryTab() {
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 {hasExistingQuery ? "Updating..." : "Generating..."}
               </>
-            ) : hasExistingQuery ? (
+            ) : hasExistingQuery && !llmError ? (
               <>
                 <Sparkles className="h-4 w-4 mr-2" />
                 Update Query
@@ -295,10 +328,25 @@ export function AiQueryTab() {
             readOnly={step === "executing"}
           />
 
+          {/* Placeholder Inputs - show when query has placeholders */}
+          {hasPlaceholders && step === "editing" && (
+            <PlaceholderInputs
+              query={editedQuery ?? ""}
+              onQueryChange={setQueryWithPlaceholders}
+              onValidChange={setPlaceholdersValid}
+              disabled={false}
+            />
+          )}
+
           {/* Action buttons */}
           <div className="flex items-center gap-2">
             {step === "editing" && (
-              <Button onClick={handleExecute} disabled={!editedQuery}>
+              <Button
+                onClick={handleExecute}
+                disabled={
+                  !editedQuery || (hasPlaceholders && !placeholdersValid)
+                }
+              >
                 <Play className="h-4 w-4 mr-2" />
                 Execute Query
               </Button>
@@ -308,7 +356,7 @@ export function AiQueryTab() {
           {/* Query Results */}
           {(step === "executing" || step === "results" || step === "error") && (
             <QueryResults
-              query={editedQuery}
+              query={executableQuery}
               autoExecute={step === "executing"}
               onResults={handleResults}
               onError={handleError}

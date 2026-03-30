@@ -5,6 +5,7 @@ import { cors } from "hono/cors";
 import health from "./health";
 import notifications from "./notifications";
 import orcid from "./orcid";
+import proxy from "./proxy";
 import signing from "./signing";
 import userProfile from "./user-profile";
 
@@ -61,6 +62,7 @@ app.on(["POST", "GET"], "/auth/*", (c) => getAuth(c.env).handler(c.req.raw));
 
 // Endpoints that require auth
 app.route("/notifications", notifications);
+app.route("/proxy", proxy);
 app.route("/signing", signing);
 
 export default app;

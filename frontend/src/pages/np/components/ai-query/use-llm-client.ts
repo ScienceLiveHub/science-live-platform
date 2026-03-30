@@ -1,11 +1,12 @@
 /**
- * Hook for LLM client interactions using Vercel AI SDK.
+ * Hook for LLM client interactions using TanStack AI.
  */
 
-import { createAnthropic } from "@ai-sdk/anthropic";
-import { createOpenAI } from "@ai-sdk/openai";
-import { generateText } from "ai";
-import { createOllama } from "ollama-ai-provider";
+import { API_PROXY_URI } from "@/lib/uri";
+import { chat } from "@tanstack/ai";
+import { createAnthropicChat } from "@tanstack/ai-anthropic";
+import { createOpenaiChat } from "@tanstack/ai-openai";
+import ky from "ky";
 import { useCallback, useState } from "react";
 import { SPARQL_GENERATION_SYSTEM_PROMPT } from "./constants";
 import type { AIConfig } from "./types";
@@ -27,8 +28,6 @@ export function useLLMClient(config: AIConfig) {
       setError(null);
 
       try {
-        const model = getModelForConfig(config);
-
         const userPrompt = existingQuery
           ? `The user has the following SPARQL query:
 
@@ -41,27 +40,45 @@ They want to make this change: ${prompt}
 Please modify the query according to their request. Only output the modified SPARQL query, nothing else.`
           : `Generate a SPARQL query for: ${prompt}`;
 
-        const result = await generateText({
-          model,
-          system: SPARQL_GENERATION_SYSTEM_PROMPT,
-          prompt: userPrompt,
-          temperature: 0.3, // Lower temperature for more deterministic output
-        });
+        let response: string;
 
-        // Clean up the response - remove markdown code blocks if present
-        let query = result.text.trim();
+        const openaiCompatSettings = config.providers["openai-compatible"];
 
-        // Remove markdown code blocks if the LLM included them
-        if (query.startsWith("```sparql")) {
-          query = query.slice(9);
-        } else if (query.startsWith("```")) {
-          query = query.slice(3);
+        if (config.provider === "ollama") {
+          // Call Ollama directly so we can pass `think: false` at the top level
+          // of the ChatRequest. The TanStack AI Ollama adapter spreads modelOptions
+          // into Ollama's nested `options` object, which does not reach the
+          // top-level `think` field that controls reasoning mode.
+          response = await callOllamaDirectly(
+            config.providers.ollama.baseUrl || "http://localhost:11434",
+            config.providers.ollama.model,
+            SPARQL_GENERATION_SYSTEM_PROMPT,
+            userPrompt,
+          );
+        } else if (
+          config.provider === "openai-compatible" &&
+          openaiCompatSettings.useProxy
+        ) {
+          // Route through the Science Live API proxy to avoid CORS restrictions.
+          response = await callOpenAICompatViaProxy(
+            openaiCompatSettings.baseUrl ?? "",
+            openaiCompatSettings.model,
+            openaiCompatSettings.apiKey ?? "",
+            SPARQL_GENERATION_SYSTEM_PROMPT,
+            userPrompt,
+          );
+        } else {
+          const adapter = getAdapterForConfig(config);
+          response = await chat({
+            adapter,
+            systemPrompts: [SPARQL_GENERATION_SYSTEM_PROMPT],
+            messages: [{ role: "user", content: userPrompt }],
+            temperature: 0.3,
+            stream: false,
+          });
         }
-        if (query.endsWith("```")) {
-          query = query.slice(0, -3);
-        }
 
-        return query.trim();
+        return extractSparqlQuery(response);
       } catch (e) {
         const message =
           e instanceof Error ? e.message : "Query generation failed";
@@ -90,36 +107,203 @@ Please modify the query according to their request. Only output the modified SPA
 }
 
 /**
- * Get the AI SDK model instance for the current configuration.
- * Uses type assertion to handle compatibility between AI SDK versions.
- * The ollama-ai-provider returns LanguageModelV1 which is compatible at runtime
- * with the AI SDK's generateText function.
+ * Extract a clean SPARQL query from an LLM response.
+ *
+ * Local models (e.g. Ollama/Qwen) often return verbose output including:
+ * - <think>...</think> reasoning blocks
+ * - Markdown code fences (```sparql ... ```)
+ * - Preamble text like "Here is the query:" before the actual SPARQL
+ * - Postamble explanations after the query
+ *
+ * Strategy:
+ * 1. Strip <think>...</think> blocks entirely.
+ * 2. If a ```sparql ... ``` or ``` ... ``` fence is present, extract its content.
+ * 3. Otherwise, find the first line that looks like a SPARQL keyword (prefix/select/ask/construct/describe)
+ *    and return everything from that line onward, trimming trailing prose.
  */
-function getModelForConfig(config: AIConfig) {
+export function extractSparqlQuery(raw: string): string {
+  // 1. Remove <think>...</think> blocks (Qwen 3 "thinking" mode)
+  const text = raw.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+
+  // 2. Extract from markdown code fence if present
+  const fenceMatch = text.match(/```(?:sparql)?\s*\n?([\s\S]*?)```/i);
+  if (fenceMatch) {
+    return fenceMatch[1].trim();
+  }
+
+  // 3. Find the first SPARQL keyword line and take from there
+  const lines = text.split("\n");
+  const sparqlStartIndex = lines.findIndex((line) =>
+    /^\s*(prefix|select|ask|construct|describe)\b/i.test(line),
+  );
+
+  if (sparqlStartIndex !== -1) {
+    // Take from the first SPARQL keyword to the end, then trim trailing prose.
+    // Trailing prose typically starts after the closing brace of the query.
+    const sparqlLines = lines.slice(sparqlStartIndex);
+
+    // Find the last line that is part of the query (non-empty and not pure prose).
+    // We consider the query ended when we see a blank line followed by a line
+    // that doesn't look like SPARQL (no indentation, no SPARQL keywords, no braces).
+    let endIndex = sparqlLines.length;
+    for (let i = 1; i < sparqlLines.length; i++) {
+      const prev = sparqlLines[i - 1].trim();
+      const curr = sparqlLines[i].trim();
+      if (
+        prev === "" &&
+        curr !== "" &&
+        !/^[{}()?$#<"'0-9]/.test(curr) &&
+        !/^\s*(prefix|select|ask|construct|describe|where|filter|optional|union|graph|limit|offset|order|group|having|values|bind|minus|service|from|named)\b/i.test(
+          curr,
+        )
+      ) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    return sparqlLines.slice(0, endIndex).join("\n").trim();
+  }
+
+  // 4. Fallback: return the cleaned text as-is
+  return text;
+}
+
+/**
+ * Call Ollama's /api/chat endpoint directly.
+ *
+ * We bypass the TanStack AI Ollama adapter here because it spreads `modelOptions`
+ * into Ollama's nested `options` object, which does not reach the top-level
+ * `think` field. Passing `think: false` at the top level of the request body
+ * disables the reasoning/thinking mode on models that support it (e.g. Qwen 3),
+ * preventing large `<think>...</think>` blocks from being generated at all.
+ */
+async function callOllamaDirectly(
+  baseUrl: string,
+  model: string,
+  systemPrompt: string,
+  userPrompt: string,
+): Promise<string> {
+  const url = `${baseUrl.replace(/\/$/, "")}/api/chat`;
+
+  const res = await ky.post(url, {
+    json: {
+      model,
+      think: false, // Disable reasoning/thinking mode (Qwen 3, DeepSeek-R1, etc.)
+      stream: false,
+      options: {
+        temperature: 0.3,
+      },
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => res.statusText);
+    throw new Error(`Ollama request failed (${res.status}): ${text}`);
+  }
+
+  const data = (await res.json()) as { message?: { content?: string } };
+  const content = data?.message?.content;
+  if (typeof content !== "string") {
+    throw new Error("Unexpected Ollama response format");
+  }
+  return content;
+}
+
+/**
+ * Call an OpenAI-compatible `/chat/completions` endpoint via the Science Live
+ * API proxy. Used when the provider blocks direct browser requests (CORS).
+ *
+ * The proxy accepts a standard `POST /proxy` request with the target URL,
+ * method, headers, and body. It forwards the request server-side and streams
+ * the response back — no data is stored or logged.
+ */
+async function callOpenAICompatViaProxy(
+  baseUrl: string,
+  model: string,
+  apiKey: string,
+  systemPrompt: string,
+  userPrompt: string,
+): Promise<string> {
+  const targetUrl = `${baseUrl.replace(/\/$/, "")}/chat/completions`;
+
+  const upstreamBody = JSON.stringify({
+    model,
+    stream: false,
+    temperature: 0.3,
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
+  });
+
+  const res = await ky.post(API_PROXY_URI, {
+    json: {
+      url: targetUrl,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: upstreamBody,
+    },
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => res.statusText);
+    throw new Error(`Proxy request failed (${res.status}): ${text}`);
+  }
+
+  const data = (await res.json()) as {
+    choices?: { message?: { content?: string } }[];
+    error?: { message?: string };
+  };
+
+  if (data.error?.message) {
+    throw new Error(`Provider error: ${data.error.message}`);
+  }
+
+  const content = data?.choices?.[0]?.message?.content;
+  if (typeof content !== "string") {
+    throw new Error("Unexpected response format from provider via proxy");
+  }
+  return content;
+}
+
+/**
+ * Get the TanStack AI adapter instance for the current configuration.
+ * Reads model/apiKey/baseUrl from the per-provider settings map.
+ * Note: Ollama is handled separately via callOllamaDirectly.
+ */
+function getAdapterForConfig(config: AIConfig) {
+  const settings = config.providers[config.provider];
   switch (config.provider) {
-    case "openai": {
-      const openai = createOpenAI({
-        apiKey: config.apiKey,
-      });
-      return openai(config.model);
-    }
-    case "anthropic": {
-      const anthropic = createAnthropic({
-        apiKey: config.apiKey,
-      });
-      return anthropic(config.model);
-    }
-    case "ollama": {
-      const ollama = createOllama({
-        baseURL: config.baseUrl || "http://localhost:11434",
-      });
-      // Cast to unknown first to handle type incompatibility between
-      // LanguageModelV1 (from ollama-ai-provider) and LanguageModel (from ai sdk)
-      // They are compatible at runtime
-      return ollama(config.model) as unknown as ReturnType<
-        ReturnType<typeof createOpenAI>
-      >;
-    }
+    case "openai":
+      return createOpenaiChat(
+        settings.model as Parameters<typeof createOpenaiChat>[0],
+        settings.apiKey ?? "",
+        { dangerouslyAllowBrowser: true },
+      );
+    case "anthropic":
+      return createAnthropicChat(
+        settings.model as Parameters<typeof createAnthropicChat>[0],
+        settings.apiKey ?? "",
+        { dangerouslyAllowBrowser: true },
+      );
+    case "openai-compatible":
+      return createOpenaiChat(
+        settings.model as Parameters<typeof createOpenaiChat>[0],
+        settings.apiKey ?? "",
+        {
+          dangerouslyAllowBrowser: true,
+          baseURL: settings.baseUrl,
+        },
+      );
     default:
       throw new Error(`Unknown provider: ${config.provider}`);
   }

@@ -170,7 +170,10 @@ export function QueryResults({
           <div className="text-sm text-muted-foreground">
             {results.length} result{results.length !== 1 ? "s" : ""} found
           </div>
-          <div className="overflow-x-auto rounded-md border">
+          <div
+            className="overflow-x-auto rounded-md border"
+            onWheel={(e) => e.stopPropagation()}
+          >
             <table className="w-full text-sm">
               <thead className="bg-muted/50">
                 <tr>

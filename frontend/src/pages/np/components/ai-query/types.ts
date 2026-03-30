@@ -5,21 +5,40 @@
 /**
  * Supported AI providers for SPARQL query generation.
  */
-export type AIProvider = "openai" | "anthropic" | "ollama";
+export type AIProvider =
+  | "openai"
+  | "anthropic"
+  | "ollama"
+  | "openai-compatible";
 
 /**
- * Configuration for AI provider connection.
- * Stored in localStorage for persistence.
+ * Per-provider settings stored independently so switching providers
+ * does not lose previously entered credentials or model selections.
+ */
+export interface AIProviderSettings {
+  /** Model identifier for this provider */
+  model: string;
+  /** API key (not needed for Ollama) */
+  apiKey?: string;
+  /** Base URL (Ollama / openai-compatible, default: http://localhost:11434) */
+  baseUrl?: string;
+  /**
+   * Route requests through the Science Live API proxy endpoint instead of
+   * calling the provider directly from the browser. Useful for openai-compatible
+   * providers that block browser requests due to CORS restrictions.
+   */
+  useProxy?: boolean;
+}
+
+/**
+ * Top-level AI configuration stored in localStorage.
+ * Credentials and model selections are kept per-provider.
  */
 export interface AIConfig {
-  /** The AI provider to use */
+  /** The currently active provider */
   provider: AIProvider;
-  /** API key for the provider (not needed for Ollama) */
-  apiKey?: string;
-  /** Model identifier (e.g., "gpt-4o", "claude-3-5-sonnet-20241022") */
-  model: string;
-  /** Base URL for Ollama (default: http://localhost:11434) */
-  baseUrl?: string;
+  /** Per-provider settings map */
+  providers: Record<AIProvider, AIProviderSettings>;
 }
 
 /**
@@ -69,6 +88,8 @@ export interface ProviderInfo {
   apiKeyLink?: string;
   /** Whether base URL configuration is needed (Ollama) */
   requiresBaseUrl: boolean;
+  /** Whether to allow custom model input (for OpenAI-compatible providers) */
+  allowCustomModel?: boolean;
 }
 
 /**

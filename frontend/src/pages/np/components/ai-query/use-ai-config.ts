@@ -1,10 +1,39 @@
 /**
  * Hook for managing AI configuration with localStorage persistence.
+ * Settings (model, API key) are stored per-provider so switching providers
+ * does not lose previously entered credentials.
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { AI_CONFIG_KEY, DEFAULT_CONFIG, getDefaultModel } from "./constants";
-import type { AIConfig } from "./types";
+import { AI_CONFIG_KEY, DEFAULT_CONFIG } from "./constants";
+import type { AIConfig, AIProvider, AIProviderSettings } from "./types";
+
+/**
+ * Deep-merge stored config with defaults to ensure all providers are present.
+ */
+function mergeWithDefaults(stored: Partial<AIConfig>): AIConfig {
+  return {
+    provider: stored.provider ?? DEFAULT_CONFIG.provider,
+    providers: {
+      openai: {
+        ...DEFAULT_CONFIG.providers.openai,
+        ...stored.providers?.openai,
+      },
+      anthropic: {
+        ...DEFAULT_CONFIG.providers.anthropic,
+        ...stored.providers?.anthropic,
+      },
+      ollama: {
+        ...DEFAULT_CONFIG.providers.ollama,
+        ...stored.providers?.ollama,
+      },
+      "openai-compatible": {
+        ...DEFAULT_CONFIG.providers["openai-compatible"],
+        ...stored.providers?.["openai-compatible"],
+      },
+    },
+  };
+}
 
 /**
  * Hook for managing AI provider configuration.
@@ -12,20 +41,13 @@ import type { AIConfig } from "./types";
  */
 export function useAIConfig() {
   const [config, setConfig] = useState<AIConfig>(() => {
-    // Only run on client side
     if (typeof window === "undefined") {
       return DEFAULT_CONFIG;
     }
-
     try {
       const stored = localStorage.getItem(AI_CONFIG_KEY);
       if (stored) {
-        const parsed = JSON.parse(stored) as Partial<AIConfig>;
-        // Merge with defaults to ensure all fields are present
-        return {
-          ...DEFAULT_CONFIG,
-          ...parsed,
-        };
+        return mergeWithDefaults(JSON.parse(stored) as Partial<AIConfig>);
       }
     } catch (e) {
       console.error("Failed to parse AI config from localStorage:", e);
@@ -33,13 +55,16 @@ export function useAIConfig() {
     return DEFAULT_CONFIG;
   });
 
-  const [isConfigured, setIsConfigured] = useState(() => {
-    // Check if we have a valid configuration
-    if (config.provider === "ollama") {
-      return true; // Ollama doesn't require API key
+  // Derived: settings for the currently active provider
+  const activeSettings = config.providers[config.provider];
+
+  const isConfigured = (() => {
+    if (config.provider === "ollama") return true;
+    if (config.provider === "openai-compatible") {
+      return !!activeSettings.apiKey && !!activeSettings.baseUrl;
     }
-    return !!config.apiKey;
-  });
+    return !!activeSettings.apiKey;
+  })();
 
   // Persist config to localStorage on change
   useEffect(() => {
@@ -48,34 +73,51 @@ export function useAIConfig() {
     } catch (e) {
       console.error("Failed to save AI config to localStorage:", e);
     }
-
-    // Update isConfigured state
-    if (config.provider === "ollama") {
-      setIsConfigured(true);
-    } else {
-      setIsConfigured(!!config.apiKey);
-    }
   }, [config]);
 
   /**
-   * Update configuration with partial values.
+   * Switch the active provider.
    */
-  const updateConfig = useCallback((updates: Partial<AIConfig>) => {
-    setConfig((prev) => {
-      const newConfig = { ...prev, ...updates };
-
-      // If provider changed, update to default model for that provider
-      if (updates.provider && updates.provider !== prev.provider) {
-        newConfig.model = getDefaultModel(updates.provider);
-        // Clear API key when switching away from a provider
-        if (updates.provider === "ollama") {
-          newConfig.apiKey = undefined;
-        }
-      }
-
-      return newConfig;
-    });
+  const setProvider = useCallback((provider: AIProvider) => {
+    setConfig((prev) => ({ ...prev, provider }));
   }, []);
+
+  /**
+   * Update settings for a specific provider (or the active one if omitted).
+   */
+  const updateProviderSettings = useCallback(
+    (updates: Partial<AIProviderSettings>, provider?: AIProvider) => {
+      setConfig((prev) => {
+        const target = provider ?? prev.provider;
+        return {
+          ...prev,
+          providers: {
+            ...prev.providers,
+            [target]: { ...prev.providers[target], ...updates },
+          },
+        };
+      });
+    },
+    [],
+  );
+
+  /**
+   * Save a full provider settings object plus optionally switch the active provider.
+   * Used by ConfigDialog on save.
+   */
+  const saveProviderConfig = useCallback(
+    (provider: AIProvider, settings: Partial<AIProviderSettings>) => {
+      setConfig((prev) => ({
+        ...prev,
+        provider,
+        providers: {
+          ...prev.providers,
+          [provider]: { ...prev.providers[provider], ...settings },
+        },
+      }));
+    },
+    [],
+  );
 
   /**
    * Reset configuration to defaults.
@@ -85,10 +127,19 @@ export function useAIConfig() {
   }, []);
 
   /**
-   * Clear API key from configuration.
+   * Clear API key for the active provider.
    */
   const clearApiKey = useCallback(() => {
-    setConfig((prev) => ({ ...prev, apiKey: undefined }));
+    setConfig((prev) => ({
+      ...prev,
+      providers: {
+        ...prev.providers,
+        [prev.provider]: {
+          ...prev.providers[prev.provider],
+          apiKey: undefined,
+        },
+      },
+    }));
   }, []);
 
   /**
@@ -99,29 +150,45 @@ export function useAIConfig() {
       return { valid: false, error: "No provider selected" };
     }
 
-    if (config.provider !== "ollama" && !config.apiKey) {
+    const settings = config.providers[config.provider];
+
+    if (config.provider !== "ollama" && !settings.apiKey) {
       return { valid: false, error: "API key is required" };
     }
 
-    if (!config.model) {
+    if (!settings.model) {
       return { valid: false, error: "No model selected" };
     }
 
-    // Validate API key format
-    if (config.provider === "openai" && config.apiKey) {
-      if (!config.apiKey.startsWith("sk-")) {
+    if (config.provider === "openai" && settings.apiKey) {
+      if (!settings.apiKey.startsWith("sk-")) {
         return { valid: false, error: "Invalid OpenAI API key format" };
       }
     }
 
-    if (config.provider === "anthropic" && config.apiKey) {
-      if (!config.apiKey.startsWith("sk-ant-")) {
+    if (config.provider === "anthropic" && settings.apiKey) {
+      if (!settings.apiKey.startsWith("sk-ant-")) {
         return { valid: false, error: "Invalid Anthropic API key format" };
       }
     }
 
-    if (config.provider === "ollama" && !config.baseUrl) {
+    if (config.provider === "ollama" && !settings.baseUrl) {
       return { valid: false, error: "Ollama base URL is required" };
+    }
+
+    if (config.provider === "openai-compatible") {
+      if (!settings.baseUrl) {
+        return {
+          valid: false,
+          error: "Base URL is required for OpenAI-compatible provider",
+        };
+      }
+      if (!settings.apiKey) {
+        return {
+          valid: false,
+          error: "API key is required for OpenAI-compatible provider",
+        };
+      }
     }
 
     return { valid: true };
@@ -129,8 +196,11 @@ export function useAIConfig() {
 
   return {
     config,
+    activeSettings,
     isConfigured,
-    updateConfig,
+    setProvider,
+    updateProviderSettings,
+    saveProviderConfig,
     resetConfig,
     clearApiKey,
     validateConfig,

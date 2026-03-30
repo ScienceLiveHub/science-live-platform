@@ -22,15 +22,19 @@ export const QUERY_HISTORY_KEY = "science-live-query-history";
 /**
  * Maximum number of history items to keep.
  */
-export const MAX_HISTORY_ITEMS = 10;
+export const MAX_HISTORY_ITEMS = 20;
 
 /**
  * Default AI configuration.
  */
 export const DEFAULT_CONFIG: AIConfig = {
   provider: "openai",
-  model: "gpt-4o",
-  baseUrl: "http://localhost:11434",
+  providers: {
+    openai: { model: "gpt-5.4" },
+    anthropic: { model: "claude-sonnet-4-6" },
+    ollama: { model: "llama3.2", baseUrl: "http://localhost:11434" },
+    "openai-compatible": { model: "" },
+  },
 };
 
 /**
@@ -46,12 +50,7 @@ export const PROVIDER_INFO: ProviderInfo[] = [
   {
     id: "openai",
     name: "OpenAI",
-    models: [
-      { id: "gpt-4o", name: "GPT-4o", isDefault: true },
-      { id: "gpt-4o-mini", name: "GPT-4o Mini" },
-      { id: "gpt-4-turbo", name: "GPT-4 Turbo" },
-      { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo" },
-    ],
+    models: [],
     requiresApiKey: true,
     apiKeyPlaceholder: "sk-...",
     apiKeyLink: "https://platform.openai.com/api-keys",
@@ -60,16 +59,7 @@ export const PROVIDER_INFO: ProviderInfo[] = [
   {
     id: "anthropic",
     name: "Anthropic",
-    models: [
-      {
-        id: "claude-sonnet-4-20250514",
-        name: "Claude Sonnet 4",
-        isDefault: true,
-      },
-      { id: "claude-3-5-sonnet-20241022", name: "Claude 3.5 Sonnet" },
-      { id: "claude-3-5-haiku-20241022", name: "Claude 3.5 Haiku" },
-      { id: "claude-3-opus-20240229", name: "Claude 3 Opus" },
-    ],
+    models: [],
     requiresApiKey: true,
     apiKeyPlaceholder: "sk-ant-...",
     apiKeyLink: "https://console.anthropic.com/settings/keys",
@@ -78,15 +68,18 @@ export const PROVIDER_INFO: ProviderInfo[] = [
   {
     id: "ollama",
     name: "Ollama (Local)",
-    models: [
-      { id: "llama3.2", name: "Llama 3.2", isDefault: true },
-      { id: "llama3.1", name: "Llama 3.1" },
-      { id: "mistral", name: "Mistral" },
-      { id: "codellama", name: "Code Llama" },
-      { id: "qwen2.5", name: "Qwen 2.5" },
-    ],
+    models: [],
     requiresApiKey: false,
     requiresBaseUrl: true,
+  },
+  {
+    id: "openai-compatible",
+    name: "OpenAI Compatible (Custom)",
+    models: [], // User enters model manually since we don't know available models
+    requiresApiKey: true,
+    apiKeyPlaceholder: "API key...",
+    requiresBaseUrl: true,
+    allowCustomModel: true,
   },
 ];
 
@@ -100,15 +93,15 @@ export const EXAMPLE_PROMPTS: ExamplePrompt[] = [
   },
   {
     label: "Recent nanopubs by creator",
-    prompt: "Find the 10 most recent nanopubs by a specific creator",
+    prompt: "Find the 10 most recent nanopubs by a specified creator",
   },
   {
     label: "Nanopubs with label containing text",
     prompt: "Find nanopubs that have a label containing 'DNA'",
   },
   {
-    label: "Count nanopubs by type",
-    prompt: "Count how many nanopubs exist for each RDF type",
+    label: "Count nanopubs by template",
+    prompt: "Count how many nanopubs exist of a specified template",
   },
 ];
 

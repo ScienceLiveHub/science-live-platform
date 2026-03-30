@@ -254,4 +254,59 @@
   }
 }
 
+/* The following CSS fixes issues in the SparqlEditor component (CodeEditor)
+ *
+ * rehype-prism-plus line numbers for @uiw/react-textarea-code-editor
+ *
+ * The editor overlays a transparent <textarea> on top of a <pre> preview.
+ * Both layers must share the same padding so that cursor/selection coordinates
+ * in the textarea match the visually rendered code in the preview.
+ *
+ * The textarea is position:absolute and comes FIRST in DOM order, while the
+ * preview div is static and comes SECOND — so the preview sits on top and
+ * intercepts mouse clicks.  We fix this with z-index on the textarea and
+ * pointer-events:none on the preview.
+ *
+ * Line numbers are rendered as absolutely-positioned ::before pseudo-elements
+ * inside the left padding gutter so they don't shift the inline text flow.
+ */
+
+/* Ensure the textarea receives all mouse events (it's position:absolute but
+   rendered before the preview in DOM order, so it's behind by default). */
+.w-tc-editor .w-tc-editor-text {
+  z-index: 1;
+}
+
+/* The preview layer is purely visual — let clicks pass through to textarea. */
+.w-tc-editor .w-tc-editor-preview {
+  pointer-events: none;
+}
+
+/* Add left padding to BOTH the textarea and the preview to make room for the
+   line-number gutter.  The component sets padding via inline styles, so we
+   need !important to override. */
+.w-tc-editor .w-tc-editor-text,
+.w-tc-editor .w-tc-editor-preview {
+  padding-left: 3.5em !important;
+}
+
+/* Each code-line needs relative positioning so the absolutely-positioned
+   ::before can anchor to it. */
+.w-tc-editor .code-line {
+  position: relative;
+}
+
+/* Line number pseudo-element: sits in the left gutter without affecting
+   inline text flow, keeping textarea and preview perfectly aligned. */
+.w-tc-editor .code-line::before {
+  content: attr(line);
+  position: absolute;
+  left: -3em;
+  width: 2.5em;
+  text-align: right;
+  color: #6e7781;
+  user-select: none;
+  pointer-events: none;
+}
+
 @import "@daveyplate/better-auth-ui/css";
