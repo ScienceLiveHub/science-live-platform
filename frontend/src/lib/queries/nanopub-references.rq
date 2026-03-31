@@ -21,13 +21,13 @@ select ?np ?label ?date ?creator ?template where {
     ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
     filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
     optional { ?np rdfs:label ?label . }
-    ?np np:hasProvenance ?provenance ;
+    ?np np:hasPublicationInfo ?pubinfo ;
         dct:created ?date ;
         dct:creator ?creator .
   }
   
-  # Optionally get the template this nanopub was created from
-  optional { graph ?provenance { ?np npx:wasCreatedFromTemplate ?template . } }
+  # Optionally get the template this nanopub was created from (TODO: doesn't work?)
+  optional { graph ?pubinfo { ?np nt:wasCreatedFromTemplate ?template . } }
 }
 order by desc(?date)
 limit 100

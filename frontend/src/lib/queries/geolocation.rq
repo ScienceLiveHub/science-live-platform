@@ -37,7 +37,6 @@ where {
     ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
     filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
     ?np np:hasAssertion ?assertion ;
-        np:hasProvenance ?provenance ;
         dct:created ?date ;
         dct:creator ?creator .
   }

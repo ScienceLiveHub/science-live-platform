@@ -28,7 +28,7 @@ prefix npx: <http://purl.org/nanopub/x/>
 prefix dct: <http://purl.org/dc/terms/>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-select ?np ?label ?date ?creator where {
+select ?np ?label ?date ?creator ?type where {
   graph npa:graph {
     ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
     filter not exists {
@@ -37,6 +37,7 @@ select ?np ?label ?date ?creator where {
     }
     ?np rdfs:label ?label .
     ?np dct:created ?date .
+    ?np npx:hasNanopubType ?type.
     ?np dct:creator ?creator .
   }
 }
