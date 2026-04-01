@@ -1,7 +1,7 @@
+import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import ApiComboboxMultipleExpandable, {
   SearchEndpoint,
 } from "@/components/np/api-combobox";
-import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import { useFormedible } from "@/hooks/use-formedible";
 import { fetchPossibleValuesFromQuads } from "@/lib/rdf";
 import { KyResponse } from "ky";
@@ -152,7 +152,8 @@ export default function PRISMASearchStrategy({
               {
                 name: "databases",
                 type: "text",
-                placeholder: "Database URI (e.g. https://pubmed.ncbi.nlm.nih.gov/)",
+                placeholder:
+                  "Database URI (e.g. https://pubmed.ncbi.nlm.nih.gov/)",
               },
             ],
           },

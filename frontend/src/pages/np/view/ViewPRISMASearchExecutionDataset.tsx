@@ -22,8 +22,7 @@ import { CommentBlock, ExternalUriLink, ItemTitle } from "./shared-components";
 
 const { namedNode } = DataFactory;
 
-const SL = (term: string) =>
-  `https://w3id.org/sciencelive/o/terms/${term}`;
+const SL = (term: string) => `https://w3id.org/sciencelive/o/terms/${term}`;
 
 const SEARCH_EXECUTION_DATASET_TYPE = SL("SearchExecutionDataset");
 const INCLUDES_DB_SEARCH = SL("includesDbSearch");
@@ -56,9 +55,7 @@ interface PRISMASearchExecutionData {
   datasetFileLocation?: string;
 }
 
-function extractData(
-  store: NanopubStore,
-): PRISMASearchExecutionData | null {
+function extractData(store: NanopubStore): PRISMASearchExecutionData | null {
   if (!store.graphUris.assertion) return null;
   const g = namedNode(store.graphUris.assertion);
 

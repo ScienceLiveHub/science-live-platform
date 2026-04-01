@@ -23,7 +23,8 @@ export default function PRISMAStudyInclusion({
         name: "studyLabel",
         type: "text",
         label: "Study Label",
-        placeholder: "e.g., Smith et al. (2024) - Climate migration in coastal regions",
+        placeholder:
+          "e.g., Smith et al. (2024) - Climate migration in coastal regions",
         required: true,
         description: "A descriptive label for the included study",
       },
@@ -41,8 +42,7 @@ export default function PRISMAStudyInclusion({
         label: "Systematic Review",
         placeholder: "Select or enter the URI of the systematic review...",
         required: true,
-        description:
-          "URI of the systematic review this study is included in",
+        description: "URI of the systematic review this study is included in",
       },
       ...NanopubEditorOptionFields,
     ],

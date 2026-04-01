@@ -44,8 +44,7 @@ export default function PRISMADatabaseSearch({
         label: "Search Strategy",
         placeholder: "Select or enter the URI of the search strategy...",
         required: true,
-        description:
-          "URI of the search strategy this database search follows",
+        description: "URI of the search strategy this database search follows",
       },
       {
         name: "databaseUrl",

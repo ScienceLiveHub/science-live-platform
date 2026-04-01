@@ -21,8 +21,7 @@ import { CommentBlock, ExternalUriLink, ItemTitle } from "./shared-components";
 
 const { namedNode } = DataFactory;
 
-const SL = (term: string) =>
-  `https://w3id.org/sciencelive/o/terms/${term}`;
+const SL = (term: string) => `https://w3id.org/sciencelive/o/terms/${term}`;
 
 const STUDY_ASSESSMENT_TYPE = SL("StudyAssessmentDataset");
 const FOLLOWS_ELIGIBILITY_CRITERIA = SL("followsEligibilityCriteria");
@@ -32,7 +31,8 @@ const HAS_DATASET_FILE_LOCATION = SL("hasDatasetFileLocation");
 const HAS_LIMITATIONS = SL("hasLimitations");
 const DCT_IS_PART_OF = "http://purl.org/dc/terms/isPartOf";
 const DCT_CREATED = "http://purl.org/dc/terms/created";
-const DCT_HAS_EXTRACTION_METHOD = "http://purl.org/dc/terms/hasExtractionMethod";
+const DCT_HAS_EXTRACTION_METHOD =
+  "http://purl.org/dc/terms/hasExtractionMethod";
 const DCT_HAS_STUDY_RESULTS = "http://purl.org/dc/terms/hasStudyResults";
 const DCT_HAS_QUALITY_ASSESSMENT =
   "http://purl.org/dc/terms/hasQualityAssessment";
@@ -52,9 +52,7 @@ interface PRISMAStudyAssessmentData {
   limitations?: string;
 }
 
-function extractData(
-  store: NanopubStore,
-): PRISMAStudyAssessmentData | null {
+function extractData(store: NanopubStore): PRISMAStudyAssessmentData | null {
   if (!store.graphUris.assertion) return null;
   const g = namedNode(store.graphUris.assertion);
 

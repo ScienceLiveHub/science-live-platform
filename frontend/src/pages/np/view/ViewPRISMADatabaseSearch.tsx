@@ -21,8 +21,7 @@ import { CommentBlock, ExternalUriLink, ItemTitle } from "./shared-components";
 
 const { namedNode } = DataFactory;
 
-const SL = (term: string) =>
-  `https://w3id.org/sciencelive/o/terms/${term}`;
+const SL = (term: string) => `https://w3id.org/sciencelive/o/terms/${term}`;
 
 const DATABASE_SEARCH_TYPE = SL("SystematicDatabaseSearch");
 const FOLLOWS_SEARCH_STRATEGY = SL("followsSearchStrategy");

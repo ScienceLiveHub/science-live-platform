@@ -21,8 +21,7 @@ const { namedNode } = DataFactory;
 
 const STUDY_TYPE = "http://rdf-vocabulary.ddialliance.org/discovery#Study";
 const DCT_SOURCE = "http://purl.org/dc/terms/source";
-const INCLUDES_STUDY =
-  "https://w3id.org/sciencelive/o/terms/includesStudy";
+const INCLUDES_STUDY = "https://w3id.org/sciencelive/o/terms/includesStudy";
 
 interface PRISMAStudyInclusionData {
   studyUri: string;
@@ -46,12 +45,7 @@ function extractData(store: NanopubStore): PRISMAStudyInclusionData | null {
   const s = namedNode(studyUri);
 
   // The systematic review is the subject of the includesStudy triple
-  const includesQuad = store.matchOne(
-    null,
-    namedNode(INCLUDES_STUDY),
-    s,
-    g,
-  );
+  const includesQuad = store.matchOne(null, namedNode(INCLUDES_STUDY), s, g);
 
   return {
     studyUri,

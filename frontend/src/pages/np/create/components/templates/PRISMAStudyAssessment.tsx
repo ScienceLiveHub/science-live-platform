@@ -40,8 +40,7 @@ export default function PRISMAStudyAssessment({
         label: "Systematic Review",
         placeholder: "Select or enter the URI of the systematic review...",
         required: true,
-        description:
-          "URI of the systematic review this assessment belongs to",
+        description: "URI of the systematic review this assessment belongs to",
       },
       {
         name: "creationDate",
@@ -53,8 +52,7 @@ export default function PRISMAStudyAssessment({
         name: "eligibilityCriteria",
         type: "textarea",
         label: "Eligibility Criteria (PRISMA Item 5)",
-        placeholder:
-          "Detailed inclusion and exclusion criteria...",
+        placeholder: "Detailed inclusion and exclusion criteria...",
         required: true,
         description: "Specify the criteria used to determine study eligibility",
         section: {
@@ -65,8 +63,7 @@ export default function PRISMAStudyAssessment({
         name: "assessmentTechnique",
         type: "textarea",
         label: "Risk of Bias Assessment (PRISMA Item 11)",
-        placeholder:
-          "Risk of bias assessment tools and methods used...",
+        placeholder: "Risk of bias assessment tools and methods used...",
         required: true,
         description: "Tools and methods for assessing risk of bias",
         section: {
@@ -88,8 +85,7 @@ export default function PRISMAStudyAssessment({
         name: "extractionMethod",
         type: "textarea",
         label: "Data Extraction Method",
-        placeholder:
-          "Data extraction methodology and reviewer processes...",
+        placeholder: "Data extraction methodology and reviewer processes...",
         required: true,
         section: {
           title: "Study Data",
@@ -99,8 +95,7 @@ export default function PRISMAStudyAssessment({
         name: "studyResults",
         type: "textarea",
         label: "Study Results (PRISMA Item 19)",
-        placeholder:
-          "Individual study results and effect estimates...",
+        placeholder: "Individual study results and effect estimates...",
         required: true,
         section: {
           title: "Results",
@@ -110,8 +105,7 @@ export default function PRISMAStudyAssessment({
         name: "qualityAssessment",
         type: "textarea",
         label: "Quality Assessment (PRISMA Item 18)",
-        placeholder:
-          "Risk of bias assessment results for included studies...",
+        placeholder: "Risk of bias assessment results for included studies...",
         required: true,
         section: {
           title: "Results",

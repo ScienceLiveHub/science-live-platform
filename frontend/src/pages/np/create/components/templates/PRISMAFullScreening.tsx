@@ -24,17 +24,16 @@ export default function PRISMAFullScreening({
         label: "Review URI",
         placeholder: "https://...",
         required: true,
-        description:
-          "URI of the systematic review or screening dataset",
+        description: "URI of the systematic review or screening dataset",
       },
       {
         name: "study",
         type: "text",
         label: "Study",
-        placeholder: "Select or enter the URI of the study to select for full screening...",
+        placeholder:
+          "Select or enter the URI of the study to select for full screening...",
         required: true,
-        description:
-          "URI of the study to be selected for full-text screening",
+        description: "URI of the study to be selected for full-text screening",
       },
       ...NanopubEditorOptionFields,
     ],

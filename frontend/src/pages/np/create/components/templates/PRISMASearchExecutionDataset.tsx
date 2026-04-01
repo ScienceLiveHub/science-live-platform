@@ -14,9 +14,7 @@ export default function PRISMASearchExecutionDataset({
     label: z.string().min(1, "Label is required"),
     systematicReview: z.string().url("Must be a valid URI"),
     creationDate: z.coerce.date(),
-    st06: z
-      .array(z.object({ dbSearch: z.string().min(1) }))
-      .optional(),
+    st06: z.array(z.object({ dbSearch: z.string().min(1) })).optional(),
     deduplicationMethodology: z.string().min(1, "Required"),
     reviewMethodology: z.string().optional().or(z.literal("")),
     screeningMethod: z.string().min(1, "Required"),
@@ -35,7 +33,8 @@ export default function PRISMASearchExecutionDataset({
         name: "label",
         type: "text",
         label: "Label of this search execution dataset",
-        placeholder: "e.g., Climate migration systematic review - search execution",
+        placeholder:
+          "e.g., Climate migration systematic review - search execution",
         required: true,
       },
       {
@@ -77,8 +76,7 @@ export default function PRISMASearchExecutionDataset({
         name: "deduplicationMethodology",
         type: "textarea",
         label: "Deduplication Methodology",
-        placeholder:
-          "e.g., EndNote 20: automatic + manual verification",
+        placeholder: "e.g., EndNote 20: automatic + manual verification",
         required: true,
         description: "Deduplication software and methodology",
         section: {
@@ -100,8 +98,7 @@ export default function PRISMASearchExecutionDataset({
         name: "screeningMethod",
         type: "textarea",
         label: "Screening Methodology",
-        placeholder:
-          "Title/abstract and full-text screening methodology...",
+        placeholder: "Title/abstract and full-text screening methodology...",
         required: true,
         section: {
           title: "Methodology",
