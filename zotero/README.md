@@ -8,8 +8,8 @@
 
 Transform your Zotero library into a semantic web publishing platform. Create, sign, and publish nanopublications **entirely within Zotero** using an embedded form interface.
 
-| Right-click to create | Fill the form | Published! |
-|:---:|:---:|:---:|
+|                Right-click to create                |                   Fill the form                   |                            Published!                             |
+| :-------------------------------------------------: | :-----------------------------------------------: | :---------------------------------------------------------------: |
 | ![Context menu](../docs/assets/images/ItemMenu.png) | ![CiTO form](../docs/assets/images/cito-form.png) | ![Published](../docs/assets/images/success-published-nanopub.png) |
 
 ---
