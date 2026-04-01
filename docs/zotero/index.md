@@ -40,27 +40,19 @@ The Zotero Nanopublication Plugin brings semantic web publishing **directly into
 
 ---
 
-## Current Features (v0.1.3)
+## Features (v1.0.0)
 
 - **In-Zotero Form Creation** - Entire workflow happens in Zotero tabs
 - **Template Browser** - Choose from popular templates with one click
-- **Multiple Templates** - CiTO, AIDA, quote & annotate, geographical coverage, and more
+- **Multiple Templates** - CiTO, AIDA, PRISMA systematic review, [FORRT](https://forrt.org/) replication studies, and more
 - **Auto-fill** - Paper metadata automatically populated
 - **Automatic Signing** - Uses cryptography with your ORCID
 - **Direct Publishing** - Publishes to nanopub network instantly
-- **Rich Notes** - Beautiful display of nanopubs with `@sciencelivehub/nanopub-view`
+- **Rich Notes** - Beautiful display of nanopubs attached to your Zotero items
 - **Search Integration** - Discover nanopubs about papers in your library
 - **Import/Attach** - Add nanopubs as items or attach as notes
 - **PDF Text Selection** - Create nanopubs directly from highlighted text
 - **Dark Mode** - Seamless integration with Zotero's theme
-
----
-
-## Coming Soon (v0.1.4)
-
-🚧 **PRISMA Systematic Review** - Create nanopubs for Systematic Reviews from Zotero
-
-Want updates? [Watch the repository](https://github.com/ScienceLiveHub/science-live-platform) ⭐
 
 ---
 
@@ -117,21 +109,13 @@ Want updates? [Watch the repository](https://github.com/ScienceLiveHub/science-l
 
 ## Part of Science Live Platform
 
-This plugin is part of [Science Live](https://sciencelive4all.org) - transforming research into connected, FAIR knowledge bricks.
+This plugin is part of [Science Live](https://sciencelive4all.org) - transforming research into FAIR nanopublications.
 
 **Science Live enables:**
 
-- 🧱 **Knowledge Bricks**: Stackable, reusable research components
-- 🎯 **FAIR Principles**: Findable, Accessible, Interoperable, Reusable
-- 💰 **Credit System**: Recognition for quality contributions _(coming soon)_
-- 🌍 **Open Science**: Transparent, collaborative research
-
-**Roadmap Integration:**
-
-- January 2026: Beta launch
-- June 2026: Public launch
-- Credit system integration
-- Travel fund for contributors
+- **FAIR Principles**: Findable, Accessible, Interoperable, Reusable
+- **Open Science**: Transparent, collaborative research
+- **Credit System**: Recognition for quality contributions _(coming soon)_
 
 [Visit Science Live →](https://sciencelive4all.org){ .md-button }
 
