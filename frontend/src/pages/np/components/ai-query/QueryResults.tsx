@@ -2,7 +2,6 @@
  * Component to display SPARQL query results.
  */
 
-import { Button } from "@/components/ui/button";
 import { executeSparql, NANOPUB_SPARQL_ENDPOINT_TEXT } from "@/lib/sparql";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -104,36 +103,8 @@ export function QueryResults({
     };
   }, []);
 
-  const handleExecute = () => {
-    if (!query) return;
-
-    // Cancel any previous in-flight request
-    abortControllerRef.current?.abort();
-
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-
-    executeQuery(query, controller.signal);
-  };
-
   return (
     <div className="flex flex-col gap-4">
-      {/* Controls */}
-      {!autoExecute && query && (
-        <div className="flex items-center gap-2">
-          <Button onClick={handleExecute} disabled={isLoading || !query}>
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Executing...
-              </>
-            ) : (
-              "Execute Query"
-            )}
-          </Button>
-        </div>
-      )}
-
       {/* Loading state */}
       {isLoading && (
         <div className="flex items-center justify-center py-8">

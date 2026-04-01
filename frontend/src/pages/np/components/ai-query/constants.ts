@@ -30,9 +30,9 @@ export const MAX_HISTORY_ITEMS = 20;
 export const DEFAULT_CONFIG: AIConfig = {
   provider: "openai",
   providers: {
-    openai: { model: "gpt-5.4" },
-    anthropic: { model: "claude-sonnet-4-6" },
-    ollama: { model: "llama3.2", baseUrl: "http://localhost:11434" },
+    openai: { model: "" },
+    anthropic: { model: "" },
+    ollama: { model: "", baseUrl: "http://localhost:11434" },
     "openai-compatible": { model: "" },
   },
 };

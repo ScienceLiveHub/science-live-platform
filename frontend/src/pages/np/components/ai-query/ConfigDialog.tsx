@@ -23,9 +23,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Eye, EyeOff, Settings } from "lucide-react";
+import { Eye, EyeOff, Settings, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { PROVIDER_INFO, getDefaultModel } from "./constants";
+import { AI_CONFIG_KEY, PROVIDER_INFO, getDefaultModel } from "./constants";
 import { ModelCombobox } from "./ModelCombobox";
 import type { AIConfig, AIProvider, AIProviderSettings } from "./types";
 
@@ -33,11 +33,19 @@ interface ConfigDialogProps {
   config: AIConfig;
   /** Called with the provider and its updated settings when the user saves. */
   onSave: (provider: AIProvider, settings: Partial<AIProviderSettings>) => void;
+  /** Called when all configuration is deleted. */
+  onDeleteAll?: () => void;
   trigger?: React.ReactNode;
 }
 
-export function ConfigDialog({ config, onSave, trigger }: ConfigDialogProps) {
+export function ConfigDialog({
+  config,
+  onSave,
+  onDeleteAll,
+  trigger,
+}: ConfigDialogProps) {
   const [open, setOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Active provider selection in the dialog (may differ from config.provider until saved)
   const [provider, setProvider] = useState<AIProvider>(config.provider);
@@ -104,6 +112,17 @@ export function ConfigDialog({ config, onSave, trigger }: ConfigDialogProps) {
     if (provider === "openai-compatible" && (!baseUrl.trim() || !apiKey.trim()))
       return true;
     return false;
+  };
+
+  const handleDeleteAll = () => {
+    try {
+      localStorage.removeItem(AI_CONFIG_KEY);
+      onDeleteAll?.();
+      setOpen(false);
+    } catch (e) {
+      console.error("Failed to delete AI config from localStorage:", e);
+    }
+    setShowDeleteConfirm(false);
   };
 
   return (
@@ -257,15 +276,54 @@ export function ConfigDialog({ config, onSave, trigger }: ConfigDialogProps) {
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={isSaveDisabled()}>
-            Save Configuration
-          </Button>
+        <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-between">
+          <div className="flex items-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => setShowDeleteConfirm(true)}
+              title="Delete all AI configuration"
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only">Delete all configuration</span>
+            </Button>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave} disabled={isSaveDisabled()}>
+              Save Configuration
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="sm:max-w-100">
+          <DialogHeader>
+            <DialogTitle>Delete All AI Configuration?</DialogTitle>
+            <DialogDescription>
+              This will remove all AI provider settings including API keys and
+              model selections stored in your browser. This action cannot be
+              undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteConfirm(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteAll}>
+              Delete All
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }

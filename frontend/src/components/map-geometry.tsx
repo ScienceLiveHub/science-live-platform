@@ -101,7 +101,10 @@ export function MapGeometrySelector({ value, onWktChange }: MapGeometryProps) {
         if (mapRef.current && fg.getLayers().length > 0) {
           const bounds = fg.getBounds();
           if (bounds.isValid()) {
-            mapRef.current.fitBounds(bounds, { padding: [20, 20] });
+            mapRef.current.fitBounds(bounds, {
+              padding: [20, 20],
+              maxZoom: 12,
+            });
           }
         }
       } catch (e) {
