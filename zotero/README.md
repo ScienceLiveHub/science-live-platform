@@ -8,9 +8,13 @@
 
 Transform your Zotero library into a semantic web publishing platform. Create, sign, and publish nanopublications **entirely within Zotero** using an embedded form interface.
 
+| Right-click to create | Fill the form | Published! |
+|:---:|:---:|:---:|
+| ![Context menu](../docs/assets/images/ItemMenu.png) | ![CiTO form](../docs/assets/images/cito-form.png) | ![Published](../docs/assets/images/success-published-nanopub.png) |
+
 ---
 
-## ✨ Features
+## Features
 
 - **All In-Zotero** - Complete workflow in Zotero tabs, no external websites
 - **Smart Forms** - Auto-generated forms from nanopub templates
@@ -23,7 +27,7 @@ Transform your Zotero library into a semantic web publishing platform. Create, s
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation
 
@@ -43,6 +47,8 @@ Transform your Zotero library into a semantic web publishing platform. Create, s
 
 3. **Create Nanopub:** Right-click → Create Nanopublication → Pick a template
 
+   ![Right-click menu](../docs/assets/images/ItemMenu.png)
+
 4. **Fill Form:** Complete the form in the new Zotero tab
 
 5. **Publish:** Click "Generate" to preview and then "Publish" - done!
@@ -51,7 +57,7 @@ A rich note with your nanopub is automatically attached.
 
 ---
 
-## 📖 How It Works
+## How It Works
 
 1. Select paper in Zotero
 2. Choose template from browser
@@ -62,9 +68,21 @@ A rich note with your nanopub is automatically attached.
 
 **No Nanodash. No external browser. All in Zotero!**
 
+### Create from PDF Annotations
+
+Highlight text in a PDF, right-click, and create a nanopublication directly from your annotation:
+
+![PDF annotation menu](../docs/assets/images/pdf-annotation-menu.png)
+
+### Discover Related Nanopublications
+
+Search the nanopub network for nanopublications related to any item in your library:
+
+![Search results](../docs/assets/images/search-results.png)
+
 ---
 
-## 🎯 Use Cases
+## Use Cases
 
 **Literature Reviews**
 
@@ -86,7 +104,7 @@ A rich note with your nanopub is automatically attached.
 
 ---
 
-## 📚 Templates
+## Templates
 
 ### Research Summary (CiTO)
 
@@ -116,7 +134,7 @@ Flexible semantic statements:
 
 ---
 
-## 🛠️ Requirements
+## Requirements
 
 - Zotero 8.0 or later
 - Internet connection
@@ -124,7 +142,7 @@ Flexible semantic statements:
 
 ---
 
-## 📘 Documentation
+## Documentation
 
 **Full documentation:** https://sciencelive4all.org/science-live-platform/
 
@@ -135,7 +153,7 @@ Flexible semantic statements:
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md)
 
@@ -154,19 +172,19 @@ npm run start
 
 ---
 
-## 🌍 Part of Science Live Platform
+## Part of Science Live Platform
 
-This plugin is part of [Science Live](https://sciencelive4all.org) - transforming research into FAIR knowledge bricks.
+This plugin is part of [Science Live](https://sciencelive4all.org) - transforming research into FAIR nanopublications.
 
 ---
 
-## 📜 License
+## License
 
 MIT License - see [LICENSE](LICENSE)
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 Built on:
 
@@ -175,7 +193,7 @@ Built on:
 
 ---
 
-## 📧 Contact
+## Contact
 
 - **Issues:** [GitHub Issues](https://github.com/ScienceLiveHub/science-live-platform/issues)
 - **Email:** contact@vitenhub.no
