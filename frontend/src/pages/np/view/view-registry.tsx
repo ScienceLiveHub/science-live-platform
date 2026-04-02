@@ -54,6 +54,7 @@ export const VIEW_COMPONENTS: Record<
   [TEMPLATE_URI.FORRT_KL_REPLICATION]: ViewFORRTKLReplication,
   [TEMPLATE_URI.FORRT_KL_REPLICATION_OUTCOME]: ViewFORRTKLReplicationOutcome,
   // Legacy templates — remove when no longer needed
+  [LEGACY_TEMPLATE_URIS.FORRT_CLAIM![0]]: ViewFORRTClaim,
   [LEGACY_TEMPLATE_URIS.PICO_RESEARCH_QUESTION![0]]:
     ViewPICOResearchQuestionLegacy,
   [LEGACY_TEMPLATE_URIS.AIDA_SENTENCE![0]]: ViewAIDASentenceLegacy,
