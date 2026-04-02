@@ -14,6 +14,8 @@ import PRISMASearchStrategy from "./PRISMASearchStrategy";
 import FORRTReplicationOutcome from "./FORRTReplicationOutcome";
 import FORRTReplication from "./FORRTReplication";
 import FORRTClaim from "./FORRTClaim";
+import FORRTKLReplication from "./FORRTKLReplication";
+import FORRTKLReplicationOutcome from "./FORRTKLReplicationOutcome";
 import PCCResearchQuestion from "./PCCResearchQuestion";
 import PICOResearchQuestion from "./PICOResearchQuestion";
 import ResearchSoftware from "./ResearchSoftware";
@@ -45,6 +47,8 @@ export const TEMPLATE_COMPONENTS: Record<
   [TEMPLATE_URI.FORRT_REPLICATION_OUTCOME]: FORRTReplicationOutcome,
   [TEMPLATE_URI.FORRT_REPLICATION]: FORRTReplication,
   [TEMPLATE_URI.FORRT_CLAIM]: FORRTClaim,
+  [TEMPLATE_URI.FORRT_KL_REPLICATION]: FORRTKLReplication,
+  [TEMPLATE_URI.FORRT_KL_REPLICATION_OUTCOME]: FORRTKLReplicationOutcome,
 };
 
 export const NanopubEditorOptionFields = [
