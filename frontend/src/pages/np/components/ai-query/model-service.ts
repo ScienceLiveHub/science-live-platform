@@ -195,6 +195,65 @@ export async function fetchOpenAICompatibleModels(
 }
 
 /**
+ * Fetches available models from OpenRouter API.
+ * OpenRouter provides access to multiple AI providers through a single API.
+ * @param apiKey - OpenRouter API key
+ * @returns Array of ModelInfo objects
+ */
+export async function fetchOpenRouterModels(
+  apiKey: string,
+): Promise<ModelInfo[]> {
+  try {
+    const response = await ky
+      .get("https://openrouter.ai/api/v1/models", {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
+        timeout: 10000,
+      })
+      .json<{
+        data: {
+          id: string;
+          name?: string;
+          description?: string;
+          context_length?: number;
+          architecture?: {
+            input_modalities: string[];
+            output_modalities: string[];
+          };
+          pricing?: {
+            prompt?: string;
+            completion?: string;
+          };
+        }[];
+      }>();
+
+    if (!response.data || response.data.length === 0) {
+      return [];
+    }
+
+    // Filter to chat models and sort by popularity (using id alphabetically as a proxy)
+    return response.data
+      .filter(
+        (model) =>
+          model.architecture?.input_modalities?.includes("text") &&
+          model.architecture?.output_modalities?.includes("text"),
+      )
+      .map((model, index) => ({
+        id: model.id,
+        name: model.name || formatModelName(model.id),
+        isDefault: model.id === "anthropic/claude-3.5-sonnet" || index === 0,
+      }));
+  } catch (error) {
+    console.error("Failed to fetch OpenRouter models:", error);
+    throw new Error(
+      "Failed to fetch OpenRouter models. Please check your API key.",
+      { cause: error },
+    );
+  }
+}
+
+/**
  * Fetches models from the appropriate provider.
  */
 export async function fetchModels(
@@ -220,6 +279,11 @@ export async function fetchModels(
         return [];
       }
       return fetchOpenAICompatibleModels(options.baseUrl, options.apiKey);
+    case "openrouter":
+      if (!options.apiKey) {
+        throw new Error("API key is required for OpenRouter");
+      }
+      return fetchOpenRouterModels(options.apiKey);
     default:
       throw new Error(`Unknown provider: ${provider}`);
   }

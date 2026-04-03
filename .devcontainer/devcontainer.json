@@ -29,7 +29,9 @@
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
       "moby": false
     },
-    "ghcr.io/dhoeric/features/act:1": {}
+    "ghcr.io/dhoeric/features/act:1": {},
+    "ghcr.io/devcontainers/features/python:1": {},
+    "ghcr.io/devcontainers-extra/features/uv:1": {}
   },
   "postCreateCommand": "bash scripts/devcontainer-setup.sh",
   "customizations": {
@@ -54,6 +56,7 @@
         "maattdd.gitless",
         /* Roo Code is my preferred agentic coding assistant in vscode */
         "RooVeterinaryInc.roo-cline",
+        /* OpenCode is a popular agentic coding CLI */
         "sst-dev.opencode",
         /* Syntax highlighting for trig/RDF */
         "stardog-union.stardog-rdf-grammars"

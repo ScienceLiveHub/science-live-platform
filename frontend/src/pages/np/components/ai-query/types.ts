@@ -8,6 +8,7 @@
 export type AIProvider =
   | "openai"
   | "anthropic"
+  | "openrouter"
   | "ollama"
   | "openai-compatible";
 
