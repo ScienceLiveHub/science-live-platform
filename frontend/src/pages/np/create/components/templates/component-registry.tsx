@@ -10,14 +10,19 @@ import CitationWithCiTO from "./CitationWithCiTO";
 import CommentOnPaper from "./CommentOnPaper";
 import Dataset from "./Dataset";
 import DocumentGeographicalCoverage from "./DocumentGeographicalCoverage";
-import PRISMASearchStrategy from "./PRISMASearchStrategy";
-import FORRTReplicationOutcome from "./FORRTReplicationOutcome";
-import FORRTReplication from "./FORRTReplication";
 import FORRTClaim from "./FORRTClaim";
 import FORRTKLReplication from "./FORRTKLReplication";
 import FORRTKLReplicationOutcome from "./FORRTKLReplicationOutcome";
+import FORRTReplication from "./FORRTReplication";
+import FORRTReplicationOutcome from "./FORRTReplicationOutcome";
 import PCCResearchQuestion from "./PCCResearchQuestion";
 import PICOResearchQuestion from "./PICOResearchQuestion";
+import PRISMADatabaseSearch from "./PRISMADatabaseSearch";
+import PRISMAFullScreening from "./PRISMAFullScreening";
+import PRISMASearchExecutionDataset from "./PRISMASearchExecutionDataset";
+import PRISMASearchStrategy from "./PRISMASearchStrategy";
+import PRISMAStudyAssessment from "./PRISMAStudyAssessment";
+import PRISMAStudyInclusion from "./PRISMAStudyInclusion";
 import ResearchSoftware from "./ResearchSoftware";
 import { TEMPLATE_URI } from "./registry-metadata";
 
@@ -44,6 +49,11 @@ export const TEMPLATE_COMPONENTS: Record<
   [TEMPLATE_URI.PCC_RESEARCH_QUESTION]: PCCResearchQuestion,
   [TEMPLATE_URI.RESEARCH_SOFTWARE]: ResearchSoftware,
   [TEMPLATE_URI.PRISMA_SEARCH_STRATEGY]: PRISMASearchStrategy,
+  [TEMPLATE_URI.PRISMA_DATABASE_SEARCH]: PRISMADatabaseSearch,
+  [TEMPLATE_URI.PRISMA_SEARCH_EXECUTION_DATASET]: PRISMASearchExecutionDataset,
+  [TEMPLATE_URI.PRISMA_STUDY_INCLUSION]: PRISMAStudyInclusion,
+  [TEMPLATE_URI.PRISMA_STUDY_ASSESSMENT]: PRISMAStudyAssessment,
+  [TEMPLATE_URI.PRISMA_FULL_SCREENING]: PRISMAFullScreening,
   [TEMPLATE_URI.FORRT_REPLICATION_OUTCOME]: FORRTReplicationOutcome,
   [TEMPLATE_URI.FORRT_REPLICATION]: FORRTReplication,
   [TEMPLATE_URI.FORRT_CLAIM]: FORRTClaim,

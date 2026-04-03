@@ -4,13 +4,17 @@ Choose the right template for your semantic statement. All templates are loaded 
 
 ## Template Overview
 
-| Template | Icon | Best For | Complexity |
-|----------|------|----------|------------|
-| **Citation with CiTO** | 📝 | Paper relationships | Easy |
-| **Comment on a paper** | 📝 | Add personal comments on a paper | Easy |
-| **Annotate a paper quotation** | 📝 | Add personal comments/notes attached to a paper quotation | Easy when used from Zotero PDFViwer |
-| **Scientific Claim (AIDA)** | 🔬 | Formal research assertions | Medium |
-| **Geographical Coverage** | 🌍 | Document the geographical area or region covered by the study. | Medium |
+| Template | Best For | Complexity |
+|----------|----------|------------|
+| **Citation with CiTO** | Paper relationships | Easy |
+| **Comment on a paper** | Add personal comments on a paper | Easy |
+| **Annotate a paper quotation** | Add comments/notes attached to a paper quotation | Easy |
+| **Scientific Claim (AIDA)** | Formal research assertions | Medium |
+| **Geographical Coverage** | Document geographical area covered by a study | Medium |
+| **Research Software** | Describe research software at summary level | Medium |
+| **Declaring a Dataset** | Document a research dataset | Medium |
+| **PRISMA Systematic Review** | Full systematic review workflow (PICO/PCC, search strategy, screening, assessment) | Advanced |
+| **FORRT Replication Studies** | Original claims, replication design, and outcomes | Advanced |
 
 ---
 
@@ -190,12 +194,6 @@ AIDA statements are structured scientific claims that are:
 > Protein A interacts with Protein B (in HeLa cells)
 
 This can be queried by databases and knowledge graphs!
-
----
-
-# Geographical Coverage Template Documentation
-
-Add this section to your `docs/user-guide/templates.md` file:
 
 ---
 
@@ -535,6 +533,93 @@ Geometry: MULTIPOINT((2.3 43.3), (12.5 41.9), (23.7 37.9))
 - **WKT Format:** [Well-Known Text specification](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry)
 - **Nanopub Spatial:** Research on spatial nanopublications
 - **Science Live Maps:** Location-based research discovery (coming soon)
+
+---
+
+## Research Software
+
+Describe research software at a summary level using the [Research Software template](https://w3id.org/np/RABBzVTxosLGT4YBCfdfNd6LyuOOTe2EVOTtWJMyOoZHk).
+
+### When to Use
+
+- Documenting software used or produced in research
+- Describing tools, libraries, or frameworks
+- Linking software to publications
+
+---
+
+## Declaring a Dataset
+
+Document a research dataset using the [Dataset template](https://w3id.org/np/RAuVB37yyAuAlgusrUAoG84JI4_EfrEqIkpEZYDpSz3d8).
+
+### When to Use
+
+- Describing datasets used or produced in research
+- Linking datasets to publications
+- Making dataset metadata machine-readable
+
+---
+
+## PRISMA Systematic Review
+
+A comprehensive set of templates supporting the full PRISMA systematic review workflow. These templates enable researchers to conduct and document systematic reviews as machine-readable nanopublications.
+
+### Available PRISMA Templates
+
+| Template | Purpose |
+|----------|---------|
+| [PICO Research Question](https://platform.sciencelive4all.org/np/create?template=https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w) | Define a Population, Intervention, Comparison, Outcome question |
+| [PCC Research Question](https://platform.sciencelive4all.org/np/create?template=https://w3id.org/np/RAmR-xqMgOq3oTJmOVDQFL2p5usID6zqRapizHy0UJb04) | Define a Population, Concept, Context question |
+| [Search Strategy](https://platform.sciencelive4all.org/np/create?template=https://w3id.org/np/RAvcJKm2DZPEKOBevGdPGcKL6sEw04JXwgzx2lH5DE5LU) | Define a systematic review search strategy |
+| [Database Search](https://platform.sciencelive4all.org/np/create?template=https://w3id.org/np/RA8MyCoRqMdgGqqOwN4MIQfe6Htwt5FPgiHXlXK4RKiic) | Declare a systematic database search |
+| [Search Execution Dataset](https://platform.sciencelive4all.org/np/create?template=https://w3id.org/np/RAV_H3udaSzxYOhhR0t-q7PKS6URwauD_Z5sMLbHmM2x0) | Declare a PRISMA search execution dataset |
+| [Study Inclusion](https://platform.sciencelive4all.org/np/create?template=https://w3id.org/np/RAivw_N13pxVoXRMP6Y3ErfA--Z011qMqwKccfiKVxF0w) | Declare a study to be included in a systematic review |
+| [Study Assessment Dataset](https://platform.sciencelive4all.org/np/create?template=https://w3id.org/np/RAwQj3SNiopwPrHXfoRT2JtYZSt-5JsDHjBDW6nYz_rDE) | Declare a PRISMA study assessment dataset |
+| [Full Screening Selection](https://platform.sciencelive4all.org/np/create?template=https://w3id.org/np/RAh4iIKHSi30apMADmsYrdyeTd1hvvYZaRRfsKLZX1jsw) | Declare a study to be selected for full screening |
+
+### When to Use
+
+- Conducting a systematic review following PRISMA guidelines
+- Documenting each stage of a review as a machine-readable record
+- Making the review process transparent and reproducible
+
+### Workflow
+
+The PRISMA templates follow the standard systematic review stages:
+
+1. **Define research question** (PICO or PCC)
+2. **Define search strategy**
+3. **Execute database searches** and record results
+4. **Screen studies** for inclusion
+5. **Assess selected studies**
+
+Each step produces a nanopublication, creating a fully traceable and reproducible review.
+
+---
+
+## FORRT Replication Studies
+
+Templates for documenting replication studies following the [FORRT](https://forrt.org/) (Framework for Open and Reproducible Research Training) framework. FORRT is a community-driven initiative that provides curated resources, pedagogical tools, and an inclusive infrastructure to support the teaching and practice of open and reproducible research.
+
+### Available FORRT Templates
+
+| Template | Purpose |
+|----------|---------|
+| [Original Claim](https://w3id.org/np/RAVdxfm3fgFahBItmNmJX_Xkmg1xlimDtoSMjZgNIs2bQ) | Declare an original claim according to FORRT |
+| [Replication Study Design](https://w3id.org/np/RAuLEjPp-4dTvPwMkfHggTto1CgjIftiGRAgHlyeEonjQ) | Declare a replication study design according to FORRT |
+| [Replication Study Outcome](https://w3id.org/np/RA2zljn0Nw9SadppOyxZoh-_Rxosslrq-vYG-p9SttnJE) | Declare a replication study outcome according to FORRT |
+
+### When to Use
+
+- Documenting original claims that have been or will be replicated
+- Describing the design of a replication study
+- Recording the outcome of a replication attempt
+
+### Workflow
+
+1. **Declare the original claim** being replicated
+2. **Describe the replication study design**
+3. **Record the replication outcome** (replicated, partially replicated, not replicated)
 
 ---
 

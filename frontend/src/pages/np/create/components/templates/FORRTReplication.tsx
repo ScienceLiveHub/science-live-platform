@@ -1,28 +1,13 @@
-import { ResultItem } from "@/components/np/api-combobox";
+import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import ApiComboboxMultipleExpandable, {
   ApiComboboxSingle,
-  SearchEndpoint,
 } from "@/components/np/api-combobox";
-import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
-import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { ResultItem, WIKIDATA_ENTITY_API } from "@/components/np/api-endpoints";
+import { QueryComboboxField } from "@/components/np/query-combobox";
 import { useFormedible } from "@/hooks/use-formedible";
-import ky, { KyResponse } from "ky";
-import { CheckIcon, ChevronsUpDownIcon, Loader2 } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import { NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
+import ky from "ky";
+import { useState } from "react";
 import z from "zod";
 import {
   NanopubEditorOptionFields,
@@ -30,8 +15,6 @@ import {
 } from "./component-registry";
 
 // --- FORRT Claim search via SPARQL -----------------------------------------
-
-const SPARQL_ENDPOINT = "https://query.knowledgepixels.com/repo/full";
 
 async function searchFORRTClaims(term: string): Promise<ResultItem[]> {
   if (term.length < 2) return [];
@@ -44,7 +27,7 @@ async function searchFORRTClaims(term: string): Promise<ResultItem[]> {
 } LIMIT 10`;
 
   try {
-    const res = await ky.post(SPARQL_ENDPOINT, {
+    const res = await ky.post(NANOPUB_SPARQL_ENDPOINT_FULL, {
       body: new URLSearchParams({ query }),
       headers: {
         Accept: "application/sparql-results+xml",
@@ -71,122 +54,6 @@ async function searchFORRTClaims(term: string): Promise<ResultItem[]> {
   }
 }
 
-function FORRTClaimCombobox({
-  value,
-  onValueChange,
-}: {
-  value: ResultItem | null;
-  onValueChange: (item: ResultItem | null) => void;
-}) {
-  const id = useId();
-  const [open, setOpen] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-  const [results, setResults] = useState<ResultItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (!inputValue || inputValue.length < 2) {
-      setResults([]);
-      return;
-    }
-    const timer = setTimeout(() => {
-      setIsLoading(true);
-      searchFORRTClaims(inputValue)
-        .then(setResults)
-        .catch(() => setResults([]))
-        .finally(() => setIsLoading(false));
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [inputValue]);
-
-  return (
-    <div className="w-full space-y-2">
-      <Label htmlFor={id}>Search for a FORRT claim</Label>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            id={id}
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-full justify-between"
-          >
-            {value ? (
-              <span className="truncate">{value.label}</span>
-            ) : (
-              <span className="text-muted-foreground/80">
-                Type to search FORRT claims...
-              </span>
-            )}
-            <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-(--radix-popper-anchor-width) p-0">
-          <Command shouldFilter={false}>
-            <CommandInput
-              placeholder="Search FORRT claims..."
-              value={inputValue}
-              onValueChange={setInputValue}
-            />
-            <CommandList>
-              {isLoading ? (
-                <div className="flex justify-center py-6 text-center text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                </div>
-              ) : (
-                <>
-                  <CommandEmpty>
-                    {inputValue.length < 2
-                      ? "Type at least 2 characters to search..."
-                      : "No results found."}
-                  </CommandEmpty>
-                  <CommandGroup>
-                    {results.map((item) => (
-                      <CommandItem
-                        key={item.uri}
-                        value={item.uri}
-                        onSelect={() => {
-                          onValueChange(item);
-                          setOpen(false);
-                        }}
-                      >
-                        <span className="truncate">{item.label}</span>
-                        {value?.uri === item.uri && (
-                          <CheckIcon size={16} className="ml-auto" />
-                        )}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </>
-              )}
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-    </div>
-  );
-}
-
-// --- Wikidata search endpoint (for keywords and discipline) ----------------
-
-const wikidataEndpoint: SearchEndpoint[] = [
-  {
-    name: "wikidata",
-    label: "Wikidata",
-    url: "https://www.wikidata.org/w/api.php?action=wbsearchentities&language=en&format=json&origin=*&limit=5&search=",
-    parser: async (res: KyResponse) => {
-      const json = await res.json<{
-        search: { concepturi: string; label: string; description: string }[];
-      }>();
-      return (json.search || []).map((item) => ({
-        uri: item.concepturi,
-        label: item.label,
-        description: item.description,
-      }));
-    },
-  },
-];
-
 // --- Study type options ----------------------------------------------------
 
 const STUDY_TYPE_OPTIONS = [
@@ -201,7 +68,8 @@ const STUDY_TYPE_OPTIONS = [
       "Replication Study - replication with different methodology or conditions",
   },
   {
-    value: "https://w3id.org/sciencelive/o/terms/Reproduction-Replication-Study",
+    value:
+      "https://w3id.org/sciencelive/o/terms/Reproduction-Replication-Study",
     label:
       "Reproduction/Replication Study - study that is both, reproduction and replication",
   },
@@ -233,12 +101,11 @@ export default function FORRTReplication({
       .object({ uri: z.string(), label: z.string() })
       .array()
       .optional(),
-    st7: z.array(z.object({ keyword: z.string() })).optional(),
-    discipline: z.string().optional(),
     disciplineSelection: z
       .object({ uri: z.string(), label: z.string() })
-      .array()
       .optional(),
+    st7: z.array(z.object({ keyword: z.string() })).optional(),
+    discipline: z.string().optional(),
   });
 
   const { Form } = useFormedible({
@@ -268,16 +135,18 @@ export default function FORRTReplication({
       {
         name: "claim",
         type: "text",
-        label: "FORRT Claim",
-        placeholder: "Search for a FORRT claim",
         required: true,
         component: ({ fieldApi }) => (
-          <FORRTClaimCombobox
+          <QueryComboboxField
             value={claimSelection}
             onValueChange={(item) => {
               setClaimSelection(item);
               fieldApi.setValue(item?.uri || "");
             }}
+            searchFunction={searchFORRTClaims}
+            labelText="Search for a FORRT claim"
+            instructionText="Search FORRT claims..."
+            placeholderText="Type to search FORRT claims..."
           />
         ),
       },
@@ -320,7 +189,7 @@ export default function FORRTReplication({
         },
         component: ({ fieldApi }) => (
           <ApiComboboxMultipleExpandable
-            endpoints={wikidataEndpoint}
+            endpoints={[WIKIDATA_ENTITY_API]}
             value={fieldApi.state.value || []}
             onValueChange={(items) => {
               fieldApi.setValue(items);
@@ -348,7 +217,7 @@ export default function FORRTReplication({
         },
         component: ({ fieldApi }) => (
           <ApiComboboxSingle
-            endpoints={wikidataEndpoint}
+            endpoints={[WIKIDATA_ENTITY_API]}
             value={fieldApi.state.value || null}
             onValueChange={(item) => {
               fieldApi.setValue(item);
@@ -383,14 +252,8 @@ export default function FORRTReplication({
         v.st7 = v.keywordSelection?.map((k: { uri: string }) => ({
           keyword: k.uri,
         }));
-        delete v.keywordSelection;
         // Map disciplineSelection to discipline placeholder
         v.discipline = v.disciplineSelection?.uri || "";
-        delete v.disciplineSelection;
-        // Remove empty optional fields
-        if (!v.deviation) delete v.deviation;
-        if (!v.discipline) delete v.discipline;
-        if (!v.st7 || v.st7.length === 0) delete v.st7;
         await submit(v);
       },
     },

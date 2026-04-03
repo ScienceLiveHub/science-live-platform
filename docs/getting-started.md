@@ -144,14 +144,14 @@ Science Live provides templates for different types of research contributions:
 | **AIDA Assertion** | Make formal research claims | "Climate change affects migration patterns" |
 | **Quote & Comment** | Annotate specific passages | Quote + your interpretation |
 | **Geographic Coverage** | Document study locations | "Study area: Amazon rainforest (WKT coordinates)" |
-| **Hypothesis** | State research hypotheses | "We hypothesize that X causes Y" |
 | **Dataset** | Document research datasets | Dataset metadata and provenance |
-| **Software** | Reference research software | Software used in analysis |
-| **PRISMA** *(coming soon)* | Systematic review protocols | PRISMA flow diagrams |
+| **Research Software** | Reference research software | Software used in analysis |
+| **PRISMA Systematic Review** | Full systematic review workflow | PICO/PCC questions, search strategy, screening, assessment |
+| **[FORRT](https://forrt.org/) Replication** | Replication studies | Original claims, study design, outcomes |
 
 Each template generates structured, standards-compliant RDF data that integrates with the global knowledge graph.
 
-**Need help choosing?** Check our [Template Guide](#) for detailed explanations and examples.
+**Need help choosing?** Check our [Template Guide](zotero/user-guide/templates.md) for detailed explanations and examples.
 
 ---
 
@@ -184,17 +184,12 @@ A: If you're already a Zotero user, the plugin integrates seamlessly into your w
 
 ### Continue Learning
 
-- [User Guide](#) — Complete platform features and workflows
-- [Template Guide](#) — Detailed guide to each template type
-- [Search & Discovery](#) — Advanced search techniques
-- [API Reference](#) — Programmatic access for developers
+- [Template Guide](zotero/user-guide/templates.md) — Detailed guide to each template type
 
 ### Get Involved
 
-- [Join the Community](#) — Connect with other researchers
 - [GitHub Discussions](https://github.com/ScienceLiveHub/science-live-platform/discussions) — Ask questions
 - [Report Issues](https://github.com/ScienceLiveHub/science-live-platform/issues) — Help improve the platform
-- [Contribute](#) — Contribute to open source development
 
 ### For Zotero Users
 
