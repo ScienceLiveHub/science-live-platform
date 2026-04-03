@@ -57,8 +57,6 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RALIq4JelUP-q9BuWONcKMJ87B5n59ppcwhQjl-1dheO4",
   FORRT_KL_REPLICATION_OUTCOME:
     "https://w3id.org/np/RAw3XdUhxQJfKBaU-cQhV6c7au4rLd5CSUdbMKTS_FB8g",
-  // The following are "utility" templates which are not intended to be used in the nanopub editor
-    "https://w3id.org/np/RAVdxfm3fgFahBItmNmJX_Xkmg1xlimDtoSMjZgNIs2bQ",
   FORRT_REPLICATION:
     "https://w3id.org/np/RAuLEjPp-4dTvPwMkfHggTto1CgjIftiGRAgHlyeEonjQ",
   FORRT_REPLICATION_OUTCOME:
