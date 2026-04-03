@@ -62,6 +62,7 @@ export default defineConfig({
         entryPoints: ["src/dialogs/createNanopub/index.tsx"],
         bundle: true,
         target: "firefox115",
+        format: "esm",
         outdir: `.scaffold/build/addon/content/scripts/dialogs/createNanopub`,
         define: metaEnvDefs,
         loader: {

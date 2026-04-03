@@ -98,18 +98,14 @@ Built on proven standards and open technologies:
 - **Nanopublications Framework** — Decentralized publishing network
 - **RDF/OWL** — Formal knowledge representation
 - **SPARQL** — Semantic web query language
-- **Python Pipeline** — Programmatic access via `science-live-pipeline`
 - **Semantic Vocabularies** — SPAR Ontologies, schema.org, Wikidata
 
 ---
 
 ## Documentation
 
-- [Getting Started](#) — First steps with Science Live
+- [Getting Started](getting-started.md) — First steps with Science Live
 - [Zotero Plugin](zotero/index.md) — Complete plugin documentation
-- [User Guide](#) — Creating and managing nanopublications
-- [API Reference](#) — Programmatic platform access
-- [Developer Guide](#) — Contributing to the platform
 
 ---
 
