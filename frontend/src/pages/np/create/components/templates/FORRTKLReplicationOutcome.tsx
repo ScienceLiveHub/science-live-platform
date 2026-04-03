@@ -1,4 +1,4 @@
-import { ResultItem } from "@/components/np/api-combobox";
+import { ResultItem } from "@/components/np/api-endpoints";
 import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import { Button } from "@/components/ui/button";
 import {
