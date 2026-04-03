@@ -568,14 +568,14 @@ A comprehensive set of templates supporting the full PRISMA systematic review wo
 
 | Template | Purpose |
 |----------|---------|
-| [PICO Research Question](https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w) | Define a Population, Intervention, Comparison, Outcome question |
-| [PCC Research Question](https://w3id.org/np/RAmR-xqMgOq3oTJmOVDQFL2p5usID6zqRapizHy0UJb04) | Define a Population, Concept, Context question |
-| [Search Strategy](https://w3id.org/np/RAvcJKm2DZPEKOBevGdPGcKL6sEw04JXwgzx2lH5DE5LU) | Define a systematic review search strategy |
-| [Database Search](https://w3id.org/np/RA8MyCoRqMdgGqqOwN4MIQfe6Htwt5FPgiHXlXK4RKiic) | Declare a systematic database search |
-| [Search Execution Dataset](https://w3id.org/np/RAV_H3udaSzxYOhhR0t-q7PKS6URwauD_Z5sMLbHmM2x0) | Declare a PRISMA search execution dataset |
-| [Study Inclusion](https://w3id.org/np/RAivw_N13pxVoXRMP6Y3ErfA--Z011qMqwKccfiKVxF0w) | Declare a study to be included in a systematic review |
-| [Study Assessment Dataset](https://w3id.org/np/RAwQj3SNiopwPrHXfoRT2JtYZSt-5JsDHjBDW6nYz_rDE) | Declare a PRISMA study assessment dataset |
-| [Full Screening Selection](https://w3id.org/np/RAh4iIKHSi30apMADmsYrdyeTd1hvvYZaRRfsKLZX1jsw) | Declare a study to be selected for full screening |
+| [PICO Research Question](https://platform.sciencelive4all.org/np/create?template=https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w) | Define a Population, Intervention, Comparison, Outcome question |
+| [PCC Research Question](https://platform.sciencelive4all.org/np/create?template=https://w3id.org/np/RAmR-xqMgOq3oTJmOVDQFL2p5usID6zqRapizHy0UJb04) | Define a Population, Concept, Context question |
+| [Search Strategy](https://platform.sciencelive4all.org/np/create?template=https://w3id.org/np/RAvcJKm2DZPEKOBevGdPGcKL6sEw04JXwgzx2lH5DE5LU) | Define a systematic review search strategy |
+| [Database Search](https://platform.sciencelive4all.org/np/create?template=https://w3id.org/np/RA8MyCoRqMdgGqqOwN4MIQfe6Htwt5FPgiHXlXK4RKiic) | Declare a systematic database search |
+| [Search Execution Dataset](https://platform.sciencelive4all.org/np/create?template=https://w3id.org/np/RAV_H3udaSzxYOhhR0t-q7PKS6URwauD_Z5sMLbHmM2x0) | Declare a PRISMA search execution dataset |
+| [Study Inclusion](https://platform.sciencelive4all.org/np/create?template=https://w3id.org/np/RAivw_N13pxVoXRMP6Y3ErfA--Z011qMqwKccfiKVxF0w) | Declare a study to be included in a systematic review |
+| [Study Assessment Dataset](https://platform.sciencelive4all.org/np/create?template=https://w3id.org/np/RAwQj3SNiopwPrHXfoRT2JtYZSt-5JsDHjBDW6nYz_rDE) | Declare a PRISMA study assessment dataset |
+| [Full Screening Selection](https://platform.sciencelive4all.org/np/create?template=https://w3id.org/np/RAh4iIKHSi30apMADmsYrdyeTd1hvvYZaRRfsKLZX1jsw) | Declare a study to be selected for full screening |
 
 ### When to Use
 
