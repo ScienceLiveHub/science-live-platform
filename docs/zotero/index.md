@@ -125,7 +125,7 @@ This plugin is part of [Science Live](https://sciencelive4all.org) - transformin
 
 - **Zotero:** Version 8.0 or later
 - **Internet:** Required for loading templates and publishing
-- For publishing: **Science Live Platform account** (verified and ORCID linked)
+- For publishing: **Science Live Platform account** with email verified, ORCID linked, and an API key (the plugin guides you through any missing steps)
 
 **Supported Platforms:**
 

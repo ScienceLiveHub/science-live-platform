@@ -8,6 +8,7 @@ Create your first nanopublication in 5 minutes - **entirely within Zotero!**
 - Plugin installed ([installation guide](installation.md))
 - ORCID account ([get one free](https://orcid.org))
 - Internet connection
+- [Science Live](https://sciencelive4all.org) account with email verified, ORCID linked, and an API key (the plugin will guide you through any missing steps)
 
 ---
 
