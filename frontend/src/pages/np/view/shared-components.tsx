@@ -67,7 +67,7 @@ export function ExternalUriLink({
       target="_blank"
       rel="noreferrer"
       className={cn(
-        "text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 break-all",
+        "text-primary hover:underline inline-flex items-center gap-1 break-all",
         className,
       )}
     >
@@ -251,7 +251,7 @@ export function RelatedNanopubLink({
         <a
           href={href || uri}
           rel="noreferrer"
-          className="font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 break-all text-md"
+          className="font-bold text-primary hover:underline inline-flex items-center gap-1 break-all text-md"
         >
           {label}
         </a>

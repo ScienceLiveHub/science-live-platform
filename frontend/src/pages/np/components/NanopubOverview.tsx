@@ -10,7 +10,7 @@ import {
   NotepadTextDashed,
   User,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { EmbedLink } from "@/embed/EmbedLink";
 import { TEMPLATE_METADATA } from "../create/components/templates/registry-metadata";
 import { NanopubViewerProps, ShareMenu } from "../view/NanopubViewer";
 import { NanopubStatus } from "./NanopubStatus";
@@ -73,7 +73,7 @@ export function NanopubOverview({
                 </LayersPlus>
               )}
               {isTemplate && (
-                <Link to={`/np/create?template=${store.metadata.uri}`}>
+                <EmbedLink to={`/np/create?template=${store.metadata.uri}`}>
                   {" "}
                   <FilePlus className="m-1.5" color="#9999ff" strokeWidth={2}>
                     <title>
@@ -81,7 +81,7 @@ export function NanopubOverview({
                       this template
                     </title>
                   </FilePlus>
-                </Link>
+                </EmbedLink>
               )}
               {showShareMenu && store.metadata.uri && (
                 <ShareMenu uri={store.metadata.uri} />
@@ -105,7 +105,7 @@ export function NanopubOverview({
                       className="inline-flex items-center gap-1"
                     >
                       <a
-                        className="text-purple-600 dark:text-purple-400 hover:underline break-all"
+                        className="text-primary hover:underline break-all"
                         href={c.href?.startsWith("http") ? c.href : undefined}
                         target={
                           c.href?.startsWith("http") ? "_blank" : undefined
@@ -117,13 +117,13 @@ export function NanopubOverview({
                         {c.name ?? (c.href ? getLabel(c.href) : "user")}
                       </a>
                       {scienceLiveUserId ? (
-                        <Link
+                        <EmbedLink
                           to={`/user/${scienceLiveUserId}`}
                           className="text-muted-foreground hover:text-foreground"
                           title="View Science Live profile"
                         >
                           <User className="h-4 w-4" />
-                        </Link>
+                        </EmbedLink>
                       ) : null}
                     </span>
                   );
@@ -147,7 +147,7 @@ export function NanopubOverview({
                 {store.metadata.types.map((c) => (
                   <a
                     key={c.name}
-                    className="text-blue-600 hover:underline break-all"
+                    className="text-primary hover:underline break-all"
                     href={c.href?.startsWith("http") ? c.href : undefined}
                     target={c.href?.startsWith("http") ? "_blank" : undefined}
                     rel={c.href?.startsWith("http") ? "noreferrer" : undefined}
@@ -170,7 +170,7 @@ export function NanopubOverview({
                 {store.metadata.introduces.map((c) => (
                   <a
                     key={c.uri}
-                    className="font-mono border-2 p-0.5 px-1.5 rounded-sm font-bold text-sm text-blue-600 dark:text-blue-300 hover:underline"
+                    className="font-mono border-2 p-0.5 px-1.5 rounded-sm font-bold text-sm text-primary hover:underline"
                     href={toScienceLiveNPUri(c.uri!)}
                     target="_blank"
                     rel="noreferrer"

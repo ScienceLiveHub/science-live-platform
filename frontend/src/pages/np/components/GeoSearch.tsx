@@ -339,11 +339,11 @@ function GeoSearchInner({
         <span className="text-sm text-muted-foreground">Examples:</span>
         <ul className="mt-2 space-y-2">
           <li className="flex items-start gap-2">
-            <MapPinned className="h-4 w-4 mt-1 text-purple-600 dark:text-purple-400" />
+            <MapPinned className="h-4 w-4 mt-1 text-primary" />
             <button
               type="button"
               onClick={handleCrabExample}
-              className="text-purple-600 dark:text-purple-400 hover:underline text-left cursor-pointer"
+              className="text-primary hover:underline text-left cursor-pointer"
             >
               Data about Crabs around Southern Europe
             </button>

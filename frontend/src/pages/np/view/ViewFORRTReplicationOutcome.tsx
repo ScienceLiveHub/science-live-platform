@@ -150,7 +150,7 @@ export function ViewFORRTReplicationOutcome({ store }: CustomViewerProps) {
         {data.label && (
           <div>
             <ItemTitle title="Outcome" className="mb-2" />
-            <div className="rounded-md border-l-4 border-teal-400 bg-teal-50 p-4 dark:bg-teal-950/20">
+            <div className="rounded-md border-l-4 border-teal-400 bg-teal-50 dark:bg-teal-950/20 p-4">
               <p className="text-lg font-medium leading-relaxed">
                 {data.label}
               </p>

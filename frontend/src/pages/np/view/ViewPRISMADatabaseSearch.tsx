@@ -100,7 +100,7 @@ export function ViewPRISMADatabaseSearch({ store }: CustomViewerProps) {
         {data.label && (
           <div>
             <ItemTitle title="Search" className="mb-2" />
-            <div className="rounded-md border-l-4 border-amber-400 bg-amber-50 p-4 dark:bg-amber-950/20">
+            <div className="rounded-md border-l-4 border-amber-400 bg-amber-50 dark:bg-amber-950/20 p-4">
               <p className="text-lg font-medium leading-relaxed">
                 {data.label}
               </p>

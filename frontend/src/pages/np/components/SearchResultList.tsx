@@ -28,7 +28,7 @@ export default function SearchResultList({
           <Link
             key={result.np || index}
             to={toScienceLiveNPUri(result.np)}
-            className="text-purple-600 dark:text-purple-400 hover:underline"
+            className="text-primary hover:underline"
           >
             <div className="font-medium flex flex-row">
               <NanopubIcon className="w-3 h-3 min-w-3 min-h-3 mt-1.5 mr-2" />
