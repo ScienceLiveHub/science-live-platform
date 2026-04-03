@@ -73,9 +73,7 @@ Choose from CiTO relationships:
 3. Form opens with paper DOI pre-filled
 4. Choose relationship: `agrees with - agrees with statements, ideas or conclusions presented in the cited entity`
 
-Check our video to see it in action:
-
-<iframe width="760" height="560" src="https://www.youtube.com/embed/N4swx_7GXRU" frameborder="0" allowfullscreen></iframe>
+<!-- TODO: Add updated screenshots of the CiTO workflow -->
 
 ## Comment on a paper
 

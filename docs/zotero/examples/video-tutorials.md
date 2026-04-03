@@ -1,6 +1,12 @@
 # Video Tutorials
 
+Video tutorials are being updated for the current version of the plugin. In the meantime, check out our step-by-step written guides:
 
-<iframe width="760" height="560" src="https://www.youtube.com/embed/BLeYIeLI6co?start=4&end=24" frameborder="0" allowfullscreen></iframe>
-<iframe width="760" height="560" src="https://www.youtube.com/embed/N4swx_7GXRU" frameborder="0" allowfullscreen></iframe>
-<iframe width="760" height="560" src="https://www.youtube.com/embed/X5BDU0N5sC4" frameborder="0" allowfullscreen></iframe>
+- [Quick Start Guide](../getting-started/quick-start.md) — Create your first nanopub in 5 minutes
+- [Feature Overview](../user-guide/features.md) — Complete guide to all plugin capabilities
+- [Template Types](../user-guide/templates.md) — When to use which template
+
+For real-world workflow examples, see:
+
+- [Tutorial: Replicating a Research Claim](../../tutorials/replication-study.md) — Atomic claim replication with FORRT/Knowledge Loom
+- [Tutorial: A Living Systematic Review](../../tutorials/systematic-review.md) — PRISMA workflow as queryable nanopubs

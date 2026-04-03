@@ -33,8 +33,16 @@ plugins:
 
 nav:
   - Home: index.md
+  - Why Nanopublications: why-nanopublications.md
   - Getting Started: getting-started.md
-  - Zotero Integration:
+  - For Researchers:
+    - Recognition & Credits: for-researchers/recognition-and-credits.md
+  - For Organizations:
+    - Overview: for-organizations/overview.md
+  - Tutorials:
+    - Replicating a Research Claim: tutorials/replication-study.md
+    - A Living Systematic Review: tutorials/systematic-review.md
+  - Zotero Plugin:
     - Overview: zotero/index.md
     - Installation: zotero/getting-started/installation.md
     - Quick Start: zotero/getting-started/quick-start.md

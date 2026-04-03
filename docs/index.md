@@ -62,7 +62,7 @@ From systematic, PRISMA-compliant search through connected research, to instant 
     
     - In-app nanopublication creation
     - Multiple semantic templates
-    - ORCID-signed publishing
+    - Authenticated via Science Live API key
     - PDF text selection support
     - Rich note displays
 

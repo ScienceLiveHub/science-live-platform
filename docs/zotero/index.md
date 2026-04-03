@@ -17,7 +17,7 @@ The Zotero Nanopublication Plugin brings semantic web publishing **directly into
     - **Embedded Forms** - Smart forms generated from templates, rendered in Zotero tabs
     - **Discover** - Find related nanopublications from other researchers
     - **FAIR Principles** - Contribute to Findable, Accessible, Interoperable, Reusable science
-    - **ORCID Signed** - Cryptographically sign your work for proper attribution
+    - **Authenticated** - Publishes through your Science Live account for proper attribution
 
 ---
 
@@ -36,7 +36,7 @@ The Zotero Nanopublication Plugin brings semantic web publishing **directly into
 === "For Researchers"
 
     **Publish semantic claims.**
-    Make formal research assertions with AIDA templates. Your claims become part of the global knowledge graph, signed with your ORCID.
+    Make formal research assertions with AIDA templates. Your claims become part of the global knowledge graph, published through your Science Live account.
 
 ---
 
@@ -46,7 +46,7 @@ The Zotero Nanopublication Plugin brings semantic web publishing **directly into
 - **Template Browser** - Choose from popular templates with one click
 - **Multiple Templates** - CiTO, AIDA, PRISMA systematic review, [FORRT](https://forrt.org/) replication studies, and more
 - **Auto-fill** - Paper metadata automatically populated
-- **Automatic Signing** - Uses cryptography with your ORCID
+- **Automatic Signing** - Publishes through your Science Live account via API key
 - **Direct Publishing** - Publishes to nanopub network instantly
 - **Rich Notes** - Beautiful display of nanopubs attached to your Zotero items
 - **Search Integration** - Discover nanopubs about papers in your library
@@ -58,17 +58,37 @@ The Zotero Nanopublication Plugin brings semantic web publishing **directly into
 
 ## How It Works
 
-1. Right-click any paper in Zotero
-2. Choose "Create Nanopublication" → Select template
-3. Form opens in new Zotero tab (auto-filled with paper info)
-4. Fill in your content
-5. Click "Create & Publish"
-6. Plugin signs with your ORCID and publishes automatically
-7. Beautiful rich note attached to your item
+### 1. Set up your account
+
+Create a [Science Live](https://platform.sciencelive4all.org) account, verify your email, link your ORCID, and generate an API key. Then enter your API key in Zotero under **Settings → Science Live**.
+
+![Screenshot: Science Live settings panel in Zotero with API key field](../assets/images/setup-profile-name.png)
+
+Enter your API key and click **Test Connection** to verify everything works.
+
+![Screenshot: Successful connection test showing profile name](../assets/images/setup-profile-connected.png)
+
+### 2. Pick a template
+
+Right-click any paper in your library and choose **Create Nanopublication** → select a template.
+
+![Screenshot: Right-click context menu showing Create Nanopublication with template submenu](../assets/images/ItemMenu.png){ width="600" }
+
+### 3. Fill in the form
+
+A form opens in a new Zotero tab, pre-filled with your paper's metadata. Add your content and click **Generate Nanopublication**.
+
+![Screenshot: CiTO citation form in a Zotero tab](../assets/images/cito-form.png)
+
+### 4. Published!
+
+The plugin signs and publishes your nanopublication through your Science Live account. A rich note is attached to your Zotero item.
+
+![Screenshot: Success dialog after publishing a nanopublication](../assets/images/success-published-nanopub.png)
+
+![Screenshot: Rich note view of the published nanopublication in Zotero](../assets/images/cito-view-from-zotero.png){ width="400" }
 
 **No browser windows. No external websites. All in Zotero!**
-
-![Screenshot: Workflow diagram showing steps within Zotero interface](../assets/images/annotated-screenshot-sequence.png)
 
 ---
 
@@ -115,7 +135,7 @@ This plugin is part of [Science Live](https://sciencelive4all.org) - transformin
 
 - **FAIR Principles**: Findable, Accessible, Interoperable, Reusable
 - **Open Science**: Transparent, collaborative research
-- **Credit System**: Recognition for quality contributions _(coming soon)_
+- **Credit System**: Recognition for quality contributions ([learn more](../for-researchers/recognition-and-credits.md))
 
 [Visit Science Live →](https://sciencelive4all.org){ .md-button }
 
