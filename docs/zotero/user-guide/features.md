@@ -38,7 +38,7 @@ Transform bibliography items into semantic, machine-readable statements using an
 - Smart form fields based on template
 - Dark mode support (matches Zotero theme)
 - Validation before publishing
-- Automatic signing with your ORCID
+- Automatic signing through your Science Live account
 - Direct publishing to nanopub network
 - Rich note automatically attached to item
 
@@ -108,7 +108,7 @@ The plugin:
 - Name
 - ORCID
 
-![Screenshot: View Profile setup ORCID](../../assets/images/profile-orcid.png)
+![Screenshot: View Profile setup](../../assets/images/setup-profile-name.png)
 
 ---
 
@@ -176,9 +176,7 @@ You can create nanopublications directly from the Zotero's PDF viewer:
 - Create annotation from the highlighted passage
 - Right-click from the note in the PDFViwer to create a nanopublication.
 
-Check the video below to view the entire workflow step by step:
-
-<iframe width="760" height="560" src="https://www.youtube.com/embed/X5BDU0N5sC4" frameborder="0" allowfullscreen></iframe>
+<!-- TODO: Add updated screenshots/video of the PDF annotation workflow -->
 
 ---
 
@@ -221,9 +219,9 @@ Or:
 
 ---
 
-## 8. ORCID Authentication
+## 8. Science Live Authentication
 
-Your nanopublications are cryptographically signed with your ORCID for:
+Your nanopublications are signed and published through your Science Live account (linked to your ORCID) for:
 
 - Proper attribution
 - Verification
