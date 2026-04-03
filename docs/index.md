@@ -111,9 +111,9 @@ Built on proven standards and open technologies:
 
 ## Legal & Policies
 
-- [Privacy Policy](https://sciencelive4all.org/privacy)
-- [Data Policy](https://sciencelive4all.org/data-policy)
-- [Terms of Service](https://sciencelive4all.org/terms)
+- [Privacy Policy](https://sciencelive4all.org/privacy/)
+- [Data & API Policy](https://sciencelive4all.org/policies/)
+- [Terms of Service](https://sciencelive4all.org/terms/)
 
 ---
 
