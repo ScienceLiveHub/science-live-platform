@@ -115,19 +115,20 @@ export const ApiComboboxSingle = ({
   allowSourceSelection?: boolean;
   endpoints?: SearchEndpoint[];
   value?: ResultItem | null;
-  onValueChange?: (value: ResultItem | null) => void;
+  onValueChange?: (value: ResultItem | null | undefined) => void;
   title?: string;
   placeholder?: string;
 }) => {
   const id = useId();
   const [open, setOpen] = useState(false);
-  const [internalSelectedValue, setInternalSelectedValue] =
-    useState<ResultItem | null>(null);
+  const [internalSelectedValue, setInternalSelectedValue] = useState<
+    ResultItem | null | undefined
+  >(null);
 
   const isControlled = value !== undefined;
   const selectedValue = isControlled ? value : internalSelectedValue;
 
-  const handleValueChange = (newValue: ResultItem | null) => {
+  const handleValueChange = (newValue: ResultItem | null | undefined) => {
     if (!isControlled) {
       setInternalSelectedValue(newValue);
     }
@@ -175,22 +176,39 @@ export const ApiComboboxSingle = ({
       <div className="space-y-2">
         <Label htmlFor={id}>{title}</Label>
         <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              id={id}
-              variant="outline"
-              role="combobox"
-              aria-expanded={open}
-              className="w-full justify-between"
-            >
-              {selectedValue ? (
-                <span className="truncate">{selectedValue.label}</span>
-              ) : (
-                <span className="text-muted-foreground/80">{placeholder}</span>
-              )}
-              <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
+          <div className="relative">
+            <PopoverTrigger asChild>
+              <Button
+                id={id}
+                variant="outline"
+                role="combobox"
+                aria-expanded={open}
+                className="w-full justify-between pr-16"
+              >
+                {selectedValue ? (
+                  <span className="truncate">{selectedValue.label}</span>
+                ) : (
+                  <span className="text-muted-foreground/80">
+                    {placeholder}
+                  </span>
+                )}
+                <ChevronsUpDownIcon className="h-4 w-4 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            {selectedValue && (
+              <button
+                type="button"
+                className="absolute right-8 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleValueChange(undefined);
+                }}
+              >
+                <XIcon className="h-4 w-4" />
+              </button>
+            )}
+          </div>
           <PopoverContent className="w-(--radix-popper-anchor-width) p-0">
             <Command shouldFilter={false}>
               <CommandInput
