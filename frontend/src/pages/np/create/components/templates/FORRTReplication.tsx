@@ -1,9 +1,8 @@
-import { ResultItem } from "@/components/np/api-combobox";
+import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import ApiComboboxMultipleExpandable, {
   ApiComboboxSingle,
-  SearchEndpoint,
 } from "@/components/np/api-combobox";
-import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
+import { ResultItem, WIKIDATA_ENTITY_API } from "@/components/np/api-endpoints";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -20,7 +19,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useFormedible } from "@/hooks/use-formedible";
-import ky, { KyResponse } from "ky";
+import ky from "ky";
 import { CheckIcon, ChevronsUpDownIcon, Loader2 } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 import z from "zod";
@@ -167,26 +166,6 @@ function FORRTClaimCombobox({
   );
 }
 
-// --- Wikidata search endpoint (for keywords and discipline) ----------------
-
-const wikidataEndpoint: SearchEndpoint[] = [
-  {
-    name: "wikidata",
-    label: "Wikidata",
-    url: "https://www.wikidata.org/w/api.php?action=wbsearchentities&language=en&format=json&origin=*&limit=5&search=",
-    parser: async (res: KyResponse) => {
-      const json = await res.json<{
-        search: { concepturi: string; label: string; description: string }[];
-      }>();
-      return (json.search || []).map((item) => ({
-        uri: item.concepturi,
-        label: item.label,
-        description: item.description,
-      }));
-    },
-  },
-];
-
 // --- Study type options ----------------------------------------------------
 
 const STUDY_TYPE_OPTIONS = [
@@ -201,7 +180,8 @@ const STUDY_TYPE_OPTIONS = [
       "Replication Study - replication with different methodology or conditions",
   },
   {
-    value: "https://w3id.org/sciencelive/o/terms/Reproduction-Replication-Study",
+    value:
+      "https://w3id.org/sciencelive/o/terms/Reproduction-Replication-Study",
     label:
       "Reproduction/Replication Study - study that is both, reproduction and replication",
   },
@@ -320,7 +300,7 @@ export default function FORRTReplication({
         },
         component: ({ fieldApi }) => (
           <ApiComboboxMultipleExpandable
-            endpoints={wikidataEndpoint}
+            endpoints={[WIKIDATA_ENTITY_API]}
             value={fieldApi.state.value || []}
             onValueChange={(items) => {
               fieldApi.setValue(items);
@@ -348,7 +328,7 @@ export default function FORRTReplication({
         },
         component: ({ fieldApi }) => (
           <ApiComboboxSingle
-            endpoints={wikidataEndpoint}
+            endpoints={[WIKIDATA_ENTITY_API]}
             value={fieldApi.state.value || null}
             onValueChange={(item) => {
               fieldApi.setValue(item);

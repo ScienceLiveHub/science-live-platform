@@ -31,22 +31,8 @@ import {
 } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
-import ky, { KyResponse } from "ky";
-
-export type ResultItem = {
-  uri: string;
-  label: string;
-  description?: string;
-};
-
-export type SearchEndpoint = {
-  name: string;
-  label: string;
-  // The url for the endpoint.  The query string will be appended on the end e.g. "https://api.example.com/search="
-  url: string;
-  // Should transform the API response to an array of ResultItem
-  parser: (res: KyResponse) => Promise<ResultItem[]>;
-};
+import ky from "ky";
+import { ResultItem, SearchEndpoint } from "./api-endpoints";
 
 // Fetch search results and process returned data using custom parser
 const searchEndpoint = async (
