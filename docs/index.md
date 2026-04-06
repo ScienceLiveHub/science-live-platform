@@ -62,7 +62,7 @@ From systematic, PRISMA-compliant search through connected research, to instant 
     
     - In-app nanopublication creation
     - Multiple semantic templates
-    - ORCID-signed publishing
+    - Authenticated via Science Live API key
     - PDF text selection support
     - Rich note displays
 
@@ -98,26 +98,22 @@ Built on proven standards and open technologies:
 - **Nanopublications Framework** — Decentralized publishing network
 - **RDF/OWL** — Formal knowledge representation
 - **SPARQL** — Semantic web query language
-- **Python Pipeline** — Programmatic access via `science-live-pipeline`
 - **Semantic Vocabularies** — SPAR Ontologies, schema.org, Wikidata
 
 ---
 
 ## Documentation
 
-- [Getting Started](#) — First steps with Science Live
+- [Getting Started](getting-started.md) — First steps with Science Live
 - [Zotero Plugin](zotero/index.md) — Complete plugin documentation
-- [User Guide](#) — Creating and managing nanopublications
-- [API Reference](#) — Programmatic platform access
-- [Developer Guide](#) — Contributing to the platform
 
 ---
 
 ## Legal & Policies
 
-- [Privacy Policy](https://sciencelive4all.org/privacy)
-- [Data Policy](https://sciencelive4all.org/data-policy)
-- [Terms of Service](https://sciencelive4all.org/terms)
+- [Privacy Policy](https://sciencelive4all.org/privacy/)
+- [Data & API Policy](https://sciencelive4all.org/policies/)
+- [Terms of Service](https://sciencelive4all.org/terms/)
 
 ---
 

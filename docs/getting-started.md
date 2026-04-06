@@ -6,25 +6,19 @@ Welcome to Science Live! This guide will help you start creating and discovering
 
 ## What You'll Need
 
-### ORCID Account (Required for Publishing)
+### A Science Live Account
 
-Science Live uses [ORCID](https://orcid.org) for authentication to ensure proper attribution for your contributions.
+Create an account at [platform.sciencelive4all.org](https://platform.sciencelive4all.org).
 
-**Don't have an ORCID yet?**
+**To publish nanopublications**, you need an [ORCID](https://orcid.org) linked to your account. Nanopublications are signed scholarly objects — your ORCID ensures proper, persistent attribution for your contributions.
 
-1. Visit [orcid.org/register](https://orcid.org/register)
-2. Create your free account (takes 2 minutes)
-3. Your ORCID gives you a persistent digital identifier throughout your career
+**Organizations** that want to discover, query, and commission research can create an account without an ORCID. See [For Organizations](for-organizations/overview.md).
 
-**Why ORCID?**
-
-- Free for all researchers
-- Globally recognized across journals and institutions
-- Proper attribution for all your contributions
-- Works regardless of name changes or institutional moves
+!!! tip "ORCID is free"
+    [ORCID](https://orcid.org) is free, globally recognized, and gives you a persistent digital identifier that follows you across institutions and name changes. If you don't have one yet, [register here](https://orcid.org/register) — it takes 2 minutes.
 
 !!! tip "Browsing Without an Account"
-    You can browse and search nanopublications without authentication. ORCID is only required to create and publish your own nanopublications.
+    You can browse and search nanopublications without authentication. An account is only required to create and publish.
 
 ---
 
@@ -73,8 +67,8 @@ Science Live offers two main ways to create nanopublications:
 ### Sign In
 
 1. Navigate to [platform.sciencelive4all.org](https://platform.sciencelive4all.org)
-2. Click **Sign in with ORCID**
-3. Authorize Science Live to access your ORCID profile
+2. Create an account and **link your ORCID**
+3. Verify your email and complete your profile
 
 ### Create Your First Nanopublication
 
@@ -144,14 +138,14 @@ Science Live provides templates for different types of research contributions:
 | **AIDA Assertion** | Make formal research claims | "Climate change affects migration patterns" |
 | **Quote & Comment** | Annotate specific passages | Quote + your interpretation |
 | **Geographic Coverage** | Document study locations | "Study area: Amazon rainforest (WKT coordinates)" |
-| **Hypothesis** | State research hypotheses | "We hypothesize that X causes Y" |
 | **Dataset** | Document research datasets | Dataset metadata and provenance |
-| **Software** | Reference research software | Software used in analysis |
-| **PRISMA** *(coming soon)* | Systematic review protocols | PRISMA flow diagrams |
+| **Research Software** | Reference research software | Software used in analysis |
+| **PRISMA Systematic Review** | Full systematic review workflow | PICO/PCC questions, search strategy, screening, assessment |
+| **[FORRT](https://forrt.org/) Replication** | Replication studies | Original claims, study design, outcomes |
 
 Each template generates structured, standards-compliant RDF data that integrates with the global knowledge graph.
 
-**Need help choosing?** Check our [Template Guide](#) for detailed explanations and examples.
+**Need help choosing?** Check our [Template Guide](zotero/user-guide/templates.md) for detailed explanations and examples.
 
 ---
 
@@ -184,17 +178,12 @@ A: If you're already a Zotero user, the plugin integrates seamlessly into your w
 
 ### Continue Learning
 
-- [User Guide](#) — Complete platform features and workflows
-- [Template Guide](#) — Detailed guide to each template type
-- [Search & Discovery](#) — Advanced search techniques
-- [API Reference](#) — Programmatic access for developers
+- [Template Guide](zotero/user-guide/templates.md) — Detailed guide to each template type
 
 ### Get Involved
 
-- [Join the Community](#) — Connect with other researchers
 - [GitHub Discussions](https://github.com/ScienceLiveHub/science-live-platform/discussions) — Ask questions
 - [Report Issues](https://github.com/ScienceLiveHub/science-live-platform/issues) — Help improve the platform
-- [Contribute](#) — Contribute to open source development
 
 ### For Zotero Users
 

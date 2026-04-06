@@ -1,30 +1,37 @@
 # Science Live Platform
 
-Transform research into connected knowledge through stackable knowledge bricks.
+Transform research into FAIR nanopublications — discoverable, reusable, and properly credited.
 
-## 🎯 Vision
+## Vision
 
-Science Live enables researchers to create FAIR (Findable, Accessible, Interoperable, Reusable) knowledge bricks from every stage of their research—from systematic reviews to data analysis—making scientific work discoverable, reusable, and properly credited while advancing Open Science practices.
+Science Live enables researchers to create [FAIR](https://www.go-fair.org/fair-principles/) (Findable, Accessible, Interoperable, Reusable) [nanopublications](https://nanopub.net/) from every stage of their research — from systematic reviews to data analysis — making scientific work discoverable, reusable, and properly credited while advancing Open Science practices.
 
-## 📊 Project Status
+**Live platform:** https://platform.sciencelive4all.org/
 
-🚧 **In Active Development** (October 2025 - June 2026)
+## Project Status
 
-| Phase     | Status   | Description                                  |
-| --------- | -------- | -------------------------------------------- |
-| ✅ Step 1 | Complete | Foundation setup (monorepo, React)           |
-| ✅ Step 2 | Complete | Database integration (PostgreSQL)            |
-| ✅ Step 3 | Complete | ORCID authentication and Org support         |
-| ✅ Step 4 | Complete | Nanopub parser and viewer with display modes |
-| ✅ Step 5 | Complete | Template processing engine for NP creation   |
-| 🔄 Step 6 | Next     | Zotero integration V1 release                |
-| ⏳ Step 7 | Planned  | AI tools for NP creation                     |
-| ⏳ Step 8 | Planned  | AI tools for search and info presentation    |
-| ⏳ Step 9 | Planned  | Credit system implementation                 |
+| Phase     | Status      | Description                                  |
+| --------- | ----------- | -------------------------------------------- |
+| ✅ Step 1 | Complete    | Foundation setup (monorepo, React)           |
+| ✅ Step 2 | Complete    | Database integration (PostgreSQL)            |
+| ✅ Step 3 | Complete    | ORCID authentication and Org support         |
+| ✅ Step 4 | Complete    | Nanopub parser and viewer with display modes |
+| ✅ Step 5 | Complete    | Template processing engine for NP creation   |
+| ✅ Step 6 | Complete    | Zotero plugin V1 release                     |
+| 🔄 Step 7 | In progress | AI tools for NP creation                     |
+| 🔄 Step 8 | In progress | AI-powered search and info presentation      |
+| ⏳ Step 9 | Planned     | Credit system (templates ready, awaiting first customers) |
 
-**Timeline:** Beta launch planned for January 2026, Public launch June 2026.
+## Zotero Plugin
 
-## 🏗️ Architecture
+The **Science Live Zotero Plugin** lets researchers create signed nanopublications directly from their Zotero library.
+
+- **Download:** [science-live.xpi](https://github.com/ScienceLiveHub/science-live-platform/releases/download/v1.0.0/science-live.xpi)
+- **Compatibility:** Zotero 7+
+- **Install:** Download the `.xpi` file, then in Zotero go to Tools > Plugins and drag the `.xpi` onto the Plugins window.
+- Auto-updates are supported via the Zotero plugin manager.
+
+## Architecture
 
 ### Architecture preferences
 
@@ -75,7 +82,7 @@ Science Live enables researchers to create FAIR (Findable, Accessible, Interoper
 
 Currently the `frontend` is a static SPA, with no SSR required, and client-side routing using react-router-dom. All dynamic content and data is pulled from the `api` which includes authentication and the database connection. This keeps the UX fast and responsive, as well as being easy to deploy as serverless without edge.
 
-## ⚡️ Developer Quick Start
+## Developer Quick Start
 
 ### Prerequisites
 
@@ -200,7 +207,7 @@ Currently we dont have a update manager, so use `npx npm-check-updates -w` in th
 
 Note: for packages installed from a git repo (e.g.`"nanopub-js": "github:vijay-prema/nanopub-js"` in package.json) you need to run install again e.g. `npm install github:vijay-prema/nanopub-js`.
 
-## 🧪 Testing
+## Testing
 
 ### Test Frontend
 
@@ -216,7 +223,7 @@ open http://localhost:3000
 curl http://localhost:3001/health
 ```
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 #### Both Frontend and Backend
 
@@ -255,9 +262,9 @@ curl http://localhost:3001/health
 - **ORCID** - An OIDC provider
 - **GitHub** - Version control
 
-## 🤝 Contributing
+## Contributing
 
-This project is currently in active development. Contribution guidelines will be added once the beta phase begins (January 2026).
+Contributions are welcome! Please open an issue or pull request.
 
 ### Development Team
 
@@ -266,32 +273,28 @@ This project is currently in active development. Contribution guidelines will be
 - **Semantic Consulting:** Barbara Magagna (Mabablue)
 - **Funding:** Astera Institute
 
-## 🔒 Security
+## Security
 
 - **Environment Variables:** Never commit `.env` files. Use `.env.example` as template.
 - **API Keys:** Keep backend keys secret. Only use anon keys in frontend.
 - **GDPR Compliance:** Data stored in EU region (Frankfurt).
 
-## 📜 License
+## License
 
-[License information to be added]
+MIT — see [package.json](package.json).
 
-## 🔗 Links
+## Links
 
+- **Platform:** https://platform.sciencelive4all.org/
 - **Website:** https://sciencelive4all.org
-- **Documentation:** https://docs.sciencelive4all.org (coming soon)
+- **Zotero Plugin:** [Download .xpi](https://github.com/ScienceLiveHub/science-live-platform/releases/download/v1.0.0/science-live.xpi)
 
-## 📞 Contact
+## Contact
 
 - **Email:** contact@sciencelive4all.org
 - **Book a Call:** https://calendly.com/anne-fouilloux/30min
 - **LinkedIn:** https://www.linkedin.com/company/sciencelive
 
-## 🎓 Acknowledgments
+## Acknowledgments
 
 Science Live is supported by the Astera Institute with planned transition to community-driven governance. Built on the nanopublication ecosystem infrastructure deployed by Knowledge Pixels.
-
----
-
-**Current Version:** 0.1.0 (Development)  
-**Last Updated:** November 2025

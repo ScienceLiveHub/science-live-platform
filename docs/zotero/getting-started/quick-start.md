@@ -6,31 +6,39 @@ Create your first nanopublication in 5 minutes - **entirely within Zotero!**
 
 - Zotero 7.0+ installed
 - Plugin installed ([installation guide](installation.md))
-- ORCID account ([get one free](https://orcid.org))
+- [ORCID](https://orcid.org) account (free)
 - Internet connection
 
 ---
 
-## Step 1: Set Up Your Profile (One-time, 2 minutes)
+## Step 1: Create Your Science Live Account (One-time, 3 minutes)
 
-Your nanopubs are signed with your ORCID for proper attribution.
+Before you can publish nanopublications, you need a Science Live account:
 
-1. In Zotero, go to **Zotero → Settings** or if Zotero menu does not exist, go to **Edit → Settings**.
-2. Select the **Science Live** Panel
-2. Enter your full name (e.g., "Jane Smith")
-3. Enter your ORCID (e.g., `0000-0002-1234-5678` or `https://orcid.org/0000-0002-1234-5678`)
-4. Click **Save Profile**
-![Screenshot: Profile setup name dialog](../../assets/images/setup-profile-name.png)
-5. To check your profile, click on **View Profile** on the same setup panel.
+1. Go to [platform.sciencelive4all.org](https://platform.sciencelive4all.org) and create an account
+2. **Verify your email** (check your inbox for a confirmation link)
+3. **Link your ORCID** to your Science Live account
+4. **Generate an API key** from your account settings — copy it for the next step
 
-The plugin generates cryptographic keys and stores them securely in Zotero.
+---
 
+## Step 2: Connect Zotero to Science Live (One-time, 1 minute)
+
+1. In Zotero, go to **Zotero → Settings** (or **Edit → Settings** on Windows/Linux)
+2. Select the **Science Live** panel
+3. Paste your **API key** from Step 1
+
+![Screenshot: Science Live settings panel in Zotero](../../assets/images/setup-profile-name.png)
+
+4. Click **Test Connection** to verify it works
+
+![Screenshot: Successful connection test](../../assets/images/setup-profile-connected.png)
 
 **✓ Done!** You won't need to do this again.
 
 ---
 
-## Step 2: Choose a Paper (30 seconds)
+## Step 3: Choose a Paper (30 seconds)
 
 Pick any paper from your Zotero library that you want to annotate.
 
@@ -42,7 +50,7 @@ Pick any paper from your Zotero library that you want to annotate.
 
 ---
 
-## Step 3: Start Creating a Nanopub (1 minute)
+## Step 4: Start Creating a Nanopub (1 minute)
 
 **Option A: Right-click menu** (recommended)
 
@@ -60,7 +68,7 @@ We’re adding new templates as we develop the Nanopublication Zotero plugin —
 
 ---
 
-## Step 4: Fill Out the Form in Zotero (2 minutes)
+## Step 5: Fill Out the Form in Zotero (2 minutes)
 
 A new tab opens in Zotero with an interactive form:
 
@@ -98,7 +106,7 @@ If you want to add the newly created nanopublication as a note under your item, 
 
 ---
 
-## Step 5: View Your Nanopublication in Zotero
+## Step 6: View Your Nanopublication in Zotero
 
 Once the nanopublication is added as a note to your selected item, you can check and display its content by clicking on it.
 
@@ -123,7 +131,7 @@ You created a **nanopublication** - a tiny, semantic, citable unit of knowledge 
 
 - Is permanently stored on the nanopub network
 - Has a persistent identifier (URI)
-- Is cryptographically signed with your ORCID
+- Is cryptographically signed through your Science Live account
 - Is machine-readable (RDF/TriG format)
 - Is discoverable by other researchers
 - Is linked to the paper in your Zotero library

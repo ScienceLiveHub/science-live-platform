@@ -26,7 +26,12 @@ import { ViewGeographicalCoverage } from "./ViewGeographicalCoverage";
 import { ViewPCCResearchQuestion } from "./ViewPCCResearchQuestion";
 import { ViewPICOResearchQuestion } from "./ViewPICOResearchQuestion";
 import { ViewPICOResearchQuestionLegacy } from "./ViewPICOResearchQuestionLegacy";
+import { ViewPRISMADatabaseSearch } from "./ViewPRISMADatabaseSearch";
+import { ViewPRISMAFullScreening } from "./ViewPRISMAFullScreening";
+import { ViewPRISMASearchExecutionDataset } from "./ViewPRISMASearchExecutionDataset";
 import { ViewPRISMASearchStrategy } from "./ViewPRISMASearchStrategy";
+import { ViewPRISMAStudyAssessment } from "./ViewPRISMAStudyAssessment";
+import { ViewPRISMAStudyInclusion } from "./ViewPRISMAStudyInclusion";
 import { ViewResearchSoftware } from "./ViewResearchSoftware";
 
 /**
@@ -46,6 +51,12 @@ export const VIEW_COMPONENTS: Record<
   [TEMPLATE_URI.PCC_RESEARCH_QUESTION]: ViewPCCResearchQuestion,
   [TEMPLATE_URI.RESEARCH_SOFTWARE]: ViewResearchSoftware,
   [TEMPLATE_URI.PRISMA_SEARCH_STRATEGY]: ViewPRISMASearchStrategy,
+  [TEMPLATE_URI.PRISMA_DATABASE_SEARCH]: ViewPRISMADatabaseSearch,
+  [TEMPLATE_URI.PRISMA_SEARCH_EXECUTION_DATASET]:
+    ViewPRISMASearchExecutionDataset,
+  [TEMPLATE_URI.PRISMA_STUDY_INCLUSION]: ViewPRISMAStudyInclusion,
+  [TEMPLATE_URI.PRISMA_STUDY_ASSESSMENT]: ViewPRISMAStudyAssessment,
+  [TEMPLATE_URI.PRISMA_FULL_SCREENING]: ViewPRISMAFullScreening,
   [TEMPLATE_URI.FORRT_REPLICATION_OUTCOME]: ViewFORRTReplicationOutcome,
   [TEMPLATE_URI.FORRT_REPLICATION]: ViewFORRTReplication,
   [TEMPLATE_URI.FORRT_CLAIM]: ViewFORRTClaim,

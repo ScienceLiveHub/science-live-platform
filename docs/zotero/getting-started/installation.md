@@ -14,11 +14,6 @@
 
 ![Nanopub Zotero plugin installation](../../assets/images/plugin-installation.png)
 
-Watch the step-by-step installation guide:
-
-<iframe width="760" height="560" src="https://www.youtube.com/embed/BLeYIeLI6co?start=4&end=24" frameborder="0" allowfullscreen></iframe>
-
-
 ## Verify Installation
 
 Right-click any item in your Zotero library and look for:
@@ -34,6 +29,10 @@ Similar menu can be found from the "File" tab:
 ![Nanopub Zotero File Menu](../../assets/images/File-menu.png)
 
 If you see these options, the installation was successful!
+
+!!! info "Before you can publish"
+
+    To create and publish nanopublications, you'll need a **Science Live account** with a verified email, linked ORCID, and an API key. The [Quick Start Guide](quick-start.md) walks you through this setup.
 
 ## Next Steps
 

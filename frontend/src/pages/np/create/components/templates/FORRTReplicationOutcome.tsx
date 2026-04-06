@@ -1,24 +1,10 @@
-import { ResultItem } from "@/components/np/api-combobox";
 import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
-import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { ResultItem } from "@/components/np/api-endpoints";
+import { QueryComboboxField } from "@/components/np/query-combobox";
 import { useFormedible } from "@/hooks/use-formedible";
+import { NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
 import ky from "ky";
-import { CheckIcon, ChevronsUpDownIcon, Loader2 } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import { useState } from "react";
 import z from "zod";
 import {
   NanopubEditorOptionFields,
@@ -27,11 +13,9 @@ import {
 
 // --- FORRT Replication Study search via SPARQL ------------------------------
 
-const SPARQL_ENDPOINT = "https://query.knowledgepixels.com/repo/full";
 const SPARQL_QUERY_PREFIX =
   "SELECT ?thing ?label WHERE { graph ?g { ?thing a <https://w3id.org/sciencelive/o/terms/FORRT-Replication-Study> } OPTIONAL { graph ?g2 { ?thing <http://www.w3.org/2000/01/rdf-schema#label> ?label } } FILTER(CONTAINS(LCASE(STR(?thing)), '";
-const SPARQL_QUERY_MIDDLE =
-  "') || CONTAINS(LCASE(STR(?label)), '";
+const SPARQL_QUERY_MIDDLE = "') || CONTAINS(LCASE(STR(?label)), '";
 const SPARQL_QUERY_SUFFIX = "')) } LIMIT 10";
 
 async function searchFORRTStudies(term: string): Promise<ResultItem[]> {
@@ -41,7 +25,7 @@ async function searchFORRTStudies(term: string): Promise<ResultItem[]> {
   const query = `${SPARQL_QUERY_PREFIX}${safeTerm}${SPARQL_QUERY_MIDDLE}${safeTerm}${SPARQL_QUERY_SUFFIX}`;
 
   try {
-    const res = await ky.post(SPARQL_ENDPOINT, {
+    const res = await ky.post(NANOPUB_SPARQL_ENDPOINT_FULL, {
       body: new URLSearchParams({ query }),
       headers: {
         Accept: "application/sparql-results+xml",
@@ -66,102 +50,6 @@ async function searchFORRTStudies(term: string): Promise<ResultItem[]> {
     console.error("FORRT study search error:", e);
     return [];
   }
-}
-
-function FORRTStudyCombobox({
-  value,
-  onValueChange,
-}: {
-  value: ResultItem | null;
-  onValueChange: (item: ResultItem | null) => void;
-}) {
-  const id = useId();
-  const [open, setOpen] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-  const [results, setResults] = useState<ResultItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (!inputValue || inputValue.length < 2) {
-      setResults([]);
-      return;
-    }
-    const timer = setTimeout(() => {
-      setIsLoading(true);
-      searchFORRTStudies(inputValue)
-        .then(setResults)
-        .catch(() => setResults([]))
-        .finally(() => setIsLoading(false));
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [inputValue]);
-
-  return (
-    <div className="w-full space-y-2">
-      <Label htmlFor={id}>Search for a FORRT replication study</Label>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            id={id}
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-full justify-between"
-          >
-            {value ? (
-              <span className="truncate">{value.label}</span>
-            ) : (
-              <span className="text-muted-foreground/80">
-                Type to search FORRT studies...
-              </span>
-            )}
-            <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-(--radix-popper-anchor-width) p-0">
-          <Command shouldFilter={false}>
-            <CommandInput
-              placeholder="Search FORRT studies..."
-              value={inputValue}
-              onValueChange={setInputValue}
-            />
-            <CommandList>
-              {isLoading ? (
-                <div className="flex justify-center py-6 text-center text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                </div>
-              ) : (
-                <>
-                  <CommandEmpty>
-                    {inputValue.length < 2
-                      ? "Type at least 2 characters to search..."
-                      : "No results found."}
-                  </CommandEmpty>
-                  <CommandGroup>
-                    {results.map((item) => (
-                      <CommandItem
-                        key={item.uri}
-                        value={item.uri}
-                        onSelect={() => {
-                          onValueChange(item);
-                          setOpen(false);
-                        }}
-                      >
-                        <span className="truncate">{item.label}</span>
-                        {value?.uri === item.uri && (
-                          <CheckIcon size={16} className="ml-auto" />
-                        )}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </>
-              )}
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-    </div>
-  );
 }
 
 // --- Restricted choice options ---------------------------------------------
@@ -263,12 +151,16 @@ export default function FORRTReplicationOutcome({
         placeholder: "Search for a FORRT replication study",
         required: true,
         component: ({ fieldApi }) => (
-          <FORRTStudyCombobox
+          <QueryComboboxField
             value={studySelection}
             onValueChange={(item) => {
               setStudySelection(item);
               fieldApi.setValue(item?.uri || "");
             }}
+            searchFunction={searchFORRTStudies}
+            labelText="Search for a FORRT replication study"
+            instructionText="Search FORRT studies..."
+            placeholderText="Type to search FORRT studies..."
           />
         ),
       },
