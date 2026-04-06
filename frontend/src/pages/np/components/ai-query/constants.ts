@@ -30,9 +30,10 @@ export const MAX_HISTORY_ITEMS = 20;
 export const DEFAULT_CONFIG: AIConfig = {
   provider: "openai",
   providers: {
-    openai: { model: "gpt-5.4" },
-    anthropic: { model: "claude-sonnet-4-6" },
-    ollama: { model: "llama3.2", baseUrl: "http://localhost:11434" },
+    openai: { model: "" },
+    anthropic: { model: "" },
+    openrouter: { model: "" },
+    ollama: { model: "", baseUrl: "http://localhost:11434" },
     "openai-compatible": { model: "" },
   },
 };
@@ -63,6 +64,15 @@ export const PROVIDER_INFO: ProviderInfo[] = [
     requiresApiKey: true,
     apiKeyPlaceholder: "sk-ant-...",
     apiKeyLink: "https://console.anthropic.com/settings/keys",
+    requiresBaseUrl: false,
+  },
+  {
+    id: "openrouter",
+    name: "OpenRouter",
+    models: [],
+    requiresApiKey: true,
+    apiKeyPlaceholder: "sk-or-...",
+    apiKeyLink: "https://openrouter.ai/keys",
     requiresBaseUrl: false,
   },
   {

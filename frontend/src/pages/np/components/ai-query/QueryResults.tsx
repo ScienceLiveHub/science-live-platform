@@ -2,10 +2,10 @@
  * Component to display SPARQL query results.
  */
 
-import { Button } from "@/components/ui/button";
 import { executeSparql, NANOPUB_SPARQL_ENDPOINT_TEXT } from "@/lib/sparql";
-import { AlertCircle, ExternalLink, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import SearchResultList, { SearchResult } from "../SearchResultList";
 import type { QueryResultItem } from "./types";
 
 interface QueryResultsProps {
@@ -103,39 +103,8 @@ export function QueryResults({
     };
   }, []);
 
-  const handleExecute = () => {
-    if (!query) return;
-
-    // Cancel any previous in-flight request
-    abortControllerRef.current?.abort();
-
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-
-    executeQuery(query, controller.signal);
-  };
-
-  // Get column headers from the first result
-  const columns = results?.[0] ? Object.keys(results[0]) : [];
-
   return (
     <div className="flex flex-col gap-4">
-      {/* Controls */}
-      {!autoExecute && query && (
-        <div className="flex items-center gap-2">
-          <Button onClick={handleExecute} disabled={isLoading || !query}>
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Executing...
-              </>
-            ) : (
-              "Execute Query"
-            )}
-          </Button>
-        </div>
-      )}
-
       {/* Loading state */}
       {isLoading && (
         <div className="flex items-center justify-center py-8">
@@ -170,48 +139,11 @@ export function QueryResults({
           <div className="text-sm text-muted-foreground">
             {results.length} result{results.length !== 1 ? "s" : ""} found
           </div>
-          <div
-            className="overflow-x-auto rounded-md border"
-            onWheel={(e) => e.stopPropagation()}
-          >
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50">
-                <tr>
-                  {columns.map((col) => (
-                    <th
-                      key={col}
-                      className="px-4 py-2 text-left font-medium text-muted-foreground"
-                    >
-                      {col}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {results.map((row, i) => (
-                  <tr key={i} className="hover:bg-muted/30">
-                    {columns.map((col) => (
-                      <td key={col} className="px-4 py-2">
-                        {isUrl(row[col]) ? (
-                          <a
-                            href={row[col]}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline inline-flex items-center gap-1"
-                          >
-                            {truncateUrl(row[col])}
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                        ) : (
-                          row[col]
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {/*TODO: This is sufficient for now but we cant guarantee that results will fit SearchResult
+                   Ideally, have a data table display toggle as back up*/}
+          <SearchResultList
+            searchResults={results as unknown as SearchResult[]}
+          />
         </div>
       )}
 
@@ -223,24 +155,4 @@ export function QueryResults({
       )}
     </div>
   );
-}
-
-/**
- * Check if a string is a URL
- */
-function isUrl(value: string): boolean {
-  try {
-    new URL(value);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Truncate a URL for display
- */
-function truncateUrl(url: string, maxLength = 50): string {
-  if (url.length <= maxLength) return url;
-  return url.slice(0, maxLength / 2) + "..." + url.slice(-maxLength / 2);
 }

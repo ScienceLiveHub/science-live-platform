@@ -59,7 +59,10 @@ export function SparqlEditor({
     <div className={cn("flex flex-col gap-2", className)}>
       {/* Toolbar */}
       <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground"></div>
+        <div className="text-sm text-muted-foreground">
+          View and edit the query directly below, or enter a prompt above to
+          update it.
+        </div>
         <div className="flex items-center gap-2">
           {/* Reset button - only show if edited and original exists */}
           {originalQuery &&

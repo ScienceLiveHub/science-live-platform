@@ -26,6 +26,7 @@ const { namedNode } = DataFactory;
 
 const GEOSPARQL = {
   hasGeometry: "http://www.opengis.net/ont/geosparql#hasGeometry",
+  hasBbox: "http://www.w3.org/ns/dcat#bbox",
   asWKT: "http://www.opengis.net/ont/geosparql#asWKT",
 };
 
@@ -42,6 +43,8 @@ interface GeographicalCoverageData {
   locationLabel: string;
   /** The WKT geometry string */
   wkt?: string;
+  /** The bbox geometry string */
+  bbox?: string;
 }
 
 function extractGeographicalCoverage(
@@ -108,8 +111,16 @@ function extractGeographicalCoverage(
     );
     wkt = wktQuad?.object.value;
   }
+  // Find geometry URI
+  const bbox =
+    store.matchOne(
+      namedNode(featureUri),
+      namedNode(GEOSPARQL.hasBbox),
+      null,
+      assertionGraph,
+    )?.object.value ?? undefined;
 
-  return { paperUrl, quotedText, commentText, locationLabel, wkt };
+  return { paperUrl, quotedText, commentText, locationLabel, wkt, bbox };
 }
 
 // Lazy-load the map component to avoid loading Leaflet when not needed
@@ -151,7 +162,7 @@ export function ViewGeographicalCoverage({ store }: CustomViewerProps) {
         )}
 
         {/* Map */}
-        {data.wkt && (
+        {(data.wkt || data.bbox) && (
           <div>
             <div className="rounded-md border overflow-hidden h-87.5">
               <Suspense
@@ -161,7 +172,7 @@ export function ViewGeographicalCoverage({ store }: CustomViewerProps) {
                   </div>
                 }
               >
-                <ReadOnlyMap wkt={data.wkt} />
+                <ReadOnlyMap wkt={data.wkt ?? data.bbox ?? ""} />
               </Suspense>
             </div>
           </div>

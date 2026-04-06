@@ -1,7 +1,8 @@
 import { NanopubIcon } from "@/components/nanopub-icon";
 import { RelativeDateTime } from "@/components/relative-datetime";
+import { Badge } from "@/components/ui/badge";
 import { AsyncLabel } from "@/hooks/use-labels";
-import { toScienceLiveNPUri } from "@/lib/uri";
+import { getUriEnd, toScienceLiveNPUri } from "@/lib/uri";
 import { FileSymlink } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -10,6 +11,8 @@ export interface SearchResult {
   label: string;
   date: Date;
   creator: string;
+  type?: string;
+  template?: string;
   isExample?: boolean;
   maxScore?: number;
   referenceCount?: number;
@@ -42,6 +45,23 @@ export default function SearchResultList({
               By <AsyncLabel uri={result.creator} link />
             </span>
           </div>
+
+          {/* Type */}
+          {result.type && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span className="text-xs truncate">
+                <a href={result.type}>
+                  <Badge
+                    key={result.type}
+                    variant="secondary"
+                    className="text-xs h-6 px-2 gap-1"
+                  >
+                    {result.type && getUriEnd(result.type)}
+                  </Badge>
+                </a>
+              </span>
+            </div>
+          )}
 
           {/* Date */}
           {result.date && (

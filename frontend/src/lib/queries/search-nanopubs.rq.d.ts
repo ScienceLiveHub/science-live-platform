@@ -13,6 +13,6 @@ declare const query: import("../sparql").SparqlQuery<{
   date: "string";
   creator: "string";
   isExample: "string";
-  template: "string";
+  type: "string";
 }>;
 export default query;

@@ -23,6 +23,10 @@ function mergeWithDefaults(stored: Partial<AIConfig>): AIConfig {
         ...DEFAULT_CONFIG.providers.anthropic,
         ...stored.providers?.anthropic,
       },
+      openrouter: {
+        ...DEFAULT_CONFIG.providers.openrouter,
+        ...stored.providers?.openrouter,
+      },
       ollama: {
         ...DEFAULT_CONFIG.providers.ollama,
         ...stored.providers?.ollama,

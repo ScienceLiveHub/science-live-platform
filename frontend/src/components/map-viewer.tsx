@@ -25,7 +25,7 @@ function FitBounds({ geoJson }: { geoJson: GeoJSON.GeoJsonObject }) {
       try {
         const bounds = geoJsonRef.current.getBounds();
         if (bounds.isValid()) {
-          map.fitBounds(bounds, { padding: [30, 30] });
+          map.fitBounds(bounds, { padding: [30, 30], maxZoom: 12 });
         }
       } catch {
         // Ignore bounds errors for edge cases
@@ -85,7 +85,7 @@ export default function ReadOnlyMap({ wkt }: ReadOnlyMapProps) {
   return (
     <Map
       center={defaultCenter}
-      zoom={2}
+      zoom={20}
       className="h-full w-full"
       scrollWheelZoom={false}
     >
