@@ -22,6 +22,8 @@ import { ViewDataset } from "./ViewDataset";
 import { ViewFORRTClaim } from "./ViewFORRTClaim";
 import { ViewFORRTReplication } from "./ViewFORRTReplication";
 import { ViewFORRTReplicationOutcome } from "./ViewFORRTReplicationOutcome";
+import { ViewFORRTKLReplication } from "./ViewFORRTKLReplication";
+import { ViewFORRTKLReplicationOutcome } from "./ViewFORRTKLReplicationOutcome";
 import { ViewGeographicalCoverage } from "./ViewGeographicalCoverage";
 import { ViewPCCResearchQuestion } from "./ViewPCCResearchQuestion";
 import { ViewPICOResearchQuestion } from "./ViewPICOResearchQuestion";
@@ -60,7 +62,10 @@ export const VIEW_COMPONENTS: Record<
   [TEMPLATE_URI.FORRT_REPLICATION_OUTCOME]: ViewFORRTReplicationOutcome,
   [TEMPLATE_URI.FORRT_REPLICATION]: ViewFORRTReplication,
   [TEMPLATE_URI.FORRT_CLAIM]: ViewFORRTClaim,
+  [TEMPLATE_URI.FORRT_KL_REPLICATION]: ViewFORRTKLReplication,
+  [TEMPLATE_URI.FORRT_KL_REPLICATION_OUTCOME]: ViewFORRTKLReplicationOutcome,
   // Legacy templates — remove when no longer needed
+  [LEGACY_TEMPLATE_URIS.FORRT_CLAIM![0]]: ViewFORRTClaim,
   [LEGACY_TEMPLATE_URIS.PICO_RESEARCH_QUESTION![0]]:
     ViewPICOResearchQuestionLegacy,
   [LEGACY_TEMPLATE_URIS.AIDA_SENTENCE![0]]: ViewAIDASentenceLegacy,
