@@ -1,8 +1,8 @@
+import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import ApiComboboxMultipleExpandable, {
   ApiComboboxSingle,
 } from "@/components/np/api-combobox";
 import { ResultItem, SearchEndpoint } from "@/components/np/api-endpoints";
-import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -200,7 +200,8 @@ const STUDY_TYPE_OPTIONS = [
       "Replication Study - replication with different methodology or conditions",
   },
   {
-    value: "https://w3id.org/sciencelive/o/terms/Reproduction-Replication-Study",
+    value:
+      "https://w3id.org/sciencelive/o/terms/Reproduction-Replication-Study",
     label:
       "Reproduction/Replication Study - study that is both, reproduction and replication",
   },
@@ -232,20 +233,22 @@ export default function FORRTKLReplication({
       .object({ uri: z.string(), label: z.string() })
       .array()
       .optional(),
-    st7: z.array(z.object({ keyword: z.string() })).optional(),
-    discipline: z.string().optional(),
     disciplineSelection: z
       .object({ uri: z.string(), label: z.string() })
-      .array()
       .optional(),
+    st7: z.array(z.object({ keyword: z.string() })).optional(),
+    discipline: z.string().optional(),
     // Knowledge Loom fields
     "kl-method": z.string().optional(),
     "kl-package": z.string().optional(),
     "kl-runtime": z.string().optional(),
-    "kl-input-source": z.string().url("Must be a valid URL").optional().or(z.literal("")),
+    "kl-input-source": z
+      .url("Must be a valid URL")
+      .optional()
+      .or(z.literal("")),
     "kl-input-desc": z.string().optional(),
-    "kl-script": z.string().url("Must be a valid URL").optional().or(z.literal("")),
-    "kl-loom-record": z.string().url("Must be a valid URL").optional().or(z.literal("")),
+    "kl-script": z.url("Must be a valid URL").optional().or(z.literal("")),
+    "kl-loom-record": z.url("Must be a valid URL").optional().or(z.literal("")),
   });
 
   const { Form } = useFormedible({
@@ -399,7 +402,8 @@ export default function FORRTKLReplication({
         name: "kl-input-desc",
         type: "text",
         label: "Input data description (optional)",
-        placeholder: "e.g. 229 rows x 8 columns, mercury measurements in albatrosses",
+        placeholder:
+          "e.g. 229 rows x 8 columns, mercury measurements in albatrosses",
         required: false,
       },
       {
@@ -413,7 +417,8 @@ export default function FORRTKLReplication({
         name: "kl-loom-record",
         type: "text",
         label: "Knowledge Loom record URL (optional)",
-        placeholder: "https://gitlab.com/TIBHannover/lki/knowledge-loom/loom-records/...",
+        placeholder:
+          "https://gitlab.com/TIBHannover/lki/knowledge-loom/loom-records/...",
         required: false,
       },
       ...NanopubEditorOptionFields,
@@ -448,22 +453,8 @@ export default function FORRTKLReplication({
         v.st7 = v.keywordSelection?.map((k: { uri: string }) => ({
           keyword: k.uri,
         }));
-        delete v.keywordSelection;
         // Map disciplineSelection to discipline placeholder
         v.discipline = v.disciplineSelection?.uri || "";
-        delete v.disciplineSelection;
-        // Remove empty optional fields
-        if (!v.deviation) delete v.deviation;
-        if (!v.discipline) delete v.discipline;
-        if (!v.st7 || v.st7.length === 0) delete v.st7;
-        // Remove empty KL fields
-        if (!v["kl-method"]) delete v["kl-method"];
-        if (!v["kl-package"]) delete v["kl-package"];
-        if (!v["kl-runtime"]) delete v["kl-runtime"];
-        if (!v["kl-input-source"]) delete v["kl-input-source"];
-        if (!v["kl-input-desc"]) delete v["kl-input-desc"];
-        if (!v["kl-script"]) delete v["kl-script"];
-        if (!v["kl-loom-record"]) delete v["kl-loom-record"];
         await submit(v);
       },
     },

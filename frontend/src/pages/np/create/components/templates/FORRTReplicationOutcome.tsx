@@ -18,7 +18,7 @@ const SPARQL_QUERY_PREFIX =
 const SPARQL_QUERY_MIDDLE = "') || CONTAINS(LCASE(STR(?label)), '";
 const SPARQL_QUERY_SUFFIX = "')) } LIMIT 10";
 
-async function searchFORRTStudies(term: string): Promise<ResultItem[]> {
+export async function searchFORRTStudies(term: string): Promise<ResultItem[]> {
   if (term.length < 2) return [];
 
   const safeTerm = term.toLowerCase().replace(/'/g, "\\'");
@@ -54,7 +54,7 @@ async function searchFORRTStudies(term: string): Promise<ResultItem[]> {
 
 // --- Restricted choice options ---------------------------------------------
 
-const VALIDATION_STATUS_OPTIONS = [
+export const VALIDATION_STATUS_OPTIONS = [
   {
     value: "https://w3id.org/sciencelive/o/terms/Validated",
     label: "validated",
@@ -77,7 +77,7 @@ const VALIDATION_STATUS_OPTIONS = [
   },
 ];
 
-const CONFIDENCE_LEVEL_OPTIONS = [
+export const CONFIDENCE_LEVEL_OPTIONS = [
   {
     value: "https://w3id.org/sciencelive/o/terms/VeryHighConfidence",
     label: "very high - Extensive evidence, high agreement with original",
