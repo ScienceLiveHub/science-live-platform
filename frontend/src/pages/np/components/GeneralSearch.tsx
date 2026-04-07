@@ -66,6 +66,7 @@ export function GeneralSearch() {
             label: row.label || "",
             date: new Date(row.date),
             creator: row.creator || "",
+            type: row.type,
             isExample: row.isExample === "true",
             maxScore: parseFloat(row.maxScore),
             referenceCount: parseInt(row.referenceCount),

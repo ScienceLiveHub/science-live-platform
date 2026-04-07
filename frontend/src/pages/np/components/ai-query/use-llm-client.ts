@@ -6,6 +6,7 @@ import { API_PROXY_URI } from "@/lib/uri";
 import { chat } from "@tanstack/ai";
 import { createAnthropicChat } from "@tanstack/ai-anthropic";
 import { createOpenaiChat } from "@tanstack/ai-openai";
+import { createOpenRouterText } from "@tanstack/ai-openrouter";
 import ky from "ky";
 import { useCallback, useState } from "react";
 import { SPARQL_GENERATION_SYSTEM_PROMPT } from "./constants";
@@ -303,6 +304,11 @@ function getAdapterForConfig(config: AIConfig) {
           dangerouslyAllowBrowser: true,
           baseURL: settings.baseUrl,
         },
+      );
+    case "openrouter":
+      return createOpenRouterText(
+        settings.model as Parameters<typeof createOpenRouterText>[0],
+        settings.apiKey ?? "",
       );
     default:
       throw new Error(`Unknown provider: ${config.provider}`);

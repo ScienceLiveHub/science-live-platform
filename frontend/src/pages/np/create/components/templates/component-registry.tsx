@@ -11,6 +11,8 @@ import CommentOnPaper from "./CommentOnPaper";
 import Dataset from "./Dataset";
 import DocumentGeographicalCoverage from "./DocumentGeographicalCoverage";
 import FORRTClaim from "./FORRTClaim";
+import FORRTKLReplication from "./FORRTKLReplication";
+import FORRTKLReplicationOutcome from "./FORRTKLReplicationOutcome";
 import FORRTReplication from "./FORRTReplication";
 import FORRTReplicationOutcome from "./FORRTReplicationOutcome";
 import PCCResearchQuestion from "./PCCResearchQuestion";
@@ -55,6 +57,8 @@ export const TEMPLATE_COMPONENTS: Record<
   [TEMPLATE_URI.FORRT_REPLICATION_OUTCOME]: FORRTReplicationOutcome,
   [TEMPLATE_URI.FORRT_REPLICATION]: FORRTReplication,
   [TEMPLATE_URI.FORRT_CLAIM]: FORRTClaim,
+  [TEMPLATE_URI.FORRT_KL_REPLICATION]: FORRTKLReplication,
+  [TEMPLATE_URI.FORRT_KL_REPLICATION_OUTCOME]: FORRTKLReplicationOutcome,
 };
 
 export const NanopubEditorOptionFields = [

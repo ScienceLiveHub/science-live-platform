@@ -52,12 +52,15 @@ export const TEMPLATE_URI = {
 
   // FORRT Replication
   FORRT_CLAIM:
-    "https://w3id.org/np/RAVdxfm3fgFahBItmNmJX_Xkmg1xlimDtoSMjZgNIs2bQ",
+    "https://w3id.org/np/RAu5uTahAxc0OLBB3vaGwK3OQDDZV7QuWtDlBk0Ea3bco",
+  FORRT_KL_REPLICATION:
+    "https://w3id.org/np/RALIq4JelUP-q9BuWONcKMJ87B5n59ppcwhQjl-1dheO4",
+  FORRT_KL_REPLICATION_OUTCOME:
+    "https://w3id.org/np/RAw3XdUhxQJfKBaU-cQhV6c7au4rLd5CSUdbMKTS_FB8g",
   FORRT_REPLICATION:
     "https://w3id.org/np/RAuLEjPp-4dTvPwMkfHggTto1CgjIftiGRAgHlyeEonjQ",
   FORRT_REPLICATION_OUTCOME:
     "https://w3id.org/np/RA2zljn0Nw9SadppOyxZoh-_Rxosslrq-vYG-p9SttnJE",
-
   // Utility templates (not shown in the nanopub editor)
   COMMENT: "http://purl.org/np/RA3gQDMnYbKCTiQeiUYJYBaH6HUhz8f3HIg71itlsZDgA",
   APPROVE_OR_DISAPPROVE:
@@ -76,6 +79,9 @@ export const LEGACY_TEMPLATE_URIS: Partial<
 > = {
   AIDA_SENTENCE: [
     "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE",
+  ],
+  FORRT_CLAIM: [
+    "https://w3id.org/np/RAVdxfm3fgFahBItmNmJX_Xkmg1xlimDtoSMjZgNIs2bQ",
   ],
   PICO_RESEARCH_QUESTION: [
     "https://w3id.org/np/RAfZfE1gbUtc35W7xT12XTO0ptZwycN2-jj7Jow6COAoQ",
@@ -330,6 +336,39 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "validation",
       "reproduction",
       "result",
+    ],
+  },
+  [TEMPLATE_URI.FORRT_KL_REPLICATION]: {
+    name: "FORRT Knowledge Loom Replication Study",
+    description:
+      "Declare a replication study with structured Knowledge Loom metadata: software methods, packages, input data, and analysis scripts.",
+    category: "Scientific",
+    icon: "🔁",
+    recommended: true,
+    keywords: [
+      "forrt",
+      "replication",
+      "knowledge loom",
+      "dtreg",
+      "reproduction",
+      "study",
+    ],
+  },
+  [TEMPLATE_URI.FORRT_KL_REPLICATION_OUTCOME]: {
+    name: "FORRT Knowledge Loom Replication Outcome",
+    description:
+      "Declare a replication outcome with machine-readable evidence from Knowledge Loom: dtreg proof, analysis type, and key results.",
+    category: "Scientific",
+    icon: "📊",
+    recommended: true,
+    keywords: [
+      "forrt",
+      "replication",
+      "outcome",
+      "knowledge loom",
+      "dtreg",
+      "proof",
+      "evidence",
     ],
   },
 };

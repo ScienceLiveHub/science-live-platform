@@ -2,107 +2,70 @@ import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffi
 import { ResultItem } from "@/components/np/api-endpoints";
 import { QueryComboboxField } from "@/components/np/query-combobox";
 import { useFormedible } from "@/hooks/use-formedible";
-import { NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
-import ky from "ky";
 import { useState } from "react";
 import z from "zod";
 import {
   NanopubEditorOptionFields,
   NanopubTemplateDefComponentProps,
 } from "./component-registry";
+import {
+  CONFIDENCE_LEVEL_OPTIONS,
+  searchFORRTStudies,
+  VALIDATION_STATUS_OPTIONS,
+} from "./FORRTReplicationOutcome";
 
-// --- FORRT Replication Study search via SPARQL ------------------------------
+// --- Restricted choice options -----------------------------------------------
 
-const SPARQL_QUERY_PREFIX =
-  "SELECT ?thing ?label WHERE { graph ?g { ?thing a <https://w3id.org/sciencelive/o/terms/FORRT-Replication-Study> } OPTIONAL { graph ?g2 { ?thing <http://www.w3.org/2000/01/rdf-schema#label> ?label } } FILTER(CONTAINS(LCASE(STR(?thing)), '";
-const SPARQL_QUERY_MIDDLE = "') || CONTAINS(LCASE(STR(?label)), '";
-const SPARQL_QUERY_SUFFIX = "')) } LIMIT 10";
-
-export async function searchFORRTStudies(term: string): Promise<ResultItem[]> {
-  if (term.length < 2) return [];
-
-  const safeTerm = term.toLowerCase().replace(/'/g, "\\'");
-  const query = `${SPARQL_QUERY_PREFIX}${safeTerm}${SPARQL_QUERY_MIDDLE}${safeTerm}${SPARQL_QUERY_SUFFIX}`;
-
-  try {
-    const res = await ky.post(NANOPUB_SPARQL_ENDPOINT_FULL, {
-      body: new URLSearchParams({ query }),
-      headers: {
-        Accept: "application/sparql-results+xml",
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    });
-
-    const text = await res.text();
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(text, "text/xml");
-    const results = xmlDoc.getElementsByTagName("result");
-
-    return Array.from(results).map((result) => {
-      const uri =
-        result.querySelector("binding[name='thing'] uri")?.textContent || "";
-      const label =
-        result.querySelector("binding[name='label'] literal")?.textContent ||
-        uri;
-      return { uri, label };
-    });
-  } catch (e) {
-    console.error("FORRT study search error:", e);
-    return [];
-  }
-}
-
-// --- Restricted choice options ---------------------------------------------
-
-export const VALIDATION_STATUS_OPTIONS = [
+const ANALYSIS_TYPE_OPTIONS = [
   {
-    value: "https://w3id.org/sciencelive/o/terms/Validated",
-    label: "validated",
+    value: "https://w3id.org/sciencelive/o/terms/dtreg-DataAnalysis",
+    label: "Data Analysis",
   },
   {
-    value: "https://w3id.org/sciencelive/o/terms/PartiallySupported",
-    label: "partially supported",
+    value: "https://w3id.org/sciencelive/o/terms/dtreg-DataPreprocessing",
+    label: "Data Preprocessing",
   },
   {
-    value: "https://w3id.org/sciencelive/o/terms/Contradicted",
-    label: "contradicted",
+    value: "https://w3id.org/sciencelive/o/terms/dtreg-DescriptiveStatistics",
+    label: "Descriptive Statistics",
   },
   {
-    value: "https://w3id.org/sciencelive/o/terms/Inconclusive",
-    label: "inconclusive",
+    value: "https://w3id.org/sciencelive/o/terms/dtreg-GroupComparison",
+    label: "Group Comparison (t-test, ANOVA, etc.)",
   },
   {
-    value: "https://w3id.org/sciencelive/o/terms/NotTested",
-    label: "not tested",
+    value: "https://w3id.org/sciencelive/o/terms/dtreg-RegressionAnalysis",
+    label: "Regression Analysis",
+  },
+  {
+    value: "https://w3id.org/sciencelive/o/terms/dtreg-CorrelationAnalysis",
+    label: "Correlation Analysis",
+  },
+  {
+    value: "https://w3id.org/sciencelive/o/terms/dtreg-MultilevelAnalysis",
+    label: "Multilevel Analysis (mixed/hierarchical models)",
+  },
+  {
+    value: "https://w3id.org/sciencelive/o/terms/dtreg-ClassPrediction",
+    label: "Class Prediction",
+  },
+  {
+    value: "https://w3id.org/sciencelive/o/terms/dtreg-ClassDiscovery",
+    label: "Class Discovery (clustering)",
+  },
+  {
+    value: "https://w3id.org/sciencelive/o/terms/dtreg-AlgorithmEvaluation",
+    label: "Algorithm Evaluation",
+  },
+  {
+    value: "https://w3id.org/sciencelive/o/terms/dtreg-FactorAnalysis",
+    label: "Factor Analysis",
   },
 ];
 
-export const CONFIDENCE_LEVEL_OPTIONS = [
-  {
-    value: "https://w3id.org/sciencelive/o/terms/VeryHighConfidence",
-    label: "very high - Extensive evidence, high agreement with original",
-  },
-  {
-    value: "https://w3id.org/sciencelive/o/terms/HighConfidence",
-    label: "high - Strong evidence, mostly agrees with original",
-  },
-  {
-    value: "https://w3id.org/sciencelive/o/terms/Moderate",
-    label: "moderate - Adequate evidence, partial agreement",
-  },
-  {
-    value: "https://w3id.org/sciencelive/o/terms/LowConfidence",
-    label: "low - Limited evidence, significant disagreement",
-  },
-  {
-    value: "https://w3id.org/sciencelive/o/terms/VeryLowConfidence",
-    label: "very low - Minimal evidence, major disagreement",
-  },
-];
+// --- Form component ----------------------------------------------------------
 
-// --- Form component --------------------------------------------------------
-
-export default function FORRTReplicationOutcome({
+export default function FORRTKLReplicationOutcome({
   submit,
   prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
@@ -125,6 +88,10 @@ export default function FORRTReplicationOutcome({
     evidence: z.string().min(1, "Evidence is required"),
     confidenceLevel: z.string().min(1, "Must select a confidence level"),
     limitations: z.string().optional(),
+    // Knowledge Loom fields
+    "kl-proof": z.url("Must be a valid URL").optional().or(z.literal("")),
+    "kl-analysis-type": z.string().optional(),
+    "kl-key-result": z.string().optional(),
   });
 
   const { Form } = useFormedible({
@@ -212,6 +179,29 @@ export default function FORRTReplicationOutcome({
         placeholder: "Limitations...",
         required: false,
       },
+      // --- Knowledge Loom evidence section ---
+      {
+        name: "kl-proof",
+        type: "text",
+        label: "Machine-readable proof URL (optional)",
+        placeholder: "https://gitlab.com/.../raw/main/result.json",
+        required: false,
+        section: { title: "Machine-Readable Evidence (Knowledge Loom)" },
+      },
+      {
+        name: "kl-analysis-type",
+        type: "select",
+        label: "Statistical analysis type (optional)",
+        required: false,
+        options: ANALYSIS_TYPE_OPTIONS,
+      },
+      {
+        name: "kl-key-result",
+        type: "textarea",
+        label: "Key numerical result (optional)",
+        placeholder: "e.g. F=7.285, p<0.001",
+        required: false,
+      },
       ...NanopubEditorOptionFields,
     ],
     globalWrapper: ShowOptionalWrapper,
@@ -230,6 +220,9 @@ export default function FORRTReplicationOutcome({
         conclusion: "",
         evidence: "",
         limitations: "",
+        "kl-proof": "",
+        "kl-analysis-type": "",
+        "kl-key-result": "",
         ...prefilledData,
       },
       onSubmit: async ({ value }) => {
