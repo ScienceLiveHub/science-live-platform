@@ -13,7 +13,7 @@
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Outlet, useSearchParams } from "react-router-dom";
 import { EmbedProvider } from "./EmbedContext";
 
@@ -181,31 +181,58 @@ function useStyleCustomization() {
   }, [searchParams]);
 }
 
-function useIframeResize() {
+function useIframeResize(ref: React.RefObject<HTMLDivElement | null>) {
   useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
     const sendHeight = () => {
-      const height = document.documentElement.scrollHeight;
+      // Measure the content wrapper's scrollHeight directly rather than
+      // document.documentElement.scrollHeight. The document's scrollHeight
+      // never shrinks below the iframe viewport height (set by the parent),
+      // so collapsing content would never reduce the reported height.
+      // By measuring the wrapper element we get the true content height.
+      const height = el.scrollHeight;
       window.parent.postMessage({ type: "nanopub-embed-resize", height }, "*");
     };
 
-    // Send initial height and on resize
+    // Send initial height and on any content resize.
+    // ResizeObserver detects size changes on the wrapper element.
+    // MutationObserver catches DOM changes (e.g. collapsibles toggling
+    // hidden/data-state attributes) that may not immediately trigger a
+    // resize on the observed element itself.
     sendHeight();
-    const observer = new ResizeObserver(sendHeight);
-    observer.observe(document.body);
 
-    return () => observer.disconnect();
-  }, []);
+    const resizeObs = new ResizeObserver(sendHeight);
+    resizeObs.observe(el);
+
+    const mutationObs = new MutationObserver(() => {
+      // Defer to next frame so the browser has laid out the change
+      requestAnimationFrame(sendHeight);
+    });
+    mutationObs.observe(el, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["hidden", "data-state", "style", "class"],
+    });
+
+    return () => {
+      resizeObs.disconnect();
+      mutationObs.disconnect();
+    };
+  }, [ref]);
 }
 
 export function EmbedLayout() {
   const [searchParams] = useSearchParams();
   const theme = searchParams.get("theme") as "dark" | "light" | null;
+  const contentRef = useRef<HTMLDivElement>(null);
 
-  const platformUrl =
-    import.meta.env.VITE_APP_URL || window.location.origin;
+  const platformUrl = import.meta.env.VITE_APP_URL || window.location.origin;
 
   useStyleCustomization();
-  useIframeResize();
+  useIframeResize(contentRef);
 
   return (
     <ThemeProvider
@@ -214,7 +241,11 @@ export function EmbedLayout() {
     >
       <TooltipProvider>
         <EmbedProvider platformUrl={platformUrl}>
-          <div className="p-2">
+          <div
+            ref={contentRef}
+            className="p-2"
+            style={{ height: "fit-content" }}
+          >
             <Outlet />
           </div>
         </EmbedProvider>
