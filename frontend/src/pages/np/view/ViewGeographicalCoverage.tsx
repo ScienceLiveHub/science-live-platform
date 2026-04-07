@@ -155,7 +155,7 @@ export function ViewGeographicalCoverage({ store }: CustomViewerProps) {
               icon={<MapPin className="h-4 w-4 inline-block mr-1" />}
             />
             <Badge variant="secondary" className="text-sm gap-1">
-              <span className="text-teal-600 opacity-70">⬤</span>{" "}
+              <span className="text-primary opacity-70">⬤</span>{" "}
               {data.locationLabel}
             </Badge>
           </div>

@@ -1,7 +1,9 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import { MissingEmailDialog } from "./components/missing-email-dialog";
 import { Navbar01 } from "./components/ui/shadcn-io/navbar-01";
 import { Toaster } from "./components/ui/sonner";
+import { EmbedLayout } from "./embed/EmbedLayout";
+import { EmbedViewer } from "./embed/EmbedViewer";
 import AuthPage from "./pages/AuthPage";
 import EmailVerified from "./pages/EmailVerified";
 import { Home } from "./pages/Home";
@@ -18,13 +20,25 @@ import { Providers } from "./providers";
 function App() {
   return (
     <BrowserRouter>
-      <Providers>
-        <div className="relative w-full">
-          <Navbar01 />
-          <Toaster />
-          <MissingEmailDialog />
-        </div>
-        <Routes>
+      <Routes>
+        {/* Embed routes — minimal layout, no app shell */}
+        <Route path="/embed" element={<EmbedLayout />}>
+          <Route path="view" element={<EmbedViewer />} />
+        </Route>
+
+        {/* Main app routes — full app shell with auth, navbar, etc. */}
+        <Route
+          element={
+            <Providers>
+              <div className="relative w-full">
+                <Navbar01 />
+                <Toaster />
+                <MissingEmailDialog />
+              </div>
+              <Outlet />
+            </Providers>
+          }
+        >
           {/* Pages/paths provided by better-auth-ui */}
           <Route path="/auth/:pathname" element={<AuthPage />} />
           {/* User app settings */}
@@ -50,8 +64,8 @@ function App() {
           <Route path="/policies" element={<Policies />} />{" "}
           {/* 404 - Catch all unmatched routes */}
           <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Providers>
+        </Route>
+      </Routes>
     </BrowserRouter>
   );
 }

@@ -227,7 +227,7 @@ export function ViewDataset({ store }: CustomViewerProps) {
       </CardHeader>
       <CardContent className="space-y-5">
         {/* Dataset Title */}
-        <div className="rounded-md border-l-4 border-violet-400 bg-violet-50 p-4 dark:bg-violet-950/20">
+        <div className="rounded-md border-l-4 border-violet-400 bg-violet-50 dark:bg-violet-950/20 p-4">
           <p className="text-lg font-medium leading-relaxed">{data.title}</p>
           {data.version && (
             <Badge variant="secondary" className="mt-2">
@@ -354,7 +354,7 @@ export function ViewDataset({ store }: CustomViewerProps) {
                   ? data.contactPoint
                   : `mailto:${data.contactPoint}`
               }
-              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+              className="text-sm text-primary hover:underline"
             >
               {data.contactPoint.replace("mailto:", "")}
             </a>

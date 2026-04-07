@@ -115,7 +115,7 @@ export function ViewCommentOnPaper({ store }: CustomViewerProps) {
               href={data.paperUrl}
               target="_blank"
               rel="noreferrer"
-              className="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 break-all"
+              className="text-primary hover:underline inline-flex items-center gap-1 break-all"
             >
               {getLabel(data.paperUrl)}
             </a>

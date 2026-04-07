@@ -26,7 +26,7 @@ export function LocationDetail({ location }: { location: GeoLocation }) {
             href={location.paper}
             target="_blank"
             rel="noreferrer"
-            className="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 break-all text-sm"
+            className="text-primary hover:underline inline-flex items-center gap-1 break-all text-sm"
           >
             <AsyncLabel uri={location.paper} />
             <ExternalLink className="h-3 w-3 shrink-0" />
@@ -69,7 +69,7 @@ export function LocationDetail({ location }: { location: GeoLocation }) {
               href={location.creator}
               target="_blank"
               rel="noreferrer"
-              className="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 break-all text-sm"
+              className="text-primary hover:underline inline-flex items-center gap-1 break-all text-sm"
             >
               <AsyncLabel uri={location.creator} />
               <ExternalLink className="h-3 w-3 shrink-0" />

@@ -39,6 +39,7 @@ nav:
     - Recognition & Credits: for-researchers/recognition-and-credits.md
   - For Organizations:
     - Overview: for-organizations/overview.md
+    - Embed Nanopublications: for-organizations/embed.md
   - Tutorials:
     - Replicating a Research Claim: tutorials/replication-study.md
     - A Living Systematic Review: tutorials/systematic-review.md
@@ -55,9 +56,6 @@ nav:
     - Contributing: zotero/development/contributing.md
     - Build Process: zotero/development/build-process.md
     - Testing: zotero/development/testing.md
-
-theme:
-  name: material  # or your preferred theme
 
 markdown_extensions:
   - admonition

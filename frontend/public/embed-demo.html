@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nanopub Embed Demo — Science Live</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      padding: 2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: #666;
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: #555;
+    }
+
+    .example {
+      margin-bottom: 3rem;
+    }
+
+    .code {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    iframe {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #0f4e8a;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      margin-left: 0.5rem;
+    }
+  </style>
+
+  <!-- Optional: auto-resize iframes based on content height -->
+  <script>
+    window.addEventListener('message', (event) => {
+      if (event.data?.type === 'nanopub-embed-resize') {
+        const iframes = document.querySelectorAll('iframe');
+        iframes.forEach(iframe => {
+          if (iframe.contentWindow === event.source) {
+            iframe.style.height = event.data.height + 'px';
+          }
+        });
+      }
+    });
+  </script>
+</head>
+
+<body>
+
+  <h1>Nanopub Embed Demo</h1>
+  <p>Examples of embedding nanopublication views from Science Live into external websites.</p>
+
+  <!-- Example 1: Default -->
+  <div class="example">
+    <h2>1. Default (Science Live theme)</h2>
+    <div class="code">&lt;iframe
+      src="https://platform.sciencelive4all.org/embed/view?uri=https://w3id.org/np/RAY7IdUcyQ8P_WCO6o9NDMz9q2LN6w7bl7ZJnsHQ_sO5g"
+      width="100%" height="600" frameborder="0" scrolling="no"&gt;&lt;/iframe&gt;</div>
+    <iframe src="/embed/view?uri=https://w3id.org/np/RAY7IdUcyQ8P_WCO6o9NDMz9q2LN6w7bl7ZJnsHQ_sO5g" width="100%"
+      height="600" frameborder="0" scrolling="no"></iframe>
+  </div>
+
+  <!-- Example 2: LifeWatch branding -->
+  <div class="example">
+    <h2>2. Custom branding <span class="badge">LifeWatch ERIC</span></h2>
+    <div class="code">&lt;iframe
+      src="https://platform.sciencelive4all.org/embed/view?uri=https://w3id.org/np/RAY7IdUcyQ8P_WCO6o9NDMz9q2LN6w7bl7ZJnsHQ_sO5g&amp;theme=light&amp;primaryColor=0f4e8a"
+      width="100%" height="600" frameborder="0" scrolling="no"&gt;&lt;/iframe&gt;</div>
+    <iframe
+      src="/embed/view?uri=https://w3id.org/np/RAY7IdUcyQ8P_WCO6o9NDMz9q2LN6w7bl7ZJnsHQ_sO5g&theme=light&primaryColor=0f4e8a"
+      width="100%" height="600" frameborder="0" scrolling="no"></iframe>
+  </div>
+
+  <!-- Example 3: FORRT replication with green brand -->
+  <div class="example">
+    <h2>3. FORRT replication study — custom green theme</h2>
+    <div class="code">&lt;iframe
+      src="https://platform.sciencelive4all.org/embed/view?uri=https://w3id.org/np/RADCSRkRrlaOzRZ-lkPh1dnvthkhqFz55eGr1wtpW03vk&amp;theme=light&amp;primaryColor=2e7d32"
+      width="100%" height="800" frameborder="0" scrolling="no"&gt;&lt;/iframe&gt;</div>
+    <iframe
+      src="/embed/view?uri=https://w3id.org/np/RADCSRkRrlaOzRZ-lkPh1dnvthkhqFz55eGr1wtpW03vk&theme=light&primaryColor=2e7d32"
+      width="100%" height="800" frameborder="0" scrolling="no"></iframe>
+  </div>
+
+  <!-- Example 4: Minimal (no share/citation) -->
+  <div class="example">
+    <h2>4. Minimal embed (no share menu, no citation, no references)</h2>
+    <div class="code">&lt;iframe
+      src="https://platform.sciencelive4all.org/embed/view?uri=https://w3id.org/np/RAY7IdUcyQ8P_WCO6o9NDMz9q2LN6w7bl7ZJnsHQ_sO5g&amp;showShare=false&amp;showCitation=false&amp;showReferences=false"
+      width="100%" height="450" frameborder="0" scrolling="no"&gt;&lt;/iframe&gt;</div>
+    <iframe
+      src="/embed/view?uri=https://w3id.org/np/RAY7IdUcyQ8P_WCO6o9NDMz9q2LN6w7bl7ZJnsHQ_sO5g&showShare=false&showCitation=false&showReferences=false"
+      width="100%" height="450" frameborder="0" scrolling="no"></iframe>
+  </div>
+
+  <!-- Example 5: Dark mode -->
+  <div class="example">
+    <h2>5. Dark mode</h2>
+    <div class="code">&lt;iframe
+      src="https://platform.sciencelive4all.org/embed/view?uri=https://w3id.org/np/RAY7IdUcyQ8P_WCO6o9NDMz9q2LN6w7bl7ZJnsHQ_sO5g&amp;theme=dark"
+      width="100%" height="600" frameborder="0" scrolling="no"&gt;&lt;/iframe&gt;</div>
+    <iframe src="/embed/view?uri=https://w3id.org/np/RAY7IdUcyQ8P_WCO6o9NDMz9q2LN6w7bl7ZJnsHQ_sO5g&theme=dark"
+      width="100%" height="600" frameborder="0" scrolling="no"></iframe>
+  </div>
+
+</body>
+
+</html>

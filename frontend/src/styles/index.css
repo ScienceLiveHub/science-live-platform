@@ -96,8 +96,8 @@
   --popover: oklch(0.236 0.073 258);
   --popover-foreground: oklch(1 0 0);
 
-  /* interactive colors */
-  --primary: oklch(0.548 0.19 354.2);           /* secondary-color as accent */
+  /* interactive colors - slightly lighter pink for readability on dark backgrounds */
+  --primary: oklch(61.202% 0.19764 353.887);
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.373 0.031 259.7);       /* gray-700 for subtle surfaces */
   --secondary-foreground: oklch(1 0 0);

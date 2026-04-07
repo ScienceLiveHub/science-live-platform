@@ -162,7 +162,7 @@ export function ViewResearchSoftware({ store }: CustomViewerProps) {
       </CardHeader>
       <CardContent className="space-y-5">
         {/* Software Title */}
-        <div className="rounded-md border-l-4 border-cyan-400 bg-cyan-50 p-4 dark:bg-cyan-950/20">
+        <div className="rounded-md border-l-4 border-cyan-400 bg-cyan-50 dark:bg-cyan-950/20 p-4">
           <p className="text-lg font-medium leading-relaxed">{data.title}</p>
         </div>
 

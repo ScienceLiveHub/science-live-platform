@@ -52,14 +52,14 @@ export function ConfigDialog({
 
   // Per-provider local state — initialised from the stored per-provider settings
   const [apiKey, setApiKey] = useState(
-    config.providers[config.provider].apiKey ?? "",
+    config.providers[config.provider]?.apiKey ?? "",
   );
-  const [model, setModel] = useState(config.providers[config.provider].model);
+  const [model, setModel] = useState(config.providers[config.provider]?.model);
   const [baseUrl, setBaseUrl] = useState(
-    config.providers[config.provider].baseUrl ?? "http://localhost:11434",
+    config.providers[config.provider]?.baseUrl ?? "http://localhost:11434",
   );
   const [useProxy, setUseProxy] = useState(
-    config.providers[config.provider].useProxy ?? false,
+    config.providers[config.provider]?.useProxy ?? false,
   );
   const [showApiKey, setShowApiKey] = useState(false);
 
@@ -70,10 +70,10 @@ export function ConfigDialog({
     if (open) {
       setProvider(config.provider);
       const settings = config.providers[config.provider];
-      setApiKey(settings.apiKey ?? "");
-      setModel(settings.model);
-      setBaseUrl(settings.baseUrl ?? "http://localhost:11434");
-      setUseProxy(settings.useProxy ?? false);
+      setApiKey(settings?.apiKey ?? "");
+      setModel(settings?.model);
+      setBaseUrl(settings?.baseUrl ?? "http://localhost:11434");
+      setUseProxy(settings?.useProxy ?? false);
       setShowApiKey(false);
     }
   }, [open, config]);

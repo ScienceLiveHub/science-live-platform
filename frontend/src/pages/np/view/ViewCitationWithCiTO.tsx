@@ -109,7 +109,7 @@ export function ViewCitationWithCiTO({ store }: CustomViewerProps) {
                   key={idx}
                   className="flex items-start gap-3 rounded-md border bg-muted/30 p-3"
                 >
-                  <ArrowRight className="h-4 w-4 mt-0.5 text-amber-600 shrink-0" />
+                  <ArrowRight className="h-4 w-4 mt-0.5 text-primary shrink-0" />
                   <div className="space-y-1 min-w-0">
                     <a
                       href={citation.relationType}

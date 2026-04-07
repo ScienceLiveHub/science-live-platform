@@ -65,9 +65,9 @@ export function useAIConfig() {
   const isConfigured = (() => {
     if (config.provider === "ollama") return true;
     if (config.provider === "openai-compatible") {
-      return !!activeSettings.apiKey && !!activeSettings.baseUrl;
+      return !!activeSettings?.apiKey && !!activeSettings?.baseUrl;
     }
-    return !!activeSettings.apiKey;
+    return !!activeSettings?.apiKey;
   })();
 
   // Persist config to localStorage on change

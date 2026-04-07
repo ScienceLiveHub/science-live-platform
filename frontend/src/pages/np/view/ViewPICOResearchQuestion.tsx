@@ -375,7 +375,7 @@ export function ViewPICOResearchQuestion({ store }: CustomViewerProps) {
         {/* Question Label & Description */}
         <div>
           <ItemTitle title="Research Question" className="mb-2" />
-          <div className="rounded-md border-l-4 border-indigo-400 bg-indigo-50 p-4 dark:bg-indigo-950/20">
+          <div className="rounded-md border-l-4 border-indigo-400 bg-indigo-50 dark:bg-indigo-950/20 p-4">
             <p className="text-lg font-medium leading-relaxed">{data.label}</p>
           </div>
           {data.description && (
