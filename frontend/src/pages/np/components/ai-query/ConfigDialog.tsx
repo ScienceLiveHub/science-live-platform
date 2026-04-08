@@ -62,6 +62,7 @@ export function ConfigDialog({
     config.providers[config.provider]?.useProxy ?? false,
   );
   const [showApiKey, setShowApiKey] = useState(false);
+  const [ollamaFetchError, setOllamaFetchError] = useState<string | null>(null);
 
   const currentProviderInfo = PROVIDER_INFO.find((p) => p.id === provider);
 
@@ -75,6 +76,7 @@ export function ConfigDialog({
       setBaseUrl(settings?.baseUrl ?? "http://localhost:11434");
       setUseProxy(settings?.useProxy ?? false);
       setShowApiKey(false);
+      setOllamaFetchError(null);
     }
   }, [open, config]);
 
@@ -86,6 +88,7 @@ export function ConfigDialog({
     setApiKey(saved.apiKey ?? "");
     setBaseUrl(saved.baseUrl ?? "http://localhost:11434");
     setUseProxy(saved.useProxy ?? false);
+    setOllamaFetchError(null);
   };
 
   const handleSave = () => {
@@ -231,6 +234,39 @@ export function ConfigDialog({
                   ? "The base URL for the OpenAI-compatible API endpoint (e.g., LM Studio, vLLM, local-ai)"
                   : "The URL where Ollama is running. Default is http://localhost:11434"}
               </p>
+              {provider === "ollama" && ollamaFetchError && (
+                <div className="grid gap-1 my-2">
+                  <Label htmlFor="useProxy" className="cursor-pointer">
+                    ⚠️ Problem connecting to Ollama
+                  </Label>
+                  <ul className="list-disc pl-4 pt-2 text-xs text-muted-foreground">
+                    <li>
+                      Ensure Ollama is installed and running at the Base URL.
+                    </li>
+                    <li>Ensure models are installed and working.</li>
+                    <li>
+                      <p>
+                        You may need to allow requests from the Science Live
+                        Platform website to be accepted by your local Ollama
+                        instance. To do this, add{" "}
+                        <code>platform.sciencelive4all.org</code> to the{" "}
+                        <code>OLLAMA_ORIGINS</code> environment variable (or set
+                        it to
+                        <code>"*"</code>), then click Allow in the browser
+                        permissions popup.{" "}
+                        <a
+                          href="https://objectgraph.com/blog/ollama-cors/"
+                          className="text-primary hover:underline"
+                          target="_blank"
+                        >
+                          See here
+                        </a>
+                        .
+                      </p>
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
           )}
 
@@ -272,6 +308,9 @@ export function ConfigDialog({
                   (!baseUrl.trim() || !apiKey.trim()))
               }
               allowCustomModel={currentProviderInfo?.allowCustomModel}
+              onFetchError={
+                provider === "ollama" ? setOllamaFetchError : undefined
+              }
             />
           </div>
         </div>

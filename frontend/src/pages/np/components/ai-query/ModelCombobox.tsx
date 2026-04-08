@@ -41,6 +41,8 @@ interface ModelComboboxProps {
   disabled?: boolean;
   /** Whether to allow custom model input (for OpenAI-compatible providers) */
   allowCustomModel?: boolean;
+  /** Called when fetching the model list fails (or succeeds with null) */
+  onFetchError?: (error: string | null) => void;
 }
 
 export function ModelCombobox({
@@ -52,6 +54,7 @@ export function ModelCombobox({
   className,
   disabled,
   allowCustomModel,
+  onFetchError,
 }: ModelComboboxProps) {
   const [open, setOpen] = useState(false);
   const [models, setModels] = useState<ModelInfo[]>([]);
@@ -77,6 +80,7 @@ export function ModelCombobox({
     // Reset state when provider changes
     setModels([]);
     setError(null);
+    onFetchError?.(null);
 
     // If no valid credentials, use fallback models from PROVIDER_INFO
     if (!hasValidCredentials) {
@@ -95,6 +99,7 @@ export function ModelCombobox({
           baseUrl,
         });
         setModels(fetchedModels);
+        onFetchError?.(null);
 
         // If current value is not in the new list, select the default
         if (fetchedModels.length > 0) {
@@ -107,11 +112,12 @@ export function ModelCombobox({
         }
       } catch (err) {
         console.error("Failed to fetch models:", err);
-        setError(
+        const errorMessage =
           err instanceof Error
             ? err.message
-            : "Failed to fetch models. Please check your configuration.",
-        );
+            : "Failed to fetch models. Please check your configuration.";
+        setError(errorMessage);
+        onFetchError?.(errorMessage);
         // Fall back to static models on error
         const fallbackModels = currentProviderInfo?.models ?? [];
         setModels(fallbackModels);
@@ -147,11 +153,13 @@ export function ModelCombobox({
         baseUrl,
       });
       setModels(fetchedModels);
+      onFetchError?.(null);
     } catch (err) {
       console.error("Failed to refresh models:", err);
-      setError(
-        err instanceof Error ? err.message : "Failed to refresh models.",
-      );
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to refresh models.";
+      setError(errorMessage);
+      onFetchError?.(errorMessage);
     } finally {
       setIsLoading(false);
     }

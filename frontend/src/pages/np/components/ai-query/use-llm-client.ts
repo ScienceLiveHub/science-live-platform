@@ -200,6 +200,8 @@ async function callOllamaDirectly(
         { role: "user", content: userPrompt },
       ],
     },
+    timeout: 60_000,
+    retry: 0,
   });
 
   if (!res.ok) {
@@ -253,6 +255,8 @@ async function callOpenAICompatViaProxy(
       body: upstreamBody,
     },
     credentials: "include",
+    timeout: 60_000,
+    retry: 0,
   });
 
   if (!res.ok) {
