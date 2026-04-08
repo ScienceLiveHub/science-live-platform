@@ -16,7 +16,7 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { OrganizationSwitcher, UserButton } from "@daveyplate/better-auth-ui";
-import { Handshake, UserCircle } from "lucide-react";
+import { Handshake, Settings, UserCircle } from "lucide-react";
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -294,17 +294,34 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                 )}
                 <UserButton
                   size="sm"
+                  classNames={{
+                    content: { menuItem: "focus:text-accent-foreground" },
+                  }}
+                  className="focus:text-accent-foreground"
+                  disableDefaultLinks
                   additionalLinks={[
                     {
                       href: "/profile",
-                      icon: <UserCircle />,
+                      icon: (
+                        <UserCircle className="focus:text-accent-foreground" />
+                      ),
                       label: "Profile",
                       signedIn: true,
                     },
                     {
                       href: "/policies",
-                      icon: <Handshake />,
+                      icon: (
+                        <Handshake className="focus:text-accent-foreground" />
+                      ),
                       label: "Terms & Privacy",
+                      signedIn: true,
+                    },
+                    {
+                      href: "/settings/account",
+                      icon: (
+                        <Settings className="focus:text-accent-foreground" />
+                      ),
+                      label: "Settings",
                       signedIn: true,
                     },
                   ]}

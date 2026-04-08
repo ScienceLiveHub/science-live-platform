@@ -212,7 +212,7 @@ export function AiQueryTab() {
           trigger={
             <Button variant="outline" size="sm">
               <Settings className="h-4 w-4 mr-2" />
-              <p className="text-muted-foreground">
+              <p className="">
                 {config.providers[config.provider].model || "AI Provider"}
               </p>
             </Button>
