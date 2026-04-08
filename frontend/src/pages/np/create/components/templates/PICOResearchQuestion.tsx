@@ -7,36 +7,37 @@ import {
   NanopubTemplateDefComponentProps,
 } from "./component-registry";
 
-// Question type options matching the template
+// Question type URIs matching the Cochrane PICO template's RestrictedChoicePlaceholder values
+const SL_TERMS = "https://w3id.org/sciencelive/o/terms/";
 const QUESTION_TYPES = [
-  { value: "causation", label: "Causation (Does factor X cause outcome Y?)" },
-  { value: "descriptive", label: "Descriptive (What are the characteristics of X?)" },
-  { value: "effectiveness", label: "Effectiveness (Does approach X work better than Y?)" },
-  { value: "experience", label: "Experience (How do people experience phenomenon X?)" },
-  { value: "prediction", label: "Prediction (What outcomes can we expect from X?)" },
+  { value: `${SL_TERMS}CausationResearchQuestion`, label: "Causation (Does factor X cause outcome Y?)" },
+  { value: `${SL_TERMS}DescriptiveResearchQuestion`, label: "Descriptive (What are the characteristics of X?)" },
+  { value: `${SL_TERMS}EffectivenessResearchQuestions`, label: "Effectiveness (Does approach X work better than Y?)" },
+  { value: `${SL_TERMS}ExperienceResearchQuestions`, label: "Experience (How do people experience phenomenon X?)" },
+  { value: `${SL_TERMS}PredictionResearchQuestions`, label: "Prediction (What outcomes can we expect from X?)" },
 ];
 
 export default function PICOResearchQuestion({
   submit,
   prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
+  // Field names must match the Cochrane PICO template placeholder names (sub:pico, sub:label, etc.)
   const schema = z.object({
-    "research-question": validUriPlaceholder,
-    "question-title": z.string().min(10).max(200),
-    "structured-question-text": z.string().min(10).max(1000),
-    "target-population": z.string().min(5).max(500),
-    "intervention-focus": z.string().min(5).max(500),
-    "comparison-group": z.string().min(5).max(500),
-    "primary-outcomes": z.string().min(5).max(500),
-    "question-type": z.string(),
-    "rationale-text": z.string().min(10).max(2000).optional().or(z.literal("")),
+    pico: validUriPlaceholder,
+    label: z.string().min(10).max(200),
+    description: z.string().min(10).max(1000),
+    populationDescription: z.string().min(5).max(500),
+    interventionGroupDescription: z.string().min(5).max(500),
+    comparatorGroupDescription: z.string().min(5).max(500),
+    outcomeGroupDescription: z.string().min(5).max(500),
+    type: z.string(),
   });
 
   const { Form } = useFormedible({
     schema,
     fields: [
       {
-        name: "research-question",
+        name: "pico",
         type: "text",
         label: "Short ID (used as URI suffix)",
         placeholder: "e.g., my-pico-question-2024",
@@ -45,7 +46,7 @@ export default function PICOResearchQuestion({
           "A short identifier for this research question (letters, numbers, hyphens)",
       },
       {
-        name: "question-title",
+        name: "label",
         type: "text",
         label: "Research Question Title",
         placeholder: "Title of your systematic review research question",
@@ -53,7 +54,7 @@ export default function PICOResearchQuestion({
         description: "A concise title for your PICO research question (10-200 characters)",
       },
       {
-        name: "structured-question-text",
+        name: "description",
         type: "textarea",
         label: "Complete Research Question",
         placeholder: "Write out your complete structured research question...",
@@ -61,7 +62,7 @@ export default function PICOResearchQuestion({
         description: "The full structured research question following PICO format",
       },
       {
-        name: "question-type",
+        name: "type",
         type: "radio",
         label: "Question Type",
         required: true,
@@ -71,7 +72,7 @@ export default function PICOResearchQuestion({
         },
       },
       {
-        name: "target-population",
+        name: "populationDescription",
         type: "textarea",
         label: "Population (P)",
         placeholder: "Describe the population or participants of interest...",
@@ -82,7 +83,7 @@ export default function PICOResearchQuestion({
         },
       },
       {
-        name: "intervention-focus",
+        name: "interventionGroupDescription",
         type: "textarea",
         label: "Intervention (I)",
         placeholder: "Describe the intervention, exposure, or phenomenon of interest...",
@@ -93,7 +94,7 @@ export default function PICOResearchQuestion({
         },
       },
       {
-        name: "comparison-group",
+        name: "comparatorGroupDescription",
         type: "textarea",
         label: "Comparison (C)",
         placeholder: "Describe the comparison group or alternative intervention...",
@@ -104,7 +105,7 @@ export default function PICOResearchQuestion({
         },
       },
       {
-        name: "primary-outcomes",
+        name: "outcomeGroupDescription",
         type: "textarea",
         label: "Outcome (O)",
         placeholder: "Describe the primary outcomes of interest...",
@@ -112,17 +113,6 @@ export default function PICOResearchQuestion({
         description: "What outcomes are you measuring?",
         section: {
           title: "PICO Components",
-        },
-      },
-      {
-        name: "rationale-text",
-        type: "textarea",
-        label: "Background & Rationale",
-        placeholder: "Provide background and rationale for this research question...",
-        required: false,
-        description: "Why is this research question important?",
-        section: {
-          title: "Additional Information",
         },
       },
       ...NanopubEditorOptionFields,
@@ -133,15 +123,14 @@ export default function PICOResearchQuestion({
     expandLabel: "Show",
     formOptions: {
       defaultValues: {
-        "research-question": "",
-        "question-title": "",
-        "structured-question-text": "",
-        "target-population": "",
-        "intervention-focus": "",
-        "comparison-group": "",
-        "primary-outcomes": "",
-        "question-type": "effectiveness",
-        "rationale-text": "",
+        pico: "",
+        label: "",
+        description: "",
+        populationDescription: "",
+        interventionGroupDescription: "",
+        comparatorGroupDescription: "",
+        outcomeGroupDescription: "",
+        type: `${SL_TERMS}EffectivenessResearchQuestions`,
         ...prefilledData,
       },
       onSubmit: async ({ value }) => {
