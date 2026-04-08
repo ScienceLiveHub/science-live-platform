@@ -247,19 +247,17 @@ export function ConfigDialog({
                     <li>
                       <p>
                         You may need to allow requests from the Science Live
-                        Platform website to be accepted by your local Ollama
-                        instance. To do this, add{" "}
-                        <code>platform.sciencelive4all.org</code> to the{" "}
-                        <code>OLLAMA_ORIGINS</code> environment variable (or set
-                        it to
-                        <code>"*"</code>), then click Allow in the browser
-                        permissions popup.{" "}
+                        Platform to be accepted by your local Ollama instance.
+                        To do this, set the <code>OLLAMA_ORIGINS</code>{" "}
+                        environment variable to "<code>*</code>", restart
+                        Ollama, refresh the Model list below, then click Allow
+                        in the browser permissions popup.{" "}
                         <a
                           href="https://objectgraph.com/blog/ollama-cors/"
                           className="text-primary hover:underline"
                           target="_blank"
                         >
-                          See here
+                          More info
                         </a>
                         .
                       </p>
