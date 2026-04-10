@@ -109,7 +109,7 @@ export function Home() {
               </a>
               ,{" "}
               <a
-                href="mailto:contact@sciencelive4all.org"
+                href="mailto:contact@vitenhub.no"
                 className="text-primary hover:underline"
               >
                 email us
