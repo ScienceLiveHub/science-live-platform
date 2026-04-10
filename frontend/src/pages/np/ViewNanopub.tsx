@@ -1,9 +1,10 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Brain, FileCode, Globe, Search } from "lucide-react";
+import { Brain, FileCode, Globe, Rss, Search } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { AiQueryTab } from "./components/ai-query";
 import { GeneralSearch } from "./components/GeneralSearch";
 import { GeoSearch } from "./components/GeoSearch";
+import { LatestFeed } from "./components/LatestFeed";
 import { NanopubView } from "./components/NanopubView";
 
 // ---------------------------------------------------------------------------
@@ -33,7 +34,7 @@ export default function ViewNanopub() {
   const hasActiveContent = uri || searchQuery;
 
   return (
-    <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-4xl">
+    <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-6xl">
       {/* ----------------------------------------------------------------- */}
       {/* Tabbed Search Interface - only when no active content             */}
       {/* ----------------------------------------------------------------- */}
@@ -45,15 +46,22 @@ export default function ViewNanopub() {
               BROWSE NANOPUBLICATIONS
             </h1>
           </div>
-          <div className="w-full max-w-2xl mx-auto">
-            <Tabs defaultValue="general" className="w-full">
+          <div className="w-full">
+            <Tabs defaultValue="latest" className="w-full">
               <TabsList className="w-full justify-center">
+                <TabsTrigger
+                  value="latest"
+                  className="flex items-center gap-1.5"
+                >
+                  <Rss className="h-4 w-4" />
+                  Latest
+                </TabsTrigger>
                 <TabsTrigger
                   value="general"
                   className="flex items-center gap-1.5"
                 >
                   <Search className="h-4 w-4" />
-                  General Search
+                  Search
                 </TabsTrigger>
                 <TabsTrigger
                   value="aiquery"
@@ -64,9 +72,14 @@ export default function ViewNanopub() {
                 </TabsTrigger>
                 <TabsTrigger value="geo" className="flex items-center gap-1.5">
                   <Globe className="h-4 w-4" />
-                  Geographic Search
+                  Geographic
                 </TabsTrigger>
               </TabsList>
+
+              {/* Latest Feed Tab */}
+              <TabsContent value="latest" className="mt-4">
+                <LatestFeed />
+              </TabsContent>
 
               {/* General Search Tab */}
               <TabsContent value="general" className="mt-4">
