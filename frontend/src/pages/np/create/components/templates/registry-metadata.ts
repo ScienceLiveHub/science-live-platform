@@ -31,6 +31,10 @@ export const TEMPLATE_URI = {
   DATASET: "https://w3id.org/np/RAuVB37yyAuAlgusrUAoG84JI4_EfrEqIkpEZYDpSz3d8",
   RESEARCH_SOFTWARE:
     "https://w3id.org/np/RABBzVTxosLGT4YBCfdfNd6LyuOOTe2EVOTtWJMyOoZHk",
+  ODRL_POLICY:
+    "https://w3id.org/np/RA61D4c7dB5t0B1mLhc78bN2vagqYTXQiJDKY0yImRULI",
+  ODRL_ACCESS_GRANT:
+    "https://w3id.org/np/RAeRMv6jOibLPIYBMOGu_FsX6NQ6B59KJCgCFkue4z7Ac",
 
   // PRISMA Systematic Review
   PICO_RESEARCH_QUESTION:
@@ -162,6 +166,44 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     icon: "💻",
     recommended: true,
     keywords: ["software", "code", "repository", "github", "tool"],
+  },
+  [TEMPLATE_URI.ODRL_POLICY]: {
+    name: "ODRL Access Policy",
+    description:
+      "Define machine-readable access conditions for a dataset using ODRL. Specify permitted actions, purpose constraints, prohibitions, and attribution duties.",
+    moreDescription:
+      "ODRL (Open Digital Rights Language) is a W3C standard for expressing policies in a machine-readable way. Useful for FAIR data governance, automated compliance checking, and transparent licensing of research datasets.",
+    category: "Data",
+    icon: "🔐",
+    recommended: false,
+    keywords: [
+      "odrl",
+      "policy",
+      "license",
+      "access control",
+      "fair",
+      "governance",
+      "compliance",
+    ],
+  },
+  [TEMPLATE_URI.ODRL_ACCESS_GRANT]: {
+    name: "ODRL Access Grant",
+    description:
+      "Record a signed, auditable grant of access to a FAIR dataset under a specific ODRL policy, assigning permissions to a requester identified by DID.",
+    moreDescription:
+      "Access grants create an immutable audit trail linking a policy, a dataset, a requester, and the granted actions. Use this after evaluating a policy to formally record the decision.",
+    category: "Data",
+    icon: "🎫",
+    recommended: false,
+    keywords: [
+      "odrl",
+      "grant",
+      "access",
+      "audit",
+      "did",
+      "fair",
+      "governance",
+    ],
   },
 
   // ── PRISMA Systematic Review ───────────────────────────────────────
