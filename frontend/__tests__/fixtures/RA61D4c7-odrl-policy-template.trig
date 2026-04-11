@@ -1,0 +1,221 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dpv: <https://w3id.org/dpv#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix nt: <https://w3id.org/np/o/ntemplate/> .
+@prefix odrl: <http://www.w3.org/ns/odrl/2/> .
+@prefix orcid: <https://orcid.org/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sub1: <https://w3id.org/np/RA61D4c7dB5t0B1mLhc78bN2vagqYTXQiJDKY0yImRULI/> .
+@prefix this: <https://w3id.org/np/RA61D4c7dB5t0B1mLhc78bN2vagqYTXQiJDKY0yImRULI> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+sub1:Head {
+  this: a np:Nanopublication;
+    np:hasAssertion sub1:assertion;
+    np:hasProvenance sub1:provenance;
+    np:hasPublicationInfo sub1:pubinfo .
+}
+
+sub1:assertion {
+  rdf:type rdfs:label "is a" .
+  
+  odrl:Offer rdfs:label "Offer - data available under conditions" .
+  
+  odrl:Set rdfs:label "Set - general policy statement" .
+  
+  odrl:action rdfs:label "action" .
+  
+  odrl:attribute rdfs:label "Attribute" .
+  
+  odrl:attributedParty rdfs:label "attributed to" .
+  
+  odrl:commercialize rdfs:label "Commercialize" .
+  
+  odrl:compensate rdfs:label "Compensate" .
+  
+  odrl:constraint rdfs:label "with constraint" .
+  
+  odrl:derive rdfs:label "Derive" .
+  
+  odrl:distribute rdfs:label "Distribute" .
+  
+  odrl:duty rdfs:label "has duty" .
+  
+  odrl:eq rdfs:label "equals" .
+  
+  odrl:leftOperand rdfs:label "constraint on" .
+  
+  odrl:modify rdfs:label "Modify" .
+  
+  odrl:obtainConsent rdfs:label "Obtain Consent" .
+  
+  odrl:operator rdfs:label "operator" .
+  
+  odrl:permission rdfs:label "has permission" .
+  
+  odrl:present rdfs:label "Present" .
+  
+  odrl:prohibition rdfs:label "has prohibition" .
+  
+  odrl:purpose rdfs:label "Purpose" .
+  
+  odrl:reproduce rdfs:label "Reproduce" .
+  
+  odrl:rightOperand rdfs:label "must be" .
+  
+  odrl:sell rdfs:label "Sell" .
+  
+  odrl:target rdfs:label "applies to dataset" .
+  
+  odrl:use rdfs:label "Use" .
+  
+  dpv:AcademicResearch rdfs:label "Academic Research" .
+  
+  dpv:NonCommercialResearch rdfs:label "Non-Commercial Research" .
+  
+  dpv:PublicBenefit rdfs:label "Public Benefit" .
+  
+  dpv:ScientificResearch rdfs:label "Scientific Research" .
+  
+  sub1:assertion a nt:AssertionTemplate;
+    dcterms:description "Defines an ODRL policy for controlling access to a FAIR dataset. Specifies permitted actions (with purpose constraints), prohibited actions, and attribution duties. Use this template to publish machine-readable access conditions for private research data.";
+    rdfs:label "ODRL Access Policy for FAIR Data";
+    nt:hasNanopubLabelPattern "ODRL policy: ${datasetUri}";
+    nt:hasStatement sub1:dutyGroup, sub1:permGroup, sub1:prohibGroup, sub1:st_target,
+      sub1:st_type;
+    nt:hasTag "Access Control", "FAIR2Adapt", "ODRL";
+    nt:hasTargetNanopubType odrl:Policy .
+  
+  sub1:attributionParty a nt:UriPlaceholder;
+    rdfs:label "URI of party to attribute (e.g. https://fair2adapt-eosc.eu)" .
+  
+  sub1:constNode a nt:LocalResource .
+  
+  sub1:const_leftOp rdf:object odrl:purpose;
+    rdf:predicate odrl:leftOperand;
+    rdf:subject sub1:constNode .
+  
+  sub1:const_link rdf:object sub1:constNode;
+    rdf:predicate odrl:constraint;
+    rdf:subject sub1:permNode .
+  
+  sub1:const_op rdf:object odrl:eq;
+    rdf:predicate odrl:operator;
+    rdf:subject sub1:constNode .
+  
+  sub1:const_rightOp rdf:object sub1:purposeConstraint;
+    rdf:predicate odrl:rightOperand;
+    rdf:subject sub1:constNode .
+  
+  sub1:datasetUri a nt:UriPlaceholder;
+    rdfs:label "URI of the dataset this policy applies to";
+    nt:hasPrefix "https://fair2adapt.eu/data/";
+    nt:hasPrefixLabel "fair2adapt-data" .
+  
+  sub1:dutyAction a nt:RestrictedChoicePlaceholder;
+    rdfs:label "Required duty action";
+    nt:possibleValue odrl:attribute, odrl:compensate, odrl:obtainConsent .
+  
+  sub1:dutyGroup a nt:GroupedStatement, nt:OptionalStatement;
+    nt:hasStatement sub1:duty_action, sub1:duty_link, sub1:duty_party .
+  
+  sub1:dutyNode a nt:LocalResource .
+  
+  sub1:duty_action rdf:object sub1:dutyAction;
+    rdf:predicate odrl:action;
+    rdf:subject sub1:dutyNode .
+  
+  sub1:duty_link rdf:object sub1:dutyNode;
+    rdf:predicate odrl:duty;
+    rdf:subject sub1:policyUri .
+  
+  sub1:duty_party a nt:OptionalStatement;
+    rdf:object sub1:attributionParty;
+    rdf:predicate odrl:attributedParty;
+    rdf:subject sub1:dutyNode .
+  
+  sub1:permGroup a nt:GroupedStatement, nt:RepeatableStatement;
+    nt:hasStatement sub1:const_leftOp, sub1:const_link, sub1:const_op, sub1:const_rightOp,
+      sub1:perm_action, sub1:perm_link .
+  
+  sub1:permNode a nt:LocalResource .
+  
+  sub1:perm_action rdf:object sub1:permittedAction;
+    rdf:predicate odrl:action;
+    rdf:subject sub1:permNode .
+  
+  sub1:perm_link rdf:object sub1:permNode;
+    rdf:predicate odrl:permission;
+    rdf:subject sub1:policyUri .
+  
+  sub1:permittedAction a nt:RestrictedChoicePlaceholder;
+    rdfs:label "Permitted action";
+    nt:possibleValue odrl:derive, odrl:distribute, odrl:modify, odrl:present, odrl:reproduce,
+      odrl:use .
+  
+  sub1:policyType a nt:RestrictedChoicePlaceholder;
+    rdfs:label "Type of ODRL policy";
+    nt:possibleValue odrl:Offer, odrl:Set .
+  
+  sub1:policyUri a nt:IntroducedResource, nt:UriPlaceholder;
+    rdfs:label "URI of the policy";
+    nt:hasPrefix "https://fair2adapt.eu/policy/";
+    nt:hasPrefixLabel "fair2adapt-policy" .
+  
+  sub1:prohibGroup a nt:GroupedStatement, nt:OptionalStatement, nt:RepeatableStatement;
+    nt:hasStatement sub1:prohib_action, sub1:prohib_link .
+  
+  sub1:prohibNode a nt:LocalResource .
+  
+  sub1:prohib_action rdf:object sub1:prohibitedAction;
+    rdf:predicate odrl:action;
+    rdf:subject sub1:prohibNode .
+  
+  sub1:prohib_link rdf:object sub1:prohibNode;
+    rdf:predicate odrl:prohibition;
+    rdf:subject sub1:policyUri .
+  
+  sub1:prohibitedAction a nt:RestrictedChoicePlaceholder;
+    rdfs:label "Prohibited action";
+    nt:possibleValue odrl:commercialize, odrl:distribute, odrl:modify, odrl:sell .
+  
+  sub1:purposeConstraint a nt:RestrictedChoicePlaceholder;
+    rdfs:label "Required purpose for access";
+    nt:possibleValue dpv:AcademicResearch, dpv:NonCommercialResearch, dpv:PublicBenefit,
+      dpv:ScientificResearch .
+  
+  sub1:st_target rdf:object sub1:datasetUri;
+    rdf:predicate odrl:target;
+    rdf:subject sub1:policyUri .
+  
+  sub1:st_type rdf:object sub1:policyType;
+    rdf:predicate rdf:type;
+    rdf:subject sub1:policyUri .
+}
+
+sub1:provenance {
+  sub1:assertion prov:wasAttributedTo orcid:0000-0002-1784-2920 .
+}
+
+sub1:pubinfo {
+  orcid:0000-0002-1784-2920 foaf:name "Anne Fouilloux" .
+  
+  this: dcterms:created "2026-03-29T15:08:46+00:00"^^xsd:dateTime;
+    dcterms:creator orcid:0000-0002-1784-2920;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/>;
+    npx:hasNanopubType nt:AssertionTemplate;
+    npx:supersedes <https://w3id.org/np/RAVqycKi1xUPx3yWHiv4Yj1YV0YYpw6js-7exHiAnaJ70>;
+    npx:wasCreatedAt <https://fair2adapt-eosc.eu>;
+    rdfs:label "Assertion template: ODRL Access Policy for FAIR Data" .
+  
+  sub1:sig npx:hasAlgorithm "RSA";
+    npx:hasPublicKey "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAosxbitQQzLXi1949Zd9JmSkGfYHHlj/CZZ7iiYs1TrZ5/Jk/wGA7kHEv7f9NtsinOdBo9EtHj/jgHE5W2Vv404JbOAY280PvH5Jns5ObWdVZmtHeCw0ZIdPEqNrurrEweKhzcTJW/YRpYWPwVPo47XyIW6IAcmx6gfdtmdPddMpplqExrP6G99ksXfXlZI0InQtZJRSGK5lYLLNzaofFtupPI5OAAGjooDyHijp0Ap2HIXH6WpO4S44cFPKU34pH2xhIY4/XT5DG1X5UoiVHs2Yoo30BHFudj/kAFwdzcy6Yh4tMDaB3ox6p7pi267d7n0y7kypC0Nt+hfgHQ1FpgwIDAQAB";
+    npx:hasSignature "T/QUWf9my325VsaziewypPwCU5Sn0wrqMwTqgLAHxyHTDgKTOiy+NIYSuD8GgFIP3FG7MeMF4Zn8K06eMVqiAz2Lg5MHf09sIFGUT0XInbYlnURj4A/vkG/lCNV8vIRXghwpKuTA7BJNR2Eqyc2gLK6CNGNPxDM9iJEQ54FjdMO0gEB4+GvSaGiw/CMuV+HKJqCZCFEbaPdOYfih4gtNJOJZNvZ3yTiShiFFv6VD3QVg5B2FFjzfyrkXGVytsnFyW5Bdb779K9b8+YM5mzViE9XdSm94UzacWbzq9rOYSpVOfzrech4wV6jiniqVuBgaDLDqurQPiW2Uso7+vFp3KA==";
+    npx:hasSignatureTarget this:;
+    npx:signedBy orcid:0000-0002-1784-2920 .
+}
+
