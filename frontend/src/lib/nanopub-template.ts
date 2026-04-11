@@ -137,14 +137,7 @@ type GroupInfo = {
   localResourcePlaceholders: string[];
 };
 
-const GROUPED_STATEMENT_TYPE = "https://w3id.org/np/o/ntemplate/GroupedStatement";
-const REPEATABLE_STATEMENT_TYPE = "https://w3id.org/np/o/ntemplate/RepeatableStatement";
 const OPTIONAL_STATEMENT_TYPE = "https://w3id.org/np/o/ntemplate/OptionalStatement";
-const LOCAL_RESOURCE_TYPE = "https://w3id.org/np/o/ntemplate/LocalResource";
-
-function isGrouped(group: GroupInfo | undefined): boolean {
-  return !!group?.types.includes(GROUPED_STATEMENT_TYPE);
-}
 
 function termValue(term: RDFT.Term): string {
   return term.value;
@@ -156,9 +149,21 @@ export type TemplateMetadata = {
   targetlabelPattern?: string;
 };
 
+/**
+ * Form values passed to `generateNanopublication`. Keys are placeholder names
+ * (or group names). Values can be:
+ *   - `string`: a plain placeholder value
+ *   - `Record<string, string>`: a single grouped statement's sub-values
+ *   - `Array<Record<string, string>>`: a repeatable grouped statement
+ *   - `boolean` / `undefined`: options like `isExampleNanopub`
+ */
 export type FormValues = Record<
   string,
-  string | Record<string, Record<string, string>>
+  | string
+  | boolean
+  | undefined
+  | Record<string, string>
+  | Array<Record<string, string>>
 >;
 
 export class NanopubTemplate extends NanopubStore {
@@ -413,7 +418,7 @@ export class NanopubTemplate extends NanopubStore {
       if (Array.isArray(rawGroupValue)) {
         iterationValues = rawGroupValue as Array<Record<string, string>>;
       } else if (rawGroupValue && typeof rawGroupValue === "object") {
-        iterationValues = [rawGroupValue as Record<string, string>];
+        iterationValues = [rawGroupValue as unknown as Record<string, string>];
       } else {
         iterationValues = [];
       }
