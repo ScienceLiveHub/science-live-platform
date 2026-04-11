@@ -8,7 +8,10 @@ export default defineConfig({
     },
   },
   test: {
-    testTimeout: 10_000,
+    // Generous timeouts because some template tests involve RSA signing and
+    // WASM init, which is variable on CI runners.
+    testTimeout: 60_000,
+    hookTimeout: 60_000,
     /* Uncomment to enable headless browser-based testing */
     //   browser: {
     //     provider: playwright(),
