@@ -56,7 +56,7 @@ export const TEMPLATE_URI = {
 
   // FORRT Replication
   FORRT_CLAIM:
-    "https://w3id.org/np/RAu5uTahAxc0OLBB3vaGwK3OQDDZV7QuWtDlBk0Ea3bco",
+    "https://w3id.org/np/RAZWyM8D16ya3S1zhCvrG1f0iSpd9-8onVWp0FTvvX7LQ",
   FORRT_KL_REPLICATION:
     "https://w3id.org/np/RALIq4JelUP-q9BuWONcKMJ87B5n59ppcwhQjl-1dheO4",
   FORRT_KL_REPLICATION_OUTCOME:
@@ -85,6 +85,7 @@ export const LEGACY_TEMPLATE_URIS: Partial<
     "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE",
   ],
   FORRT_CLAIM: [
+    "https://w3id.org/np/RAu5uTahAxc0OLBB3vaGwK3OQDDZV7QuWtDlBk0Ea3bco",
     "https://w3id.org/np/RAVdxfm3fgFahBItmNmJX_Xkmg1xlimDtoSMjZgNIs2bQ",
   ],
   PICO_RESEARCH_QUESTION: [
