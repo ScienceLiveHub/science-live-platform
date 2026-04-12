@@ -281,8 +281,8 @@ export default function NanopubEditor({
         data,
         {
           orcid: identity.orcid,
-          name: identity.name,
-          isExample: demoMode || data?.isExampleNanopub === true,
+          name: identity.name?.trim(),
+          isExample: data?.isExampleNanopub === true,
         },
         identity.privateKey || EXAMPLE_privateKey,
       );
