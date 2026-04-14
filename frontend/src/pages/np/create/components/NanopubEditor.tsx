@@ -293,14 +293,14 @@ export default function NanopubEditor({
     if (!generatedRdf) return;
 
     if (!identity) {
-      toast.warning("Authentication Required", {
+      toast.error("Authentication Required", {
         description: "You need to be signed in to publish nanopublications.",
       });
       return;
     }
 
     if (!identity.orcid) {
-      toast.warning("ORCID Required", {
+      toast.error("ORCID Required", {
         description:
           "Your account must be linked to your ORCID to publish nanopublications.",
         action: orcidLinkAction
@@ -316,7 +316,7 @@ export default function NanopubEditor({
     if (!identity.privateKey) {
       toast.error("No Private Key", {
         description:
-          "Enter a private key in your Science Live account or use Demo Mode to sign with an example key.",
+          "Enter a private key in your Science Live account in order to publish.",
       });
       return;
     }
