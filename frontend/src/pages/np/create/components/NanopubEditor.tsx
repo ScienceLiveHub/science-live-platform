@@ -229,18 +229,6 @@ export default function NanopubEditor({
   const generateNanopub = async (data: any) => {
     console.log("Data entered:", data);
 
-    if (!identity) {
-      toast.warning("Sign in to publish", {
-        description:
-          "The nanopub draft was generated but you cannot publish until you sign in.",
-      });
-    } else if (!identity.orcid || !identity.privateKey) {
-      toast.warning("Resolve account issues to publish", {
-        description:
-          "The nanopub draft was generated but your account will need to meet the requirements before publishing.",
-      });
-    }
-
     // Generate/Sign
     let template;
     try {
@@ -272,6 +260,19 @@ export default function NanopubEditor({
       toast.success("Nanopublication generated", {
         description: "Signed TriG generated, review before publishing.",
       });
+
+      if (!identity) {
+        toast.warning("Sign in to publish", {
+          description:
+            "The nanopub draft was generated but you cannot publish until you sign in.",
+        });
+      } else if (!identity.orcid || !identity.privateKey) {
+        toast.warning("Resolve account issues to publish", {
+          description:
+            "The nanopub draft was generated but your account will need to meet the requirements before publishing.",
+        });
+      }
+
       (scrollPreviewRef?.current as any)?.scrollIntoView({
         behavior: "smooth",
         block: "start",
