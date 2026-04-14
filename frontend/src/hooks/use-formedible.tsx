@@ -218,8 +218,8 @@ const SectionRenderer: React.FC<
 
   React.useEffect(() => {
     if (!form) return;
-    const subscription = form.store.subscribe((state) => {
-      setSubscribedValues((state as any).values);
+    const subscription = form.store.subscribe((state: any) => {
+      setSubscribedValues(state.values);
     });
     return () => {
       subscription.unsubscribe();
@@ -738,6 +738,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
     }),
   };
 
+  // @ts-expect-error due to the dynamic generation of formConfig above
   const form = useForm(formConfig);
 
   // Store form reference for the onSubmit callback
