@@ -40,7 +40,6 @@ export default function CreateNanopub() {
         templateUri={templateUri}
         onTemplateUriChange={handleTemplateChange}
         embedded={false}
-        demoMode={true} // TODO: currently hard coded as demo for web app
         orcidLinkAction={async () =>
           await authClient.linkSocial({ provider: "orcid" })
         } // TODO: ideally this should open in a new window so it doesn't wipe out the form entries
