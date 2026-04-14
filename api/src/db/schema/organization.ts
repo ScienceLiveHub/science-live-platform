@@ -48,6 +48,9 @@ export const invitation = pgTable("invitation", {
 // Note: this table is not currently used, as role is defined in the member table
 // To enable use of this table for dynamic setting of roles see:
 // https://www.better-auth.com/docs/plugins/organization#dynamic-access-control
+// TODO: seems permission field was updated to "permissions" array in v1.5 according to:
+// https://github.com/better-auth/better-auth/releases/tag/v1.5.0.
+// Wait for update to better-auth docs link above, then change it.
 export const organizationRole = pgTable("organizationRole", {
   id: text().primaryKey(),
   organizationId: text()

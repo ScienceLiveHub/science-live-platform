@@ -30,8 +30,8 @@ export const SelectField: React.FC<SelectFieldSpecificProps> = ({
   const hasErrors =
     fieldApi.state?.meta?.isTouched && fieldApi.state?.meta?.errors?.length > 0;
 
-  const onValueChange = (value: string) => {
-    fieldApi.handleChange(value);
+  const onValueChange = (value: string | null) => {
+    fieldApi.handleChange(value ?? "");
   };
 
   const onBlur = () => {
