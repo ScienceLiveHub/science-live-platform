@@ -8,6 +8,7 @@ export default defineConfig({
     },
   },
   test: {
+    setupFiles: ["./__tests__/setup.ts"],
     testTimeout: 10_000,
     /* Uncomment to enable headless browser-based testing */
     //   browser: {

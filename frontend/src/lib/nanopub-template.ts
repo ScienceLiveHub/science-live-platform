@@ -61,19 +61,15 @@ export interface TemplateField {
 /**
  * Is this a repeatable statement?
  */
-function isRepeatable(statement: Statement) {
-  return statement.types?.some(
-    (t) => t.value === "https://w3id.org/np/o/ntemplate/RepeatableStatement",
-  );
+function isRepeatable(statement: Statement | GroupInfo) {
+  return statement.types?.some((t) => t.equals(NS.NPTs("RepeatableStatement")));
 }
 
 /**
  * Is this an optional statement?
  */
-function isOptional(statement: Statement) {
-  return statement.types?.some(
-    (t) => t.value === "https://w3id.org/np/o/ntemplate/OptionalStatement",
-  );
+function isOptional(statement: Statement | GroupInfo) {
+  return statement.types?.some((t) => t.equals(NS.NPTs("OptionalStatement")));
 }
 
 /**
@@ -126,7 +122,7 @@ type Statements = Map<string, Statement>;
 type GroupInfo = {
   id: string;
   /** All types on this group statement (GroupedStatement, Repeatable, Optional) */
-  types: string[];
+  types: RDFT.Term[];
   /** Sub-statements contained in this group (via `nt:hasStatement`) */
   childStatementIds: string[];
   /**
@@ -136,12 +132,6 @@ type GroupInfo = {
    */
   localResourcePlaceholders: string[];
 };
-
-const OPTIONAL_STATEMENT_TYPE = "https://w3id.org/np/o/ntemplate/OptionalStatement";
-
-function termValue(term: RDFT.Term): string {
-  return term.value;
-}
 
 export type TemplateMetadata = {
   description: string;
@@ -405,8 +395,6 @@ export class NanopubTemplate extends NanopubStore {
     // URIs (e.g. permNode, permNode__1) to match the Nanodash convention.
     for (const [groupId, group] of this.groups) {
       const groupName = getUriEnd(groupId) || groupId;
-      const groupTypes = group.types;
-      const isGroupOptional = groupTypes.includes(OPTIONAL_STATEMENT_TYPE);
 
       const rawGroupValue = placeholderValues[groupName];
 
@@ -423,11 +411,10 @@ export class NanopubTemplate extends NanopubStore {
         iterationValues = [];
       }
 
-      // Skip optional empty groups entirely.
+      // Skip empty groups entirely
       if (iterationValues.length === 0) {
-        if (isGroupOptional) continue;
-        // Required group with no values — nothing to emit (matches previous
-        // behaviour for non-optional empty repeatable statements).
+        // Any optional (or non-optional) group with no values — nothing to emit
+        // (includes non-optional empty repeatable statements).
         continue;
       }
 
@@ -462,6 +449,10 @@ export class NanopubTemplate extends NanopubStore {
             continue;
           }
           addStatement(childStmt, mergedValues);
+
+          // TODO: We currently don't support repeatable statements within child
+          //       statements. So far we don't need it, but could implement it as
+          //       per above for top-level statements.
         }
       });
     }
@@ -709,7 +700,7 @@ export class NanopubTemplate extends NanopubStore {
         null,
         assertionGraphNode,
       );
-      const types = typeQuads.map((q) => q.object.value);
+      const types = typeQuads.map((q) => q.object);
       const childIds = childQuads.map((q) => q.object.value);
       groups.set(sid, {
         id: sid,
@@ -757,12 +748,13 @@ export class NanopubTemplate extends NanopubStore {
         for (const term of [stmt.subject, stmt.object]) {
           if (!term || term.termType !== "NamedNode") continue;
           // Is this a LocalResource placeholder?
-          const isLocal = this.getQuads(
-            namedNode(term.value),
-            NS.RDF("type"),
-            localResourceType,
-            assertionGraphNode,
-          ).length > 0;
+          const isLocal =
+            this.getQuads(
+              namedNode(term.value),
+              NS.RDF("type"),
+              localResourceType,
+              assertionGraphNode,
+            ).length > 0;
           if (isLocal) localResources.add(term.value);
         }
       }
@@ -775,7 +767,7 @@ export class NanopubTemplate extends NanopubStore {
       // It's optional if it appears only in optional statements and doesn't appear in any non-optional statements
       const required = Object.values(statements).some(
         (q: Statement) =>
-          termValue(q.object as unknown as RDFT.Term) === pk && isOptional(q),
+          (q.object as unknown as RDFT.Term).value === pk && isOptional(q),
       );
 
       // Get options for restricted choice placeholders
@@ -928,7 +920,7 @@ export function templateStatementsToFormedible(
         // Skip statements with missing parts
         return null;
       }
-      const v = termValue(term);
+      const v = term.value;
       const objectField = fields.find((f) => f.id === v);
       let baseField: FieldConfig;
       if (objectField) {

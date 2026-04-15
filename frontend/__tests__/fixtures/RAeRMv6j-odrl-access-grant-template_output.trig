@@ -1,0 +1,43 @@
+@prefix this: <https://w3id.org/sciencelive/np/RABH65t6Wv5BR4efYcJ9iaLhNyl0ilBAlIl7hrofOWVWI>.
+@prefix sub: <https://w3id.org/sciencelive/np/RABH65t6Wv5BR4efYcJ9iaLhNyl0ilBAlIl7hrofOWVWI/>.
+@prefix np: <http://www.nanopub.org/nschema#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix prov: <http://www.w3.org/ns/prov#>.
+@prefix npx: <http://purl.org/nanopub/x/>.
+@prefix dc: <http://purl.org/dc/terms/>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+sub:Head {
+this: np:hasAssertion sub:assertion;
+    np:hasProvenance sub:provenance;
+    np:hasPublicationInfo sub:pubinfo;
+    a np:Nanopublication
+}
+sub:assertion {
+<grant-001> a <http://www.w3.org/ns/odrl/2/Agreement>;
+    <http://www.w3.org/ns/odrl/2/assignee> <did:web:researcher.example.org>;
+    <http://www.w3.org/ns/odrl/2/permission> <grantPermNode>;
+    <http://www.w3.org/ns/odrl/2/target> <https://fair2adapt.eu/data/public-demo-biodiversity>;
+    prov:generatedAtTime "2026-04-11T12:00:00.000Z";
+    <https://fair2adapt.eu/ns/underPolicy> <https://w3id.org/np/RA61D4c7dB5t0B1mLhc78bN2vagqYTXQiJDKY0yImRULI>.
+<grantPermNode> <http://www.w3.org/ns/odrl/2/action> <http://www.w3.org/ns/odrl/2/use>
+}
+sub:provenance {
+sub:assertion prov:wasAttributedTo <https://orcid.org/0000-0000-0000-0000>
+}
+sub:pubinfo {
+this: dc:created "2026-04-11T12:00:00.000Z"^^xsd:dateTime;
+    dc:creator <https://orcid.org/0000-0000-0000-0000>;
+    dc:license <https://creativecommons.org/licenses/by/4.0/>;
+    npx:hasNanopubType <http://www.w3.org/ns/odrl/2/Agreement>;
+    npx:introduces <grant-001>;
+    npx:wasCreatedAt <https://platform.sciencelive4all.org>;
+    <http://www.w3.org/2000/01/rdf-schema#label> "Access grant: public-demo-biodiversity -> did:web:researcher.example.org";
+    <https://w3id.org/np/o/ntemplate/wasCreatedFromTemplate> <https://w3id.org/np/RAeRMv6jOibLPIYBMOGu_FsX6NQ6B59KJCgCFkue4z7Ac>.
+<https://orcid.org/0000-0000-0000-0000> <http://xmlns.com/foaf/0.1/name> "Test User".
+sub:sig npx:signedBy <https://orcid.org/0000-0000-0000-0000>;
+    npx:hasAlgorithm "RSA";
+    npx:hasPublicKey "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzUBHKF13IXaU5u9U4nYcq9QTCafI2HlYO/6C25hOVjidIYpUh/25or8sAfh6Ezq+v97aYp8NAcLNjNpv+yy5w2mnmAeUQtg6A9gSgWuPfcjh2t6xjBjof74sghjiW4xTyDZTIbCM7K/sL5LR8NCXJX1udPJR5rnY80df+gdzj3W4+l8NvdlRyEbdlncgpjxHPP98787snEN8bFEZzMUaAHRaiH+Yj99KZ/bqj/hMda1GmeJW61PALjT8rN34iDw1U2ILIeGpWPyHGL3eTgr59rsOC6F3fyWW/RCbktSmCvb/w0YqwnZb0jYeIcuVBO/5zYJlw7d8WIw38zmDf/DfYQIDAQAB";
+    npx:hasSignatureTarget this:;
+    npx:hasSignature "jZzLiesCxrTB8IdpUbGzlMcGozB2DNDvJXSGHNdR3TIQQzzcPDQQqAJStApMVMkpoV99Rpa47GH99CUoDzO5VgbjAis8z/Im82Yh36MhqfVaU+1LM0lpJcSIU5RJQny54xBmJ0jjHFBT7Xe2uoz6L8XA9MbEuYyf7rpYifXQ+hQESvLe++UTUj9eBOQbDxq3Dg4bIZ9i6hW7/12F2krCJGdxw7S6NnM96Eq4eIkZoyYMibBpXF1z2v6NBY9DGqYyDXC30g+SD14yrXZM0zEp005weG7qnbC9YbobupdU/Hfa4Ybd/g177d4Ed5l6i3TErQMCRMNT99sf6Z8k7N+2aw=="
+}
