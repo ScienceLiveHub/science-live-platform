@@ -34,7 +34,7 @@ describe("ODRL Access Policy template", () => {
     );
     template = await NanopubTemplate.loadString(templateTrig);
     outputTrig = await readFile(
-      join(__dirname, "fixtures", "RA61D4c7-odrl-policy-template_output.trig"),
+      join(__dirname, "fixtures", "RA61D4c7-odrl-policy-expected_output.trig"),
       "utf-8",
     );
   });
@@ -180,7 +180,7 @@ describe("ODRL Access Grant template", () => {
       join(
         __dirname,
         "fixtures",
-        "RAeRMv6j-odrl-access-grant-template_output.trig",
+        "RAeRMv6j-odrl-access-grant-expected_output.trig",
       ),
       "utf-8",
     );
