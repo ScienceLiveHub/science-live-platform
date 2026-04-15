@@ -70,7 +70,7 @@ export async function fetchQuads(
     retry: 2,
     hooks: {
       afterResponse: [
-        async (_request, _options, response) => {
+        async ({ response }) => {
           // Throw if its not trig, then later catch and retry using the registry
           throwIfNotTrig(response);
         },

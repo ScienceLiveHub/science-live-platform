@@ -218,10 +218,12 @@ const SectionRenderer: React.FC<
 
   React.useEffect(() => {
     if (!form) return;
-    const unsubscribe = form.store.subscribe((state) => {
-      setSubscribedValues((state as any).values);
+    const subscription = form.store.subscribe((state: any) => {
+      setSubscribedValues(state.values);
     });
-    return unsubscribe;
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [form]);
 
   // Check if any fields in this section will actually render
@@ -995,12 +997,14 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
     };
 
     // Set up subscription
-    const unsubscribe = form.store.subscribe(updateVisiblePages);
+    const subscription = form.store.subscribe(updateVisiblePages);
 
     // Initialize on mount
     updateVisiblePages();
 
-    return unsubscribe;
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [form, getVisiblePages]);
 
   // Form persistence logic
@@ -1147,13 +1151,15 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
           }, autoSubmitDebounceMs);
         }
       });
-      unsubscribers.push(unsubscribe);
+      unsubscribers.push(() => {
+        unsubscribe.unsubscribe();
+      });
     }
 
     // Enhanced analytics using TanStack Form subscriptions instead of document event listeners
     if (analytics) {
       // Subscribe to form state changes for field validation analytics
-      const fieldValidationUnsubscribe = form.store.subscribe(() => {
+      const fieldValidationSubscription = form.store.subscribe(() => {
         const formState = form.state;
         const fieldMeta = formState.fieldMeta;
 
@@ -1170,10 +1176,12 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
           }
         });
       });
-      unsubscribers.push(fieldValidationUnsubscribe);
+      unsubscribers.push(() => {
+        fieldValidationSubscription.unsubscribe();
+      });
 
       // Subscribe to field changes with optimized tracking
-      const fieldChangeUnsubscribe = form.store.subscribe(() => {
+      const fieldChangeSubscription = form.store.subscribe(() => {
         const values = form.state.values;
         const context = analyticsContextRef.current;
 
@@ -1206,11 +1214,13 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
           },
         );
       });
-      unsubscribers.push(fieldChangeUnsubscribe);
+      unsubscribers.push(() => {
+        fieldChangeSubscription.unsubscribe();
+      });
 
       // User's onBlur handler using subscription
       if (formOptions?.onBlur) {
-        const blurUnsubscribe = form.store.subscribe(() => {
+        const blurSubscription = form.store.subscribe(() => {
           clearTimeout(onBlurTimeout);
           onBlurTimeout = setTimeout(() => {
             if (!formOptions.onBlur) return;
@@ -1219,7 +1229,9 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
             formOptions.onBlur({ value: values as TFormValues, formApi });
           }, 100); // 100ms debounce for blur
         });
-        unsubscribers.push(blurUnsubscribe);
+        unsubscribers.push(() => {
+          blurSubscription.unsubscribe();
+        });
       }
     }
 

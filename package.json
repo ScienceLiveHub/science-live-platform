@@ -25,13 +25,13 @@
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
-    "@types/node": "^25.3.3",
+    "@types/node": "^25.6.0",
     "eslint-plugin-jsonc": "^3.1.2",
     "prettier-plugin-organize-imports": "^4.3.0",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   },
   "dependencies": {
-    "dotenv": "^17.3.1"
+    "dotenv": "^17.4.2"
   },
   "prettier": {
     "plugins": [

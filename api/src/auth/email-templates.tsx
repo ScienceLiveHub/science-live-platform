@@ -1,4 +1,4 @@
-import { EmailTemplate } from "better-auth-ui/server";
+import { EmailTemplate } from "@daveyplate/better-auth-ui/server";
 
 export const orgInviteEmailTemplate = (
   name: string,
@@ -50,6 +50,7 @@ export const verifyEmailTemplate = (
 export const changeEmailTemplate = (
   name: string,
   baseUrl: string,
+  newEmail: string,
   link: string,
 ) =>
   EmailTemplate({
@@ -58,7 +59,10 @@ export const changeEmailTemplate = (
     content: (
       <>
         <p>{`Hello ${name},`}</p>
-        <p>Click the button below to confirm your email address change.</p>
+        <p>
+          Click the button below to confirm your email address change to{" "}
+          {newEmail}.
+        </p>
       </>
     ),
     heading: "Confirm Email Change",

@@ -7,15 +7,11 @@ import { signingKey } from "@/db/schema/user";
 import { sendEmail } from "@/email";
 import { generatePrivateKey } from "@/signing";
 import { isValidEmail } from "@/utils";
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import {
-  apiKey,
-  createAuthEndpoint,
-  createAuthMiddleware,
-  openAPI,
-  organization,
-} from "better-auth/plugins";
+import { apiKey } from "@better-auth/api-key";
+import { drizzleAdapter } from "@better-auth/drizzle-adapter";
+import { createAuthEndpoint, createAuthMiddleware } from "better-auth/api";
+import { betterAuth } from "better-auth/minimal";
+import { openAPI, organization } from "better-auth/plugins";
 import { wrapKeyPEM } from "../../../frontend/src/lib/string-format";
 import { builtInProviders } from "./built-in-providers";
 import { customProviders } from "./custom-providers";
@@ -112,6 +108,8 @@ export const getAuth = (env: Env) => {
       typeof env.BETTER_AUTH_SECRET === "string"
         ? env.BETTER_AUTH_SECRET
         : undefined,
+    // In future we can gradually rotate the secret like so, to keep the previous secret to decrypt existing sessions etc
+    // BETTER_AUTH_SECRETS="2:new-secret-key,1:old-secret-key"
     telemetry: {
       // Already disabled by default but explicitly set it just in case it changes in future
       enabled: false,
@@ -167,14 +165,20 @@ export const getAuth = (env: Env) => {
     user: {
       changeEmail: {
         enabled: true,
-        sendChangeEmailVerification: async (
+        updateEmailWithoutVerification: true, // allow changing unverified email without confirmation (e.g. if entered wrongly when creating account)
+        sendChangeEmailConfirmation: async (
           { user, newEmail, url, token },
           request,
         ) => {
           await sendEmail(env, {
-            to: newEmail,
+            to: user.email,
             subject: "Confirm your change of email address",
-            react: changeEmailTemplate(user.name, env.FRONTEND_URL, url),
+            react: changeEmailTemplate(
+              user.name,
+              env.FRONTEND_URL,
+              newEmail,
+              url,
+            ),
           });
         },
       },

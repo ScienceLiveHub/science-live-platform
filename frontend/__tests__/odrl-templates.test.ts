@@ -24,6 +24,7 @@ const pubdata = {
 
 describe("ODRL Access Policy template", () => {
   let templateTrig: string;
+  let outputTrig: string;
   let template: NanopubTemplate;
 
   beforeAll(async () => {
@@ -32,6 +33,10 @@ describe("ODRL Access Policy template", () => {
       "utf-8",
     );
     template = await NanopubTemplate.loadString(templateTrig);
+    outputTrig = await readFile(
+      join(__dirname, "fixtures", "RA61D4c7-odrl-policy-expected_output.trig"),
+      "utf-8",
+    );
   });
 
   it("loads template without crashing", () => {
@@ -121,11 +126,6 @@ describe("ODRL Access Policy template", () => {
       EXAMPLE_privateKey,
     );
 
-    console.log(
-      "\n=== Full ODRL Policy (2 permissions, 2 prohibitions, 1 duty) ===\n" +
-        signedRdf,
-    );
-
     // Both permission actions
     expect(signedRdf).toMatch(/odrl:use|odrl\/2\/use/);
     expect(signedRdf).toMatch(/odrl:reproduce|odrl\/2\/reproduce/);
@@ -135,6 +135,8 @@ describe("ODRL Access Policy template", () => {
     // Duty
     expect(signedRdf).toMatch(/odrl:attribute|odrl\/2\/attribute/);
     expect(signedRdf).toContain("fair2adapt-eosc.eu");
+
+    await expect(signedRdf).toMatchSerializedTrig(outputTrig);
   });
 
   it("skips optional empty groups", async () => {
@@ -165,6 +167,7 @@ describe("ODRL Access Policy template", () => {
 
 describe("ODRL Access Grant template", () => {
   let templateTrig: string;
+  let outputTrig: string;
   let template: NanopubTemplate;
 
   beforeAll(async () => {
@@ -173,6 +176,14 @@ describe("ODRL Access Grant template", () => {
       "utf-8",
     );
     template = await NanopubTemplate.loadString(templateTrig);
+    outputTrig = await readFile(
+      join(
+        __dirname,
+        "fixtures",
+        "RAeRMv6j-odrl-access-grant-expected_output.trig",
+      ),
+      "utf-8",
+    );
   });
 
   it("loads template without crashing", () => {
@@ -194,8 +205,6 @@ describe("ODRL Access Grant template", () => {
       EXAMPLE_privateKey,
     );
 
-    console.log("\n=== ODRL Access Grant ===\n" + signedRdf);
-
     expect(signedRdf).toContain(
       "https://fair2adapt.eu/data/public-demo-biodiversity",
     );
@@ -203,5 +212,6 @@ describe("ODRL Access Grant template", () => {
     expect(signedRdf).toContain("did:web:researcher.example.org");
     expect(signedRdf).toMatch(/odrl:Agreement|odrl\/2\/Agreement/);
     expect(signedRdf).toMatch(/odrl:use|odrl\/2\/use/);
+    await expect(signedRdf).toMatchSerializedTrig(outputTrig);
   });
 });

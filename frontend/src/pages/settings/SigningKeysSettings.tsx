@@ -45,7 +45,7 @@ interface SigningKeyDetail extends SigningKey {
 }
 
 const api = ky.create({
-  prefixUrl: import.meta.env.VITE_API_URL,
+  prefix: import.meta.env.VITE_API_URL,
   credentials: "include",
 });
 

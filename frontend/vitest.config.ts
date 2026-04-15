@@ -8,8 +8,9 @@ export default defineConfig({
     },
   },
   test: {
-    // Generous timeouts because some template tests involve RSA signing and
-    // WASM init, which is variable on CI runners.
+    setupFiles: ["./__tests__/setup.ts"],
+    // Generous timeouts because some template tests involve RSA signing,
+    // which is variable on CI runners.
     testTimeout: 60_000,
     hookTimeout: 60_000,
     /* Uncomment to enable headless browser-based testing */
