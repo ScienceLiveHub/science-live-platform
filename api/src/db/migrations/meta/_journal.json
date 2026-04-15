@@ -43,6 +43,13 @@
       "when": 1771744513313,
       "tag": "0005_bitter_onslaught",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1776125648433,
+      "tag": "0006_tranquil_purple_man",
+      "breakpoints": true
     }
   ]
 }

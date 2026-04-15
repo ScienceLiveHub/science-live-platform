@@ -24,10 +24,12 @@ export const ObjectField: React.FC<ObjectFieldProps> = ({
 
   React.useEffect(() => {
     if (!fieldApi.form) return;
-    const unsubscribe = fieldApi.form.store.subscribe((state) => {
-      setSubscribedValues((state as any).values);
+    const subscription = fieldApi.form.store.subscribe((state: any) => {
+      setSubscribedValues(state.values);
     });
-    return unsubscribe;
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [fieldApi.form]);
 
   // Track per-sub-field touched state

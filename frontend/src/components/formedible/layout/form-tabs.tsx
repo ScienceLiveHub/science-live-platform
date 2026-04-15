@@ -77,10 +77,12 @@ export const EnhancedFormTabs = <TFormValues extends Record<string, unknown>>({
 
   React.useEffect(() => {
     if (!form) return;
-    const unsubscribe = form.store.subscribe((state) => {
-      setFormValues((state as any).values as TFormValues);
+    const subscription = form.store.subscribe((state: any) => {
+      setFormValues(state.values as TFormValues);
     });
-    return unsubscribe;
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [form]);
 
   return (
