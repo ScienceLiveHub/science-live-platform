@@ -61,19 +61,15 @@ export interface TemplateField {
 /**
  * Is this a repeatable statement?
  */
-function isRepeatable(statement: Statement) {
-  return statement.types?.some(
-    (t) => t.value === "https://w3id.org/np/o/ntemplate/RepeatableStatement",
-  );
+function isRepeatable(statement: Statement | GroupInfo) {
+  return statement.types?.some((t) => t.equals(NS.NPTs("RepeatableStatement")));
 }
 
 /**
  * Is this an optional statement?
  */
-function isOptional(statement: Statement) {
-  return statement.types?.some(
-    (t) => t.value === "https://w3id.org/np/o/ntemplate/OptionalStatement",
-  );
+function isOptional(statement: Statement | GroupInfo) {
+  return statement.types?.some((t) => t.equals(NS.NPTs("OptionalStatement")));
 }
 
 /**
@@ -87,6 +83,10 @@ function isAllEmpty(statement: Statement, values: FormValues, uri: string) {
     const arrayValues = values[statement.id] as unknown as Array<unknown>;
     return arrayValues.length === 0;
   }
+
+  // Grouped statements (containers) have no object — treat them as empty at
+  // this level; the group iteration logic handles their children.
+  if (!statement.object) return true;
 
   // TODO: we assume only the object matters, is this correct?
   // const subject = getPlaceholderName(statement.subject.value);
@@ -106,12 +106,32 @@ type Statement = {
   subject: RDFT.Quad_Subject;
   predicate: RDFT.Quad_Predicate;
   object: RDFT.Quad_Object;
+  /**
+   * ID of the parent group, if this statement is inside a GroupedStatement.
+   * Used by the generator to skip processing such statements directly —
+   * they're processed via the group iteration instead.
+   */
+  parentGroup?: string;
 };
 type Statements = Map<string, Statement>;
 
-function termValue(term: RDFT.Term): string {
-  return term.value;
-}
+/**
+ * Information about a GroupedStatement — a container for related sub-statements
+ * that share context (e.g. a permission with its action + constraint).
+ */
+type GroupInfo = {
+  id: string;
+  /** All types on this group statement (GroupedStatement, Repeatable, Optional) */
+  types: RDFT.Term[];
+  /** Sub-statements contained in this group (via `nt:hasStatement`) */
+  childStatementIds: string[];
+  /**
+   * Local resource placeholders shared across the group's sub-statements.
+   * For repeatable groups, these need per-iteration renaming so each iteration
+   * gets unique URIs (`permNode`, `permNode__1`, `permNode__2`, ...).
+   */
+  localResourcePlaceholders: string[];
+};
 
 export type TemplateMetadata = {
   description: string;
@@ -119,9 +139,21 @@ export type TemplateMetadata = {
   targetlabelPattern?: string;
 };
 
+/**
+ * Form values passed to `generateNanopublication`. Keys are placeholder names
+ * (or group names). Values can be:
+ *   - `string`: a plain placeholder value
+ *   - `Record<string, string>`: a single grouped statement's sub-values
+ *   - `Array<Record<string, string>>`: a repeatable grouped statement
+ *   - `boolean` / `undefined`: options like `isExampleNanopub`
+ */
 export type FormValues = Record<
   string,
-  string | Record<string, Record<string, string>>
+  | string
+  | boolean
+  | undefined
+  | Record<string, string>
+  | Array<Record<string, string>>
 >;
 
 export class NanopubTemplate extends NanopubStore {
@@ -131,6 +163,11 @@ export class NanopubTemplate extends NanopubStore {
   description: string = "-";
   fields: TemplateField[] = [];
   statements: Statements = new Map();
+  /**
+   * Information about GroupedStatement containers, keyed by group statement URI.
+   * Populated in extractFields by traversing `nt:hasStatement` links.
+   */
+  groups: Map<string, GroupInfo> = new Map();
   type: "Assertion" | "Provenance" | "Pubinfo" | "Unlisted" | "Nanopub" =
     "Nanopub";
   templateMetadata: TemplateMetadata = { description: "-" };
@@ -312,14 +349,21 @@ export class NanopubTemplate extends NanopubStore {
 
     // ---- 2. ASSERTION graph, created by processing template statements
 
-    // Process each statement from the template
+    const addStatement = (s: Statement, values: FormValues) => {
+      const subject = createSubjectTerm(s.subject, values);
+      const predicate = createPredicateTerm(s.predicate, values);
+      const object = createObjectTerm(s.object, values);
+      outputStore.addQuad(subject, predicate, object, assertionGraph);
+    };
+
+    // Process each top-level statement. Statements that belong to a group
+    // (parentGroup set) are handled by the group loop below.
     for (const [statementId, statement] of this.statements) {
-      const addStatement = (s: Statement, values: FormValues) => {
-        const subject = createSubjectTerm(s.subject, values);
-        const predicate = createPredicateTerm(s.predicate, values);
-        const object = createObjectTerm(s.object, values);
-        outputStore.addQuad(subject, predicate, object, assertionGraph);
-      };
+      if (statement.parentGroup) continue; // handled via group iteration
+      // A GroupedStatement container itself has no subject/predicate/object —
+      // skip it; its children are processed in the group loop.
+      if (!statement.subject) continue;
+
       const statementName = getUriEnd(statementId) || statement.id;
 
       // Skip optional statements which have empty placeholders
@@ -334,12 +378,83 @@ export class NanopubTemplate extends NanopubStore {
         isRepeatable(statement) &&
         Array.isArray(placeholderValues[statementName])
       ) {
-        for (const values of placeholderValues[statementName]) {
+        for (const values of placeholderValues[statementName] as Array<
+          Record<string, string>
+        >) {
           addStatement(statement, { ...placeholderValues, ...values });
         }
       } else {
         addStatement(statement, placeholderValues);
       }
+    }
+
+    // Process GroupedStatement containers.
+    // For each group, we iterate its sub-statements. The form may send the
+    // group value as an array (repeatable) or as a single object (one-shot),
+    // and we handle both uniformly. Each iteration gets unique local-resource
+    // URIs (e.g. permNode, permNode__1) to match the Nanodash convention.
+    for (const [groupId, group] of this.groups) {
+      const groupName = getUriEnd(groupId) || groupId;
+
+      const rawGroupValue = placeholderValues[groupName];
+
+      // Normalise the group value to an array of iterations. We accept:
+      //   - undefined/null → no iterations
+      //   - array          → iterate each element
+      //   - object         → single iteration
+      let iterationValues: Array<Record<string, string>>;
+      if (Array.isArray(rawGroupValue)) {
+        iterationValues = rawGroupValue as Array<Record<string, string>>;
+      } else if (rawGroupValue && typeof rawGroupValue === "object") {
+        iterationValues = [rawGroupValue as unknown as Record<string, string>];
+      } else {
+        iterationValues = [];
+      }
+
+      // Skip empty groups entirely
+      if (iterationValues.length === 0) {
+        // Any optional (or non-optional) group with no values — nothing to emit
+        // (includes non-optional empty repeatable statements).
+        continue;
+      }
+
+      iterationValues.forEach((iterValues, iterIdx) => {
+        // Build per-iteration local resource overrides. For iteration 0 the
+        // short name stays as-is (e.g. "permNode"), for iteration N>0 we
+        // append "__N" to match the Nanodash naming convention.
+        const localResourceOverrides: Record<string, string> = {};
+        for (const lrUri of group.localResourcePlaceholders) {
+          const shortName = getUriEnd(lrUri);
+          if (!shortName) continue;
+          localResourceOverrides[shortName] =
+            iterIdx === 0 ? shortName : `${shortName}__${iterIdx}`;
+        }
+
+        const mergedValues: FormValues = {
+          ...placeholderValues,
+          ...localResourceOverrides,
+          ...iterValues,
+        };
+
+        for (const childId of group.childStatementIds) {
+          const childStmt = this.statements.get(childId);
+          if (!childStmt || !childStmt.subject) continue;
+          // If the child statement is optional and its object placeholder has
+          // no value, skip it (allows the duty's optional attributionParty to
+          // be omitted, for example).
+          if (
+            isOptional(childStmt) &&
+            isAllEmpty(childStmt, mergedValues, this.metadata.uri!)
+          ) {
+            continue;
+          }
+          addStatement(childStmt, mergedValues);
+
+          // TODO: We currently don't support repeatable statements within child
+          //       statements. So far we don't need it, but could implement it as
+          //       per above for top-level statements.
+        }
+      });
     }
 
     const orcidNode = namedNode(cleanOrcidUri(pubData.orcid));
@@ -558,7 +673,48 @@ export class NanopubTemplate extends NanopubStore {
       this.graphUris.assertion,
     );
 
-    // ---- 3. Get the "Statements" and their attributes (what will be output to the created nanopub)
+    // ---- 3a. Discover GroupedStatement containers and their sub-statements.
+    // A GroupedStatement has no rdf:subject/predicate/object itself — instead
+    // it references its member statements via `nt:hasStatement`. We need to
+    // recursively collect those so the generator can process them.
+    const assertionGraphNode = namedNode(this.graphUris.assertion!);
+    const hasStatementPred = NS.NPTs("hasStatement");
+    const topLevelIds = (props.statements as string[]) ?? [];
+    const allStatementIds: Set<string> = new Set(topLevelIds);
+    const groups: Map<string, GroupInfo> = new Map();
+    const childToParent: Map<string, string> = new Map();
+
+    // Expand each top-level statement that happens to be a group
+    for (const sid of topLevelIds) {
+      const childQuads = this.getQuads(
+        namedNode(sid),
+        hasStatementPred,
+        null,
+        assertionGraphNode,
+      );
+      if (childQuads.length === 0) continue;
+      // It's a group. Gather its types and children.
+      const typeQuads = this.getQuads(
+        namedNode(sid),
+        NS.RDF("type"),
+        null,
+        assertionGraphNode,
+      );
+      const types = typeQuads.map((q) => q.object);
+      const childIds = childQuads.map((q) => q.object.value);
+      groups.set(sid, {
+        id: sid,
+        types,
+        childStatementIds: childIds,
+        localResourcePlaceholders: [],
+      });
+      for (const cid of childIds) {
+        allStatementIds.add(cid);
+        childToParent.set(cid, sid);
+      }
+    }
+
+    // ---- 3b. Get the "Statements" and their attributes (what will be output to the created nanopub)
     const statementsPropertyMap = {
       types_$array: [NS.RDF("type")],
       subject: [NS.RDF("subject")],
@@ -569,13 +725,40 @@ export class NanopubTemplate extends NanopubStore {
     const statements: Statements = extractSubjectsFiltered(
       this,
       statementsPropertyMap,
-      (q) => (props.statements as string[])?.includes(q.subject.value),
+      (q) => allStatementIds.has(q.subject.value),
       this.graphUris.assertion,
       true,
     );
 
     for (const [sk, sv] of statements) {
       sv.id = getUriEnd(sk) || sk;
+      const parent = childToParent.get(sk);
+      if (parent) sv.parentGroup = parent;
+    }
+
+    // ---- 3c. For each group, discover the LocalResource placeholders used by
+    // its sub-statements. These need per-iteration renaming so each iteration
+    // of a repeatable group produces unique URIs (permNode, permNode__1, ...).
+    const localResourceType = NS.NPTs("LocalResource");
+    for (const group of groups.values()) {
+      const localResources = new Set<string>();
+      for (const childId of group.childStatementIds) {
+        const stmt = statements.get(childId);
+        if (!stmt) continue;
+        for (const term of [stmt.subject, stmt.object]) {
+          if (!term || term.termType !== "NamedNode") continue;
+          // Is this a LocalResource placeholder?
+          const isLocal =
+            this.getQuads(
+              namedNode(term.value),
+              NS.RDF("type"),
+              localResourceType,
+              assertionGraphNode,
+            ).length > 0;
+          if (isLocal) localResources.add(term.value);
+        }
+      }
+      group.localResourcePlaceholders = Array.from(localResources);
     }
 
     // ---- 4. match up properties of statements to contained placeholders
@@ -584,7 +767,7 @@ export class NanopubTemplate extends NanopubStore {
       // It's optional if it appears only in optional statements and doesn't appear in any non-optional statements
       const required = Object.values(statements).some(
         (q: Statement) =>
-          termValue(q.object as unknown as RDFT.Term) === pk && isOptional(q),
+          (q.object as unknown as RDFT.Term).value === pk && isOptional(q),
       );
 
       // Get options for restricted choice placeholders
@@ -608,6 +791,7 @@ export class NanopubTemplate extends NanopubStore {
     }
     this.fields = fields;
     this.statements = statements;
+    this.groups = groups;
     this.templateMetadata = {
       description: props.description ?? "-",
       targetlabelPattern: props.targetlabelPattern,
@@ -736,7 +920,7 @@ export function templateStatementsToFormedible(
         // Skip statements with missing parts
         return null;
       }
-      const v = termValue(term);
+      const v = term.value;
       const objectField = fields.find((f) => f.id === v);
       let baseField: FieldConfig;
       if (objectField) {
