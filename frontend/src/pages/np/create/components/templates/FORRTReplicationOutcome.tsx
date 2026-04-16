@@ -118,7 +118,7 @@ export default function FORRTReplicationOutcome({
       ),
     label: z.string().min(1, "Label is required"),
     study: z.string().min(1, "Must select a study"),
-    repo: z.string().url("Must be a valid URL"),
+    repo: z.url("Must be a valid URL"),
     date: z.coerce.date(),
     validationStatus: z.string().min(1, "Must select a validation status"),
     conclusion: z.string().min(1, "Conclusion is required"),

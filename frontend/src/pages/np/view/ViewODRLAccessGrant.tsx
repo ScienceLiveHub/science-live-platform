@@ -15,9 +15,9 @@ import {
   CheckCircle2,
   Clock,
   Database,
+  ShieldCheck,
   Ticket,
   User,
-  ShieldCheck,
 } from "lucide-react";
 import { DataFactory } from "n3";
 import { useMemo } from "react";
@@ -201,7 +201,9 @@ export function ViewODRLAccessGrant({ store }: CustomViewerProps) {
           <div>
             <ItemTitle
               title="Permitted actions"
-              icon={<CheckCircle2 className="h-4 w-4 inline-block mr-1 text-emerald-600" />}
+              icon={
+                <CheckCircle2 className="h-4 w-4 inline-block mr-1 text-emerald-600" />
+              }
             />
             <div className="mt-2 flex flex-wrap gap-2">
               {data.grantedActions.map((action, i) => (
@@ -224,7 +226,11 @@ export function ViewODRLAccessGrant({ store }: CustomViewerProps) {
               title="Under policy"
               icon={<ShieldCheck className="h-4 w-4 inline-block mr-1" />}
             />
-            <ExternalUriLink uri={data.policyNanopub} className="text-sm" />
+            <ExternalUriLink
+              uri={data.policyNanopub}
+              label={getLabel(data.policyNanopub)}
+              className="text-sm"
+            />
           </div>
         )}
 

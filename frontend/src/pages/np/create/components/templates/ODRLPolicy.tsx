@@ -209,7 +209,7 @@ export default function ODRLPolicy({
           prefixLabel="fair2adapt-policy"
           value={state.policyUri}
           onChange={(v) => update({ policyUri: v })}
-          placeholder="my-dataset"
+          placeholder="my-policy"
           required
         />
         <p className="text-xs text-muted-foreground">

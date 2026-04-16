@@ -194,7 +194,7 @@ describe("ODRL Access Grant template", () => {
   it("generates a grant with a single permission", async () => {
     const { signedRdf } = await template.generateNanopublication(
       {
-        grantUri: "grant-001",
+        grantUri: "https://fair2adapt.eu/grant/grant-001",
         datasetUri: "public-demo-biodiversity",
         assigneeDid: "did:web:researcher.example.org",
         policyNanopubUri: "RA61D4c7dB5t0B1mLhc78bN2vagqYTXQiJDKY0yImRULI",
