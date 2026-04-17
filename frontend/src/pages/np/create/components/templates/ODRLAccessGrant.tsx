@@ -44,9 +44,10 @@ export default function ODRLAccessGrant({
         name: "assigneeDid",
         type: "text",
         label: "Granted to",
-        description: "Identify the requester of this Access Grant.",
+        description:
+          "Identify the requester of this Access Grant using a Distributed Identifier (DID).",
         placeholder:
-          "URI of the requester (e.g. https://orcid.org/0000-0000-1234-0000, https://researcher.example.org)",
+          "DID URI of the requester (e.g. https://fair2adapt.github.io/fair-data-access/did.json)",
         required: true,
       },
       {
