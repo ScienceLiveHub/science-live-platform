@@ -46,7 +46,7 @@ export default function ODRLAccessGrant({
         label: "Granted to",
         description: "Identify the requester of this Access Grant.",
         placeholder:
-          "DID of the requester (e.g. did:web:researcher.example.org)",
+          "URI of the requester (e.g. https://orcid.org/0000-0000-1234-0000, https://researcher.example.org)",
         required: true,
       },
       {
