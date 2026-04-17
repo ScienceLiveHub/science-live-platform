@@ -8,6 +8,12 @@ import {
 } from "./component-registry";
 import { TEMPLATE_URI } from "./registry-metadata";
 
+const PERMISSIONS = [
+  { value: NS.ODRL("use").value, label: "Use" },
+  { value: NS.ODRL("reproduce").value, label: "Reproduce" },
+  { value: NS.ODRL("distribute").value, label: "Distribute" },
+];
+
 export default function ODRLAccessGrant({
   submit,
   prefilledData = {},
@@ -68,15 +74,11 @@ export default function ODRLAccessGrant({
         label: "Permissions",
         description: "One or more actions the requester is allowed to perform.",
         required: true,
-        options: [
-          { value: NS.ODRL("use").value, label: "Use" },
-          { value: NS.ODRL("reproduce").value, label: "Reproduce" },
-          { value: NS.ODRL("distribute").value, label: "Distribute" },
-        ],
+        options: PERMISSIONS,
         multiSelectConfig: {
           creatable: false,
           searchable: false,
-          maxSelections: 3,
+          maxSelections: PERMISSIONS.length,
         },
         wrapper: (field) => <div className="max-w-sm">{field.children}</div>,
       },
