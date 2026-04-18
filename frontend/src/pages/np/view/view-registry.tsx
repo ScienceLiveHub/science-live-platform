@@ -69,4 +69,5 @@ export const VIEW_COMPONENTS: Record<
   [LEGACY_TEMPLATE_URIS.PICO_RESEARCH_QUESTION![0]]:
     ViewPICOResearchQuestionLegacy,
   [LEGACY_TEMPLATE_URIS.AIDA_SENTENCE![0]]: ViewAIDASentenceLegacy,
+  [LEGACY_TEMPLATE_URIS.CITATION_CITO![0]]: ViewCitationWithCiTO,
 };

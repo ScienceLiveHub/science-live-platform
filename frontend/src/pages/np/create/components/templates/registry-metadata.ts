@@ -80,6 +80,9 @@ export const LEGACY_TEMPLATE_URIS: Partial<
   AIDA_SENTENCE: [
     "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE",
   ],
+  CITATION_CITO: [
+    "https://w3id.org/np/RA43F9EoOuzF0xoNUnCMNyFsfIqlsuWDdPHCnN0wCdCAw",
+  ],
   FORRT_CLAIM: [
     "https://w3id.org/np/RAVdxfm3fgFahBItmNmJX_Xkmg1xlimDtoSMjZgNIs2bQ",
   ],
