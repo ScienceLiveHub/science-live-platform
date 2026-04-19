@@ -259,17 +259,29 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
           {/* Right side */}
           <div className="flex items-center gap-3">
             {!session && !isPending ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate("/auth/sign-in");
-                }}
-              >
-                Sign In
-              </Button>
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/auth/sign-in");
+                  }}
+                >
+                  Sign In
+                </Button>
+                <Button
+                  size="sm"
+                  className="text-sm font-medium"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/auth/sign-up");
+                  }}
+                >
+                  Create Free Account
+                </Button>
+              </>
             ) : (
               <>
                 <Notifications />
