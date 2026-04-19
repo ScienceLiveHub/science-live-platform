@@ -19,13 +19,14 @@ import { ExternalUriLink, ItemTitle } from "./shared-components";
 
 const { namedNode } = DataFactory;
 
-const FABIO_SCHOLARLY_WORK = "http://purl.org/spar/fabio/ScholarlyWork";
-// Older CiTO templates typed the citing work as schema:CreativeWork instead.
-// Both http:// and https:// forms of the schema.org namespace occur in the wild.
+// The current CiTO template types the citing work as schema:CreativeWork;
+// the earlier template used fabio:ScholarlyWork. Both http:// and https://
+// forms of the schema.org namespace occur in the wild.
 const SCHEMA_CREATIVE_WORK_URIS = [
   "http://schema.org/CreativeWork",
   "https://schema.org/CreativeWork",
 ];
+const FABIO_SCHOLARLY_WORK = "http://purl.org/spar/fabio/ScholarlyWork";
 
 // --- Citation with CiTO extraction ------------------------------------
 
@@ -42,9 +43,9 @@ function extractCitationWithCiTO(
   if (!store.graphUris.assertion) return null;
   const assertionGraph = namedNode(store.graphUris.assertion);
 
-  // Find the citing article: the subject typed as fabio:ScholarlyWork (current
-  // template) or schema:CreativeWork (older template version).
-  const candidateTypes = [FABIO_SCHOLARLY_WORK, ...SCHEMA_CREATIVE_WORK_URIS];
+  // Find the citing work: the subject typed as schema:CreativeWork (current
+  // template) or fabio:ScholarlyWork (legacy template version).
+  const candidateTypes = [...SCHEMA_CREATIVE_WORK_URIS, FABIO_SCHOLARLY_WORK];
   let scholarlyWorkQuad: ReturnType<typeof store.matchOne> = null;
   for (const typeUri of candidateTypes) {
     scholarlyWorkQuad = store.matchOne(

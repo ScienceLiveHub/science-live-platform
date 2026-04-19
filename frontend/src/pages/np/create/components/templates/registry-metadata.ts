@@ -17,7 +17,7 @@ export interface NanopubTemplateMetadata {
 export const TEMPLATE_URI = {
   // Core templates
   CITATION_CITO:
-    "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo",
+    "https://w3id.org/np/RA43F9EoOuzF0xoNUnCMNyFsfIqlsuWDdPHCnN0wCdCAw",
   ANNOTATE_QUOTATION:
     "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU",
   COMMENT_PAPER:
@@ -81,7 +81,7 @@ export const LEGACY_TEMPLATE_URIS: Partial<
     "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE",
   ],
   CITATION_CITO: [
-    "https://w3id.org/np/RA43F9EoOuzF0xoNUnCMNyFsfIqlsuWDdPHCnN0wCdCAw",
+    "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo",
   ],
   FORRT_CLAIM: [
     "https://w3id.org/np/RAVdxfm3fgFahBItmNmJX_Xkmg1xlimDtoSMjZgNIs2bQ",
