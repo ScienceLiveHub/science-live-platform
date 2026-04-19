@@ -35,6 +35,7 @@ import { ViewPRISMASearchStrategy } from "./ViewPRISMASearchStrategy";
 import { ViewPRISMAStudyAssessment } from "./ViewPRISMAStudyAssessment";
 import { ViewPRISMAStudyInclusion } from "./ViewPRISMAStudyInclusion";
 import { ViewResearchSoftware } from "./ViewResearchSoftware";
+import { ViewResearchSynthesis } from "./ViewResearchSynthesis";
 
 /**
  * Registry mapping template URIs to their custom view components.
@@ -64,9 +65,11 @@ export const VIEW_COMPONENTS: Record<
   [TEMPLATE_URI.FORRT_CLAIM]: ViewFORRTClaim,
   [TEMPLATE_URI.FORRT_KL_REPLICATION]: ViewFORRTKLReplication,
   [TEMPLATE_URI.FORRT_KL_REPLICATION_OUTCOME]: ViewFORRTKLReplicationOutcome,
+  [TEMPLATE_URI.RESEARCH_SYNTHESIS]: ViewResearchSynthesis,
   // Legacy templates — remove when no longer needed
   [LEGACY_TEMPLATE_URIS.FORRT_CLAIM![0]]: ViewFORRTClaim,
   [LEGACY_TEMPLATE_URIS.PICO_RESEARCH_QUESTION![0]]:
     ViewPICOResearchQuestionLegacy,
   [LEGACY_TEMPLATE_URIS.AIDA_SENTENCE![0]]: ViewAIDASentenceLegacy,
+  [LEGACY_TEMPLATE_URIS.RESEARCH_SYNTHESIS![0]]: ViewResearchSynthesis,
 };
