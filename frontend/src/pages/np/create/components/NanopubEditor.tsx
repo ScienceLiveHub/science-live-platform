@@ -109,11 +109,6 @@ export interface NanopubEditorProps {
   embedded?: boolean;
 
   /**
-   * If true, forces ExampleNanopublication property for generated RDF.
-   */
-  demoMode?: boolean;
-
-  /**
    * If true, show a small widget with the currently loaded profile info.
    */
   showProfile?: boolean;
@@ -189,7 +184,6 @@ export default function NanopubEditor({
   orcidLinkAction,
   embedded = false,
   showProfile = true,
-  demoMode = false,
 }: NanopubEditorProps) {
   // Local state for the "custom URI" input (when not using predefined template)
   const [inputUri, setInputUri] = useState<string | null>(null);
@@ -235,35 +229,6 @@ export default function NanopubEditor({
   const generateNanopub = async (data: any) => {
     console.log("Data entered:", data);
 
-    if (!identity) {
-      toast.warning("Authentication Required", {
-        description: "You need to be signed in to publish nanopublications.",
-      });
-      return;
-    }
-
-    if (!identity.orcid) {
-      toast.warning("ORCID Required", {
-        description:
-          "Your account must be linked to your ORCID to publish nanopublications.",
-        action: orcidLinkAction
-          ? {
-              label: "Link ORCID",
-              onClick: orcidLinkAction,
-            }
-          : undefined,
-      });
-      return;
-    }
-
-    if (!identity.privateKey && !demoMode) {
-      toast.error("No Private Key", {
-        description:
-          "Enter a private key in your Science Live account or use Demo Mode to sign with an example key.",
-      });
-      return;
-    }
-
     // Generate/Sign
     let template;
     try {
@@ -280,11 +245,11 @@ export default function NanopubEditor({
       const signed = await template.generateNanopublication(
         data,
         {
-          orcid: identity.orcid,
-          name: identity.name,
-          isExample: demoMode || data?.isExampleNanopub === true,
+          orcid: identity?.orcid || "https://orcid.org/0000-0000-0000-0000",
+          name: identity?.name?.trim() || "DEMO USER",
+          isExample: data?.isExampleNanopub === true,
         },
-        identity.privateKey || EXAMPLE_privateKey,
+        identity?.privateKey || EXAMPLE_privateKey,
       );
 
       setGeneratedRdf(signed.signedRdf);
@@ -295,6 +260,19 @@ export default function NanopubEditor({
       toast.success("Nanopublication generated", {
         description: "Signed TriG generated, review before publishing.",
       });
+
+      if (!identity) {
+        toast.warning("Sign in to publish", {
+          description:
+            "The nanopub draft was generated but you cannot publish until you sign in.",
+        });
+      } else if (!identity.orcid || !identity.privateKey) {
+        toast.warning("Resolve account issues to publish", {
+          description:
+            "The nanopub draft was generated but your account will need to meet the requirements before publishing.",
+        });
+      }
+
       (scrollPreviewRef?.current as any)?.scrollIntoView({
         behavior: "smooth",
         block: "start",
@@ -313,6 +291,35 @@ export default function NanopubEditor({
 
   const publish = async () => {
     if (!generatedRdf) return;
+
+    if (!identity) {
+      toast.error("Authentication Required", {
+        description: "You need to be signed in to publish nanopublications.",
+      });
+      return;
+    }
+
+    if (!identity.orcid) {
+      toast.error("ORCID Required", {
+        description:
+          "Your account must be linked to your ORCID to publish nanopublications.",
+        action: orcidLinkAction
+          ? {
+              label: "Link ORCID",
+              onClick: orcidLinkAction,
+            }
+          : undefined,
+      });
+      return;
+    }
+
+    if (!identity.privateKey) {
+      toast.error("No Private Key", {
+        description:
+          "Enter a private key in your Science Live account in order to publish.",
+      });
+      return;
+    }
 
     try {
       // publishRdf currently does not surface URI (server-dependent), so:
@@ -503,7 +510,7 @@ export default function NanopubEditor({
                   submit={generateNanopub}
                   prefilledData={{
                     ...(prefilledData ?? {}),
-                    isExampleNanopub: demoMode,
+                    isExampleNanopub: !identity,
                   }}
                 />
               </>
@@ -513,7 +520,7 @@ export default function NanopubEditor({
                 submit={generateNanopub}
                 prefilledData={{
                   ...(prefilledData ?? {}),
-                  isExampleNanopub: demoMode,
+                  isExampleNanopub: !identity,
                 }}
               />
             )}

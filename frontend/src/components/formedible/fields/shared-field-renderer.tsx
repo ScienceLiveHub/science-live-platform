@@ -72,10 +72,12 @@ export const NestedFieldRenderer = <
 
   React.useEffect(() => {
     if (!form) return;
-    const unsubscribe = form.store.subscribe((state) => {
-      setSubscribedValues((state as any).values as TFormValues);
+    const subscription = form.store.subscribe((state: any) => {
+      setSubscribedValues(state.values as TFormValues);
     });
-    return unsubscribe;
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [form]);
 
   const {
@@ -269,10 +271,12 @@ export const SharedFieldRenderer = <
 
   React.useEffect(() => {
     if (!form) return;
-    const unsubscribe = form.store.subscribe((state) => {
-      setSubscribedValues((state as any).values as TFormValues);
+    const subscription = form.store.subscribe((state: any) => {
+      setSubscribedValues(state.values as TFormValues);
     });
-    return unsubscribe;
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [form]);
 
   const {

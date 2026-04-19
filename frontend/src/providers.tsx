@@ -68,17 +68,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
         basePath: "/settings",
         viewPaths: { SETTINGS: "account" },
       }}
-      additionalFields={{
-        privateKey: {
-          label: "Private Key",
-          placeholder: "",
-          description:
-            "Your Private Key for signing nanopublications you create",
-          required: true,
-          type: "string",
-          multiline: true,
-        },
-      }}
     >
       <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
         <TooltipProvider>{children}</TooltipProvider>

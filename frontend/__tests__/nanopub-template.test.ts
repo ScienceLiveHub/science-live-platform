@@ -1,30 +1,8 @@
 import { readFile } from "fs/promises";
 import { join } from "path";
 import { beforeAll, describe, expect, it } from "vitest";
-import { NanopubStore } from "../src/lib/nanopub-store";
 import { NanopubTemplate } from "../src/lib/nanopub-template";
 import { EXAMPLE_privateKey } from "../src/lib/uri";
-
-expect.extend({
-  async toMatchSerializedTrig(received: string, expected: string) {
-    // Compare serialized versions to ensure quads match
-    const receivedSerialized = (
-      await NanopubStore.loadString(received)
-    ).serialize();
-    const expectedSerialized = (
-      await NanopubStore.loadString(expected)
-    ).serialize();
-    // expect(resultStore.serialize()).toMatch(fixtureStore.serialize());
-
-    return {
-      // do not alter your "pass" based on isNot. Vitest does it for you
-      pass: receivedSerialized === expectedSerialized,
-      message: () => "Serialized TriG did not match.",
-      actual: receivedSerialized,
-      expected: expectedSerialized,
-    };
-  },
-});
 
 describe("NanopubTemplate.applyTemplate", () => {
   const fixturesSets: { input: string; params: any; outputs: string[] }[] = [
