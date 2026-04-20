@@ -172,7 +172,7 @@ describe("ODRL Access Grant template", () => {
 
   beforeAll(async () => {
     templateTrig = await readFile(
-      join(__dirname, "fixtures", "RAeRMv6j-odrl-access-grant-template.trig"),
+      join(__dirname, "fixtures", "RAoLSOhZ-odrl-access-grant-template.trig"),
       "utf-8",
     );
     template = await NanopubTemplate.loadString(templateTrig);
@@ -180,7 +180,7 @@ describe("ODRL Access Grant template", () => {
       join(
         __dirname,
         "fixtures",
-        "RAeRMv6j-odrl-access-grant-expected_output.trig",
+        "RAoLSOhZ-odrl-access-grant-expected_output.trig",
       ),
       "utf-8",
     );
@@ -195,9 +195,10 @@ describe("ODRL Access Grant template", () => {
     const { signedRdf } = await template.generateNanopublication(
       {
         grantUri: "https://fair2adapt.eu/grant/grant-001",
-        datasetUri: "public-demo-biodiversity",
+        datasetUri: "https://fair2adapt.eu/data/public-demo-biodiversity",
         assigneeDid: "did:web:researcher.example.org",
-        policyNanopubUri: "RA61D4c7dB5t0B1mLhc78bN2vagqYTXQiJDKY0yImRULI",
+        policyNanopubUri:
+          "https://w3id.org/np/RA61D4c7dB5t0B1mLhc78bN2vagqYTXQiJDKY0yImRULI",
         grantTimestamp: "2026-04-11T12:00:00.000Z",
         permGroup: [{ grantedAction: ODRL_NS + "use" }],
       },
@@ -208,7 +209,7 @@ describe("ODRL Access Grant template", () => {
     expect(signedRdf).toContain(
       "https://fair2adapt.eu/data/public-demo-biodiversity",
     );
-    expect(signedRdf).toContain("https://w3id.org/np/RA61D4c7");
+    expect(signedRdf).toContain("https://w3id.org/sciencelive/np/RA3evcFdb");
     expect(signedRdf).toContain("did:web:researcher.example.org");
     expect(signedRdf).toMatch(/odrl:Agreement|odrl\/2\/Agreement/);
     expect(signedRdf).toMatch(/odrl:use|odrl\/2\/use/);

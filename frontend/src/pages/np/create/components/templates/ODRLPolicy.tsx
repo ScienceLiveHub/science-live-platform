@@ -86,7 +86,7 @@ export default function ODRLPolicy({
           DUTY_ACTIONS.map((d) => d.value),
           "Select an option",
         ),
-        attributionParty: z.string().optional(),
+        attributionParty: z.url().optional(),
       })
       .array()
       .optional(),
@@ -217,7 +217,7 @@ export default function ODRLPolicy({
               {
                 name: "attributionParty",
                 type: "text",
-                placeholder: "Identifier or URI of party (optional)",
+                placeholder: "URI of party to attribute (optional)",
                 required: false,
               },
             ],

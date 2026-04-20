@@ -34,7 +34,7 @@ export const TEMPLATE_URI = {
   ODRL_POLICY:
     "https://w3id.org/np/RA61D4c7dB5t0B1mLhc78bN2vagqYTXQiJDKY0yImRULI",
   ODRL_ACCESS_GRANT:
-    "https://w3id.org/np/RAeRMv6jOibLPIYBMOGu_FsX6NQ6B59KJCgCFkue4z7Ac",
+    "https://w3id.org/np/RAoLSOhZx_dLX6xnGBN8o1aQSiD8HSrwBshfCjXXSslhE",
 
   // PRISMA Systematic Review
   PICO_RESEARCH_QUESTION:
@@ -196,15 +196,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     category: "Data",
     icon: "🎫",
     recommended: false,
-    keywords: [
-      "odrl",
-      "grant",
-      "access",
-      "audit",
-      "did",
-      "fair",
-      "governance",
-    ],
+    keywords: ["odrl", "grant", "access", "audit", "did", "fair", "governance"],
   },
 
   // ── PRISMA Systematic Review ───────────────────────────────────────
@@ -269,13 +261,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     category: "Systematic Review",
     icon: "🗄️",
     recommended: false,
-    keywords: [
-      "prisma",
-      "systematic review",
-      "database",
-      "search",
-      "query",
-    ],
+    keywords: ["prisma", "systematic review", "database", "search", "query"],
   },
   [TEMPLATE_URI.PRISMA_SEARCH_EXECUTION_DATASET]: {
     name: "PRISMA Search Execution Dataset",

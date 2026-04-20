@@ -1,6 +1,7 @@
 import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import { useFormedible } from "@/hooks/use-formedible";
 import { NS } from "@/lib/rdf";
+import { isNanopubUri } from "@/lib/uri";
 import z from "zod";
 import {
   NanopubEditorOptionFields,
@@ -23,12 +24,16 @@ export default function ODRLAccessGrant({
    */
   const schema = z.object({
     grantUri: z.url(),
-    permissions: z
-      .string()
-      .array()
-      .min(1, "At least one permission should be specified"),
+    grantedActions: z
+      .enum(
+        PERMISSIONS.map((d) => d.value),
+        "At least one permission should be specified",
+      )
+      .array(),
     assigneeDid: z.url(),
-    policyNanopubUri: z.string().min(1, "Must be a valid nanopub hash"),
+    policyNanopubUri: z
+      .string()
+      .refine(isNanopubUri, "Must be a valid Nanopublication URI"),
     datasetUri: z.string().min(1, "A value is required"),
     grantTimestamp: z.coerce.date(),
     // Placeholders for compatibility with template generateNanopublication()
@@ -43,7 +48,7 @@ export default function ODRLAccessGrant({
         type: "text",
         label: "Grant identifier",
         description: "Unique URI for this access grant.",
-        placeholder: "https://fair2adapt.eu/grant/...",
+        placeholder: "e.g. https://fair2adapt.eu/grant/...",
         required: true,
       },
       {
@@ -58,10 +63,10 @@ export default function ODRLAccessGrant({
       },
       {
         name: "datasetUri",
-        type: "prefixed",
+        type: "text",
         label: "FAIR dataset",
         description: "The dataset to which access is granted.",
-        placeholder: "my-dataset",
+        placeholder: "e.g. https://fair2adapt.eu/data/my-dataset",
         required: true,
         prefixedInputConfig: {
           prefix: "",
@@ -69,7 +74,7 @@ export default function ODRLAccessGrant({
         },
       },
       {
-        name: "permissions",
+        name: "grantedActions",
         type: "multiSelect",
         label: "Permissions",
         description: "One or more actions the requester is allowed to perform.",
@@ -84,13 +89,9 @@ export default function ODRLAccessGrant({
       },
       {
         name: "policyNanopubUri",
-        type: "prefixed",
-        placeholder: "RAaBc123_Xyz...",
+        type: "text",
+        placeholder: "e.g. https://w3id.org/np/RAaBc123_Xyz...",
         required: true,
-        prefixedInputConfig: {
-          prefix: "",
-          prefixLabel: "https://w3id.org/np/",
-        },
         wrapper: (field) => (
           <div>
             <div className="text-sm font-medium pb-1.5">ODRL Access Policy</div>
@@ -103,7 +104,7 @@ export default function ODRLAccessGrant({
               >
                 Create one
               </a>{" "}
-              if required, then paste the ID here.
+              if required, then paste the URI here.
             </div>
             {field.children}
           </div>
@@ -131,7 +132,7 @@ export default function ODRLAccessGrant({
     formOptions: {
       defaultValues: {
         grantUri: "",
-        permissions: [],
+        grantedActions: [],
         assigneeDid: "",
         policyNanopubUri: "",
         datasetUri: "",
@@ -139,8 +140,8 @@ export default function ODRLAccessGrant({
         ...prefilledData,
       },
       onSubmit: async ({ value }) => {
-        value.permGroup = value.permissions?.map((p) => ({
-          grantedAction: p,
+        value.permGroup = value.grantedActions?.map((a) => ({
+          grantedAction: a,
         }));
 
         await submit(value);
