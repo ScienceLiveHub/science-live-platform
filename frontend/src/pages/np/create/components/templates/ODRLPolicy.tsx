@@ -187,7 +187,14 @@ export default function ODRLPolicy({
           searchable: false,
           maxSelections: PROHIBITED_ACTIONS.length,
         },
-        wrapper: (field) => <div className="max-w-md">{field.children}</div>,
+        wrapper: (field) => (
+          <div className="max-w-md">
+            <span className="m-0 block text-xs text-muted-foreground/50">
+              optional
+            </span>
+            {field.children}
+          </div>
+        ),
       },
       {
         name: "dutyGroup",
@@ -200,7 +207,6 @@ export default function ODRLPolicy({
         defaultValue: [],
         arrayConfig: {
           defaultValue: {},
-          minItems: 1,
           itemType: "object",
           objectConfig: {
             layout: "grid",
