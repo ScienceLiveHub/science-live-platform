@@ -31,6 +31,10 @@ export const TEMPLATE_URI = {
   DATASET: "https://w3id.org/np/RAuVB37yyAuAlgusrUAoG84JI4_EfrEqIkpEZYDpSz3d8",
   RESEARCH_SOFTWARE:
     "https://w3id.org/np/RABBzVTxosLGT4YBCfdfNd6LyuOOTe2EVOTtWJMyOoZHk",
+  ODRL_POLICY:
+    "https://w3id.org/np/RA61D4c7dB5t0B1mLhc78bN2vagqYTXQiJDKY0yImRULI",
+  ODRL_ACCESS_GRANT:
+    "https://w3id.org/np/RAoLSOhZx_dLX6xnGBN8o1aQSiD8HSrwBshfCjXXSslhE",
 
   // PRISMA Systematic Review
   PICO_RESEARCH_QUESTION:
@@ -52,7 +56,7 @@ export const TEMPLATE_URI = {
 
   // FORRT Replication
   FORRT_CLAIM:
-    "https://w3id.org/np/RAu5uTahAxc0OLBB3vaGwK3OQDDZV7QuWtDlBk0Ea3bco",
+    "https://w3id.org/np/RAZWyM8D16ya3S1zhCvrG1f0iSpd9-8onVWp0FTvvX7LQ",
   FORRT_KL_REPLICATION:
     "https://w3id.org/np/RALIq4JelUP-q9BuWONcKMJ87B5n59ppcwhQjl-1dheO4",
   FORRT_KL_REPLICATION_OUTCOME:
@@ -81,6 +85,7 @@ export const LEGACY_TEMPLATE_URIS: Partial<
     "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE",
   ],
   FORRT_CLAIM: [
+    "https://w3id.org/np/RAu5uTahAxc0OLBB3vaGwK3OQDDZV7QuWtDlBk0Ea3bco",
     "https://w3id.org/np/RAVdxfm3fgFahBItmNmJX_Xkmg1xlimDtoSMjZgNIs2bQ",
   ],
   PICO_RESEARCH_QUESTION: [
@@ -163,6 +168,36 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     recommended: true,
     keywords: ["software", "code", "repository", "github", "tool"],
   },
+  [TEMPLATE_URI.ODRL_POLICY]: {
+    name: "ODRL Access Policy",
+    description:
+      "Define machine-readable access conditions for a dataset using ODRL. Specify permitted actions, purpose constraints, prohibitions, and attribution duties.",
+    moreDescription:
+      "ODRL (Open Digital Rights Language) is a W3C standard for expressing policies in a machine-readable way. Useful for FAIR data governance, automated compliance checking, and transparent licensing of research datasets.",
+    category: "Data",
+    icon: "🔐",
+    recommended: false,
+    keywords: [
+      "odrl",
+      "policy",
+      "license",
+      "access control",
+      "fair",
+      "governance",
+      "compliance",
+    ],
+  },
+  [TEMPLATE_URI.ODRL_ACCESS_GRANT]: {
+    name: "ODRL Access Grant",
+    description:
+      "Record a signed, auditable grant of access to a FAIR dataset under a specific ODRL policy, assigning permissions to a requester identified by DID.",
+    moreDescription:
+      "Access grants create an immutable audit trail linking a policy, a dataset, a requester, and the granted actions. Use this after evaluating a policy to formally record the decision.",
+    category: "Data",
+    icon: "🎫",
+    recommended: false,
+    keywords: ["odrl", "grant", "access", "audit", "did", "fair", "governance"],
+  },
 
   // ── PRISMA Systematic Review ───────────────────────────────────────
   [TEMPLATE_URI.PICO_RESEARCH_QUESTION]: {
@@ -226,13 +261,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     category: "Systematic Review",
     icon: "🗄️",
     recommended: false,
-    keywords: [
-      "prisma",
-      "systematic review",
-      "database",
-      "search",
-      "query",
-    ],
+    keywords: ["prisma", "systematic review", "database", "search", "query"],
   },
   [TEMPLATE_URI.PRISMA_SEARCH_EXECUTION_DATASET]: {
     name: "PRISMA Search Execution Dataset",

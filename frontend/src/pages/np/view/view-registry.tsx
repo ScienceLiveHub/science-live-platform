@@ -25,6 +25,8 @@ import { ViewFORRTReplicationOutcome } from "./ViewFORRTReplicationOutcome";
 import { ViewFORRTKLReplication } from "./ViewFORRTKLReplication";
 import { ViewFORRTKLReplicationOutcome } from "./ViewFORRTKLReplicationOutcome";
 import { ViewGeographicalCoverage } from "./ViewGeographicalCoverage";
+import { ViewODRLAccessGrant } from "./ViewODRLAccessGrant";
+import { ViewODRLPolicy } from "./ViewODRLPolicy";
 import { ViewPCCResearchQuestion } from "./ViewPCCResearchQuestion";
 import { ViewPICOResearchQuestion } from "./ViewPICOResearchQuestion";
 import { ViewPICOResearchQuestionLegacy } from "./ViewPICOResearchQuestionLegacy";
@@ -49,6 +51,8 @@ export const VIEW_COMPONENTS: Record<
   [TEMPLATE_URI.AIDA_SENTENCE]: ViewAIDASentence,
   [TEMPLATE_URI.GEO_COVERAGE]: ViewGeographicalCoverage,
   [TEMPLATE_URI.DATASET]: ViewDataset,
+  [TEMPLATE_URI.ODRL_POLICY]: ViewODRLPolicy,
+  [TEMPLATE_URI.ODRL_ACCESS_GRANT]: ViewODRLAccessGrant,
   [TEMPLATE_URI.PICO_RESEARCH_QUESTION]: ViewPICOResearchQuestion,
   [TEMPLATE_URI.PCC_RESEARCH_QUESTION]: ViewPCCResearchQuestion,
   [TEMPLATE_URI.RESEARCH_SOFTWARE]: ViewResearchSoftware,

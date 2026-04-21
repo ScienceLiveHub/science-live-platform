@@ -24,6 +24,7 @@ export const NS = {
   PROV: prefix("http://www.w3.org/ns/prov#"),
   FOAF: prefix("http://xmlns.com/foaf/0.1/"),
   CITO: prefix("http://purl.org/spar/cito/"),
+  ODRL: prefix("http://www.w3.org/ns/odrl/2/"),
 };
 
 const { RDF, RDFS, XSD, NP, NPT, DCT, PROV, FOAF } = NS;
