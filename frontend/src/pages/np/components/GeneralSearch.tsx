@@ -1,6 +1,8 @@
+import { PaginationControls } from "@/components/pagination-controls";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { usePagination } from "@/hooks/use-pagination";
 import { SEARCH_NANOPUBS } from "@/lib/queries";
 import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_TEXT } from "@/lib/sparql";
 import { isNanopubUri } from "@/lib/uri";
@@ -19,11 +21,14 @@ import SearchResultList, { type SearchResult } from "./SearchResultList";
  * - When query is active: shows compact search bar at top and results below
  *
  * Handles both keyword search and nanopub URI navigation.
+ * Supports pagination via the `page` URL search parameter.
  */
 export function GeneralSearch() {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get("q") || "";
   const uri = searchParams.get("uri") || "";
+
+  const { currentPage, offset, limit, pageSize, setPage } = usePagination();
 
   const [inputValue, setInputValue] = useState(searchQuery || uri);
   const [searchResults, setSearchResults] = useState<SearchResult[] | null>(
@@ -31,6 +36,8 @@ export function GeneralSearch() {
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Whether there are likely more results beyond the current page. */
+  const [hasMore, setHasMore] = useState(false);
 
   const isNanopubInput = isNanopubUri(inputValue);
   const hasActiveContent = searchQuery || uri;
@@ -40,10 +47,11 @@ export function GeneralSearch() {
     setInputValue(searchQuery || uri);
   }, [searchQuery, uri]);
 
-  // Load search results when searchQuery changes
+  // Load search results when searchQuery or page changes
   useEffect(() => {
     if (!searchQuery) {
       setSearchResults(null);
+      setHasMore(false);
       return;
     }
 
@@ -53,15 +61,24 @@ export function GeneralSearch() {
 
     const performSearch = async () => {
       try {
+        // Fetch one extra row to detect whether there is a next page
         const rows = await executeBindSparql(
           SEARCH_NANOPUBS,
-          { searchTerm: searchQuery },
+          {
+            searchTerm: searchQuery,
+            limit: String(limit),
+            offset: String(offset),
+          },
           NANOPUB_SPARQL_ENDPOINT_TEXT,
           controller.signal,
         );
 
+        const { visibleRows, hasMore: moreResultsAvailable } =
+          paginateRows(rows);
+
+        setHasMore(moreResultsAvailable);
         setSearchResults(
-          rows.map((row) => ({
+          visibleRows.map((row) => ({
             np: row.np,
             label: row.label || "",
             date: new Date(row.date),
@@ -77,6 +94,7 @@ export function GeneralSearch() {
         console.error("Search failed:", e);
         setError(e?.message || "Search failed");
         setSearchResults(null);
+        setHasMore(false);
       } finally {
         setLoading(false);
       }
@@ -87,7 +105,14 @@ export function GeneralSearch() {
     return () => {
       controller.abort();
     };
-  }, [searchQuery]);
+  }, [searchQuery, currentPage]);
+
+  /** Paginate raw SPARQL rows using the current page size. */
+  function paginateRows<T>(rows: T[]) {
+    const hasMoreRows = rows.length > pageSize;
+    const visibleRows = hasMoreRows ? rows.slice(0, pageSize) : rows;
+    return { visibleRows, hasMore: hasMoreRows };
+  }
 
   const handleSubmit = () => {
     if (!inputValue.trim()) return;
@@ -97,12 +122,14 @@ export function GeneralSearch() {
       const next = new URLSearchParams(searchParams);
       next.set("uri", inputValue);
       next.delete("q");
+      next.delete("page");
       setSearchParams(next);
     } else {
-      // It's a search query - perform search
+      // It's a search query - perform search (resets to page 1)
       const next = new URLSearchParams(searchParams);
       next.set("q", inputValue);
       next.delete("uri");
+      next.delete("page");
       setSearchParams(next);
     }
   };
@@ -208,11 +235,15 @@ export function GeneralSearch() {
 
     if (!searchResults) return null;
 
+    const firstResultIndex = (currentPage - 1) * pageSize + 1;
+    const lastResultIndex = firstResultIndex + searchResults.length - 1;
+
     return (
       <div className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold">
-          {searchResults.length} result
-          {searchResults.length !== 1 ? "s" : ""} for "{searchQuery}"
+          {searchResults.length > 0
+            ? `Results ${firstResultIndex}–${lastResultIndex} for "${searchQuery}"`
+            : `No results for "${searchQuery}"`}
         </h2>
         {searchResults.length > 0 ? (
           <SearchResultList searchResults={searchResults} />
@@ -221,6 +252,12 @@ export function GeneralSearch() {
             No results found for your search.
           </div>
         )}
+        <PaginationControls
+          currentPage={currentPage}
+          hasMore={hasMore}
+          loading={loading}
+          onPageChange={setPage}
+        />
       </div>
     );
   };

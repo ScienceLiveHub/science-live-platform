@@ -5,6 +5,8 @@
  */
 declare const query: import("../sparql").SparqlQuery<{
   searchTerm: "literal";
+  limit: "raw";
+  offset: "raw";
 }, {
   referenceCount: "string";
   maxScore: "string";

@@ -5,6 +5,8 @@
  */
 declare const query: import("../sparql").SparqlQuery<{
   templateValues: "raw";
+  limit: "raw";
+  offset: "raw";
 }, {
   description: "string";
   np: "string";

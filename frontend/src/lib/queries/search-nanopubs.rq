@@ -2,6 +2,8 @@
 # Excludes example, invalidated, superseded, and template nanopubs.
 #
 # Placeholder: `?_searchTerm` - the user's search string.
+# Placeholder: `?_limit` - RAW: maximum number of results to return (e.g. 10).
+# Placeholder: `?_offset` - RAW: number of results to skip for pagination (e.g. 0).
 
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix np: <http://www.nanopub.org/nschema#>
@@ -35,4 +37,4 @@ select ?np ?label ?date ?creator ?type ?template (count(?refNp) as ?referenceCou
     # Get the template used to create it, if any
     graph ?pubinfo { ?x nt:wasCreatedFromTemplate ?template . }
   }
-} group by ?np ?label ?date ?creator ?type ?template order by desc(?maxScore) limit 10
+} group by ?np ?label ?date ?creator ?type ?template order by desc(?maxScore) limit ?_limit offset ?_offset

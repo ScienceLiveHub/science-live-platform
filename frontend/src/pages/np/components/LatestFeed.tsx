@@ -1,6 +1,8 @@
 import { NanopubIcon } from "@/components/nanopub-icon";
+import { PaginationControls } from "@/components/pagination-controls";
 import { RelativeDateTime } from "@/components/relative-datetime";
 import { AsyncLabel } from "@/hooks/use-labels";
+import { usePagination } from "@/hooks/use-pagination";
 import { toScienceLiveNPUri } from "@/lib/uri";
 import {
   FEED_GROUPS,
@@ -43,6 +45,8 @@ export function LatestFeed() {
   const [checked, setChecked] =
     useState<Record<FeedTemplateKey, boolean>>(INITIAL_CHECKED);
 
+  const { currentPage, setPage } = usePagination();
+
   const selected = useMemo(() => {
     const s = new Set<FeedTemplateKey>();
     for (const [key, val] of Object.entries(checked)) {
@@ -51,7 +55,10 @@ export function LatestFeed() {
     return s;
   }, [checked]);
 
-  const { results, loading, error } = useFeed(selected);
+  const { results, loading, error, hasMore } = useFeed({
+    selectedKeys: selected,
+    page: currentPage,
+  });
 
   const toggle = useCallback((key: FeedTemplateKey) => {
     setChecked((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -129,7 +136,17 @@ export function LatestFeed() {
             No nanopublications found for the selected templates.
           </p>
         )}
-        {!loading && results.length > 0 && <FeedResultList results={results} />}
+        {!loading && results.length > 0 && (
+          <>
+            <FeedResultList results={results} />
+            <PaginationControls
+              currentPage={currentPage}
+              hasMore={hasMore}
+              loading={loading}
+              onPageChange={setPage}
+            />
+          </>
+        )}
       </section>
     </div>
   );

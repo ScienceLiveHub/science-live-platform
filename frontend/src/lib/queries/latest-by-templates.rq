@@ -4,6 +4,8 @@
 #
 # Placeholder: `?_templateValues` - raw: a SPARQL VALUES block, e.g.
 #   "(<https://w3id.org/np/RA...current>) (<https://w3id.org/np/RA...legacy>)"
+# Placeholder: `?_limit` - RAW: maximum number of results to return (e.g. 10).
+# Placeholder: `?_offset` - RAW: number of results to skip for pagination (e.g. 0).
 
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix np: <http://www.nanopub.org/nschema#>
@@ -33,4 +35,4 @@ select ?np ?label ?date ?creator (max(?desc) as ?description) ?template where {
       ?introduced rdfs:label ?desc .
     }
   }
-} group by ?np ?label ?date ?creator ?template order by desc(?date) limit 10
+} group by ?np ?label ?date ?creator ?template order by desc(?date) limit ?_limit offset ?_offset

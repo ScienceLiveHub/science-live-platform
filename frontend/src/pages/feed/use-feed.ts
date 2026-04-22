@@ -1,3 +1,4 @@
+import { DEFAULT_PAGE_SIZE } from "@/hooks/use-pagination";
 import { LATEST_BY_TEMPLATES } from "@/lib/queries";
 import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
 import {
@@ -119,14 +120,30 @@ function getTemplateUris(keys: FeedTemplateKey[]): string[] {
   return uris;
 }
 
-export function useFeed(selectedKeys: Set<FeedTemplateKey>) {
+export interface UseFeedOptions {
+  /** Set of selected template keys to fetch results for. */
+  selectedKeys: Set<FeedTemplateKey>;
+  /** Current page number (1-based). Defaults to 1. */
+  page?: number;
+  /** Number of results per page. Defaults to DEFAULT_PAGE_SIZE (10). */
+  pageSize?: number;
+}
+
+export function useFeed({
+  selectedKeys,
+  page = 1,
+  pageSize = DEFAULT_PAGE_SIZE,
+}: UseFeedOptions) {
   const [results, setResults] = useState<FeedResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Whether there are more results beyond the current page. */
+  const [hasMore, setHasMore] = useState(false);
 
   useEffect(() => {
     if (selectedKeys.size === 0) {
       setResults([]);
+      setHasMore(false);
       return;
     }
 
@@ -136,25 +153,39 @@ export function useFeed(selectedKeys: Set<FeedTemplateKey>) {
 
     const uris = getTemplateUris([...selectedKeys]);
     const templateValues = uris.map((u) => `(<${u}>)`).join(" ");
+    const offset = (page - 1) * pageSize;
+    // Fetch one extra row to detect whether there is a next page
+    const limit = pageSize + 1;
 
     executeBindSparql(
       LATEST_BY_TEMPLATES,
-      { templateValues },
+      {
+        templateValues,
+        limit: String(limit),
+        offset: String(offset),
+      },
       NANOPUB_SPARQL_ENDPOINT_FULL,
       controller.signal,
     )
       .then((rows) => {
-        setResults(rows as FeedResult[]);
+        const moreResultsAvailable = rows.length > pageSize;
+        const visibleRows = moreResultsAvailable
+          ? rows.slice(0, pageSize)
+          : rows;
+
+        setHasMore(moreResultsAvailable);
+        setResults(visibleRows as FeedResult[]);
         setLoading(false);
       })
       .catch((err) => {
         if (err?.name === "AbortError") return;
         setError(err.message ?? "Failed to load feed");
+        setHasMore(false);
         setLoading(false);
       });
 
     return () => controller.abort();
-  }, [selectedKeys]);
+  }, [selectedKeys, page, pageSize]);
 
-  return { results, loading, error };
+  return { results, loading, error, hasMore };
 }
