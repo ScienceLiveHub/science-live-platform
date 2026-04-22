@@ -14,9 +14,13 @@ import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
 import { toScienceLiveNPUri } from "@/lib/uri";
-import { ClipboardCheck, Code, Tag } from "lucide-react";
+import { Code, Tag } from "lucide-react";
 import { DataFactory } from "n3";
 import { useMemo } from "react";
+import {
+  TEMPLATE_METADATA,
+  TEMPLATE_URI,
+} from "../create/components/templates/registry-metadata";
 import { CustomViewerProps } from "./NanopubViewer";
 import {
   CommentBlock,
@@ -24,6 +28,7 @@ import {
   ItemTitle,
   RelatedNanopubLink,
 } from "./shared-components";
+import { TEMPLATE_VIEW_ICONS } from "./view-registry";
 
 const { namedNode } = DataFactory;
 
@@ -171,13 +176,17 @@ export function ViewFORRTKLReplicationOutcome({ store }: CustomViewerProps) {
 
   if (!data) return null;
 
+  const Icon = TEMPLATE_VIEW_ICONS[TEMPLATE_URI.FORRT_KL_REPLICATION_OUTCOME];
+  const color =
+    TEMPLATE_METADATA[TEMPLATE_URI.FORRT_KL_REPLICATION_OUTCOME].color!;
+
   const hasKLData = data.proofUri || data.analysisType || data.keyResult;
 
   return (
-    <Card className="border-l-8 border-l-teal-500">
+    <Card className={`border-l-8 border-l-${color}-500`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <ClipboardCheck className="h-5 w-5 text-teal-600" />
+          <Icon className={`h-5 w-5 text-${color}-600`} />
           FORRT Replication Outcome
           <Badge variant="outline" className="ml-2 text-xs">
             Knowledge Loom
@@ -289,8 +298,7 @@ export function ViewFORRTKLReplicationOutcome({ store }: CustomViewerProps) {
                 <div>
                   <span className="font-medium">Analysis type:</span>{" "}
                   <Badge variant="secondary" className="text-xs">
-                    {data.analysisType.label ||
-                      getLabel(data.analysisType.uri)}
+                    {data.analysisType.label || getLabel(data.analysisType.uri)}
                   </Badge>
                 </div>
               )}

@@ -9,6 +9,7 @@ export interface NanopubTemplateMetadata {
   moreDescription?: string;
   category: string;
   icon: string;
+  color?: string;
   recommended?: boolean;
   keywords?: string[];
 }
@@ -105,6 +106,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare citations between papers using Citation Typing Ontology",
     category: "Citation",
     icon: "📚",
+    color: "amber",
     recommended: true,
     keywords: ["citation", "cito", "reference", "cite"],
   },
@@ -113,6 +115,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     description: "Annotating a paper quotation with personal interpretation",
     category: "Annotation",
     icon: "❝❞",
+    color: "rose",
     recommended: true,
     keywords: ["comment", "annotation", "quote", "interpretation"],
   },
@@ -121,6 +124,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     description: "Add comments, quotes, or evaluations to papers",
     category: "Annotation",
     icon: "💬",
+    color: "sky",
     recommended: true,
     keywords: ["comment", "annotation", "quote", "review"],
   },
@@ -129,6 +133,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     description: "Make structured scientific claims following the AIDA model",
     category: "Scientific",
     icon: "🔬",
+    color: "emerald",
     recommended: true,
     keywords: ["aida", "claim", "assertion", "scientific"],
   },
@@ -140,6 +145,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Identify the spatial coverage (e.g. Europe, Canada, or a specific geographical area) and provide supporting quotations from the paper that led to this conclusion. The resulting nanopublication can work with GeoSPARQL queries for efficient spatial discovery of research.",
     category: "geographical coverage",
     icon: "📝",
+    color: "teal",
     recommended: false,
     keywords: ["statement", "general", "rdf", "triple"],
   },
@@ -151,6 +157,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Describe a FAIR Digital Object dataset with metadata including creators, version, license, and access information.",
     category: "Data",
     icon: "📊",
+    color: "violet",
     recommended: true,
     keywords: ["dataset", "data", "fair", "digital object", "zenodo"],
   },
@@ -160,6 +167,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Describe research software with metadata including repository, supporting publications, and related resources.",
     category: "Software",
     icon: "💻",
+    color: "cyan",
     recommended: true,
     keywords: ["software", "code", "repository", "github", "tool"],
   },
@@ -171,6 +179,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Define a research question using the PICO framework (Population, Intervention, Comparator, Outcome)",
     category: "Systematic Review",
     icon: "🔬",
+    color: "indigo",
     recommended: true,
     keywords: [
       "pico",
@@ -190,6 +199,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Define a review question using the PCC framework (Population, Concept, Context)",
     category: "Systematic Review",
     icon: "📋",
+    color: "cyan",
     recommended: true,
     keywords: [
       "pcc",
@@ -210,6 +220,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Captures search terms, databases, date ranges, languages, and methodology notes. Corresponds to PRISMA 2020 Item 7 (Search) for transparent, reproducible literature searches.",
     category: "Systematic Review",
     icon: "🔍",
+    color: "amber",
     recommended: true,
     keywords: [
       "prisma",
@@ -225,14 +236,9 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare a systematic database search with query strings, filters, and result counts.",
     category: "Systematic Review",
     icon: "🗄️",
+    color: "amber",
     recommended: false,
-    keywords: [
-      "prisma",
-      "systematic review",
-      "database",
-      "search",
-      "query",
-    ],
+    keywords: ["prisma", "systematic review", "database", "search", "query"],
   },
   [TEMPLATE_URI.PRISMA_SEARCH_EXECUTION_DATASET]: {
     name: "PRISMA Search Execution Dataset",
@@ -240,6 +246,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare a PRISMA search execution dataset aggregating search results across databases.",
     category: "Systematic Review",
     icon: "📑",
+    color: "amber",
     recommended: false,
     keywords: [
       "prisma",
@@ -255,6 +262,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare a study to be included in a systematic review with rationale.",
     category: "Systematic Review",
     icon: "✅",
+    color: "amber",
     recommended: false,
     keywords: [
       "prisma",
@@ -270,6 +278,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare a PRISMA study assessment dataset with quality and bias evaluations.",
     category: "Systematic Review",
     icon: "📝",
+    color: "amber",
     recommended: false,
     keywords: [
       "prisma",
@@ -286,6 +295,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare a study to be selected for full-text screening in a systematic review.",
     category: "Systematic Review",
     icon: "🔎",
+    color: "amber",
     recommended: false,
     keywords: [
       "prisma",
@@ -303,6 +313,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare an original claim according to FORRT, linking it to an AIDA sentence with a specific FORRT type.",
     category: "Replication",
     icon: "🎓",
+    color: "violet",
     recommended: true,
     keywords: ["forrt", "claim", "aida", "scientific", "replication"],
   },
@@ -312,6 +323,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare a replication or reproduction study design according to FORRT, targeting a specific claim.",
     category: "Replication",
     icon: "🔁",
+    color: "violet",
     recommended: true,
     keywords: [
       "forrt",
@@ -328,6 +340,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare the outcome of a replication or reproduction study, including validation status, confidence, and conclusions.",
     category: "Replication",
     icon: "📊",
+    color: "teal",
     recommended: true,
     keywords: [
       "forrt",
@@ -344,6 +357,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare a replication study with structured Knowledge Loom metadata: software methods, packages, input data, and analysis scripts.",
     category: "Scientific",
     icon: "🔁",
+    color: "violet",
     recommended: true,
     keywords: [
       "forrt",
@@ -360,6 +374,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare a replication outcome with machine-readable evidence from Knowledge Loom: dtreg proof, analysis type, and key results.",
     category: "Scientific",
     icon: "📊",
+    color: "teal",
     recommended: true,
     keywords: [
       "forrt",

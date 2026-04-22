@@ -13,7 +13,6 @@ export interface SearchResult {
   creator: string;
   type?: string;
   template?: string;
-  isExample?: boolean;
   maxScore?: number;
   referenceCount?: number;
 }

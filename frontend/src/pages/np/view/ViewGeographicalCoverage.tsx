@@ -11,9 +11,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
-import { Globe, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { DataFactory } from "n3";
 import { lazy, Suspense, useMemo } from "react";
+import {
+  TEMPLATE_METADATA,
+  TEMPLATE_URI,
+} from "../create/components/templates/registry-metadata";
 import { CustomViewerProps } from "./NanopubViewer";
 import {
   CommentBlock,
@@ -21,6 +25,7 @@ import {
   PaperLink,
   QuotationBlock,
 } from "./shared-components";
+import { TEMPLATE_VIEW_ICONS } from "./view-registry";
 
 const { namedNode } = DataFactory;
 
@@ -133,11 +138,14 @@ export function ViewGeographicalCoverage({ store }: CustomViewerProps) {
 
   if (!data) return null;
 
+  const Icon = TEMPLATE_VIEW_ICONS[TEMPLATE_URI.GEO_COVERAGE];
+  const color = TEMPLATE_METADATA[TEMPLATE_URI.GEO_COVERAGE].color!;
+
   return (
-    <Card className="border-l-8 border-l-teal-500">
+    <Card className={`border-l-8 border-l-${color}-500`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Globe className="h-5 w-5 text-teal-600" />
+          <Icon className={`h-5 w-5 text-${color}-600`} />
           Geographical Coverage
         </CardTitle>
       </CardHeader>

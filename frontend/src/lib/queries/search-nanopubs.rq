@@ -1,5 +1,5 @@
 # Full-text search on nanopub labels.
-# Excludes invalidated, superseded, and template nanopubs.
+# Excludes example, invalidated, superseded, and template nanopubs.
 #
 # Placeholder: `?_searchTerm` - the user's search string.
 
@@ -11,10 +11,11 @@ prefix dct: <http://purl.org/dc/terms/>
 prefix search: <http://www.openrdf.org/contrib/lucenesail#>
 prefix nt: <https://w3id.org/np/o/ntemplate/>
 
-select ?np ?label ?date ?creator ?isExample ?type (count(?refNp) as ?referenceCount) (max(?score) as ?maxScore) where {
+select ?np ?label ?date ?creator ?type ?template (count(?refNp) as ?referenceCount) (max(?score) as ?maxScore) where {
   graph npa:graph {
     ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
     filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+    filter not exists { ?np npx:hasNanopubType npx:ExampleNanopub }
     optional { ?np rdfs:label ?label . }
     ?np np:hasAssertion ?assertion ;
         np:hasPublicationInfo ?pubinfo ;
@@ -28,12 +29,10 @@ select ?np ?label ?date ?creator ?isExample ?type (count(?refNp) as ?referenceCo
     search:property rdfs:label ;
     search:score ?score ] .
 
-  # Check if this is an ExampleNanopub (TODO: exclude these?)
-  bind(exists { graph ?pubinfo { ?np a npx:ExampleNanopub . } } as ?isExample)
-  # Count references from other nanopubs using npa:networkGraph
   optional {
-    graph npa:networkGraph {
-      ?refNp npa:refersToNanopub ?np .
-    }
+    # Count references from other nanopubs using npa:networkGraph
+    graph npa:networkGraph { ?refNp npa:refersToNanopub ?np . }
+    # Get the template used to create it, if any
+    graph ?pubinfo { ?x nt:wasCreatedFromTemplate ?template . }
   }
-} group by ?np ?label ?date ?creator ?isExample ?type order by desc(?maxScore) limit 100
+} group by ?np ?label ?date ?creator ?type ?template order by desc(?maxScore) limit 10

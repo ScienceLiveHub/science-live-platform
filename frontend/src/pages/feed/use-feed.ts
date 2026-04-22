@@ -1,8 +1,5 @@
 import { LATEST_BY_TEMPLATES } from "@/lib/queries";
-import {
-  executeBindSparql,
-  NANOPUB_SPARQL_ENDPOINT_FULL,
-} from "@/lib/sparql";
+import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
 import {
   LEGACY_TEMPLATE_URIS,
   TEMPLATE_URI,
@@ -106,6 +103,7 @@ export interface FeedResult {
   date: string;
   creator: string;
   description?: string;
+  template?: string;
 }
 
 /** Collect all URIs (current + legacy) for the selected template keys. */

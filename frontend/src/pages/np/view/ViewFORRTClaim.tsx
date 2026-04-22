@@ -11,9 +11,13 @@ import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
 import { toScienceLiveNPUri } from "@/lib/uri";
-import { GraduationCap, Tag } from "lucide-react";
+import { Tag } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
+import {
+  TEMPLATE_METADATA,
+  TEMPLATE_URI,
+} from "../create/components/templates/registry-metadata";
 import { CustomViewerProps } from "./NanopubViewer";
 import {
   ExternalUriLink,
@@ -21,6 +25,7 @@ import {
   RelatedNanopubLink,
   ScientificClaimBlock,
 } from "./shared-components";
+import { TEMPLATE_VIEW_ICONS } from "./view-registry";
 
 const { namedNode } = DataFactory;
 
@@ -135,11 +140,14 @@ export function ViewFORRTClaim({ store }: CustomViewerProps) {
 
   if (!data) return null;
 
+  const Icon = TEMPLATE_VIEW_ICONS[TEMPLATE_URI.FORRT_CLAIM];
+  const color = TEMPLATE_METADATA[TEMPLATE_URI.FORRT_CLAIM].color!;
+
   return (
-    <Card className="border-l-8 border-l-violet-500">
+    <Card className={`border-l-8 border-l-${color}-500`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <GraduationCap className="h-5 w-5 text-violet-600" />
+          <Icon className={`h-5 w-5 text-${color}-600`} />
           FORRT Claim
         </CardTitle>
       </CardHeader>

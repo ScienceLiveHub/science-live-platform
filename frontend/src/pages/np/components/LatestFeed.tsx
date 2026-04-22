@@ -12,6 +12,8 @@ import {
 import { Check, Loader2, Minus } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { TEMPLATE_METADATA } from "../create/components/templates/registry-metadata";
+import { TEMPLATE_VIEW_ICONS } from "../view/view-registry";
 
 /** Initial checked state for each template key — false means unchecked */
 const INITIAL_CHECKED: Record<FeedTemplateKey, boolean> = {
@@ -83,7 +85,9 @@ export function LatestFeed() {
                 onClick={() => toggleGroup(group.keys)}
               >
                 <FeedCheckbox
-                  state={allOn ? "checked" : someOn ? "indeterminate" : "unchecked"}
+                  state={
+                    allOn ? "checked" : someOn ? "indeterminate" : "unchecked"
+                  }
                 />
                 <span className="text-sm font-medium">{group.label}</span>
               </label>
@@ -125,9 +129,7 @@ export function LatestFeed() {
             No nanopublications found for the selected templates.
           </p>
         )}
-        {!loading && results.length > 0 && (
-          <FeedResultList results={results} />
-        )}
+        {!loading && results.length > 0 && <FeedResultList results={results} />}
       </section>
     </div>
   );
@@ -140,7 +142,7 @@ function FeedCheckbox({
 }) {
   return (
     <span
-      className={`flex size-4 shrink-0 items-center justify-center rounded-[4px] border shadow-xs ${
+      className={`flex size-4 shrink-0 items-center justify-center rounded-lg border shadow-xs ${
         state === "unchecked"
           ? "border-input dark:bg-input/30"
           : "border-primary bg-primary text-primary-foreground"
@@ -157,6 +159,8 @@ function FeedResultList({ results }: { results: FeedResult[] }) {
     <div className="flex flex-col gap-3">
       {results.map((r, i) => {
         const displayLabel = r.description || r.label;
+        const Icon = r.template && TEMPLATE_VIEW_ICONS[r.template];
+        const color = r.template && TEMPLATE_METADATA[r.template]?.color;
         return (
           <div
             key={r.np || i}
@@ -164,10 +168,16 @@ function FeedResultList({ results }: { results: FeedResult[] }) {
           >
             <Link
               to={toScienceLiveNPUri(r.np)}
-              className="text-primary hover:underline"
+              className={`hover:underline ${color ? `text-${color}-600` : "text-primary"}`}
             >
               <div className="font-medium flex flex-row">
-                <NanopubIcon className="w-3 h-3 min-w-3 min-h-3 mt-1.5 mr-2" />
+                {r.template &&
+                  TEMPLATE_METADATA[r.template] &&
+                  (Icon ? (
+                    <Icon className="w-4 h-4 min-w-4 min-h-4 mt-1 mr-2" />
+                  ) : (
+                    <NanopubIcon className="w-3 h-3 min-w-3 min-h-3 mt-1.5 mr-2" />
+                  ))}
                 {displayLabel || "Untitled Nanopublication"}
               </div>
             </Link>

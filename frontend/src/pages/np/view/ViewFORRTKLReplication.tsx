@@ -14,9 +14,13 @@ import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
 import { toScienceLiveNPUri } from "@/lib/uri";
-import { Code, FlaskConical, Tag } from "lucide-react";
+import { Code, Tag } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
+import {
+  TEMPLATE_METADATA,
+  TEMPLATE_URI,
+} from "../create/components/templates/registry-metadata";
 import { CustomViewerProps } from "./NanopubViewer";
 import {
   CommentBlock,
@@ -24,6 +28,7 @@ import {
   ItemTitle,
   RelatedNanopubLink,
 } from "./shared-components";
+import { TEMPLATE_VIEW_ICONS } from "./view-registry";
 
 const { namedNode } = DataFactory;
 
@@ -42,7 +47,8 @@ const SKOS_RELATED = "http://www.w3.org/2004/02/skos/core#related";
 const EXECUTES_METHOD = "https://w3id.org/sciencelive/o/terms/executesMethod";
 const USES_SOFTWARE_PACKAGE =
   "https://w3id.org/sciencelive/o/terms/usesSoftwarePackage";
-const HAS_RUNTIME = "https://w3id.org/sciencelive/o/terms/hasRuntimeEnvironment";
+const HAS_RUNTIME =
+  "https://w3id.org/sciencelive/o/terms/hasRuntimeEnvironment";
 const HAS_INPUT_SOURCE =
   "https://w3id.org/sciencelive/o/terms/hasInputDataSource";
 const HAS_INPUT_DESC =
@@ -165,6 +171,9 @@ export function ViewFORRTKLReplication({ store }: CustomViewerProps) {
 
   if (!data) return null;
 
+  const Icon = TEMPLATE_VIEW_ICONS[TEMPLATE_URI.FORRT_KL_REPLICATION];
+  const color = TEMPLATE_METADATA[TEMPLATE_URI.FORRT_KL_REPLICATION].color!;
+
   const hasKLData =
     data.method ||
     data.softwarePackage ||
@@ -175,10 +184,10 @@ export function ViewFORRTKLReplication({ store }: CustomViewerProps) {
     data.loomRecord;
 
   return (
-    <Card className="border-l-8 border-l-violet-500">
+    <Card className={`border-l-8 border-l-${color}-500`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <FlaskConical className="h-5 w-5 text-violet-600" />
+          <Icon className={`h-5 w-5 text-${color}-600`} />
           FORRT Replication Study
           <Badge variant="outline" className="ml-2 text-xs">
             Knowledge Loom

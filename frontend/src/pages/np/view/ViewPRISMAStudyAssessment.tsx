@@ -13,11 +13,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
-import { ClipboardCheck } from "lucide-react";
 import { DataFactory } from "n3";
 import { useMemo } from "react";
+import {
+  TEMPLATE_METADATA,
+  TEMPLATE_URI,
+} from "../create/components/templates/registry-metadata";
 import { CustomViewerProps } from "./NanopubViewer";
 import { CommentBlock, ExternalUriLink, ItemTitle } from "./shared-components";
+import { TEMPLATE_VIEW_ICONS } from "./view-registry";
 
 const { namedNode } = DataFactory;
 
@@ -92,11 +96,14 @@ export function ViewPRISMAStudyAssessment({ store }: CustomViewerProps) {
 
   if (!data) return null;
 
+  const Icon = TEMPLATE_VIEW_ICONS[TEMPLATE_URI.PRISMA_STUDY_ASSESSMENT];
+  const color = TEMPLATE_METADATA[TEMPLATE_URI.PRISMA_STUDY_ASSESSMENT].color!;
+
   return (
-    <Card className="border-l-8 border-l-amber-500">
+    <Card className={`border-l-8 border-l-${color}-500`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <ClipboardCheck className="h-5 w-5 text-amber-600" />
+          <Icon className={`h-5 w-5 text-${color}-600`} />
           Study Assessment Dataset
         </CardTitle>
       </CardHeader>

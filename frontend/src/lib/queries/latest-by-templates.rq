@@ -12,11 +12,12 @@ prefix npx: <http://purl.org/nanopub/x/>
 prefix dct: <http://purl.org/dc/terms/>
 prefix nt: <https://w3id.org/np/o/ntemplate/>
 
-select ?np ?label ?date ?creator (max(?desc) as ?description) where {
+select ?np ?label ?date ?creator (max(?desc) as ?description) ?template where {
   values (?template) { ?_templateValues }
   graph npa:graph {
     ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
     filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+    filter not exists { ?np npx:hasNanopubType npx:ExampleNanopub }
     ?np dct:created ?date ;
         dct:creator ?creator .
     optional { ?np rdfs:label ?label . }
@@ -32,4 +33,4 @@ select ?np ?label ?date ?creator (max(?desc) as ?description) where {
       ?introduced rdfs:label ?desc .
     }
   }
-} group by ?np ?label ?date ?creator order by desc(?date) limit 10
+} group by ?np ?label ?date ?creator ?template order by desc(?date) limit 10

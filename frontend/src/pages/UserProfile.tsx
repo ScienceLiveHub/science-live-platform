@@ -50,6 +50,7 @@ export default function UserProfile() {
   const [profile, setProfile] = useState<UserProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activityError, setActivityError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -99,10 +100,16 @@ export default function UserProfile() {
         }
 
         if (data.orcidConnected && data.orcidId) {
-          const result = await executeBindSparql(USERS_LATEST, {
+          // Errors here are non-fatal
+          await executeBindSparql(USERS_LATEST, {
             orcidUri: data.orcidId,
-          });
-          data.latestContent = result;
+          })
+            .then((result) => {
+              data.latestContent = result;
+            })
+            .catch(() => {
+              setActivityError("Could not load latest activity");
+            });
         }
         setProfile(data);
       } catch (err) {
@@ -301,8 +308,10 @@ export default function UserProfile() {
                     );
                   })
                 ) : (
-                  <span className="text-muted-foreground text-sm w-auto">
-                    Nothing found
+                  <span
+                    className={`text-sm w-auto ${activityError ? "text-destructive" : "text-muted-foreground "}`}
+                  >
+                    {activityError ?? "Nothing found"}
                   </span>
                 )}
               </div>
