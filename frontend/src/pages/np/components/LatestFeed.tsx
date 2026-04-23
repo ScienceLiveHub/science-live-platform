@@ -32,6 +32,8 @@ const INITIAL_CHECKED: Record<FeedTemplateKey, boolean> = {
   GEO_COVERAGE: false,
   DATASET: false,
   RESEARCH_SOFTWARE: false,
+  ODRL_POLICY: false,
+  ODRL_ACCESS_GRANT: false,
   PICO_RESEARCH_QUESTION: true,
   PCC_RESEARCH_QUESTION: true,
   PRISMA_SEARCH_STRATEGY: true,
