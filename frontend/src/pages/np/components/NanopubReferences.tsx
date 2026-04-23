@@ -99,7 +99,7 @@ export function NanopubReferences({ nanopubUri }: { nanopubUri: string }) {
           }`}
         />
       </CollapsibleTrigger>
-      <CollapsibleContent className="px-4 pb-4">
+      <CollapsibleContent className="px-4 pb-4 mt-1">
         {loading ? (
           <div className="flex items-center gap-3 py-4 text-muted-foreground">
             <Spinner />

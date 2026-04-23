@@ -399,14 +399,14 @@ export const TEMPLATE_COLOR_CLASSES: Record<
   string,
   { light: string; dark: string }
 > = {
-  amber: { light: "text-amber-700", dark: "text-amber-300" },
-  rose: { light: "text-rose-700", dark: "text-rose-300" },
-  sky: { light: "text-sky-700", dark: "text-sky-300" },
+  amber: { light: "text-amber-600", dark: "text-amber-300" },
+  rose: { light: "text-rose-600", dark: "text-rose-300" },
+  sky: { light: "text-sky-600", dark: "text-sky-300" },
   emerald: { light: "text-green-700", dark: "text-green-500" },
-  teal: { light: "text-teal-700", dark: "text-teal-300" },
-  violet: { light: "text-violet-700", dark: "text-violet-300" },
-  cyan: { light: "text-cyan-700", dark: "text-cyan-300" },
-  indigo: { light: "text-indigo-700", dark: "text-indigo-300" },
+  teal: { light: "text-teal-600", dark: "text-teal-300" },
+  violet: { light: "text-violet-600", dark: "text-violet-300" },
+  cyan: { light: "text-cyan-600", dark: "text-cyan-300" },
+  indigo: { light: "text-indigo-600", dark: "text-indigo-300" },
 };
 
 export const TEMPLATE_BORDER_CLASSES: Record<

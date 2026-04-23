@@ -28,7 +28,7 @@ export function Home() {
             Beta
           </Badge>
         </h1>
-        <p className="mx-auto max-w-lg text-lg text-muted-foreground">
+        <p className="mx-auto max-w-lg text-lg text-secondary-foreground">
           Transform research into structured, citable nanopublications
         </p>
         {!session?.user && (
@@ -46,13 +46,13 @@ export function Home() {
       {/* Action Cards */}
       <section className="grid gap-4 sm:grid-cols-3">
         <Link to="/np/" className="group">
-          <Card className="h-full transition-shadow hover:shadow-md">
-            <CardHeader className="pb-2">
-              <Rss className="h-5 w-5 text-primary mb-2" />
+          <Card className="h-full hover:shadow-md hover:scale-110 transition-transform">
+            <CardHeader className="pb-2 text-center">
+              <Rss className="h-5 w-5 text-primary mb-2 mx-auto" />
               <CardTitle className="text-base">Browse</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-secondary-foreground">
                 Explore the latest nanopublications from the community
               </p>
             </CardContent>
@@ -60,13 +60,13 @@ export function Home() {
         </Link>
 
         <Link to="/np/create" className="group">
-          <Card className="h-full transition-shadow hover:shadow-md">
-            <CardHeader className="pb-2">
-              <PenTool className="h-5 w-5 text-primary mb-2" />
+          <Card className="h-full hover:shadow-md hover:scale-110 transition-transform">
+            <CardHeader className="pb-2 text-center">
+              <PenTool className="h-5 w-5 text-primary mb-2 mx-auto" />
               <CardTitle className="text-base">Create</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-secondary-foreground">
                 Publish FAIR nanopublications from your research
               </p>
             </CardContent>
@@ -74,13 +74,13 @@ export function Home() {
         </Link>
 
         <Link to="/np/" className="group">
-          <Card className="h-full transition-shadow hover:shadow-md">
-            <CardHeader className="pb-2">
-              <Search className="h-5 w-5 text-primary mb-2" />
+          <Card className="h-full hover:shadow-md hover:scale-110 transition-transform">
+            <CardHeader className="pb-2 text-center">
+              <Search className="h-5 w-5 text-primary mb-2 mx-auto" />
               <CardTitle className="text-base">Search</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-secondary-foreground">
                 Find nanopublications by keyword, AI query, or location
               </p>
             </CardContent>
@@ -102,7 +102,7 @@ export function Home() {
               Post an issue on{" "}
               <a
                 href="https://github.com/ScienceLiveHub/science-live-platform"
-                className="text-primary hover:underline"
+                className="text-link hover:underline"
                 target="_blank"
               >
                 GitHub
@@ -110,14 +110,14 @@ export function Home() {
               ,{" "}
               <a
                 href="mailto:contact@vitenhub.no"
-                className="text-primary hover:underline"
+                className="text-link hover:underline"
               >
                 email us
               </a>
               , or{" "}
               <a
                 href="https://calendly.com/anne-fouilloux/30min"
-                className="text-primary hover:underline"
+                className="text-link hover:underline"
                 target="_blank"
               >
                 book a call

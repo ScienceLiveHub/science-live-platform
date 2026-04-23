@@ -204,7 +204,7 @@ export function ViewAIDASentence({ store }: CustomViewerProps) {
                       href={supportingurl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-primary hover:underline inline-flex items-center gap-1 break-all text-sm"
+                      className="text-link hover:underline inline-flex items-center gap-1 break-all text-sm"
                     >
                       {getLabel(supportingurl)}
                       <ExternalLink className="h-3 w-3 shrink-0" />

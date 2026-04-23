@@ -130,7 +130,7 @@ export function ViewCommentOnPaper({ store }: CustomViewerProps) {
               href={data.paperUrl}
               target="_blank"
               rel="noreferrer"
-              className="text-primary hover:underline inline-flex items-center gap-1 break-all"
+              className="text-link hover:underline inline-flex items-center gap-1 break-all"
             >
               {getLabel(data.paperUrl)}
             </a>

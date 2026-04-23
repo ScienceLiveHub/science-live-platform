@@ -21,6 +21,7 @@ import {
   getTemplateColorClass,
 } from "../create/components/templates/registry-metadata";
 import { TEMPLATE_VIEW_ICONS } from "../view/view-registry";
+import { NanopubTemplateIcon } from "./SearchResultList";
 
 /** Initial checked state for each template key — false means unchecked */
 const INITIAL_CHECKED: Record<FeedTemplateKey, boolean> = {
@@ -191,32 +192,18 @@ function FeedCheckbox({
 }
 
 function FeedResultList({ results }: { results: FeedResult[] }) {
-  const { resolvedTheme } = useTheme();
   return (
     <div className="flex flex-col gap-3">
       {results.map((r, i) => {
         const displayLabel = r.description || r.label;
-        const Icon = r.template && TEMPLATE_VIEW_ICONS[r.template];
-        const color = r.template && TEMPLATE_METADATA[r.template]?.color;
         return (
           <div
             key={r.np || i}
             className="flex flex-col gap-2 rounded-lg border bg-card p-4"
           >
-            <Link
-              to={toScienceLiveNPUri(r.np)}
-              // className={`hover:underline ${color ? `text-${color}-600` : "text-primary"}`}
-            >
+            <Link to={toScienceLiveNPUri(r.np)}>
               <div className={`font-medium flex flex-row`}>
-                {r.template &&
-                  TEMPLATE_METADATA[r.template] &&
-                  (Icon ? (
-                    <Icon
-                      className={`w-4 h-4 min-w-4 min-h-4 mt-1 mr-2 font-medium flex flex-row ${getTemplateColorClass(color, resolvedTheme)}`}
-                    />
-                  ) : (
-                    <NanopubIcon className="w-3 h-3 min-w-3 min-h-3 mt-1.5 mr-2" />
-                  ))}
+                <NanopubTemplateIcon template={r.template} />
                 {displayLabel || "Untitled Nanopublication"}
               </div>
             </Link>
