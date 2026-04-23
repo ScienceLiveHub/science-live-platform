@@ -48,6 +48,7 @@ export function NanopubReferences({ nanopubUri }: { nanopubUri: string }) {
             label: row.label || "",
             date: new Date(row.date),
             creator: row.creator || "",
+            template: row.template,
           })),
         );
         hasFetched.current = true;

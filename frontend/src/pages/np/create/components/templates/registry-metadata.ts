@@ -78,12 +78,17 @@ export const TEMPLATE_URI = {
  * Legacy/previous versions of template URIs.
  * Used for viewing nanopubs created with older template versions.
  * Maps template key to array of legacy URIs.
+ *
+ * NOTE: we need to be careful to ensure backwards-compatible support for legacy
+ * template versions in custom view components.
  */
 export const LEGACY_TEMPLATE_URIS: Partial<
   Record<keyof typeof TEMPLATE_URI, string[]>
 > = {
   AIDA_SENTENCE: [
     "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE",
+    "http://purl.org/np/RAe39AG652u7Mj8nnuQdhfttfvu5vYTIARJwADGYLMjS0",
+    "https://w3id.org/np/RAMs3KMOjAHN_4a3p5D2VvVE_kialJOKaVS7faQwnKniw",
   ],
   FORRT_CLAIM: [
     "https://w3id.org/np/RAu5uTahAxc0OLBB3vaGwK3OQDDZV7QuWtDlBk0Ea3bco",
@@ -93,6 +98,41 @@ export const LEGACY_TEMPLATE_URIS: Partial<
     "https://w3id.org/np/RAfZfE1gbUtc35W7xT12XTO0ptZwycN2-jj7Jow6COAoQ",
   ],
 };
+
+/**
+ * Reverse lookup: maps every legacy URI back to the current template URI.
+ * Built automatically from LEGACY_TEMPLATE_URIS so it stays in sync.
+ */
+export const LEGACY_URI_TO_CURRENT_URI: ReadonlyMap<string, string> = new Map(
+  Object.entries(LEGACY_TEMPLATE_URIS).flatMap(([key, uris]) =>
+    (uris ?? []).map((uri) => [
+      uri,
+      TEMPLATE_URI[key as keyof typeof TEMPLATE_URI],
+    ]),
+  ),
+);
+
+/**
+ * Resolves a template URI to its current version.
+ * If the URI is already the current version it is returned as-is.
+ * If it is a legacy URI the corresponding current URI is returned.
+ * If the URI is unknown it is returned unchanged (caller can decide how to handle).
+ */
+export function resolveTemplateUri(uri: string): string {
+  return LEGACY_URI_TO_CURRENT_URI.get(uri) ?? uri;
+}
+
+/**
+ * Returns the template metadata for a given URI, resolving legacy URIs
+ * to their current version first. Returns `undefined` if the URI is
+ * not recognised as a current or legacy template.
+ */
+export function getTemplateMetadata(
+  uri: string,
+): NanopubTemplateMetadata | undefined {
+  return TEMPLATE_METADATA[resolveTemplateUri(uri)];
+}
+
 /**
  * Template metadata without React components
  * Non-React workspaces (e.g., Zotero) should import this directly

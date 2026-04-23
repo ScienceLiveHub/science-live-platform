@@ -1,16 +1,32 @@
 import { PaginationControls } from "@/components/pagination-controls";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { usePagination } from "@/hooks/use-pagination";
 import { SEARCH_NANOPUBS } from "@/lib/queries";
 import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_TEXT } from "@/lib/sparql";
 import { isNanopubUri } from "@/lib/uri";
-import { FileSymlink, Search } from "lucide-react";
+import { ArrowDownNarrowWide, FileSymlink, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import ViewerDemo from "../ViewerDemo";
 import SearchResultList, { type SearchResult } from "./SearchResultList";
+
+/** Valid sort options for search results. */
+type SortOption = "maxScore" | "date";
+
+/** SPARQL ORDER BY clause for each sort option. */
+const SORT_ORDER_BY: Record<SortOption, string> = {
+  maxScore: "desc(?maxScore)",
+  date: "desc(?date)",
+};
 
 /**
  * GeneralSearch
@@ -27,6 +43,8 @@ export function GeneralSearch() {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get("q") || "";
   const uri = searchParams.get("uri") || "";
+  const sortByParam = searchParams.get("sort") || "maxScore";
+  const sortBy: SortOption = sortByParam === "date" ? "date" : "maxScore";
 
   const { currentPage, offset, limit, pageSize, setPage } = usePagination();
 
@@ -68,6 +86,7 @@ export function GeneralSearch() {
             searchTerm: searchQuery,
             limit: String(limit),
             offset: String(offset),
+            sortBy: SORT_ORDER_BY[sortBy],
           },
           NANOPUB_SPARQL_ENDPOINT_TEXT,
           controller.signal,
@@ -105,7 +124,7 @@ export function GeneralSearch() {
     return () => {
       controller.abort();
     };
-  }, [searchQuery, currentPage]);
+  }, [searchQuery, sortBy, currentPage]);
 
   /** Paginate raw SPARQL rows using the current page size. */
   function paginateRows<T>(rows: T[]) {
@@ -134,6 +153,31 @@ export function GeneralSearch() {
     }
   };
 
+  /** Update sort parameter in URL, resetting to page 1. */
+  const handleSortChange = (value: SortOption) => {
+    const next = new URLSearchParams(searchParams);
+    next.set("sort", value);
+    next.delete("page");
+    setSearchParams(next);
+  };
+
+  /** Sort select dropdown, reused in compact bar and results header. */
+  const renderSortSelect = (size: "sm" | "default" = "default") => (
+    <Select
+      value={sortBy}
+      onValueChange={(v) => handleSortChange(v as SortOption)}
+    >
+      <SelectTrigger size={size} className="gap-1">
+        <ArrowDownNarrowWide className="size-4" />
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="maxScore">Relevance</SelectItem>
+        <SelectItem value="date">Newest first</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+
   // Compact search bar (shown when there's active content)
   const renderCompactSearchBar = () => (
     <div className="flex gap-2">
@@ -149,6 +193,7 @@ export function GeneralSearch() {
           }
         }}
       />
+      {searchQuery && renderSortSelect("sm")}
       <Button
         className="inline-flex items-center rounded-md bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 px-6"
         disabled={loading}
@@ -240,11 +285,14 @@ export function GeneralSearch() {
 
     return (
       <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">
-          {searchResults.length > 0
-            ? `Results ${firstResultIndex}–${lastResultIndex} for "${searchQuery}"`
-            : `No results for "${searchQuery}"`}
-        </h2>
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-lg font-semibold">
+            {searchResults.length > 0
+              ? `Results ${firstResultIndex} - ${lastResultIndex} for "${searchQuery}"`
+              : `No results for "${searchQuery}"`}
+          </h2>
+          {searchResults.length > 0 && renderSortSelect("sm")}
+        </div>
         {searchResults.length > 0 ? (
           <SearchResultList searchResults={searchResults} />
         ) : (
