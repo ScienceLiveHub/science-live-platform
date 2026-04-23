@@ -1,6 +1,5 @@
 import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import { useFormedible } from "@/hooks/use-formedible";
-import { validUriPlaceholder } from "@/lib/validation";
 import z from "zod";
 import {
   NanopubEditorOptionFields,
@@ -12,10 +11,10 @@ export default function ResearchSoftware({
   prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
   const schema = z.object({
-    software: validUriPlaceholder,
+    software: z.string().url(),
     title: z.string().min(3).max(200),
     repository: z.string().url(),
-    project: z.string().url().optional().or(z.literal("")),
+    project: z.string().url(),
     datasets: z.array(z.string().url()).optional(),
     researchOutputs: z.array(z.string().url()).optional(),
     license: z.string().url().optional().or(z.literal("")),
@@ -27,11 +26,11 @@ export default function ResearchSoftware({
       {
         name: "software",
         type: "text",
-        label: "Short ID (used as URI suffix)",
-        placeholder: "e.g., my-software-v1",
+        label: "URI of published software",
+        placeholder: "https://doi.org/10... or https://github.com/...",
         required: true,
         description:
-          "A short identifier for this software (letters, numbers, hyphens)",
+          "The URI where the software is published (e.g. a DOI, Zenodo record, or repository URL)",
       },
       {
         name: "title",
@@ -56,10 +55,10 @@ export default function ResearchSoftware({
         name: "project",
         type: "text",
         label: "Research Project",
-        placeholder: "https://w3id.org/np/... or leave empty",
-        required: false,
+        placeholder: "https://w3id.org/np/...",
+        required: true,
         description:
-          "URI of the nanopublication describing the research project that produced this software (optional)",
+          "URI of the nanopublication describing the research project that produced this software",
         section: {
           title: "Software Details",
         },
@@ -131,7 +130,18 @@ export default function ResearchSoftware({
         ...prefilledData,
       },
       onSubmit: async ({ value }) => {
-        await submit(value);
+        // Map repeatable array fields to the template's statement IDs.
+        // sub:st041 uses placeholder sub:dataset; sub:st05 uses sub:researchoutput.
+        const payload: Record<string, string | object> = {
+          ...value,
+          st041: (value.datasets ?? [])
+            .filter(Boolean)
+            .map((d) => ({ dataset: d })),
+          st05: (value.researchOutputs ?? [])
+            .filter(Boolean)
+            .map((r) => ({ researchoutput: r })),
+        };
+        await submit(payload);
       },
     },
   });
