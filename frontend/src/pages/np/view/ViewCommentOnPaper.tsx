@@ -6,16 +6,23 @@
  * in a clean, readable format.
  */
 
+import { useTheme } from "@/components/theme-provider";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
-import { MessageSquare } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
+import {
+  TEMPLATE_METADATA,
+  TEMPLATE_URI,
+  getTemplateBorderClass,
+  getTemplateColorClass,
+} from "../create/components/templates/registry-metadata";
 import { CustomViewerProps } from "./NanopubViewer";
 import { CommentBlock, ItemTitle } from "./shared-components";
+import { TEMPLATE_VIEW_ICONS } from "./view-registry";
 
 const { namedNode } = DataFactory;
 
@@ -84,16 +91,24 @@ function extractCommentOnPaper(store: NanopubStore): CommentOnPaperData | null {
 
 export function ViewCommentOnPaper({ store }: CustomViewerProps) {
   const data = useMemo(() => extractCommentOnPaper(store), [store]);
+  const { resolvedTheme } = useTheme();
 
   const { getLabel } = useLabels();
 
   if (!data) return null;
 
+  const Icon = TEMPLATE_VIEW_ICONS[TEMPLATE_URI.COMMENT_PAPER];
+  const color = TEMPLATE_METADATA[TEMPLATE_URI.COMMENT_PAPER].color!;
+
   return (
-    <Card className="border-l-8 border-l-sky-500">
+    <Card
+      className={`border-l-8 ${getTemplateBorderClass(color, resolvedTheme)}`}
+    >
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <MessageSquare className="h-5 w-5 text-sky-600" />
+          <Icon
+            className={`h-5 w-5 ${getTemplateColorClass(color, resolvedTheme)}`}
+          />
           Comment on Paper
         </CardTitle>
       </CardHeader>
@@ -115,7 +130,7 @@ export function ViewCommentOnPaper({ store }: CustomViewerProps) {
               href={data.paperUrl}
               target="_blank"
               rel="noreferrer"
-              className="text-primary hover:underline inline-flex items-center gap-1 break-all"
+              className="text-link hover:underline inline-flex items-center gap-1 break-all"
             >
               {getLabel(data.paperUrl)}
             </a>

@@ -86,7 +86,7 @@ export function NanopubReferences({ nanopubUri }: { nanopubUri: string }) {
       <CollapsibleTrigger className="flex w-full items-center justify-between p-4 text-left font-medium hover:bg-muted/50 transition-colors">
         <span className="flex items-center gap-2">
           <FileSymlink className="h-5 w-5 text-muted-foreground" />
-          <span>Referencing Nanopublications</span>
+          <span>Related Nanopublications</span>
           {!loading && hasFetched.current && (
             <span className="text-sm text-muted-foreground">
               ({references.length})
@@ -99,7 +99,7 @@ export function NanopubReferences({ nanopubUri }: { nanopubUri: string }) {
           }`}
         />
       </CollapsibleTrigger>
-      <CollapsibleContent className="px-4 pb-4">
+      <CollapsibleContent className="px-4 pb-4 mt-1">
         {loading ? (
           <div className="flex items-center gap-3 py-4 text-muted-foreground">
             <Spinner />
@@ -111,6 +111,7 @@ export function NanopubReferences({ nanopubUri }: { nanopubUri: string }) {
           </div>
         ) : references.length > 0 ? (
           <div className="pt-2">
+            <span>Other Nanopublications which refererence this one:</span>
             <SearchResultList searchResults={references} />
           </div>
         ) : hasFetched.current ? (

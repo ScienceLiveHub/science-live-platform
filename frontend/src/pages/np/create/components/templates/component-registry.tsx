@@ -1,6 +1,6 @@
 /**
  * React component registry
- * This file holds all React component mappings for template URIs
+ * This file holds all React component mappings for template URIs and is only used by the frontend
  */
 
 import { ComponentType } from "react";
@@ -35,7 +35,6 @@ export interface NanopubTemplateDefComponentProps {
 
 /**
  * Maps template IDs to their React components
- * This file is only used by the frontend
  */
 export const TEMPLATE_COMPONENTS: Record<
   string,

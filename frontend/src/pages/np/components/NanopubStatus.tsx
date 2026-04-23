@@ -1,5 +1,6 @@
 import { RelativeDateTime } from "@/components/relative-datetime";
 import { Spinner } from "@/components/ui/spinner";
+import { EmbedLink } from "@/embed/EmbedLink";
 import { AsyncLabel } from "@/hooks/use-labels";
 import { loadSigningProfile, UserIdentity } from "@/lib/api-utils";
 import { authClient } from "@/lib/auth-client";
@@ -18,7 +19,6 @@ import {
   XCircle,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { EmbedLink } from "@/embed/EmbedLink";
 import { toast } from "sonner";
 import { TEMPLATE_URI } from "../create/components/templates/registry-metadata";
 import { CommentEntry } from "./CommentEntry";
@@ -270,7 +270,7 @@ export function NanopubStatus({ nanopubUri }: { nanopubUri: string }) {
             {status.retractedBy && (
               <EmbedLink
                 to={`/np?uri=${status.retractedBy}`}
-                className="text-sm text-primary hover:underline mt-1 inline-flex items-center gap-1"
+                className="text-sm text-link hover:underline mt-1 inline-flex items-center gap-1"
               >
                 View retraction
                 <ExternalLink className="size-3" />
@@ -292,7 +292,7 @@ export function NanopubStatus({ nanopubUri }: { nanopubUri: string }) {
             {status.supercededBy && (
               <EmbedLink
                 to={`/np?uri=${status.supercededBy}`}
-                className="text-sm text-primary hover:underline mt-1 inline-flex items-center gap-1"
+                className="text-sm text-link hover:underline mt-1 inline-flex items-center gap-1"
               >
                 View newer version
                 <ExternalLink className="size-3" />
@@ -360,7 +360,7 @@ export function NanopubStatus({ nanopubUri }: { nanopubUri: string }) {
           className="flex items-center gap-2 cursor-pointer"
           onClick={() => setShowComments(!showComments)}
         >
-          <MessageSquare className="size-4 text-primary" />
+          <MessageSquare className="size-4 text-link" />
           <span className="font-medium">{status.comments}</span>
           <span className="text-muted-foreground text-sm">
             {status.comments === 1 ? "comment" : "comments"}
@@ -423,7 +423,7 @@ export function NanopubStatus({ nanopubUri }: { nanopubUri: string }) {
                     )}
                     <EmbedLink
                       to={`/np?uri=${comment.commentNp}`}
-                      className="text-primary hover:underline items-center gap-1"
+                      className="text-link hover:underline items-center gap-1"
                     >
                       <ExternalLink className="size-3" />
                     </EmbedLink>

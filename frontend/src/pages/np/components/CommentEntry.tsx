@@ -188,7 +188,7 @@ export function CommentEntry({
               comments.
               <Link
                 to="/settings/signing-keys"
-                className="text-primary hover:underline ml-1"
+                className="text-link hover:underline ml-1"
               >
                 Configure signing keys
               </Link>
@@ -213,7 +213,7 @@ export function CommentEntry({
         <p className="text-sm text-muted-foreground">
           <Link
             to={`/auth/sign-in?redirectTo=${encodeURIComponent(location.pathname + location.search)}`}
-            className="text-primary hover:underline"
+            className="text-link hover:underline"
           >
             Sign in
           </Link>{" "}

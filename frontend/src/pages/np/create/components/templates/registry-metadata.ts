@@ -9,6 +9,7 @@ export interface NanopubTemplateMetadata {
   moreDescription?: string;
   category: string;
   icon: string;
+  color?: string;
   recommended?: boolean;
   keywords?: string[];
 }
@@ -110,6 +111,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare citations between papers using Citation Typing Ontology",
     category: "Citation",
     icon: "📚",
+    color: "amber",
     recommended: true,
     keywords: ["citation", "cito", "reference", "cite"],
   },
@@ -118,6 +120,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     description: "Annotating a paper quotation with personal interpretation",
     category: "Annotation",
     icon: "❝❞",
+    color: "rose",
     recommended: true,
     keywords: ["comment", "annotation", "quote", "interpretation"],
   },
@@ -126,6 +129,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     description: "Add comments, quotes, or evaluations to papers",
     category: "Annotation",
     icon: "💬",
+    color: "sky",
     recommended: true,
     keywords: ["comment", "annotation", "quote", "review"],
   },
@@ -134,6 +138,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     description: "Make structured scientific claims following the AIDA model",
     category: "Scientific",
     icon: "🔬",
+    color: "emerald",
     recommended: true,
     keywords: ["aida", "claim", "assertion", "scientific"],
   },
@@ -145,6 +150,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Identify the spatial coverage (e.g. Europe, Canada, or a specific geographical area) and provide supporting quotations from the paper that led to this conclusion. The resulting nanopublication can work with GeoSPARQL queries for efficient spatial discovery of research.",
     category: "geographical coverage",
     icon: "📝",
+    color: "teal",
     recommended: false,
     keywords: ["statement", "general", "rdf", "triple"],
   },
@@ -156,6 +162,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Describe a FAIR Digital Object dataset with metadata including creators, version, license, and access information.",
     category: "Data",
     icon: "📊",
+    color: "violet",
     recommended: true,
     keywords: ["dataset", "data", "fair", "digital object", "zenodo"],
   },
@@ -165,6 +172,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Describe research software with metadata including repository, supporting publications, and related resources.",
     category: "Software",
     icon: "💻",
+    color: "cyan",
     recommended: true,
     keywords: ["software", "code", "repository", "github", "tool"],
   },
@@ -206,6 +214,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Define a research question using the PICO framework (Population, Intervention, Comparator, Outcome)",
     category: "Systematic Review",
     icon: "🔬",
+    color: "indigo",
     recommended: true,
     keywords: [
       "pico",
@@ -225,6 +234,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Define a review question using the PCC framework (Population, Concept, Context)",
     category: "Systematic Review",
     icon: "📋",
+    color: "cyan",
     recommended: true,
     keywords: [
       "pcc",
@@ -245,6 +255,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Captures search terms, databases, date ranges, languages, and methodology notes. Corresponds to PRISMA 2020 Item 7 (Search) for transparent, reproducible literature searches.",
     category: "Systematic Review",
     icon: "🔍",
+    color: "amber",
     recommended: true,
     keywords: [
       "prisma",
@@ -260,6 +271,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare a systematic database search with query strings, filters, and result counts.",
     category: "Systematic Review",
     icon: "🗄️",
+    color: "amber",
     recommended: false,
     keywords: ["prisma", "systematic review", "database", "search", "query"],
   },
@@ -269,6 +281,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare a PRISMA search execution dataset aggregating search results across databases.",
     category: "Systematic Review",
     icon: "📑",
+    color: "amber",
     recommended: false,
     keywords: [
       "prisma",
@@ -284,6 +297,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare a study to be included in a systematic review with rationale.",
     category: "Systematic Review",
     icon: "✅",
+    color: "amber",
     recommended: false,
     keywords: [
       "prisma",
@@ -299,6 +313,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare a PRISMA study assessment dataset with quality and bias evaluations.",
     category: "Systematic Review",
     icon: "📝",
+    color: "amber",
     recommended: false,
     keywords: [
       "prisma",
@@ -315,6 +330,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare a study to be selected for full-text screening in a systematic review.",
     category: "Systematic Review",
     icon: "🔎",
+    color: "amber",
     recommended: false,
     keywords: [
       "prisma",
@@ -332,6 +348,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare an original claim according to FORRT, linking it to an AIDA sentence with a specific FORRT type.",
     category: "Replication",
     icon: "🎓",
+    color: "violet",
     recommended: true,
     keywords: ["forrt", "claim", "aida", "scientific", "replication"],
   },
@@ -341,6 +358,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare a replication or reproduction study design according to FORRT, targeting a specific claim.",
     category: "Replication",
     icon: "🔁",
+    color: "violet",
     recommended: true,
     keywords: [
       "forrt",
@@ -357,6 +375,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare the outcome of a replication or reproduction study, including validation status, confidence, and conclusions.",
     category: "Replication",
     icon: "📊",
+    color: "teal",
     recommended: true,
     keywords: [
       "forrt",
@@ -373,6 +392,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare a replication study with structured Knowledge Loom metadata: software methods, packages, input data, and analysis scripts.",
     category: "Scientific",
     icon: "🔁",
+    color: "violet",
     recommended: true,
     keywords: [
       "forrt",
@@ -389,6 +409,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "Declare a replication outcome with machine-readable evidence from Knowledge Loom: dtreg proof, analysis type, and key results.",
     category: "Scientific",
     icon: "📊",
+    color: "teal",
     recommended: true,
     keywords: [
       "forrt",
@@ -401,3 +422,66 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     ],
   },
 };
+
+/**
+ * Static Tailwind color class mappings for template colors.
+ * Tailwind CSS uses static analysis to detect class names at build time.
+ * Dynamic strings like `text-${color}-600` are NOT detected, so the CSS
+ * for those classes is never generated. This map ensures every class
+ * string appears literally in source so Tailwind can scan it.
+ */
+export const TEMPLATE_COLOR_CLASSES: Record<
+  string,
+  { light: string; dark: string }
+> = {
+  amber: { light: "text-amber-600", dark: "text-amber-300" },
+  rose: { light: "text-rose-600", dark: "text-rose-300" },
+  sky: { light: "text-sky-600", dark: "text-sky-300" },
+  emerald: { light: "text-green-700", dark: "text-green-500" },
+  teal: { light: "text-teal-600", dark: "text-teal-300" },
+  violet: { light: "text-violet-600", dark: "text-violet-300" },
+  cyan: { light: "text-cyan-600", dark: "text-cyan-300" },
+  indigo: { light: "text-indigo-600", dark: "text-indigo-300" },
+};
+
+export const TEMPLATE_BORDER_CLASSES: Record<
+  string,
+  { light: string; dark: string }
+> = {
+  amber: { light: "border-l-amber-500", dark: "border-l-amber-400" },
+  rose: { light: "border-l-rose-500", dark: "border-l-rose-400" },
+  sky: { light: "border-l-sky-500", dark: "border-l-sky-400" },
+  emerald: { light: "border-l-green-500", dark: "border-l-green-400" },
+  teal: { light: "border-l-teal-500", dark: "border-l-teal-400" },
+  violet: { light: "border-l-violet-500", dark: "border-l-violet-400" },
+  cyan: { light: "border-l-cyan-500", dark: "border-l-cyan-400" },
+  indigo: { light: "border-l-indigo-500", dark: "border-l-indigo-400" },
+};
+
+/** Resolves a theme value to "light" or "dark", defaulting to "light" for undefined/"system". */
+function resolveTheme(
+  theme: "light" | "dark" | "system" | undefined,
+): "light" | "dark" {
+  if (theme === "dark") return "dark";
+  return "light";
+}
+
+/** Returns a Tailwind text-color class for the given template color and theme, or the fallback class. */
+export function getTemplateColorClass(
+  color: string | undefined,
+  theme: "light" | "dark" | "system" | undefined,
+  fallback = "text-primary",
+): string {
+  if (!color) return fallback;
+  return TEMPLATE_COLOR_CLASSES[color]?.[resolveTheme(theme)] ?? fallback;
+}
+
+/** Returns a Tailwind border-color class for the given template color and theme, or the fallback class. */
+export function getTemplateBorderClass(
+  color: string | undefined,
+  theme: "light" | "dark" | "system" | undefined,
+  fallback = "border-l-border",
+): string {
+  if (!color) return fallback;
+  return TEMPLATE_BORDER_CLASSES[color]?.[resolveTheme(theme)] ?? fallback;
+}

@@ -5,15 +5,23 @@
  * Displays software title, repository, supporting publications, and related resources.
  */
 
+import { useTheme } from "@/components/theme-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
-import { Code2, ExternalLink, FileText, FolderGit2, Link2 } from "lucide-react";
+import { ExternalLink, FileText, FolderGit2, Link2 } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
+import {
+  TEMPLATE_METADATA,
+  TEMPLATE_URI,
+  getTemplateBorderClass,
+  getTemplateColorClass,
+} from "../create/components/templates/registry-metadata";
 import { CustomViewerProps } from "./NanopubViewer";
 import { ExternalUriLink, ItemTitle } from "./shared-components";
+import { TEMPLATE_VIEW_ICONS } from "./view-registry";
 
 const { namedNode } = DataFactory;
 
@@ -148,15 +156,23 @@ function formatUrlForDisplay(url: string): string {
 
 export function ViewResearchSoftware({ store }: CustomViewerProps) {
   const data = useMemo(() => extractResearchSoftware(store), [store]);
+  const { resolvedTheme } = useTheme();
   const { getLabel } = useLabels();
 
   if (!data) return null;
 
+  const Icon = TEMPLATE_VIEW_ICONS[TEMPLATE_URI.RESEARCH_SOFTWARE];
+  const color = TEMPLATE_METADATA[TEMPLATE_URI.RESEARCH_SOFTWARE].color!;
+
   return (
-    <Card className="border-l-8 border-l-cyan-500">
+    <Card
+      className={`border-l-8 ${getTemplateBorderClass(color, resolvedTheme)}`}
+    >
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Code2 className="h-5 w-5 text-cyan-600" />
+          <Icon
+            className={`h-5 w-5 ${getTemplateColorClass(color, resolvedTheme)}`}
+          />
           Research Software
         </CardTitle>
       </CardHeader>
