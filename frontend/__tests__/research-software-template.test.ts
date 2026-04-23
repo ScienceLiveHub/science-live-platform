@@ -189,8 +189,11 @@ describe("Research Software template", () => {
         title: "Test Research Software",
         repository: REPO_URI,
         project: PROJECT_URI,
-        // Wrong key: should be `st041`, not `datasets`
-        datasets: [datasetUri],
+        // Wrong key AND wrong shape (a bare string[] instead of
+        // Array<Record<string,string>>) — this is what the buggy form
+        // used to send. FormValues rejects this at compile time now,
+        // so we cast to replay the exact bug.
+        datasets: [datasetUri] as unknown as Record<string, string>[],
       },
       pubdata,
       EXAMPLE_privateKey,
