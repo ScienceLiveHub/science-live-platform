@@ -1,6 +1,7 @@
 import { NanopubIcon } from "@/components/nanopub-icon";
 import { PaginationControls } from "@/components/pagination-controls";
 import { RelativeDateTime } from "@/components/relative-datetime";
+import { useTheme } from "@/components/theme-provider";
 import { AsyncLabel } from "@/hooks/use-labels";
 import { usePagination } from "@/hooks/use-pagination";
 import { toScienceLiveNPUri } from "@/lib/uri";
@@ -14,7 +15,11 @@ import {
 import { Check, Loader2, Minus } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { TEMPLATE_METADATA } from "../create/components/templates/registry-metadata";
+import {
+  TEMPLATE_METADATA,
+  TEMPLATE_URI,
+  getTemplateColorClass,
+} from "../create/components/templates/registry-metadata";
 import { TEMPLATE_VIEW_ICONS } from "../view/view-registry";
 
 /** Initial checked state for each template key — false means unchecked */
@@ -42,6 +47,8 @@ const INITIAL_CHECKED: Record<FeedTemplateKey, boolean> = {
 };
 
 export function LatestFeed() {
+  const { resolvedTheme } = useTheme();
+
   const [checked, setChecked] =
     useState<Record<FeedTemplateKey, boolean>>(INITIAL_CHECKED);
 
@@ -99,18 +106,30 @@ export function LatestFeed() {
                 <span className="text-sm font-medium">{group.label}</span>
               </label>
               <div className="ml-6 flex flex-col gap-1">
-                {group.keys.map((key) => (
-                  <label
-                    key={key}
-                    className="flex cursor-pointer items-center gap-2 text-sm font-normal select-none"
-                    onClick={() => toggle(key)}
-                  >
-                    <FeedCheckbox
-                      state={checked[key] ? "checked" : "unchecked"}
-                    />
-                    {FEED_TEMPLATE_LABELS[key]}
-                  </label>
-                ))}
+                {group.keys.map((key) => {
+                  const uri = TEMPLATE_URI[key];
+                  const Icon = TEMPLATE_VIEW_ICONS[uri];
+                  const color = TEMPLATE_METADATA[uri]?.color;
+                  return (
+                    <label
+                      key={key}
+                      className="flex cursor-pointer items-center gap-2 text-sm font-normal select-none"
+                      onClick={() => toggle(key)}
+                    >
+                      <FeedCheckbox
+                        state={checked[key] ? "checked" : "unchecked"}
+                      />
+                      {Icon ? (
+                        <Icon
+                          className={`w-3.5 h-3.5 min-w-3.5 min-h-3.5 ${getTemplateColorClass(color, resolvedTheme)}`}
+                        />
+                      ) : (
+                        <NanopubIcon className="w-2.5 h-2.5 min-w-2.5 min-h-2.5 text-muted-foreground" />
+                      )}
+                      {FEED_TEMPLATE_LABELS[key]}
+                    </label>
+                  );
+                })}
               </div>
             </div>
           );
@@ -172,6 +191,7 @@ function FeedCheckbox({
 }
 
 function FeedResultList({ results }: { results: FeedResult[] }) {
+  const { resolvedTheme } = useTheme();
   return (
     <div className="flex flex-col gap-3">
       {results.map((r, i) => {
@@ -185,13 +205,15 @@ function FeedResultList({ results }: { results: FeedResult[] }) {
           >
             <Link
               to={toScienceLiveNPUri(r.np)}
-              className={`hover:underline ${color ? `text-${color}-600` : "text-primary"}`}
+              // className={`hover:underline ${color ? `text-${color}-600` : "text-primary"}`}
             >
-              <div className="font-medium flex flex-row">
+              <div className={`font-medium flex flex-row`}>
                 {r.template &&
                   TEMPLATE_METADATA[r.template] &&
                   (Icon ? (
-                    <Icon className="w-4 h-4 min-w-4 min-h-4 mt-1 mr-2" />
+                    <Icon
+                      className={`w-4 h-4 min-w-4 min-h-4 mt-1 mr-2 font-medium flex flex-row ${getTemplateColorClass(color, resolvedTheme)}`}
+                    />
                   ) : (
                     <NanopubIcon className="w-3 h-3 min-w-3 min-h-3 mt-1.5 mr-2" />
                   ))}

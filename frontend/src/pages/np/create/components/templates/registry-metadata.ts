@@ -387,3 +387,66 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     ],
   },
 };
+
+/**
+ * Static Tailwind color class mappings for template colors.
+ * Tailwind CSS uses static analysis to detect class names at build time.
+ * Dynamic strings like `text-${color}-600` are NOT detected, so the CSS
+ * for those classes is never generated. This map ensures every class
+ * string appears literally in source so Tailwind can scan it.
+ */
+export const TEMPLATE_COLOR_CLASSES: Record<
+  string,
+  { light: string; dark: string }
+> = {
+  amber: { light: "text-amber-700", dark: "text-amber-300" },
+  rose: { light: "text-rose-700", dark: "text-rose-300" },
+  sky: { light: "text-sky-700", dark: "text-sky-300" },
+  emerald: { light: "text-green-700", dark: "text-green-500" },
+  teal: { light: "text-teal-700", dark: "text-teal-300" },
+  violet: { light: "text-violet-700", dark: "text-violet-300" },
+  cyan: { light: "text-cyan-700", dark: "text-cyan-300" },
+  indigo: { light: "text-indigo-700", dark: "text-indigo-300" },
+};
+
+export const TEMPLATE_BORDER_CLASSES: Record<
+  string,
+  { light: string; dark: string }
+> = {
+  amber: { light: "border-l-amber-500", dark: "border-l-amber-400" },
+  rose: { light: "border-l-rose-500", dark: "border-l-rose-400" },
+  sky: { light: "border-l-sky-500", dark: "border-l-sky-400" },
+  emerald: { light: "border-l-green-500", dark: "border-l-green-400" },
+  teal: { light: "border-l-teal-500", dark: "border-l-teal-400" },
+  violet: { light: "border-l-violet-500", dark: "border-l-violet-400" },
+  cyan: { light: "border-l-cyan-500", dark: "border-l-cyan-400" },
+  indigo: { light: "border-l-indigo-500", dark: "border-l-indigo-400" },
+};
+
+/** Resolves a theme value to "light" or "dark", defaulting to "light" for undefined/"system". */
+function resolveTheme(
+  theme: "light" | "dark" | "system" | undefined,
+): "light" | "dark" {
+  if (theme === "dark") return "dark";
+  return "light";
+}
+
+/** Returns a Tailwind text-color class for the given template color and theme, or the fallback class. */
+export function getTemplateColorClass(
+  color: string | undefined,
+  theme: "light" | "dark" | "system" | undefined,
+  fallback = "text-primary",
+): string {
+  if (!color) return fallback;
+  return TEMPLATE_COLOR_CLASSES[color]?.[resolveTheme(theme)] ?? fallback;
+}
+
+/** Returns a Tailwind border-color class for the given template color and theme, or the fallback class. */
+export function getTemplateBorderClass(
+  color: string | undefined,
+  theme: "light" | "dark" | "system" | undefined,
+  fallback = "border-l-border",
+): string {
+  if (!color) return fallback;
+  return TEMPLATE_BORDER_CLASSES[color]?.[resolveTheme(theme)] ?? fallback;
+}

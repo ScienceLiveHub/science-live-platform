@@ -8,6 +8,7 @@
  * PCC = Population, Concept, Context
  */
 
+import { useTheme } from "@/components/theme-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
@@ -16,6 +17,8 @@ import { useMemo } from "react";
 import {
   TEMPLATE_METADATA,
   TEMPLATE_URI,
+  getTemplateBorderClass,
+  getTemplateColorClass,
 } from "../create/components/templates/registry-metadata";
 import { CustomViewerProps } from "./NanopubViewer";
 import { CommentBlock, ItemTitle } from "./shared-components";
@@ -150,6 +153,7 @@ function extractPCCData(store: NanopubStore): PCCData | null {
 
 export function ViewPCCResearchQuestion({ store }: CustomViewerProps) {
   const data = useMemo(() => extractPCCData(store), [store]);
+  const { resolvedTheme } = useTheme();
 
   if (!data) return null;
 
@@ -157,10 +161,14 @@ export function ViewPCCResearchQuestion({ store }: CustomViewerProps) {
   const color = TEMPLATE_METADATA[TEMPLATE_URI.PCC_RESEARCH_QUESTION].color!;
 
   return (
-    <Card className={`border-l-8 border-l-${color}-500`}>
+    <Card
+      className={`border-l-8 ${getTemplateBorderClass(color, resolvedTheme)}`}
+    >
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Icon className={`h-5 w-5 text-${color}-600`} />
+          <Icon
+            className={`h-5 w-5 ${getTemplateColorClass(color, resolvedTheme)}`}
+          />
           PCC Review Question
         </CardTitle>
       </CardHeader>

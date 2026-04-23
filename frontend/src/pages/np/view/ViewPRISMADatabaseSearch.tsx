@@ -8,6 +8,7 @@
  * search date, query string, and retrieved record count.
  */
 
+import { useTheme } from "@/components/theme-provider";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLabels } from "@/hooks/use-labels";
@@ -18,6 +19,8 @@ import { useMemo } from "react";
 import {
   TEMPLATE_METADATA,
   TEMPLATE_URI,
+  getTemplateBorderClass,
+  getTemplateColorClass,
 } from "../create/components/templates/registry-metadata";
 import { CustomViewerProps } from "./NanopubViewer";
 import { CommentBlock, ExternalUriLink, ItemTitle } from "./shared-components";
@@ -88,6 +91,7 @@ function extractData(store: NanopubStore): PRISMADatabaseSearchData | null {
 
 export function ViewPRISMADatabaseSearch({ store }: CustomViewerProps) {
   const data = useMemo(() => extractData(store), [store]);
+  const { resolvedTheme } = useTheme();
   const { getLabel } = useLabels();
 
   if (!data) return null;
@@ -96,10 +100,14 @@ export function ViewPRISMADatabaseSearch({ store }: CustomViewerProps) {
   const color = TEMPLATE_METADATA[TEMPLATE_URI.PRISMA_DATABASE_SEARCH].color!;
 
   return (
-    <Card className={`border-l-8 border-l-${color}-500`}>
+    <Card
+      className={`border-l-8 ${getTemplateBorderClass(color, resolvedTheme)}`}
+    >
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Icon className={`h-5 w-5 text-${color}-600`} />
+          <Icon
+            className={`h-5 w-5 ${getTemplateColorClass(color, resolvedTheme)}`}
+          />
           Database Search
         </CardTitle>
       </CardHeader>

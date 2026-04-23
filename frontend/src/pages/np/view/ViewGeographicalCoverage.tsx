@@ -6,6 +6,7 @@
  * showing the WKT geometry.
  */
 
+import { useTheme } from "@/components/theme-provider";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLabels } from "@/hooks/use-labels";
@@ -15,6 +16,8 @@ import { MapPin } from "lucide-react";
 import { DataFactory } from "n3";
 import { lazy, Suspense, useMemo } from "react";
 import {
+  getTemplateBorderClass,
+  getTemplateColorClass,
   TEMPLATE_METADATA,
   TEMPLATE_URI,
 } from "../create/components/templates/registry-metadata";
@@ -133,6 +136,7 @@ const ReadOnlyMap = lazy(() => import("../../../components/map-viewer"));
 
 export function ViewGeographicalCoverage({ store }: CustomViewerProps) {
   const data = useMemo(() => extractGeographicalCoverage(store), [store]);
+  const { resolvedTheme } = useTheme();
 
   const { getLabel } = useLabels();
 
@@ -142,10 +146,14 @@ export function ViewGeographicalCoverage({ store }: CustomViewerProps) {
   const color = TEMPLATE_METADATA[TEMPLATE_URI.GEO_COVERAGE].color!;
 
   return (
-    <Card className={`border-l-8 border-l-${color}-500`}>
+    <Card
+      className={`border-l-8 ${getTemplateBorderClass(color, resolvedTheme)}`}
+    >
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Icon className={`h-5 w-5 text-${color}-600`} />
+          <Icon
+            className={`h-5 w-5 ${getTemplateColorClass(color, resolvedTheme)}`}
+          />
           Geographical Coverage
         </CardTitle>
       </CardHeader>

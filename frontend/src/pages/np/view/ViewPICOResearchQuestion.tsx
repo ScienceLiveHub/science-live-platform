@@ -9,6 +9,7 @@
  * PICO = Population, Intervention, Comparator, Outcome
  */
 
+import { useTheme } from "@/components/theme-provider";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NanopubStore } from "@/lib/nanopub-store";
@@ -18,6 +19,8 @@ import { useMemo } from "react";
 import {
   TEMPLATE_METADATA,
   TEMPLATE_URI,
+  getTemplateBorderClass,
+  getTemplateColorClass,
 } from "../create/components/templates/registry-metadata";
 import { CustomViewerProps } from "./NanopubViewer";
 import { CommentBlock, ItemTitle } from "./shared-components";
@@ -344,6 +347,7 @@ function extractPICOData(store: NanopubStore): PICOData | null {
 
 export function ViewPICOResearchQuestion({ store }: CustomViewerProps) {
   const data = useMemo(() => extractPICOData(store), [store]);
+  const { resolvedTheme } = useTheme();
 
   if (!data) return null;
 
@@ -351,10 +355,14 @@ export function ViewPICOResearchQuestion({ store }: CustomViewerProps) {
   const color = TEMPLATE_METADATA[TEMPLATE_URI.PICO_RESEARCH_QUESTION].color!;
 
   return (
-    <Card className={`border-l-8 border-l-${color}-500`}>
+    <Card
+      className={`border-l-8 ${getTemplateBorderClass(color, resolvedTheme)}`}
+    >
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Icon className={`h-5 w-5 text-${color}-600`} />
+          <Icon
+            className={`h-5 w-5 ${getTemplateColorClass(color, resolvedTheme)}`}
+          />
           PICO Research Question
           {data.questionType &&
             (data.questionTypeUri ? (

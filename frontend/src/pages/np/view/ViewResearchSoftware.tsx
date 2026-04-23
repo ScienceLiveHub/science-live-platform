@@ -5,6 +5,7 @@
  * Displays software title, repository, supporting publications, and related resources.
  */
 
+import { useTheme } from "@/components/theme-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
@@ -15,6 +16,8 @@ import { useMemo } from "react";
 import {
   TEMPLATE_METADATA,
   TEMPLATE_URI,
+  getTemplateBorderClass,
+  getTemplateColorClass,
 } from "../create/components/templates/registry-metadata";
 import { CustomViewerProps } from "./NanopubViewer";
 import { ExternalUriLink, ItemTitle } from "./shared-components";
@@ -153,6 +156,7 @@ function formatUrlForDisplay(url: string): string {
 
 export function ViewResearchSoftware({ store }: CustomViewerProps) {
   const data = useMemo(() => extractResearchSoftware(store), [store]);
+  const { resolvedTheme } = useTheme();
   const { getLabel } = useLabels();
 
   if (!data) return null;
@@ -161,10 +165,14 @@ export function ViewResearchSoftware({ store }: CustomViewerProps) {
   const color = TEMPLATE_METADATA[TEMPLATE_URI.RESEARCH_SOFTWARE].color!;
 
   return (
-    <Card className={`border-l-8 border-l-${color}-500`}>
+    <Card
+      className={`border-l-8 ${getTemplateBorderClass(color, resolvedTheme)}`}
+    >
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Icon className={`h-5 w-5 text-${color}-600`} />
+          <Icon
+            className={`h-5 w-5 ${getTemplateColorClass(color, resolvedTheme)}`}
+          />
           Research Software
         </CardTitle>
       </CardHeader>
