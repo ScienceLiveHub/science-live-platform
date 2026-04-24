@@ -2,7 +2,7 @@
  * ViewCitationWithCiTO
  *
  * User-friendly view for nanopubs created with the "Citation with CiTO" template.
- * Displays the citing article and a list of citations with their relation types
+ * Displays the citing Scholarly work and a list of citations with their relation types
  * in a clean, readable format.
  */
 
@@ -39,10 +39,10 @@ const FABIO_SCHOLARLY_WORK = "http://purl.org/spar/fabio/ScholarlyWork";
 // --- Citation with CiTO extraction ------------------------------------
 
 interface CitationWithCiTOData {
-  /** The citing article DOI/URL */
-  citingArticle: string;
-  /** Array of citations: each has a relation type URI and a cited article URL */
-  citations: { relationType: string; citedArticle: string }[];
+  /** The citing Scholarly work DOI/URL */
+  citingWork: string;
+  /** Array of citations: each has a relation type URI and a cited works URL */
+  citations: { relationType: string; citedWork: string }[];
 }
 
 function extractCitationWithCiTO(
@@ -67,29 +67,29 @@ function extractCitationWithCiTO(
 
   if (!scholarlyWorkQuad) return null;
 
-  const citingArticle = scholarlyWorkQuad.subject.value;
+  const citingWork = scholarlyWorkQuad.subject.value;
 
   // Find all citation triples: subject = citingArticle, predicate = cito:*
   // (excluding rdf:type)
   const allQuads = store.getQuads(
-    namedNode(citingArticle),
+    namedNode(citingWork),
     null,
     null,
     assertionGraph,
   );
 
-  const citations: { relationType: string; citedArticle: string }[] = [];
+  const citations: { relationType: string; citedWork: string }[] = [];
   for (const q of allQuads) {
     if (q.predicate.value === NS.RDF("type").value) continue;
     if (Util.isNamedNode(q.object)) {
       citations.push({
         relationType: q.predicate.value,
-        citedArticle: q.object.value,
+        citedWork: q.object.value,
       });
     }
   }
 
-  return { citingArticle, citations };
+  return { citingWork, citations };
 }
 
 export function ViewCitationWithCiTO({ store }: CustomViewerProps) {
@@ -116,14 +116,14 @@ export function ViewCitationWithCiTO({ store }: CustomViewerProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Citing Article */}
+        {/* Citing Work */}
         <div>
-          <ItemTitle title="This Article" />
+          <ItemTitle title="The Creative or Scholarly work" />
           <div className="flex items-center gap-2">
             <Link2 className="h-4 w-4 text-muted-foreground shrink-0" />
             <ExternalUriLink
-              uri={data.citingArticle}
-              label={getLabel(data.citingArticle)}
+              uri={data.citingWork}
+              label={getLabel(data.citingWork)}
             />
           </div>
         </div>
@@ -153,8 +153,8 @@ export function ViewCitationWithCiTO({ store }: CustomViewerProps) {
                     </a>
                     <div>
                       <ExternalUriLink
-                        uri={citation.citedArticle}
-                        label={getLabel(citation.citedArticle)}
+                        uri={citation.citedWork}
+                        label={getLabel(citation.citedWork)}
                       />
                     </div>
                   </div>

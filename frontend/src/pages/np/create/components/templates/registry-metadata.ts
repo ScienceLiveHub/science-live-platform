@@ -151,7 +151,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
   [TEMPLATE_URI.CITATION_CITO]: {
     name: "Citation with CiTO",
     description:
-      "Declare citations between papers using Citation Typing Ontology",
+      "Declare citations between papers or other works, using Citation Typing Ontology",
     category: "Citation",
     icon: "📚",
     color: "amber",

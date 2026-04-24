@@ -105,7 +105,7 @@ export default function CitationWithCiTO({
                 name: "cited",
                 type: "url",
                 label:
-                  "DOI (https://doi.org/10...) or other URL of the cited article",
+                  "DOI (https://doi.org/10...) or other URL of the cited work",
                 placeholder: "https://... or other URL",
                 required: false,
                 section: {
