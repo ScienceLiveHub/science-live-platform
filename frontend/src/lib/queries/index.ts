@@ -5,6 +5,7 @@
  */
 
 export { default as GEOLOCATION } from "./geolocation.rq";
+export { default as LATEST_ALL } from "./latest-all.rq";
 export { default as LATEST_BY_TEMPLATE } from "./latest-by-template.rq";
 export { default as LATEST_BY_TEMPLATES } from "./latest-by-templates.rq";
 export { default as NANOPUB_COMMENTS } from "./nanopub-comments.rq";
