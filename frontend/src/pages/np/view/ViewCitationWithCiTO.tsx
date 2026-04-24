@@ -2,7 +2,7 @@
  * ViewCitationWithCiTO
  *
  * User-friendly view for nanopubs created with the "Citation with CiTO" template.
- * Displays the citing article and a list of citations with their relation types
+ * Displays the citing Scholarly work and a list of citations with their relation types
  * in a clean, readable format.
  */
 
@@ -27,15 +27,22 @@ import { TEMPLATE_VIEW_ICONS } from "./view-registry";
 
 const { namedNode } = DataFactory;
 
+// The current CiTO template types the citing work as schema:CreativeWork;
+// the earlier template used fabio:ScholarlyWork. Both http:// and https://
+// forms of the schema.org namespace occur in the wild.
+const SCHEMA_CREATIVE_WORK_URIS = [
+  "http://schema.org/CreativeWork",
+  "https://schema.org/CreativeWork",
+];
 const FABIO_SCHOLARLY_WORK = "http://purl.org/spar/fabio/ScholarlyWork";
 
 // --- Citation with CiTO extraction ------------------------------------
 
 interface CitationWithCiTOData {
-  /** The citing article DOI/URL */
-  citingArticle: string;
-  /** Array of citations: each has a relation type URI and a cited article URL */
-  citations: { relationType: string; citedArticle: string }[];
+  /** The citing Scholarly work DOI/URL */
+  citingWork: string;
+  /** Array of citations: each has a relation type URI and a cited works URL */
+  citations: { relationType: string; citedWork: string }[];
 }
 
 function extractCitationWithCiTO(
@@ -44,39 +51,45 @@ function extractCitationWithCiTO(
   if (!store.graphUris.assertion) return null;
   const assertionGraph = namedNode(store.graphUris.assertion);
 
-  // Find the citing article: the subject that is a fabio:ScholarlyWork
-  const scholarlyWorkQuad = store.matchOne(
-    null,
-    NS.RDF("type"),
-    namedNode(FABIO_SCHOLARLY_WORK),
-    assertionGraph,
-  );
+  // Find the citing work: the subject typed as schema:CreativeWork (current
+  // template) or fabio:ScholarlyWork (legacy template version).
+  const candidateTypes = [...SCHEMA_CREATIVE_WORK_URIS, FABIO_SCHOLARLY_WORK];
+  let scholarlyWorkQuad: ReturnType<typeof store.matchOne> = null;
+  for (const typeUri of candidateTypes) {
+    scholarlyWorkQuad = store.matchOne(
+      null,
+      NS.RDF("type"),
+      namedNode(typeUri),
+      assertionGraph,
+    );
+    if (scholarlyWorkQuad) break;
+  }
 
   if (!scholarlyWorkQuad) return null;
 
-  const citingArticle = scholarlyWorkQuad.subject.value;
+  const citingWork = scholarlyWorkQuad.subject.value;
 
   // Find all citation triples: subject = citingArticle, predicate = cito:*
   // (excluding rdf:type)
   const allQuads = store.getQuads(
-    namedNode(citingArticle),
+    namedNode(citingWork),
     null,
     null,
     assertionGraph,
   );
 
-  const citations: { relationType: string; citedArticle: string }[] = [];
+  const citations: { relationType: string; citedWork: string }[] = [];
   for (const q of allQuads) {
     if (q.predicate.value === NS.RDF("type").value) continue;
     if (Util.isNamedNode(q.object)) {
       citations.push({
         relationType: q.predicate.value,
-        citedArticle: q.object.value,
+        citedWork: q.object.value,
       });
     }
   }
 
-  return { citingArticle, citations };
+  return { citingWork, citations };
 }
 
 export function ViewCitationWithCiTO({ store }: CustomViewerProps) {
@@ -103,14 +116,14 @@ export function ViewCitationWithCiTO({ store }: CustomViewerProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Citing Article */}
+        {/* Citing Work */}
         <div>
-          <ItemTitle title="This Article" />
+          <ItemTitle title="The Creative or Scholarly work" />
           <div className="flex items-center gap-2">
             <Link2 className="h-4 w-4 text-muted-foreground shrink-0" />
             <ExternalUriLink
-              uri={data.citingArticle}
-              label={getLabel(data.citingArticle)}
+              uri={data.citingWork}
+              label={getLabel(data.citingWork)}
             />
           </div>
         </div>
@@ -140,8 +153,8 @@ export function ViewCitationWithCiTO({ store }: CustomViewerProps) {
                     </a>
                     <div>
                       <ExternalUriLink
-                        uri={citation.citedArticle}
-                        label={getLabel(citation.citedArticle)}
+                        uri={citation.citedWork}
+                        label={getLabel(citation.citedWork)}
                       />
                     </div>
                   </div>

@@ -722,7 +722,7 @@ export class ScienceLivePlugin {
       const doi = parentItem.getField("DOI");
 
       // TODO: should URL or DOI be preferred?
-      const article = doi
+      const work = doi
         ? `https://doi.org/${doi}`
         : parentItem.getField("URL") || undefined;
       const cited = extractDoisFromText(annotationText);
@@ -733,7 +733,7 @@ export class ScienceLivePlugin {
 
       // Prepare data for the form
       const annotationData = {
-        article, // Must be a URL, either DOI url or other URL from Zotero Item
+        work, // Must be a URL, either DOI url or other URL from Zotero Item
         st02,
       };
 
