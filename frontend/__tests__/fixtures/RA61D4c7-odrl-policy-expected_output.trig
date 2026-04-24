@@ -1,5 +1,5 @@
-@prefix this: <https://w3id.org/sciencelive/np/RAzkXH-E0fxztdJbff26ZJC02dkYq_Tffs9KqN8a-ql2s>.
-@prefix sub: <https://w3id.org/sciencelive/np/RAzkXH-E0fxztdJbff26ZJC02dkYq_Tffs9KqN8a-ql2s/>.
+@prefix this: <https://w3id.org/sciencelive/np/RAlqPIWvxiYt580Ri1O8emzBAcuSrF-_wIvG0FUbmwdDI>.
+@prefix sub: <https://w3id.org/sciencelive/np/RAlqPIWvxiYt580Ri1O8emzBAcuSrF-_wIvG0FUbmwdDI/>.
 @prefix np: <http://www.nanopub.org/nschema#>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix prov: <http://www.w3.org/ns/prov#>.
@@ -14,25 +14,25 @@ this: np:hasAssertion sub:assertion;
     a np:Nanopublication
 }
 sub:assertion {
-<constNode> <http://www.w3.org/ns/odrl/2/leftOperand> <http://www.w3.org/ns/odrl/2/purpose>;
-    <http://www.w3.org/ns/odrl/2/operator> <http://www.w3.org/ns/odrl/2/eq>;
-    <http://www.w3.org/ns/odrl/2/rightOperand> <https://w3id.org/dpv#AcademicResearch>.
-<constNode__1> <http://www.w3.org/ns/odrl/2/leftOperand> <http://www.w3.org/ns/odrl/2/purpose>;
-    <http://www.w3.org/ns/odrl/2/operator> <http://www.w3.org/ns/odrl/2/eq>;
-    <http://www.w3.org/ns/odrl/2/rightOperand> <https://w3id.org/dpv#AcademicResearch>.
-<dutyNode> <http://www.w3.org/ns/odrl/2/action> <http://www.w3.org/ns/odrl/2/attribute>;
-    <http://www.w3.org/ns/odrl/2/attributedParty> <https://fair2adapt-eosc.eu>.
 <https://fair2adapt.eu/policy/public-demo-biodiversity> a <http://www.w3.org/ns/odrl/2/Offer>;
-    <http://www.w3.org/ns/odrl/2/duty> <dutyNode>;
-    <http://www.w3.org/ns/odrl/2/permission> <permNode>, <permNode__1>;
-    <http://www.w3.org/ns/odrl/2/prohibition> <prohibNode>, <prohibNode__1>;
+    <http://www.w3.org/ns/odrl/2/duty> sub:dutyNode;
+    <http://www.w3.org/ns/odrl/2/permission> sub:permNode, sub:permNode__1;
+    <http://www.w3.org/ns/odrl/2/prohibition> sub:prohibNode, sub:prohibNode__1;
     <http://www.w3.org/ns/odrl/2/target> <https://fair2adapt.eu/data/public-demo-biodiversity>.
-<permNode> <http://www.w3.org/ns/odrl/2/action> <http://www.w3.org/ns/odrl/2/use>;
-    <http://www.w3.org/ns/odrl/2/constraint> <constNode>.
-<permNode__1> <http://www.w3.org/ns/odrl/2/action> <http://www.w3.org/ns/odrl/2/reproduce>;
-    <http://www.w3.org/ns/odrl/2/constraint> <constNode__1>.
-<prohibNode> <http://www.w3.org/ns/odrl/2/action> <http://www.w3.org/ns/odrl/2/commercialize>.
-<prohibNode__1> <http://www.w3.org/ns/odrl/2/action> <http://www.w3.org/ns/odrl/2/sell>
+sub:dutyNode <http://www.w3.org/ns/odrl/2/action> <http://www.w3.org/ns/odrl/2/attribute>;
+    <http://www.w3.org/ns/odrl/2/attributedParty> <https://fair2adapt-eosc.eu>.
+sub:permNode <http://www.w3.org/ns/odrl/2/action> <http://www.w3.org/ns/odrl/2/use>;
+    <http://www.w3.org/ns/odrl/2/constraint> sub:constNode.
+sub:permNode__1 <http://www.w3.org/ns/odrl/2/action> <http://www.w3.org/ns/odrl/2/reproduce>;
+    <http://www.w3.org/ns/odrl/2/constraint> sub:constNode__1.
+sub:prohibNode <http://www.w3.org/ns/odrl/2/action> <http://www.w3.org/ns/odrl/2/commercialize>.
+sub:prohibNode__1 <http://www.w3.org/ns/odrl/2/action> <http://www.w3.org/ns/odrl/2/sell>.
+sub:constNode <http://www.w3.org/ns/odrl/2/leftOperand> <http://www.w3.org/ns/odrl/2/purpose>;
+    <http://www.w3.org/ns/odrl/2/operator> <http://www.w3.org/ns/odrl/2/eq>;
+    <http://www.w3.org/ns/odrl/2/rightOperand> <https://w3id.org/dpv#AcademicResearch>.
+sub:constNode__1 <http://www.w3.org/ns/odrl/2/leftOperand> <http://www.w3.org/ns/odrl/2/purpose>;
+    <http://www.w3.org/ns/odrl/2/operator> <http://www.w3.org/ns/odrl/2/eq>;
+    <http://www.w3.org/ns/odrl/2/rightOperand> <https://w3id.org/dpv#AcademicResearch>
 }
 sub:provenance {
 sub:assertion prov:wasAttributedTo <https://orcid.org/0000-0000-0000-0000>
@@ -51,5 +51,5 @@ sub:sig npx:signedBy <https://orcid.org/0000-0000-0000-0000>;
     npx:hasAlgorithm "RSA";
     npx:hasPublicKey "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzUBHKF13IXaU5u9U4nYcq9QTCafI2HlYO/6C25hOVjidIYpUh/25or8sAfh6Ezq+v97aYp8NAcLNjNpv+yy5w2mnmAeUQtg6A9gSgWuPfcjh2t6xjBjof74sghjiW4xTyDZTIbCM7K/sL5LR8NCXJX1udPJR5rnY80df+gdzj3W4+l8NvdlRyEbdlncgpjxHPP98787snEN8bFEZzMUaAHRaiH+Yj99KZ/bqj/hMda1GmeJW61PALjT8rN34iDw1U2ILIeGpWPyHGL3eTgr59rsOC6F3fyWW/RCbktSmCvb/w0YqwnZb0jYeIcuVBO/5zYJlw7d8WIw38zmDf/DfYQIDAQAB";
     npx:hasSignatureTarget this:;
-    npx:hasSignature "IveVdn/toqDPonrJ1rvE4EqSBSWUSNAEI2yHDBH+6D2OoOmVKclknntMrXbJY8VUSORust/Qu7cD/Nk4nDNfDsnwfB21QClFIYmBe3p4RIaAN/mpozKJm+xpelh46Ks6HDG8UzjJEtXNbbC8I9KS3gWloxlMP8pF90C+H8maAPG3sRxnE5F8IAs49XvUMb3YdkPERD/CsSQehH1u0umeCWFI84WGl6vQ2XfwXAsjis5amOAHnRpU+xJtKYpE2WzjhbAXFVwQfg/kt8xT0rvO9GzKCJtCJpWaNLx0NKBvbaPl2C3C395OSITdtlJBXBzdHcmWovc5wU9aVBsNcdMAvA=="
+    npx:hasSignature "HhDTVG4lqtDQkcsJV+ly/5Bf8ABmK9HDdnVyA2Z1rr6S4uYO1wJ6zpwsKIivS6Rsau75iFnHy7sWXid0GZDPiVmAu+Fa2h5Ha9hOJauNfF12KnlVA4XZTQTwc/XUW1Cx/sDVt4Uf6CxweqxTjoMT9BVCl1+216UFJ8B1Xt8wLW3WuVUZ9+9ZCUC2rU4PBths/XEGmVA1/I9E6tEyj9UGQNLjsG47zxwERjMqLPupBTGmOTMQ0MsjSzHF4MZWRlt+aXLyyzIJhn/GtnWQSg9VApb4sWV6bNZTHvPPIq225u2V5fnMvGcRULEWFvo2g0lRC9LW5A/TYdsCgXRrJAlgOA=="
 }

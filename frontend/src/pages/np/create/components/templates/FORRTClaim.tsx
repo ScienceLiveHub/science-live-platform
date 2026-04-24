@@ -63,6 +63,9 @@ async function searchAidaSentences(term: string): Promise<ResultItem[]> {
 
 // --- FORRT Claim form ------------------------------------------------------
 
+// TODO: These options should be read dynamically from the template's
+// nt:possibleValue, like Nanodash does. Hardcoding means we need to update
+// this list every time the template is superseded with new types.
 const FORRT_TYPE_OPTIONS = [
   {
     value:
@@ -72,6 +75,31 @@ const FORRT_TYPE_OPTIONS = [
   {
     value: "https://w3id.org/sciencelive/o/terms/scalability-FORRT-Claim",
     label: "scalability (Computational & Performance)",
+  },
+  {
+    value:
+      "https://w3id.org/sciencelive/o/terms/data_quality-FORRT-Claim",
+    label: "data quality (preprocessing, validation, normalization)",
+  },
+  {
+    value:
+      "https://w3id.org/sciencelive/o/terms/data_governance-FORRT-Claim",
+    label: "data governance (access control, licensing, FAIR compliance)",
+  },
+  {
+    value:
+      "https://w3id.org/sciencelive/o/terms/descriptive_pattern-FORRT-Claim",
+    label: "descriptive pattern (observed trend, distribution, correlation)",
+  },
+  {
+    value:
+      "https://w3id.org/sciencelive/o/terms/model_performance-FORRT-Claim",
+    label: "model performance (accuracy, F1 score, evaluation metrics)",
+  },
+  {
+    value:
+      "https://w3id.org/sciencelive/o/terms/statistical_significance-FORRT-Claim",
+    label: "statistical significance (p-value, confidence interval)",
   },
 ];
 

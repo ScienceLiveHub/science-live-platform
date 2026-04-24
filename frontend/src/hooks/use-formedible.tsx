@@ -16,6 +16,7 @@ import { MultiComboboxField } from "@/components/formedible/fields/multicombobox
 import { NumberField } from "@/components/formedible/fields/number-field";
 import { ObjectField } from "@/components/formedible/fields/object-field";
 import { PhoneField } from "@/components/formedible/fields/phone-field";
+import { PrefixedInputField } from "@/components/formedible/fields/prefixed-input-field";
 import { RadioField } from "@/components/formedible/fields/radio-field";
 import { RatingField } from "@/components/formedible/fields/rating-field";
 import { SelectField } from "@/components/formedible/fields/select-field";
@@ -136,6 +137,7 @@ const defaultFieldComponents: Record<string, React.ComponentType<any>> = {
   object: ObjectField,
   combobox: ComboboxField,
   multicombobox: MultiComboboxField,
+  prefixed: PrefixedInputField,
 };
 
 const DefaultProgressComponent: React.FC<{
@@ -1643,6 +1645,7 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
           durationConfig,
           autocompleteConfig,
           maskedInputConfig,
+          prefixedInputConfig,
           objectConfig,
           sliderConfig,
           numberConfig,
@@ -1858,6 +1861,8 @@ export function useFormedible<TFormValues extends Record<string, unknown>>(
                             };
                           } else if (type === "masked") {
                             props = { ...props, maskedInputConfig };
+                          } else if (type === "prefixed") {
+                            props = { ...props, prefixedInputConfig };
                           } else if (type === "object") {
                             props = { ...props, objectConfig, form };
                           } else if (type === "slider") {

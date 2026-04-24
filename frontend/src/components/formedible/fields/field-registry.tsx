@@ -18,6 +18,7 @@ import { MultiComboboxField } from "./multicombobox-field";
 import { NumberField } from "./number-field";
 import { ObjectField } from "./object-field";
 import { PhoneField } from "./phone-field";
+import { PrefixedInputField } from "./prefixed-input-field";
 import { RadioField } from "./radio-field";
 import { RatingField } from "./rating-field";
 import { SelectField } from "./select-field";
@@ -55,6 +56,7 @@ export const fieldComponents: Record<string, FieldComponent> = {
   duration: DurationPickerField,
   location: LocationPickerField,
   masked: MaskedInputField,
+  prefixed: PrefixedInputField,
   object: ObjectField,
 };
 

@@ -18,6 +18,7 @@ import { MultiComboboxField } from "./multicombobox-field";
 import { NumberField } from "./number-field";
 import { ObjectField } from "./object-field";
 import { PhoneField } from "./phone-field";
+import { PrefixedInputField } from "./prefixed-input-field";
 import { RadioField } from "./radio-field";
 import { RatingField } from "./rating-field";
 import { SelectField } from "./select-field";
@@ -51,6 +52,7 @@ export const FIELD_TYPE_COMPONENTS: Record<string, React.ComponentType<any>> = {
   duration: DurationPickerField,
   autocomplete: AutocompleteField,
   masked: MaskedInputField,
+  prefixed: PrefixedInputField,
 };
 
 export const NestedFieldRenderer = <
@@ -100,6 +102,7 @@ export const NestedFieldRenderer = <
     durationConfig,
     autocompleteConfig,
     maskedInputConfig,
+    prefixedInputConfig,
     objectConfig,
     sliderConfig,
     numberConfig,
@@ -219,6 +222,7 @@ export const NestedFieldRenderer = <
           : autocompleteConfig;
     }
     if (type === "masked") props.maskedInputConfig = maskedInputConfig;
+    if (type === "prefixed") props.prefixedInputConfig = prefixedInputConfig;
     if (type === "slider") props.sliderConfig = sliderConfig;
     if (type === "number") props.numberConfig = numberConfig;
     if (type === "date") props.dateConfig = dateConfig;
@@ -298,6 +302,7 @@ export const SharedFieldRenderer = <
     durationConfig,
     autocompleteConfig,
     maskedInputConfig,
+    prefixedInputConfig,
     sliderConfig,
     numberConfig,
     dateConfig,
@@ -397,6 +402,7 @@ export const SharedFieldRenderer = <
         : autocompleteConfig;
   }
   if (type === "masked") props.maskedInputConfig = maskedInputConfig;
+  if (type === "prefixed") props.prefixedInputConfig = prefixedInputConfig;
   if (type === "slider") props.sliderConfig = sliderConfig;
   if (type === "number") props.numberConfig = numberConfig;
   if (type === "date") props.dateConfig = dateConfig;

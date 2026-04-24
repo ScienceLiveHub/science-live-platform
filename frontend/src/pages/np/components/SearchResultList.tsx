@@ -1,10 +1,17 @@
 import { NanopubIcon } from "@/components/nanopub-icon";
 import { RelativeDateTime } from "@/components/relative-datetime";
+import { useTheme } from "@/components/theme-provider";
 import { Badge } from "@/components/ui/badge";
 import { AsyncLabel } from "@/hooks/use-labels";
 import { getUriEnd, toScienceLiveNPUri } from "@/lib/uri";
 import { FileSymlink } from "lucide-react";
 import { Link } from "react-router-dom";
+import {
+  getTemplateColorClass,
+  getTemplateMetadata,
+  resolveTemplateUri,
+} from "../create/components/templates/registry-metadata";
+import { TEMPLATE_VIEW_ICONS } from "../view/view-registry";
 
 export interface SearchResult {
   np: string;
@@ -13,7 +20,6 @@ export interface SearchResult {
   creator: string;
   type?: string;
   template?: string;
-  isExample?: boolean;
   maxScore?: number;
   referenceCount?: number;
 }
@@ -31,10 +37,10 @@ export default function SearchResultList({
           <Link
             key={result.np || index}
             to={toScienceLiveNPUri(result.np)}
-            className="text-primary hover:underline"
+            className="hover:underline"
           >
             <div className="font-medium flex flex-row">
-              <NanopubIcon className="w-3 h-3 min-w-3 min-h-3 mt-1.5 mr-2" />
+              <NanopubTemplateIcon template={result.template} />
               {result.label || "Untitled Nanopublication"}
             </div>
           </Link>
@@ -82,5 +88,19 @@ export default function SearchResultList({
         </div>
       ))}
     </div>
+  );
+}
+
+export function NanopubTemplateIcon({ template }: { template?: string }) {
+  const { resolvedTheme } = useTheme();
+  const resolved = template && resolveTemplateUri(template);
+  const Icon = resolved ? TEMPLATE_VIEW_ICONS[resolved] : undefined;
+  const color = template && getTemplateMetadata(template)?.color;
+  return Icon ? (
+    <Icon
+      className={`w-4 h-4 min-w-4 min-h-4 mt-1 mr-2 font-medium flex flex-row ${getTemplateColorClass(color, resolvedTheme)}`}
+    />
+  ) : (
+    <NanopubIcon className="w-3 h-3 min-w-3 min-h-3 mt-1.5 mr-2 text-link" />
   );
 }

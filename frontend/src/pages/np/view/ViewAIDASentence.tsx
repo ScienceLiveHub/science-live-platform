@@ -8,21 +8,29 @@
  * AIDA = Atomic, Independent, Declarative, Absolute sentences.
  */
 
+import { useTheme } from "@/components/theme-provider";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
 import { toScienceLiveNPUri } from "@/lib/uri";
-import { Database, ExternalLink, FlaskConical, Tag } from "lucide-react";
+import { Database, ExternalLink, Tag } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
+import {
+  TEMPLATE_METADATA,
+  TEMPLATE_URI,
+  getTemplateBorderClass,
+  getTemplateColorClass,
+} from "../create/components/templates/registry-metadata";
 import { CustomViewerProps } from "./NanopubViewer";
 import {
   ItemTitle,
   RelatedNanopubLink,
   ScientificClaimBlock,
 } from "./shared-components";
+import { TEMPLATE_VIEW_ICONS } from "./view-registry";
 
 const { namedNode } = DataFactory;
 
@@ -117,16 +125,23 @@ function extractAIDASentence(store: NanopubStore): AIDASentenceData | null {
 
 export function ViewAIDASentence({ store }: CustomViewerProps) {
   const data = useMemo(() => extractAIDASentence(store), [store]);
+  const { resolvedTheme } = useTheme();
 
   const { getLabel } = useLabels();
 
   if (!data) return null;
+  const Icon = TEMPLATE_VIEW_ICONS[TEMPLATE_URI.AIDA_SENTENCE];
+  const color = TEMPLATE_METADATA[TEMPLATE_URI.AIDA_SENTENCE].color!;
 
   return (
-    <Card className="border-l-8 border-l-emerald-500">
+    <Card
+      className={`border-l-8 ${getTemplateBorderClass(color, resolvedTheme)}`}
+    >
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <FlaskConical className="h-5 w-5 text-emerald-600" />
+          <Icon
+            className={`h-5 w-5 ${getTemplateColorClass(color, resolvedTheme)}`}
+          />
           AIDA Sentence
         </CardTitle>
       </CardHeader>
@@ -189,7 +204,7 @@ export function ViewAIDASentence({ store }: CustomViewerProps) {
                       href={supportingurl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-primary hover:underline inline-flex items-center gap-1 break-all text-sm"
+                      className="text-link hover:underline inline-flex items-center gap-1 break-all text-sm"
                     >
                       {getLabel(supportingurl)}
                       <ExternalLink className="h-3 w-3 shrink-0" />

@@ -1,0 +1,132 @@
+@prefix this: <https://w3id.org/np/RAoLSOhZx_dLX6xnGBN8o1aQSiD8HSrwBshfCjXXSslhE> .
+@prefix sub: <https://w3id.org/np/RAoLSOhZx_dLX6xnGBN8o1aQSiD8HSrwBshfCjXXSslhE/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix nt: <https://w3id.org/np/o/ntemplate/> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix orcid: <https://orcid.org/> .
+@prefix ns1: <http://purl.org/np/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+sub:Head {
+  this: a np:Nanopublication;
+    np:hasAssertion sub:assertion;
+    np:hasProvenance sub:provenance;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+  rdf:type rdfs:label "is a" .
+  
+  <http://www.w3.org/ns/odrl/2/action> rdfs:label "for action" .
+  
+  <http://www.w3.org/ns/odrl/2/assignee> rdfs:label "is granted to" .
+  
+  <http://www.w3.org/ns/odrl/2/distribute> rdfs:label "distribute" .
+  
+  <http://www.w3.org/ns/odrl/2/permission> rdfs:label "has permission" .
+  
+  <http://www.w3.org/ns/odrl/2/reproduce> rdfs:label "reproduce" .
+  
+  <http://www.w3.org/ns/odrl/2/target> rdfs:label "grants access to dataset" .
+  
+  <http://www.w3.org/ns/odrl/2/use> rdfs:label "use" .
+  
+  prov:generatedAtTime rdfs:label "granted at time" .
+  
+  <https://fair2adapt.eu/ns/underPolicy> rdfs:label "under ODRL policy" .
+  
+  sub:assertion a nt:AssertionTemplate;
+    dct:description "Records that a specific DID was granted access to a dataset under an ODRL policy. Serves as an immutable audit trail for data access in the FAIR2Adapt project.";
+    rdfs:label "ODRL Access Grant for FAIR Data";
+    nt:hasNanopubLabelPattern "Access grant: ${datasetUri} -> ${assigneeDid}";
+    nt:hasStatement sub:permGroup, sub:st_assignee, sub:st_policy, sub:st_target, sub:st_time,
+      sub:st_type;
+    nt:hasTag "ODRL";
+    nt:hasTargetNanopubType <http://www.w3.org/ns/odrl/2/Agreement> .
+  
+  sub:assigneeDid a nt:UriPlaceholder;
+    rdfs:label "DID of the requester (e.g. did:web:researcher.example.org)" .
+  
+  sub:datasetUri a nt:UriPlaceholder;
+    rdfs:label "URI of the dataset" .
+  
+  sub:grantPermNode a nt:LocalResource .
+  
+  sub:grantTimestamp a nt:LiteralPlaceholder;
+    rdfs:label "Timestamp of access grant";
+    nt:hasDatatype xsd:dateTime .
+  
+  sub:grantUri a nt:IntroducedResource, nt:UriPlaceholder;
+    rdfs:label "Grant identifier" .
+  
+  sub:grant_perm_action rdf:object sub:grantedAction;
+    rdf:predicate <http://www.w3.org/ns/odrl/2/action>;
+    rdf:subject sub:grantPermNode .
+  
+  sub:grant_perm_link rdf:object sub:grantPermNode;
+    rdf:predicate <http://www.w3.org/ns/odrl/2/permission>;
+    rdf:subject sub:grantUri .
+  
+  sub:grantedAction a nt:RestrictedChoicePlaceholder;
+    rdfs:label "Granted action";
+    nt:possibleValue <http://www.w3.org/ns/odrl/2/distribute>, <http://www.w3.org/ns/odrl/2/reproduce>,
+      <http://www.w3.org/ns/odrl/2/use> .
+  
+  sub:permGroup a nt:GroupedStatement, nt:RepeatableStatement;
+    nt:hasStatement sub:grant_perm_action, sub:grant_perm_link .
+  
+  sub:policyNanopubUri a nt:UriPlaceholder;
+    rdfs:label "Nanopub URI of the ODRL policy this grant is under" .
+  
+  sub:st_assignee rdf:object sub:assigneeDid;
+    rdf:predicate <http://www.w3.org/ns/odrl/2/assignee>;
+    rdf:subject sub:grantUri .
+  
+  sub:st_policy rdf:object sub:policyNanopubUri;
+    rdf:predicate <https://fair2adapt.eu/ns/underPolicy>;
+    rdf:subject sub:grantUri .
+  
+  sub:st_target rdf:object sub:datasetUri;
+    rdf:predicate <http://www.w3.org/ns/odrl/2/target>;
+    rdf:subject sub:grantUri .
+  
+  sub:st_time rdf:object sub:grantTimestamp;
+    rdf:predicate prov:generatedAtTime;
+    rdf:subject sub:grantUri .
+  
+  sub:st_type rdf:object <http://www.w3.org/ns/odrl/2/Agreement>;
+    rdf:predicate rdf:type;
+    rdf:subject sub:grantUri .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo orcid:0000-0002-1784-2920 .
+}
+
+sub:pubinfo {
+  orcid:0000-0002-1784-2920 foaf:name "Anne Fouilloux" .
+  
+  this: dct:created "2026-04-17T07:53:27.023Z"^^xsd:dateTime;
+    dct:creator orcid:0000-0002-1784-2920;
+    dct:license <https://creativecommons.org/licenses/by/4.0/>;
+    npx:hasNanopubType nt:AssertionTemplate;
+    npx:wasCreatedAt <https://nanodash.knowledgepixels.com/>;
+    rdfs:label "ODRL Access Grant for FAIR Data";
+    prov:wasDerivedFrom <https://w3id.org/np/RAeRMv6jOibLPIYBMOGu_FsX6NQ6B59KJCgCFkue4z7Ac>;
+    nt:wasCreatedFromProvenanceTemplate ns1:RAcm8OurwUk15WOgBM9wySo-T3a5h6as4K8YR5MBrrxUc;
+    nt:wasCreatedFromPubinfoTemplate <https://w3id.org/np/RACJ58Gvyn91LqCKIO9zu1eijDQIeEff28iyDrJgjSJF8>,
+      <https://w3id.org/np/RAMEgudZsQ1bh1fZhfYnkthqH6YSXpghSE_DEN1I-6eAI>, <https://w3id.org/np/RARW4MsFkHuwjycNElvEVtuMjpf4yWDL10-0C5l2MqqRQ>,
+      <https://w3id.org/np/RAukAcWHRDlkqxk7H2XNSegc1WnHI569INvNr-xdptDGI>;
+    nt:wasCreatedFromTemplate <https://w3id.org/np/RASDwdz5WzsWdeDRREs0i5n5xTtKTrKS8pCIFUXhlkpt0> .
+  
+  sub:sig npx:hasAlgorithm "RSA";
+    npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDWv2pJnmDsBOq8OlT1aSvYXSuWT34WOp4FYqEzdnn2F0kqzcFevBqWGZDxJWC0lqCrDEuNfp2QFyPe/+nES9dlHGYIhqPi68fwK6ZiNUotRFxXou+rjFznVvUxtCL8Ede79EBHwWN61QtwSIcU12bLoZsNPFlqQASQ93BJuKlihwIDAQAB";
+    npx:hasSignature "D1nYBbTW5wrCu/IG7jrUY8+F5Ry/USTFv8HJMhPDfxDRrdgTm4xcNzzamXYwStXr3WZiVTGo72OeQz+I9AZtY4PLMlYf7AT0vBCpzBwCZ8GYKtmP3Lqs5ROC57NG1TwxDRAAfGg5d3DxMHZAsV27DOA5rfVhED8lbTt/LpV3z8k=";
+    npx:hasSignatureTarget this:;
+    npx:signedBy orcid:0000-0002-1784-2920 .
+}

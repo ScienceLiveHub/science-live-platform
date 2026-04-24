@@ -6,14 +6,21 @@
  * showing the WKT geometry.
  */
 
+import { useTheme } from "@/components/theme-provider";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
-import { Globe, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { DataFactory } from "n3";
 import { lazy, Suspense, useMemo } from "react";
+import {
+  getTemplateBorderClass,
+  getTemplateColorClass,
+  TEMPLATE_METADATA,
+  TEMPLATE_URI,
+} from "../create/components/templates/registry-metadata";
 import { CustomViewerProps } from "./NanopubViewer";
 import {
   CommentBlock,
@@ -21,6 +28,7 @@ import {
   PaperLink,
   QuotationBlock,
 } from "./shared-components";
+import { TEMPLATE_VIEW_ICONS } from "./view-registry";
 
 const { namedNode } = DataFactory;
 
@@ -128,16 +136,24 @@ const ReadOnlyMap = lazy(() => import("../../../components/map-viewer"));
 
 export function ViewGeographicalCoverage({ store }: CustomViewerProps) {
   const data = useMemo(() => extractGeographicalCoverage(store), [store]);
+  const { resolvedTheme } = useTheme();
 
   const { getLabel } = useLabels();
 
   if (!data) return null;
 
+  const Icon = TEMPLATE_VIEW_ICONS[TEMPLATE_URI.GEO_COVERAGE];
+  const color = TEMPLATE_METADATA[TEMPLATE_URI.GEO_COVERAGE].color!;
+
   return (
-    <Card className="border-l-8 border-l-teal-500">
+    <Card
+      className={`border-l-8 ${getTemplateBorderClass(color, resolvedTheme)}`}
+    >
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Globe className="h-5 w-5 text-teal-600" />
+          <Icon
+            className={`h-5 w-5 ${getTemplateColorClass(color, resolvedTheme)}`}
+          />
           Geographical Coverage
         </CardTitle>
       </CardHeader>
@@ -155,7 +171,7 @@ export function ViewGeographicalCoverage({ store }: CustomViewerProps) {
               icon={<MapPin className="h-4 w-4 inline-block mr-1" />}
             />
             <Badge variant="secondary" className="text-sm gap-1">
-              <span className="text-primary opacity-70">⬤</span>{" "}
+              <span className="text-link opacity-70">⬤</span>{" "}
               {data.locationLabel}
             </Badge>
           </div>

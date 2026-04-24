@@ -7,6 +7,24 @@
  * the generic NanopubViewer is used as a fallback.
  */
 
+import {
+  BookCheck,
+  BookOpen,
+  ClipboardCheck,
+  ClipboardList,
+  Code2,
+  Database,
+  FileSpreadsheet,
+  FlaskConical,
+  Globe,
+  GraduationCap,
+  MessageSquare,
+  Microscope,
+  Quote,
+  ScanSearch,
+  SearchCheck,
+  type LucideIcon,
+} from "lucide-react";
 import { ComponentType } from "react";
 import {
   LEGACY_TEMPLATE_URIS,
@@ -20,11 +38,13 @@ import { ViewCitationWithCiTO } from "./ViewCitationWithCiTO";
 import { ViewCommentOnPaper } from "./ViewCommentOnPaper";
 import { ViewDataset } from "./ViewDataset";
 import { ViewFORRTClaim } from "./ViewFORRTClaim";
-import { ViewFORRTReplication } from "./ViewFORRTReplication";
-import { ViewFORRTReplicationOutcome } from "./ViewFORRTReplicationOutcome";
 import { ViewFORRTKLReplication } from "./ViewFORRTKLReplication";
 import { ViewFORRTKLReplicationOutcome } from "./ViewFORRTKLReplicationOutcome";
+import { ViewFORRTReplication } from "./ViewFORRTReplication";
+import { ViewFORRTReplicationOutcome } from "./ViewFORRTReplicationOutcome";
 import { ViewGeographicalCoverage } from "./ViewGeographicalCoverage";
+import { ViewODRLAccessGrant } from "./ViewODRLAccessGrant";
+import { ViewODRLPolicy } from "./ViewODRLPolicy";
 import { ViewPCCResearchQuestion } from "./ViewPCCResearchQuestion";
 import { ViewPICOResearchQuestion } from "./ViewPICOResearchQuestion";
 import { ViewPICOResearchQuestionLegacy } from "./ViewPICOResearchQuestionLegacy";
@@ -49,6 +69,8 @@ export const VIEW_COMPONENTS: Record<
   [TEMPLATE_URI.AIDA_SENTENCE]: ViewAIDASentence,
   [TEMPLATE_URI.GEO_COVERAGE]: ViewGeographicalCoverage,
   [TEMPLATE_URI.DATASET]: ViewDataset,
+  [TEMPLATE_URI.ODRL_POLICY]: ViewODRLPolicy,
+  [TEMPLATE_URI.ODRL_ACCESS_GRANT]: ViewODRLAccessGrant,
   [TEMPLATE_URI.PICO_RESEARCH_QUESTION]: ViewPICOResearchQuestion,
   [TEMPLATE_URI.PCC_RESEARCH_QUESTION]: ViewPCCResearchQuestion,
   [TEMPLATE_URI.RESEARCH_SOFTWARE]: ViewResearchSoftware,
@@ -70,4 +92,30 @@ export const VIEW_COMPONENTS: Record<
     ViewPICOResearchQuestionLegacy,
   [LEGACY_TEMPLATE_URIS.AIDA_SENTENCE![0]]: ViewAIDASentenceLegacy,
   [LEGACY_TEMPLATE_URIS.CITATION_CITO![0]]: ViewCitationWithCiTO,
+};
+
+/**
+ * Maps template IDs to their icons
+ */
+export const TEMPLATE_VIEW_ICONS: Record<string, LucideIcon> = {
+  [TEMPLATE_URI.CITATION_CITO]: BookOpen,
+  [TEMPLATE_URI.ANNOTATE_QUOTATION]: Quote,
+  [TEMPLATE_URI.COMMENT_PAPER]: MessageSquare,
+  [TEMPLATE_URI.AIDA_SENTENCE]: FlaskConical,
+  [TEMPLATE_URI.GEO_COVERAGE]: Globe,
+  [TEMPLATE_URI.DATASET]: Database,
+  [TEMPLATE_URI.PICO_RESEARCH_QUESTION]: Microscope,
+  [TEMPLATE_URI.PCC_RESEARCH_QUESTION]: ClipboardList,
+  [TEMPLATE_URI.RESEARCH_SOFTWARE]: Code2,
+  [TEMPLATE_URI.PRISMA_SEARCH_STRATEGY]: SearchCheck,
+  [TEMPLATE_URI.PRISMA_DATABASE_SEARCH]: Database,
+  [TEMPLATE_URI.PRISMA_SEARCH_EXECUTION_DATASET]: FileSpreadsheet,
+  [TEMPLATE_URI.PRISMA_STUDY_INCLUSION]: BookCheck,
+  [TEMPLATE_URI.PRISMA_STUDY_ASSESSMENT]: ClipboardCheck,
+  [TEMPLATE_URI.PRISMA_FULL_SCREENING]: ScanSearch,
+  [TEMPLATE_URI.FORRT_REPLICATION_OUTCOME]: ClipboardCheck,
+  [TEMPLATE_URI.FORRT_REPLICATION]: FlaskConical,
+  [TEMPLATE_URI.FORRT_CLAIM]: GraduationCap,
+  [TEMPLATE_URI.FORRT_KL_REPLICATION]: FlaskConical,
+  [TEMPLATE_URI.FORRT_KL_REPLICATION_OUTCOME]: ClipboardCheck,
 };
