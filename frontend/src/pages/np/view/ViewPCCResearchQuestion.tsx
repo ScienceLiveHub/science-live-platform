@@ -8,14 +8,21 @@
  * PCC = Population, Concept, Context
  */
 
+import { useTheme } from "@/components/theme-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
-import { ClipboardList } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
+import {
+  TEMPLATE_METADATA,
+  TEMPLATE_URI,
+  getTemplateBorderClass,
+  getTemplateColorClass,
+} from "../create/components/templates/registry-metadata";
 import { CustomViewerProps } from "./NanopubViewer";
 import { CommentBlock, ItemTitle } from "./shared-components";
+import { TEMPLATE_VIEW_ICONS } from "./view-registry";
 
 const { namedNode } = DataFactory;
 
@@ -146,14 +153,22 @@ function extractPCCData(store: NanopubStore): PCCData | null {
 
 export function ViewPCCResearchQuestion({ store }: CustomViewerProps) {
   const data = useMemo(() => extractPCCData(store), [store]);
+  const { resolvedTheme } = useTheme();
 
   if (!data) return null;
 
+  const Icon = TEMPLATE_VIEW_ICONS[TEMPLATE_URI.PCC_RESEARCH_QUESTION];
+  const color = TEMPLATE_METADATA[TEMPLATE_URI.PCC_RESEARCH_QUESTION].color!;
+
   return (
-    <Card className="border-l-8 border-l-cyan-500">
+    <Card
+      className={`border-l-8 ${getTemplateBorderClass(color, resolvedTheme)}`}
+    >
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <ClipboardList className="h-5 w-5 text-cyan-600" />
+          <Icon
+            className={`h-5 w-5 ${getTemplateColorClass(color, resolvedTheme)}`}
+          />
           PCC Review Question
         </CardTitle>
       </CardHeader>

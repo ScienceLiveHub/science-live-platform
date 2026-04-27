@@ -1,14 +1,32 @@
+import { PaginationControls } from "@/components/pagination-controls";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import { usePagination } from "@/hooks/use-pagination";
 import { SEARCH_NANOPUBS } from "@/lib/queries";
 import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_TEXT } from "@/lib/sparql";
 import { isNanopubUri } from "@/lib/uri";
-import { FileSymlink, Search } from "lucide-react";
+import { ArrowDownNarrowWide, FileSymlink, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import ViewerDemo from "../ViewerDemo";
 import SearchResultList, { type SearchResult } from "./SearchResultList";
+
+/** Valid sort options for search results. */
+type SortOption = "maxScore" | "date";
+
+/** SPARQL ORDER BY clause for each sort option. */
+const SORT_ORDER_BY: Record<SortOption, string> = {
+  maxScore: "desc(?maxScore)",
+  date: "desc(?date)",
+};
 
 /**
  * GeneralSearch
@@ -19,11 +37,16 @@ import SearchResultList, { type SearchResult } from "./SearchResultList";
  * - When query is active: shows compact search bar at top and results below
  *
  * Handles both keyword search and nanopub URI navigation.
+ * Supports pagination via the `page` URL search parameter.
  */
 export function GeneralSearch() {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get("q") || "";
   const uri = searchParams.get("uri") || "";
+  const sortByParam = searchParams.get("sort") || "maxScore";
+  const sortBy: SortOption = sortByParam === "date" ? "date" : "maxScore";
+
+  const { currentPage, offset, limit, pageSize, setPage } = usePagination();
 
   const [inputValue, setInputValue] = useState(searchQuery || uri);
   const [searchResults, setSearchResults] = useState<SearchResult[] | null>(
@@ -31,6 +54,8 @@ export function GeneralSearch() {
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Whether there are likely more results beyond the current page. */
+  const [hasMore, setHasMore] = useState(false);
 
   const isNanopubInput = isNanopubUri(inputValue);
   const hasActiveContent = searchQuery || uri;
@@ -40,10 +65,11 @@ export function GeneralSearch() {
     setInputValue(searchQuery || uri);
   }, [searchQuery, uri]);
 
-  // Load search results when searchQuery changes
+  // Load search results when searchQuery or page changes
   useEffect(() => {
     if (!searchQuery) {
       setSearchResults(null);
+      setHasMore(false);
       return;
     }
 
@@ -53,21 +79,31 @@ export function GeneralSearch() {
 
     const performSearch = async () => {
       try {
+        // Fetch one extra row to detect whether there is a next page
         const rows = await executeBindSparql(
           SEARCH_NANOPUBS,
-          { searchTerm: searchQuery },
+          {
+            searchTerm: searchQuery,
+            limit: String(limit),
+            offset: String(offset),
+            sortBy: SORT_ORDER_BY[sortBy],
+          },
           NANOPUB_SPARQL_ENDPOINT_TEXT,
           controller.signal,
         );
 
+        const { visibleRows, hasMore: moreResultsAvailable } =
+          paginateRows(rows);
+
+        setHasMore(moreResultsAvailable);
         setSearchResults(
-          rows.map((row) => ({
+          visibleRows.map((row) => ({
             np: row.np,
             label: row.label || "",
             date: new Date(row.date),
             creator: row.creator || "",
             type: row.type,
-            isExample: row.isExample === "true",
+            template: row.template,
             maxScore: parseFloat(row.maxScore),
             referenceCount: parseInt(row.referenceCount),
           })),
@@ -77,6 +113,7 @@ export function GeneralSearch() {
         console.error("Search failed:", e);
         setError(e?.message || "Search failed");
         setSearchResults(null);
+        setHasMore(false);
       } finally {
         setLoading(false);
       }
@@ -87,7 +124,14 @@ export function GeneralSearch() {
     return () => {
       controller.abort();
     };
-  }, [searchQuery]);
+  }, [searchQuery, sortBy, currentPage]);
+
+  /** Paginate raw SPARQL rows using the current page size. */
+  function paginateRows<T>(rows: T[]) {
+    const hasMoreRows = rows.length > pageSize;
+    const visibleRows = hasMoreRows ? rows.slice(0, pageSize) : rows;
+    return { visibleRows, hasMore: hasMoreRows };
+  }
 
   const handleSubmit = () => {
     if (!inputValue.trim()) return;
@@ -97,15 +141,42 @@ export function GeneralSearch() {
       const next = new URLSearchParams(searchParams);
       next.set("uri", inputValue);
       next.delete("q");
+      next.delete("page");
       setSearchParams(next);
     } else {
-      // It's a search query - perform search
+      // It's a search query - perform search (resets to page 1)
       const next = new URLSearchParams(searchParams);
       next.set("q", inputValue);
       next.delete("uri");
+      next.delete("page");
       setSearchParams(next);
     }
   };
+
+  /** Update sort parameter in URL, resetting to page 1. */
+  const handleSortChange = (value: SortOption) => {
+    const next = new URLSearchParams(searchParams);
+    next.set("sort", value);
+    next.delete("page");
+    setSearchParams(next);
+  };
+
+  /** Sort select dropdown, reused in compact bar and results header. */
+  const renderSortSelect = (size: "sm" | "default" = "default") => (
+    <Select
+      value={sortBy}
+      onValueChange={(v) => handleSortChange(v as SortOption)}
+    >
+      <SelectTrigger size={size} className="gap-1">
+        <ArrowDownNarrowWide className="size-4" />
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="maxScore">Relevance</SelectItem>
+        <SelectItem value="date">Newest first</SelectItem>
+      </SelectContent>
+    </Select>
+  );
 
   // Compact search bar (shown when there's active content)
   const renderCompactSearchBar = () => (
@@ -122,6 +193,7 @@ export function GeneralSearch() {
           }
         }}
       />
+      {searchQuery && renderSortSelect("sm")}
       <Button
         className="inline-flex items-center rounded-md bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 px-6"
         disabled={loading}
@@ -208,12 +280,19 @@ export function GeneralSearch() {
 
     if (!searchResults) return null;
 
+    const firstResultIndex = (currentPage - 1) * pageSize + 1;
+    const lastResultIndex = firstResultIndex + searchResults.length - 1;
+
     return (
       <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">
-          {searchResults.length} result
-          {searchResults.length !== 1 ? "s" : ""} for "{searchQuery}"
-        </h2>
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-lg font-semibold">
+            {searchResults.length > 0
+              ? `Results ${firstResultIndex} - ${lastResultIndex} for "${searchQuery}"`
+              : `No results for "${searchQuery}"`}
+          </h2>
+          {searchResults.length > 0 && renderSortSelect("sm")}
+        </div>
         {searchResults.length > 0 ? (
           <SearchResultList searchResults={searchResults} />
         ) : (
@@ -221,6 +300,12 @@ export function GeneralSearch() {
             No results found for your search.
           </div>
         )}
+        <PaginationControls
+          currentPage={currentPage}
+          hasMore={hasMore}
+          loading={loading}
+          onPageChange={setPage}
+        />
       </div>
     );
   };

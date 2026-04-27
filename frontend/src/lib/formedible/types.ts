@@ -244,6 +244,13 @@ export interface DateFieldProps extends BaseFieldProps {
     showTime?: boolean;
     timeFormat?: string;
 
+    // Timezone selection
+    showTimezone?: boolean;
+    /** Custom list of IANA timezone IDs to show. Defaults to a curated common list. */
+    timezones?: string[];
+    /** Callback invoked when the user selects a timezone. */
+    onTimezoneChange?: (timezone: string) => void;
+
     // Days of week restrictions (0=Sunday, 6=Saturday)
     disabledDaysOfWeek?: number[];
 
@@ -604,6 +611,7 @@ export type FieldComponentProps = BaseFieldProps & {
   };
   comboboxConfig?: ComboboxConfig;
   maskedInputConfig?: MaskedInputConfig;
+  prefixedInputConfig?: PrefixedInputConfig;
   // Allow additional props for extensibility
   [key: string]: unknown;
 };
@@ -975,6 +983,14 @@ export interface MaskedInputConfig {
     conformedValue: string,
     config: unknown,
   ) => false | string | { value: string; indexesOfPipedChars: number[] };
+}
+
+// Prefixed input configuration
+export interface PrefixedInputConfig {
+  /** The full prefix URI/value (shown as a tooltip on the addon chip). */
+  prefix: string;
+  /** Short label rendered in the addon chip (e.g. "nanopub"). */
+  prefixLabel: string;
 }
 
 // Field validation configuration
@@ -1357,6 +1373,7 @@ export interface FieldConfig {
   durationConfig?: DurationConfig;
   autocompleteConfig?: AutocompleteConfig;
   maskedInputConfig?: MaskedInputConfig;
+  prefixedInputConfig?: PrefixedInputConfig;
   objectConfig?: ObjectConfig;
   sliderConfig?: SliderFieldProps["sliderConfig"];
   numberConfig?: NumberConfig;

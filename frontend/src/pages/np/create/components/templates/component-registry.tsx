@@ -1,6 +1,6 @@
 /**
  * React component registry
- * This file holds all React component mappings for template URIs
+ * This file holds all React component mappings for template URIs and is only used by the frontend
  */
 
 import { ComponentType } from "react";
@@ -15,6 +15,8 @@ import FORRTKLReplication from "./FORRTKLReplication";
 import FORRTKLReplicationOutcome from "./FORRTKLReplicationOutcome";
 import FORRTReplication from "./FORRTReplication";
 import FORRTReplicationOutcome from "./FORRTReplicationOutcome";
+import ODRLAccessGrant from "./ODRLAccessGrant";
+import ODRLPolicy from "./ODRLPolicy";
 import PCCResearchQuestion from "./PCCResearchQuestion";
 import PICOResearchQuestion from "./PICOResearchQuestion";
 import PRISMADatabaseSearch from "./PRISMADatabaseSearch";
@@ -34,7 +36,6 @@ export interface NanopubTemplateDefComponentProps {
 
 /**
  * Maps template IDs to their React components
- * This file is only used by the frontend
  */
 export const TEMPLATE_COMPONENTS: Record<
   string,
@@ -49,6 +50,8 @@ export const TEMPLATE_COMPONENTS: Record<
   [TEMPLATE_URI.PICO_RESEARCH_QUESTION]: PICOResearchQuestion,
   [TEMPLATE_URI.PCC_RESEARCH_QUESTION]: PCCResearchQuestion,
   [TEMPLATE_URI.RESEARCH_SOFTWARE]: ResearchSoftware,
+  [TEMPLATE_URI.ODRL_POLICY]: ODRLPolicy,
+  [TEMPLATE_URI.ODRL_ACCESS_GRANT]: ODRLAccessGrant,
   [TEMPLATE_URI.PRISMA_SEARCH_STRATEGY]: PRISMASearchStrategy,
   [TEMPLATE_URI.PRISMA_DATABASE_SEARCH]: PRISMADatabaseSearch,
   [TEMPLATE_URI.PRISMA_SEARCH_EXECUTION_DATASET]: PRISMASearchExecutionDataset,

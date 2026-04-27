@@ -1,5 +1,6 @@
 "use client";
 
+import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -8,21 +9,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -40,21 +28,33 @@ import {
   toScienceLiveNPUri,
 } from "@/lib/uri";
 import {
+  FEED_GROUPS,
+  FEED_TEMPLATE_LABELS,
+  type FeedTemplateKey,
+} from "@/pages/feed/use-feed";
+import {
   AlertTriangle,
   BookCheck,
   CheckCircle2,
   ChevronRight,
-  ChevronsUpDown,
   ExternalLink,
   FilePlus,
   KeyRound,
+  Search,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { NanopubTemplateIcon } from "../../components/SearchResultList";
 import { NanopubViewer } from "../../view/NanopubViewer";
+import { TEMPLATE_VIEW_ICONS } from "../../view/view-registry";
 import AnyStatementTemplate from "./AnyStatementTemplate";
 import { POPULAR_TEMPLATES } from "./templates/registry";
+import {
+  TEMPLATE_METADATA,
+  TEMPLATE_URI,
+  getTemplateColorClass,
+} from "./templates/registry-metadata";
 
 export interface NanopubEditorProps {
   /**
@@ -121,54 +121,87 @@ export interface NanopubEditorProps {
   ) => void;
 }
 
-export function TemplateCombobox({
-  setSelection,
+export function CategorizedTemplateList({
+  onSelect,
 }: {
-  setSelection: (value: string) => void;
+  onSelect: (uri: string) => void;
 }) {
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState("");
+  const { resolvedTheme } = useTheme();
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+
+  const filteredGroups = normalizedSearch
+    ? FEED_GROUPS.map((group) => ({
+        ...group,
+        keys: group.keys.filter((key: FeedTemplateKey) => {
+          const uri = TEMPLATE_URI[key];
+          const label = FEED_TEMPLATE_LABELS[key].toLowerCase();
+          const description =
+            TEMPLATE_METADATA[uri]?.description?.toLowerCase() ?? "";
+          return (
+            label.includes(normalizedSearch) ||
+            description.includes(normalizedSearch)
+          );
+        }),
+      })).filter((group) => group.keys.length > 0)
+    : FEED_GROUPS;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-125 justify-between"
-        >
-          {selected ? POPULAR_TEMPLATES[selected]?.name : "Select template..."}
-          <ChevronsUpDown className="opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-125 p-0">
-        <Command>
-          <CommandInput placeholder="Search template..." className="h-9" />
-          <CommandList>
-            <CommandEmpty>No template found.</CommandEmpty>
-            <CommandGroup>
-              {Object.entries(POPULAR_TEMPLATES).map(([k, t]) => (
-                <CommandItem
-                  className="grid auto-rows-max grid-flow-row"
-                  key={t.name}
-                  value={k}
-                  keywords={[...t.keywords!, t.name]}
-                  onSelect={(value) => {
-                    setSelected(value);
-                    setOpen(false);
-                    setSelection(value);
-                  }}
-                >
-                  <span className="font-bold">{t.name}</span>
-                  <span className="font-light">{t.description}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <div className="flex flex-col gap-4">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="Search templates…"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-9"
+        />
+      </div>
+      {filteredGroups.length === 0 && normalizedSearch ? (
+        <p className="text-muted-foreground text-sm text-center py-4">
+          No templates found for "{searchTerm.trim()}"
+        </p>
+      ) : null}
+      {filteredGroups.map((group) => (
+        <div key={group.label} className="flex flex-col gap-3 mt-2">
+          <span className="text-lg font-bold text-muted-foreground">
+            {group.label}
+          </span>
+          <div className="ml-2 flex flex-col gap-0.5">
+            {group.keys.map((key: FeedTemplateKey) => {
+              const uri = TEMPLATE_URI[key];
+              const Icon = TEMPLATE_VIEW_ICONS[uri];
+              const color = TEMPLATE_METADATA[uri]?.color;
+              const description = TEMPLATE_METADATA[uri]?.description;
+              return (
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="relative group flex flex-col cursor-pointer gap-2 rounded-md p-2 text-md font-normal select-none hover:bg-background text-left w-2xl"
+                    onClick={() => onSelect(uri)}
+                  >
+                    <div className="flex items-center gap-2">
+                      {Icon ? (
+                        <Icon
+                          className={`w-4 h-4 min-w-4 min-h-4 align-middle ${getTemplateColorClass(color, resolvedTheme)}`}
+                        />
+                      ) : null}
+                      {FEED_TEMPLATE_LABELS[key]}
+                    </div>
+                    <p className="text-muted-foreground text-sm max-w-xl">
+                      {description}
+                    </p>
+                    <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -425,7 +458,7 @@ export default function NanopubEditor({
                       href={identity.orcid}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1"
+                      className="text-xs text-muted-foreground hover:text-link flex items-center gap-1"
                     >
                       {extractOrcidId(identity.orcid)}
                     </a>
@@ -489,21 +522,22 @@ export default function NanopubEditor({
             {isPredefined && TemplateComp && !isAdvancedMode ? (
               <>
                 <div className="font-bold inline-flex">
+                  <NanopubTemplateIcon template={templateUri} />
                   {POPULAR_TEMPLATES[templateUri].name}{" "}
                   <a
                     href={toScienceLiveNPUri(templateUri)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="ml-2 text-blue-400"
-                    title="View source template"
+                    title="View template source"
                   >
                     <ExternalLink size={20} />
                   </a>
                 </div>
-                <div className="my-6">
+                <div className="my-2 text-muted-foreground">
                   {POPULAR_TEMPLATES[templateUri].description}
                 </div>
-                <div className="my-8 text-muted-foreground">
+                <div className="my-6 text-muted-foreground/80">
                   {POPULAR_TEMPLATES[templateUri].moreDescription}
                 </div>
                 <TemplateComp
@@ -535,14 +569,11 @@ export default function NanopubEditor({
                 Select a Template to use
               </h1>
 
-              <div className="gap-2 w-full md:w-auto space-y-4">
-                <Label>Use a predefined template:</Label>{" "}
-                <TemplateCombobox
-                  setSelection={(value) => {
-                    onTemplateUriChange?.(value);
-                  }}
-                />
-              </div>
+              <CategorizedTemplateList
+                onSelect={(uri) => {
+                  onTemplateUriChange?.(uri);
+                }}
+              />
               <Collapsible className="mt-6">
                 <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors data-[state=open]:[&>svg]:rotate-90">
                   <ChevronRight className="h-4 w-4 transition-transform duration-100" />

@@ -48,6 +48,7 @@ export interface TemplateField {
   label: string; // Human-readable label from rdfs:label
   type: string;
   types: string[];
+  dataType?: string;
   required?: boolean;
   description?: string;
   options?: { name: string; description: string; uri?: string }[]; // For restricted choice placeholders
@@ -232,6 +233,10 @@ export class NanopubTemplate extends NanopubStore {
       let outputValue = values[placeholderName] || uri;
       // Add any field-specific augmentations (prefix etc)
       const placeholderField = this.fields.find((f) => f.id === uri);
+
+      if (placeholderField?.dataType === NS.XSD("dateTime").value) {
+        return new Date(outputValue as string | number | Date).toISOString();
+      }
       if (placeholderField?.type === PlaceholderType.AUTO_ESCAPE_URI) {
         outputValue = encodeURI(outputValue as string);
       }
@@ -309,8 +314,11 @@ export class NanopubTemplate extends NanopubStore {
 
       const placeholderId = templateTerm.value;
       const formattedValue = formatValue(placeholderId, values);
+      const dataType = this.fields.find(
+        (f) => f.id === placeholderId,
+      )?.dataType;
       return shouldPlaceholderBeLiteral(placeholderId)
-        ? literal(formattedValue)
+        ? literal(formattedValue, dataType ? namedNode(dataType) : undefined)
         : namedNode(formattedValue);
     };
 
@@ -349,7 +357,7 @@ export class NanopubTemplate extends NanopubStore {
 
     // ---- 2. ASSERTION graph, created by processing template statements
 
-    const addStatement = (s: Statement, values: FormValues) => {
+    const addStatementQuad = (s: Statement, values: FormValues) => {
       const subject = createSubjectTerm(s.subject, values);
       const predicate = createPredicateTerm(s.predicate, values);
       const object = createObjectTerm(s.object, values);
@@ -381,10 +389,10 @@ export class NanopubTemplate extends NanopubStore {
         for (const values of placeholderValues[statementName] as Array<
           Record<string, string>
         >) {
-          addStatement(statement, { ...placeholderValues, ...values });
+          addStatementQuad(statement, { ...placeholderValues, ...values });
         }
       } else {
-        addStatement(statement, placeholderValues);
+        addStatementQuad(statement, placeholderValues);
       }
     }
 
@@ -427,7 +435,7 @@ export class NanopubTemplate extends NanopubStore {
           const shortName = getUriEnd(lrUri);
           if (!shortName) continue;
           localResourceOverrides[shortName] =
-            iterIdx === 0 ? shortName : `${shortName}__${iterIdx}`;
+            baseUri + (iterIdx === 0 ? shortName : `${shortName}__${iterIdx}`);
         }
 
         const mergedValues: FormValues = {
@@ -448,7 +456,7 @@ export class NanopubTemplate extends NanopubStore {
           ) {
             continue;
           }
-          addStatement(childStmt, mergedValues);
+          addStatementQuad(childStmt, mergedValues);
 
           // TODO: We currently don't support repeatable statements within child
           //       statements. So far we don't need it, but could implement it as
@@ -645,6 +653,7 @@ export class NanopubTemplate extends NanopubStore {
       placeholderType: [(q: Quad) => q.object.value.endsWith("Placeholder")],
       // type: [NS.RDF("type")],
       types_$array: [NS.RDF("type")],
+      dataType: [NS.NPTs("hasDatatype")],
       name: [NS.RDFS("label")],
       description: [NS.DCT("description")],
       possibleValuesFrom: [NS.NPT("possibleValuesFrom")],
@@ -655,6 +664,7 @@ export class NanopubTemplate extends NanopubStore {
     type Placeholder = {
       placeholderType: string;
       types: string[];
+      dataType: string;
       name: string;
       description: string;
       possibleValuesFrom: string;
@@ -750,7 +760,7 @@ export class NanopubTemplate extends NanopubStore {
           // Is this a LocalResource placeholder?
           const isLocal =
             this.getQuads(
-              namedNode(term.value),
+              term,
               NS.RDF("type"),
               localResourceType,
               assertionGraphNode,
@@ -782,6 +792,7 @@ export class NanopubTemplate extends NanopubStore {
         label: pv.name,
         type: getUriEnd(pv.placeholderType) ?? pv.placeholderType,
         types: pv.types,
+        dataType: pv.dataType,
         description: pv.description,
         regex: pv.hasRegex,
         prefix: pv.hasPrefix,

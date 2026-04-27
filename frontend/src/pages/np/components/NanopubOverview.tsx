@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { EmbedLink } from "@/embed/EmbedLink";
 import { useLabels } from "@/hooks/use-labels";
 import { COMMON_LICENSES } from "@/lib/nanopub-store";
 import { formatDate } from "@/lib/string-format";
@@ -10,8 +11,7 @@ import {
   NotepadTextDashed,
   User,
 } from "lucide-react";
-import { EmbedLink } from "@/embed/EmbedLink";
-import { TEMPLATE_METADATA } from "../create/components/templates/registry-metadata";
+import { getTemplateMetadata } from "../create/components/templates/registry-metadata";
 import { NanopubViewerProps, ShareMenu } from "../view/NanopubViewer";
 import { NanopubStatus } from "./NanopubStatus";
 
@@ -105,7 +105,7 @@ export function NanopubOverview({
                       className="inline-flex items-center gap-1"
                     >
                       <a
-                        className="text-primary hover:underline break-all"
+                        className="text-link hover:underline break-all"
                         href={c.href?.startsWith("http") ? c.href : undefined}
                         target={
                           c.href?.startsWith("http") ? "_blank" : undefined
@@ -190,7 +190,7 @@ export function NanopubOverview({
             <div>
               <span className="font-bold">From Template:</span>{" "}
               <a href={toScienceLiveNPUri(store.metadata.template)}>
-                {TEMPLATE_METADATA[store.metadata.template]?.name ||
+                {getTemplateMetadata(store.metadata.template)?.name ||
                   getLabel(store.metadata.template)}
               </a>
             </div>

@@ -2,32 +2,47 @@
  * ViewCitationWithCiTO
  *
  * User-friendly view for nanopubs created with the "Citation with CiTO" template.
- * Displays the citing article and a list of citations with their relation types
+ * Displays the citing Scholarly work and a list of citations with their relation types
  * in a clean, readable format.
  */
 
+import { useTheme } from "@/components/theme-provider";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
-import { ArrowRight, BookOpen, Link2 } from "lucide-react";
+import { ArrowRight, Link2 } from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
+import {
+  TEMPLATE_METADATA,
+  TEMPLATE_URI,
+  getTemplateBorderClass,
+  getTemplateColorClass,
+} from "../create/components/templates/registry-metadata";
 import { CustomViewerProps } from "./NanopubViewer";
 import { ExternalUriLink, ItemTitle } from "./shared-components";
+import { TEMPLATE_VIEW_ICONS } from "./view-registry";
 
 const { namedNode } = DataFactory;
 
+// The current CiTO template types the citing work as schema:CreativeWork;
+// the earlier template used fabio:ScholarlyWork. Both http:// and https://
+// forms of the schema.org namespace occur in the wild.
+const SCHEMA_CREATIVE_WORK_URIS = [
+  "http://schema.org/CreativeWork",
+  "https://schema.org/CreativeWork",
+];
 const FABIO_SCHOLARLY_WORK = "http://purl.org/spar/fabio/ScholarlyWork";
 
 // --- Citation with CiTO extraction ------------------------------------
 
 interface CitationWithCiTOData {
-  /** The citing article DOI/URL */
-  citingArticle: string;
-  /** Array of citations: each has a relation type URI and a cited article URL */
-  citations: { relationType: string; citedArticle: string }[];
+  /** The citing Scholarly work DOI/URL */
+  citingWork: string;
+  /** Array of citations: each has a relation type URI and a cited works URL */
+  citations: { relationType: string; citedWork: string }[];
 }
 
 function extractCitationWithCiTO(
@@ -36,65 +51,79 @@ function extractCitationWithCiTO(
   if (!store.graphUris.assertion) return null;
   const assertionGraph = namedNode(store.graphUris.assertion);
 
-  // Find the citing article: the subject that is a fabio:ScholarlyWork
-  const scholarlyWorkQuad = store.matchOne(
-    null,
-    NS.RDF("type"),
-    namedNode(FABIO_SCHOLARLY_WORK),
-    assertionGraph,
-  );
+  // Find the citing work: the subject typed as schema:CreativeWork (current
+  // template) or fabio:ScholarlyWork (legacy template version).
+  const candidateTypes = [...SCHEMA_CREATIVE_WORK_URIS, FABIO_SCHOLARLY_WORK];
+  let scholarlyWorkQuad: ReturnType<typeof store.matchOne> = null;
+  for (const typeUri of candidateTypes) {
+    scholarlyWorkQuad = store.matchOne(
+      null,
+      NS.RDF("type"),
+      namedNode(typeUri),
+      assertionGraph,
+    );
+    if (scholarlyWorkQuad) break;
+  }
 
   if (!scholarlyWorkQuad) return null;
 
-  const citingArticle = scholarlyWorkQuad.subject.value;
+  const citingWork = scholarlyWorkQuad.subject.value;
 
   // Find all citation triples: subject = citingArticle, predicate = cito:*
   // (excluding rdf:type)
   const allQuads = store.getQuads(
-    namedNode(citingArticle),
+    namedNode(citingWork),
     null,
     null,
     assertionGraph,
   );
 
-  const citations: { relationType: string; citedArticle: string }[] = [];
+  const citations: { relationType: string; citedWork: string }[] = [];
   for (const q of allQuads) {
     if (q.predicate.value === NS.RDF("type").value) continue;
     if (Util.isNamedNode(q.object)) {
       citations.push({
         relationType: q.predicate.value,
-        citedArticle: q.object.value,
+        citedWork: q.object.value,
       });
     }
   }
 
-  return { citingArticle, citations };
+  return { citingWork, citations };
 }
 
 export function ViewCitationWithCiTO({ store }: CustomViewerProps) {
   const data = useMemo(() => extractCitationWithCiTO(store), [store]);
+  const { resolvedTheme } = useTheme();
 
   const { getLabel } = useLabels();
 
   if (!data) return null;
 
+  const Icon = TEMPLATE_VIEW_ICONS[TEMPLATE_URI.CITATION_CITO];
+  const color = TEMPLATE_METADATA[TEMPLATE_URI.CITATION_CITO].color!;
+
   return (
-    <Card className="border-l-8 border-l-amber-500">
+    <Card
+      className={`border-l-8 ${getTemplateBorderClass(color, resolvedTheme)}`}
+    >
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <BookOpen className="h-5 w-5 text-amber-600" />
+          <Icon
+            className={`h-5 w-5 ${getTemplateColorClass(color, resolvedTheme)}`}
+          />
           Citations
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Citing Article */}
+        {/* Citing Work */}
         <div>
-          <ItemTitle title="This Article" />
+          <ItemTitle title="The Creative or Scholarly work" />
           <div className="flex items-center gap-2">
             <Link2 className="h-4 w-4 text-muted-foreground shrink-0" />
             <ExternalUriLink
-              uri={data.citingArticle}
-              label={getLabel(data.citingArticle)}
+              uri={data.citingWork}
+              label={getLabel(data.citingWork)}
             />
           </div>
         </div>
@@ -124,8 +153,8 @@ export function ViewCitationWithCiTO({ store }: CustomViewerProps) {
                     </a>
                     <div>
                       <ExternalUriLink
-                        uri={citation.citedArticle}
-                        label={getLabel(citation.citedArticle)}
+                        uri={citation.citedWork}
+                        label={getLabel(citation.citedWork)}
                       />
                     </div>
                   </div>

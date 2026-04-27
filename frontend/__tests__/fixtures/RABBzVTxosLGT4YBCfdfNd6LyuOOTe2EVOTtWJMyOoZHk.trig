@@ -1,0 +1,127 @@
+@prefix this: <https://w3id.org/np/RABBzVTxosLGT4YBCfdfNd6LyuOOTe2EVOTtWJMyOoZHk> .
+@prefix sub: <https://w3id.org/np/RABBzVTxosLGT4YBCfdfNd6LyuOOTe2EVOTtWJMyOoZHk/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix nt: <https://w3id.org/np/o/ntemplate/> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix orcid: <https://orcid.org/> .
+@prefix ns1: <http://purl.org/np/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+sub:Head {
+  this: a np:Nanopublication;
+    np:hasAssertion sub:assertion;
+    np:hasProvenance sub:provenance;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+  <http://purl.org/dc/dcmitype/Software> rdfs:label "software" .
+  
+  dct:license rdfs:label "has license" .
+  
+  dct:title rdfs:label "has title" .
+  
+  <http://purl.org/spar/cito/supports> rdfs:label "supports" .
+  
+  rdf:type rdfs:label "is a" .
+  
+  <http://www.w3.org/2004/02/skos/core#related> rdfs:label "is related to" .
+  
+  <https://schema.org/maintainer> rdfs:label "has repository" .
+  
+  <https://schema.org/result> rdfs:label "results from" .
+  
+  sub:assertion a nt:AssertionTemplate;
+    dct:description "Template for describing research software at summary level and linking to its relevant project.";
+    rdfs:label "Describing research software at summary level - simple";
+    nt:hasNanopubLabelPattern "Software: ${title}";
+    nt:hasStatement sub:st01, sub:st02, sub:st03, sub:st04, sub:st041, sub:st05, sub:st06;
+    nt:hasTag "Research Software";
+    nt:hasTargetNanopubType <http://purl.org/dc/dcmitype/Software> .
+  
+  sub:dataset a nt:UriPlaceholder;
+    rdfs:label "URI of published dataset" .
+  
+  sub:license a nt:UriPlaceholder;
+    rdfs:label "URI of license of published software" .
+  
+  sub:project a nt:GuidedChoicePlaceholder;
+    rdfs:label "URI of nanopublication for research project that produced software";
+    nt:possibleValuesFromApi "https://w3id.org/np/l/nanopub-query-1.1/api/RAz6f1v82BCG0SjYMfHUe-m927VTVKdwvsuq1X7j1qcA8/find-things?type=https://schema.org/ResearchProject" .
+  
+  sub:repository a nt:UriPlaceholder;
+    rdfs:label "URI of repository where software is published" .
+  
+  sub:researchoutput a nt:UriPlaceholder;
+    rdfs:label "URI of related scholarly work (e.g. publication)" .
+  
+  sub:software a nt:UriPlaceholder;
+    rdfs:label "URI of published software" .
+  
+  sub:st01 rdf:object <http://purl.org/dc/dcmitype/Software>;
+    rdf:predicate rdf:type;
+    rdf:subject sub:software .
+  
+  sub:st02 rdf:object sub:title;
+    rdf:predicate dct:title;
+    rdf:subject sub:software .
+  
+  sub:st03 rdf:object sub:repository;
+    rdf:predicate <https://schema.org/maintainer>;
+    rdf:subject sub:software .
+  
+  sub:st04 rdf:object sub:project;
+    rdf:predicate <https://schema.org/result>;
+    rdf:subject sub:software .
+  
+  sub:st041 a nt:OptionalStatement, nt:RepeatableStatement;
+    rdf:object sub:dataset;
+    rdf:predicate <http://www.w3.org/2004/02/skos/core#related>;
+    rdf:subject sub:software .
+  
+  sub:st05 a nt:OptionalStatement, nt:RepeatableStatement;
+    rdf:object sub:researchoutput;
+    rdf:predicate <http://purl.org/spar/cito/supports>;
+    rdf:subject sub:software .
+  
+  sub:st06 a nt:OptionalStatement;
+    rdf:object sub:license;
+    rdf:predicate dct:license;
+    rdf:subject sub:software .
+  
+  sub:title a nt:LiteralPlaceholder;
+    rdfs:label "title of published software" .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo orcid:0000-0002-4930-2662 .
+}
+
+sub:pubinfo {
+  orcid:0000-0002-4930-2662 foaf:name "Alessa An Gambardella" .
+  
+  this: dct:created "2025-06-06T17:10:32.053Z"^^xsd:dateTime;
+    dct:creator orcid:0000-0002-4930-2662;
+    dct:license <https://creativecommons.org/licenses/by/4.0/>;
+    npx:supersedes <https://w3id.org/np/RAn4wxVPaV-1gqZ5Nn4pnAFic9vq2zZtBwb4OQe7dBMoQ>;
+    npx:wasCreatedAt <https://nanodash.knowledgepixels.com/>;
+    rdfs:label "Template: Describing research software at summary level - simple";
+    prov:wasDerivedFrom <https://w3id.org/np/RABpEcx2myngtrNsOyYtSZVTvxUrVDKg7A3nvWgjWp6aA>;
+    nt:wasCreatedFromProvenanceTemplate ns1:RANwQa4ICWS5SOjw7gp99nBpXBasapwtZF1fIM3H2gYTM;
+    nt:wasCreatedFromPubinfoTemplate <https://w3id.org/np/RA0J4vUn_dekg-U1kK3AOEt02p9mT2WO03uGxLDec1jLw>,
+      <https://w3id.org/np/RARW4MsFkHuwjycNElvEVtuMjpf4yWDL10-0C5l2MqqRQ>, <https://w3id.org/np/RAoTD7udB2KtUuOuAe74tJi1t3VzK0DyWS7rYVAq1GRvw>,
+      <https://w3id.org/np/RAukAcWHRDlkqxk7H2XNSegc1WnHI569INvNr-xdptDGI>;
+    nt:wasCreatedFromTemplate <https://w3id.org/np/RA5reLVXOCPQFWr2UiCJb19ES7NwOpQRmudb17e2iB0c4> .
+  
+  sub:sig npx:hasAlgorithm "RSA";
+    npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCEJGVv2xFV8o+Ojt3f0N2LgtZTt4+24Lxp8esEZiFYKryDGBYaR0Ef4ajadqtlSpvUHlwNlVIF7XRWiGd64P8drVnqPtpRtxJ+SOl0UNvxuHzUjeWlOYKpKZ/UgrGwVSSR3LvwqXOM9qUkWqy0IQ2KsFbJHHwzgNbcEZuZOD+/WQIDAQAB";
+    npx:hasSignature "CQJ/vbOo/tMor52XWRAUyBGU4LEV6BuL+3SHeVXSZ/3pfr81YkTkUP2mGjtmTBdmAgSTcIh7+U0i3Wm++DSB6sIfha2T2AkVdPrPcthJ9+1ejYp17He65y5ibL3ZFnepz/meJHY0pt/SFm9uvwZGfJlLruosDyzpEHSGVLrWWAQ=";
+    npx:hasSignatureTarget this:;
+    npx:signedBy orcid:0000-0002-4930-2662 .
+}
+

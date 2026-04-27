@@ -50,7 +50,7 @@ export default function CitationWithCiTO({
    * The Schema for types, validation, and error messages
    */
   const schema = z.object({
-    article: z.url(),
+    work: z.url(),
     st02: z
       .array(
         object({
@@ -65,9 +65,9 @@ export default function CitationWithCiTO({
     schema,
     fields: [
       {
-        name: "article",
+        name: "work",
         type: "text",
-        label: "Identifier for the citing paper or other scholarly work",
+        label: "Identifier for the citing creative work",
         placeholder: "https://doi.org/10... or other URL",
         required: true,
       },
@@ -105,7 +105,7 @@ export default function CitationWithCiTO({
                 name: "cited",
                 type: "url",
                 label:
-                  "DOI (https://doi.org/10...) or other URL of the cited article",
+                  "DOI (https://doi.org/10...) or other URL of the cited work",
                 placeholder: "https://... or other URL",
                 required: false,
                 section: {
@@ -124,7 +124,7 @@ export default function CitationWithCiTO({
     expandLabel: "Show",
     formOptions: {
       defaultValues: {
-        article: "",
+        work: "",
         st02: [],
         ...prefilledData,
       },
