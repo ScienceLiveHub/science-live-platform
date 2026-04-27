@@ -11,13 +11,13 @@ export default function ResearchSoftware({
   prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
   const schema = z.object({
-    software: z.string().url(),
+    software: z.url(),
     title: z.string().min(3).max(200),
-    repository: z.string().url(),
-    project: z.string().url(),
-    datasets: z.array(z.string().url()).optional(),
-    researchOutputs: z.array(z.string().url()).optional(),
-    license: z.string().url().optional().or(z.literal("")),
+    repository: z.url(),
+    project: z.url(),
+    datasets: z.array(z.url()).optional(),
+    researchOutputs: z.array(z.url()).optional(),
+    license: z.url().optional().or(z.literal("")),
   });
 
   const { Form } = useFormedible({
@@ -36,7 +36,8 @@ export default function ResearchSoftware({
         name: "title",
         type: "text",
         label: "Software Title",
-        placeholder: "e.g., QOMIC (Quantum Optimization for Motif Identification)",
+        placeholder:
+          "e.g., QOMIC (Quantum Optimization for Motif Identification)",
         required: true,
         description: "The full name or title of the software",
       },
