@@ -14,6 +14,7 @@ import {
   ClipboardList,
   Code2,
   Database,
+  FileKey,
   FileSpreadsheet,
   FlaskConical,
   Globe,
@@ -23,6 +24,7 @@ import {
   Quote,
   ScanSearch,
   SearchCheck,
+  UserKey,
   type LucideIcon,
 } from "lucide-react";
 import { ComponentType } from "react";
@@ -103,6 +105,8 @@ export const TEMPLATE_VIEW_ICONS: Record<string, LucideIcon> = {
   [TEMPLATE_URI.AIDA_SENTENCE]: FlaskConical,
   [TEMPLATE_URI.GEO_COVERAGE]: Globe,
   [TEMPLATE_URI.DATASET]: Database,
+  [TEMPLATE_URI.ODRL_POLICY]: FileKey,
+  [TEMPLATE_URI.ODRL_ACCESS_GRANT]: UserKey,
   [TEMPLATE_URI.PICO_RESEARCH_QUESTION]: Microscope,
   [TEMPLATE_URI.PCC_RESEARCH_QUESTION]: ClipboardList,
   [TEMPLATE_URI.RESEARCH_SOFTWARE]: Code2,
