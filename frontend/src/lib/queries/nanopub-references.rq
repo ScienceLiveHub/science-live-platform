@@ -25,8 +25,7 @@ select ?np ?label ?date ?creator ?template where {
     # Exclude retractions (nanopubs that invalidate the target nanopub)
     filter not exists { ?np npx:invalidates ?_nanopubUri . }
     optional { ?np rdfs:label ?label . }
-    ?np np:hasPublicationInfo ?pubinfo ;
-        np:hasAssertion ?assertion ;
+    ?np np:hasAssertion ?assertion ;
         dct:created ?date ;
         dct:creator ?creator .
   }
@@ -40,8 +39,8 @@ select ?np ?label ?date ?creator ?template where {
   # Exclude disapprovals (assertion contains npx:disapprovesOf for the target)
   filter not exists { graph ?assertion { ?disapprover npx:disapprovesOf ?_nanopubUri . } }
   
-  # Optionally get the template this nanopub was created from (TODO: doesn't work?)
-  optional { graph ?pubinfo { ?np nt:wasCreatedFromTemplate ?template . } }
+  # Optionally get the template this nanopub was created from
+  optional { graph npa:networkGraph { ?np nt:wasCreatedFromTemplate ?template . } }
 }
 order by desc(?date)
 limit 100

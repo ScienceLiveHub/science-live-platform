@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 import { NanopubOverview } from "../components/NanopubOverview";
+import { resolveTemplateUri } from "../create/components/templates/registry-metadata";
 import { VIEW_COMPONENTS } from "./view-registry";
 
 const MenuItem = ({
@@ -135,9 +136,10 @@ export function NanopubViewer({
 }: NanopubViewerProps) {
   const hasScrolledOnLoad = useRef(false);
 
-  const ViewComponent = store.metadata.template
-    ? VIEW_COMPONENTS[store.metadata.template]
-    : null;
+  const resolved =
+    store.metadata.template && resolveTemplateUri(store.metadata.template);
+
+  const ViewComponent = resolved ? VIEW_COMPONENTS[resolved] : null;
 
   const assertionStatements = useMemo(() => {
     return store.graphUris.assertion

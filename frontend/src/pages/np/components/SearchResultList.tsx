@@ -8,7 +8,8 @@ import { FileSymlink } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   getTemplateColorClass,
-  TEMPLATE_METADATA,
+  getTemplateMetadata,
+  resolveTemplateUri,
 } from "../create/components/templates/registry-metadata";
 import { TEMPLATE_VIEW_ICONS } from "../view/view-registry";
 
@@ -92,8 +93,9 @@ export default function SearchResultList({
 
 export function NanopubTemplateIcon({ template }: { template?: string }) {
   const { resolvedTheme } = useTheme();
-  const Icon = template && TEMPLATE_VIEW_ICONS[template];
-  const color = template && TEMPLATE_METADATA[template]?.color;
+  const resolved = template && resolveTemplateUri(template);
+  const Icon = resolved ? TEMPLATE_VIEW_ICONS[resolved] : undefined;
+  const color = template && getTemplateMetadata(template)?.color;
   return Icon ? (
     <Icon
       className={`w-4 h-4 min-w-4 min-h-4 mt-1 mr-2 font-medium flex flex-row ${getTemplateColorClass(color, resolvedTheme)}`}
