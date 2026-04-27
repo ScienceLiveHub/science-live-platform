@@ -24,7 +24,7 @@ import {
   Share2,
   UserCircle,
 } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { NanopubOverview } from "../components/NanopubOverview";
 import { VIEW_COMPONENTS } from "./view-registry";
 
@@ -116,6 +116,16 @@ export type NanopubViewerProps = {
  *   - Citation section below the tabs
  *   - A third tab with raw Trig, if provided
  */
+function scrollToSubject(uri: string, behavior: ScrollBehavior = "smooth") {
+  const id = `subject-${encodeURIComponent(uri).replace(/%/g, "-")}`;
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior, block: "start" });
+    return true;
+  }
+  return false;
+}
+
 export function NanopubViewer({
   store,
   creatorUserIdsByOrcid = {},
@@ -123,6 +133,8 @@ export function NanopubViewer({
   showCitation = true,
   generatedTrig,
 }: NanopubViewerProps) {
+  const hasScrolledOnLoad = useRef(false);
+
   const ViewComponent = store.metadata.template
     ? VIEW_COMPONENTS[store.metadata.template]
     : null;
@@ -176,6 +188,56 @@ export function NanopubViewer({
     }));
   }, [store]);
 
+  // Handle initial scroll when the page loads with a hash pointing to an internal subject
+  useEffect(() => {
+    if (hasScrolledOnLoad.current) return;
+    const hash = window.location.hash.slice(1);
+    if (!hash) return;
+
+    // Try to find a matching subject in the assertion statements
+    const targetUri = assertionStatements.find((st) => {
+      const id = `subject-${encodeURIComponent(st.subject.value).replace(/%/g, "-")}`;
+      return id === hash;
+    })?.subject.value;
+
+    if (targetUri) {
+      // Small delay to ensure DOM is rendered
+      const timer = setTimeout(() => {
+        if (scrollToSubject(targetUri, "auto")) {
+          hasScrolledOnLoad.current = true;
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [assertionStatements]);
+
+  // Listen for browser back/forward (popstate) and scroll to the hash subject
+  useEffect(() => {
+    const handlePopState = () => {
+      const hash = window.location.hash.slice(1);
+      if (!hash) return;
+
+      const targetUri = assertionStatements.find((st) => {
+        const id = `subject-${encodeURIComponent(st.subject.value).replace(/%/g, "-")}`;
+        return id === hash;
+      })?.subject.value;
+
+      if (targetUri) {
+        scrollToSubject(targetUri, "auto");
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [assertionStatements]);
+
+  const handleInternalClick = (uri: string) => {
+    const id = `subject-${encodeURIComponent(uri).replace(/%/g, "-")}`;
+    // Push a new history entry so back/forward buttons work
+    window.history.pushState(null, "", `#${id}`);
+    scrollToSubject(uri, "smooth");
+  };
+
   const rdfGraphsContent = (
     <section className="space-y-4">
       <GraphSection
@@ -184,6 +246,7 @@ export function NanopubViewer({
         statements={assertionStatements}
         Icon={File}
         extraClasses="border-l-8 border-l-yellow-300"
+        onInternalClick={handleInternalClick}
       />
 
       <GraphSection
@@ -201,6 +264,7 @@ export function NanopubViewer({
         statements={pubinfoStatements}
         Icon={UserCircle}
         extraClasses="border-l-8 border-l-blue-800"
+        onInternalClick={handleInternalClick}
       />
 
       {otherGraphs.length > 0 && (
