@@ -12,7 +12,7 @@ import {
   type FeedTemplateKey,
   useFeed,
 } from "@/pages/feed/use-feed";
-import { Check, Loader2, Minus } from "lucide-react";
+import { Check, FilterX, Loader2, Minus } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -47,6 +47,7 @@ const INITIAL_CHECKED: Record<FeedTemplateKey, boolean> = {
   FORRT_REPLICATION_OUTCOME: true,
   FORRT_KL_REPLICATION: false,
   FORRT_KL_REPLICATION_OUTCOME: true,
+  RESEARCH_SYNTHESIS: false,
 };
 
 export function LatestFeed() {
@@ -55,7 +56,7 @@ export function LatestFeed() {
   const [checked, setChecked] =
     useState<Record<FeedTemplateKey, boolean>>(INITIAL_CHECKED);
 
-  const { currentPage, setPage } = usePagination();
+  const { currentPage, setPage, resetPage } = usePagination();
 
   const selected = useMemo(() => {
     const s = new Set<FeedTemplateKey>();
@@ -70,28 +71,59 @@ export function LatestFeed() {
     page: currentPage,
   });
 
-  const toggle = useCallback((key: FeedTemplateKey) => {
-    setChecked((prev) => ({ ...prev, [key]: !prev[key] }));
-  }, []);
+  const toggle = useCallback(
+    (key: FeedTemplateKey) => {
+      setChecked((prev) => ({ ...prev, [key]: !prev[key] }));
+      resetPage();
+    },
+    [resetPage],
+  );
 
-  const toggleGroup = useCallback((keys: FeedTemplateKey[]) => {
+  const clearFilters = useCallback(() => {
     setChecked((prev) => {
-      const allOn = keys.every((k) => prev[k]);
       const next = { ...prev };
-      for (const k of keys) {
-        next[k] = !allOn;
+      for (const key of Object.keys(next) as FeedTemplateKey[]) {
+        next[key] = false;
       }
       return next;
     });
-  }, []);
+    resetPage();
+  }, [resetPage]);
+
+  const toggleGroup = useCallback(
+    (keys: FeedTemplateKey[]) => {
+      setChecked((prev) => {
+        const allOn = keys.every((k) => prev[k]);
+        const next = { ...prev };
+        for (const k of keys) {
+          next[k] = !allOn;
+        }
+        return next;
+      });
+      resetPage();
+    },
+    [resetPage],
+  );
 
   return (
     <div className="flex flex-col gap-6 lg:flex-row">
       {/* Sidebar: template filters */}
       <aside className="flex w-full flex-col gap-4 lg:w-64 lg:min-w-64">
-        <h2 className="text-sm font-medium text-muted-foreground">
-          Filter by template
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-medium text-muted-foreground">
+            Filter by template
+          </h2>
+          {selected.size > 0 && (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <FilterX className="h-3.5 w-3.5" />
+              Clear filters
+            </button>
+          )}
+        </div>
         {FEED_GROUPS.map((group) => {
           const allOn = group.keys.every((k) => checked[k]);
           const someOn = !allOn && group.keys.some((k) => checked[k]);
@@ -148,14 +180,11 @@ export function LatestFeed() {
           </div>
         )}
         {error && <p className="text-sm text-destructive">Error: {error}</p>}
-        {!loading && !error && selected.size === 0 && (
+        {!loading && !error && results.length === 0 && (
           <p className="text-sm text-muted-foreground">
-            Select at least one template type to see results.
-          </p>
-        )}
-        {!loading && !error && selected.size > 0 && results.length === 0 && (
-          <p className="text-sm text-muted-foreground">
-            No nanopublications found for the selected templates.
+            {selected.size === 0
+              ? "No nanopublications found."
+              : "No nanopublications found for the selected templates."}
           </p>
         )}
         {!loading && results.length > 0 && (
@@ -209,11 +238,11 @@ function FeedResultList({ results }: { results: FeedResult[] }) {
                 {displayLabel || "Untitled Nanopublication"}
               </div>
             </Link>
-            {r.description && r.label && (
+            {/* {r.description && r.label && (
               <p className="text-xs text-muted-foreground line-clamp-1">
                 {r.label}
               </p>
-            )}
+            )} */}
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span className="text-xs truncate">
                 By <AsyncLabel uri={r.creator} link />

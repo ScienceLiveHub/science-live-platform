@@ -5,7 +5,8 @@ import type { FieldConfig } from "@/lib/formedible/types";
 /**
  * Intended as a `globalWrapper` for Formedible forms.
  *
- * Prepends the text "optional" above optional form fields.
+ * Prepends the text "optional" above optional form fields
+ * (those not explicitly marked as `required: true` in Formedible field definition).
  */
 export default function ShowOptionalWrapper({
   children,

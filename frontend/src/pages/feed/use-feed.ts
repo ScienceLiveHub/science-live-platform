@@ -1,5 +1,5 @@
 import { DEFAULT_PAGE_SIZE } from "@/hooks/use-pagination";
-import { LATEST_BY_TEMPLATES } from "@/lib/queries";
+import { LATEST_ALL, LATEST_BY_TEMPLATES } from "@/lib/queries";
 import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
 import {
   LEGACY_TEMPLATE_URIS,
@@ -31,6 +31,7 @@ export const FEED_TEMPLATE_KEYS = [
   "FORRT_REPLICATION_OUTCOME",
   "FORRT_KL_REPLICATION",
   "FORRT_KL_REPLICATION_OUTCOME",
+  "RESEARCH_SYNTHESIS",
 ] as const satisfies (keyof typeof TEMPLATE_URI)[];
 
 export type FeedTemplateKey = (typeof FEED_TEMPLATE_KEYS)[number];
@@ -59,6 +60,7 @@ export const FEED_TEMPLATE_LABELS: Record<FeedTemplateKey, string> = {
   FORRT_REPLICATION_OUTCOME: "FORRT Replication Outcome",
   FORRT_KL_REPLICATION: "FORRT KL Replication Study",
   FORRT_KL_REPLICATION_OUTCOME: "FORRT KL Replication Outcome",
+  RESEARCH_SYNTHESIS: "Science Live Research Synthesis",
 };
 
 /** Group labels for organizing checkboxes by category. */
@@ -98,6 +100,7 @@ export const FEED_GROUPS: { label: string; keys: FeedTemplateKey[] }[] = [
       "FORRT_REPLICATION_OUTCOME",
       "FORRT_KL_REPLICATION",
       "FORRT_KL_REPLICATION_OUTCOME",
+      "RESEARCH_SYNTHESIS",
     ],
   },
 ];
@@ -145,32 +148,41 @@ export function useFeed({
   const [hasMore, setHasMore] = useState(false);
 
   useEffect(() => {
-    if (selectedKeys.size === 0) {
-      setResults([]);
-      setHasMore(false);
-      return;
-    }
-
     const controller = new AbortController();
     setLoading(true);
     setError(null);
 
-    const uris = getTemplateUris([...selectedKeys]);
-    const templateValues = uris.map((u) => `(<${u}>)`).join(" ");
     const offset = (page - 1) * pageSize;
     // Fetch one extra row to detect whether there is a next page
     const limit = pageSize + 1;
 
-    executeBindSparql(
-      LATEST_BY_TEMPLATES,
-      {
-        templateValues,
-        limit: String(limit),
-        offset: String(offset),
-      },
-      NANOPUB_SPARQL_ENDPOINT_FULL,
-      controller.signal,
-    )
+    const fetchPromise =
+      selectedKeys.size === 0
+        ? // No filters selected: fetch all latest nanopubs
+          executeBindSparql(
+            LATEST_ALL,
+            {
+              limit: String(limit),
+              offset: String(offset),
+            },
+            NANOPUB_SPARQL_ENDPOINT_FULL,
+            controller.signal,
+          )
+        : // Filters selected: fetch only matching templates
+          executeBindSparql(
+            LATEST_BY_TEMPLATES,
+            {
+              templateValues: getTemplateUris([...selectedKeys])
+                .map((u) => `(<${u}>)`)
+                .join(" "),
+              limit: String(limit),
+              offset: String(offset),
+            },
+            NANOPUB_SPARQL_ENDPOINT_FULL,
+            controller.signal,
+          );
+
+    fetchPromise
       .then((rows) => {
         const moreResultsAvailable = rows.length > pageSize;
         const visibleRows = moreResultsAvailable

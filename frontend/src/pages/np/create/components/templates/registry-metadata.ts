@@ -18,7 +18,7 @@ export interface NanopubTemplateMetadata {
 export const TEMPLATE_URI = {
   // Core templates
   CITATION_CITO:
-    "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo",
+    "https://w3id.org/np/RA43F9EoOuzF0xoNUnCMNyFsfIqlsuWDdPHCnN0wCdCAw",
   ANNOTATE_QUOTATION:
     "https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU",
   COMMENT_PAPER:
@@ -66,6 +66,8 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RAuLEjPp-4dTvPwMkfHggTto1CgjIftiGRAgHlyeEonjQ",
   FORRT_REPLICATION_OUTCOME:
     "https://w3id.org/np/RA2zljn0Nw9SadppOyxZoh-_Rxosslrq-vYG-p9SttnJE",
+  RESEARCH_SYNTHESIS:
+    "https://w3id.org/np/RApmrqOEr4f5bJC2vayrTnzhwnuEfAU_I4Pdg8K5JxeBw",
   // Utility templates (not shown in the nanopub editor)
   COMMENT: "http://purl.org/np/RA3gQDMnYbKCTiQeiUYJYBaH6HUhz8f3HIg71itlsZDgA",
   APPROVE_OR_DISAPPROVE:
@@ -78,12 +80,20 @@ export const TEMPLATE_URI = {
  * Legacy/previous versions of template URIs.
  * Used for viewing nanopubs created with older template versions.
  * Maps template key to array of legacy URIs.
+ *
+ * NOTE: we need to be careful to ensure backwards-compatible support for legacy
+ * template versions in custom view components.
  */
 export const LEGACY_TEMPLATE_URIS: Partial<
   Record<keyof typeof TEMPLATE_URI, string[]>
 > = {
   AIDA_SENTENCE: [
     "https://w3id.org/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE",
+    "http://purl.org/np/RAe39AG652u7Mj8nnuQdhfttfvu5vYTIARJwADGYLMjS0",
+    "https://w3id.org/np/RAMs3KMOjAHN_4a3p5D2VvVE_kialJOKaVS7faQwnKniw",
+  ],
+  CITATION_CITO: [
+    "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo",
   ],
   FORRT_CLAIM: [
     "https://w3id.org/np/RAu5uTahAxc0OLBB3vaGwK3OQDDZV7QuWtDlBk0Ea3bco",
@@ -92,7 +102,45 @@ export const LEGACY_TEMPLATE_URIS: Partial<
   PICO_RESEARCH_QUESTION: [
     "https://w3id.org/np/RAfZfE1gbUtc35W7xT12XTO0ptZwycN2-jj7Jow6COAoQ",
   ],
+  RESEARCH_SYNTHESIS: [
+    "https://w3id.org/np/RA-ahnCOKnyLdqxUKbmRxFrXXc3PQMoa-_ce-W-J5-GLY",
+  ],
 };
+
+/**
+ * Reverse lookup: maps every legacy URI back to the current template URI.
+ * Built automatically from LEGACY_TEMPLATE_URIS so it stays in sync.
+ */
+export const LEGACY_URI_TO_CURRENT_URI: ReadonlyMap<string, string> = new Map(
+  Object.entries(LEGACY_TEMPLATE_URIS).flatMap(([key, uris]) =>
+    (uris ?? []).map((uri) => [
+      uri,
+      TEMPLATE_URI[key as keyof typeof TEMPLATE_URI],
+    ]),
+  ),
+);
+
+/**
+ * Resolves a template URI to its current version.
+ * If the URI is already the current version it is returned as-is.
+ * If it is a legacy URI the corresponding current URI is returned.
+ * If the URI is unknown it is returned unchanged (caller can decide how to handle).
+ */
+export function resolveTemplateUri(uri: string): string {
+  return LEGACY_URI_TO_CURRENT_URI.get(uri) ?? uri;
+}
+
+/**
+ * Returns the template metadata for a given URI, resolving legacy URIs
+ * to their current version first. Returns `undefined` if the URI is
+ * not recognised as a current or legacy template.
+ */
+export function getTemplateMetadata(
+  uri: string,
+): NanopubTemplateMetadata | undefined {
+  return TEMPLATE_METADATA[resolveTemplateUri(uri)];
+}
+
 /**
  * Template metadata without React components
  * Non-React workspaces (e.g., Zotero) should import this directly
@@ -108,7 +156,7 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
   [TEMPLATE_URI.CITATION_CITO]: {
     name: "Citation with CiTO",
     description:
-      "Declare citations between papers using Citation Typing Ontology",
+      "Declare citations between papers or other works, using Citation Typing Ontology",
     category: "Citation",
     icon: "📚",
     color: "amber",
@@ -418,6 +466,24 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "knowledge loom",
       "dtreg",
       "proof",
+      "evidence",
+    ],
+  },
+  [TEMPLATE_URI.RESEARCH_SYNTHESIS]: {
+    name: "Science Live Research Synthesis",
+    description:
+      "Synthesise findings across multiple replication outcomes with conclusions, recommendations, conditions, and limitations.",
+    moreDescription:
+      "Aggregate evidence from supporting nanopubs, link Wikidata topics, and publish actionable recommendations for practitioners.",
+    category: "Replication",
+    icon: "🧬",
+    recommended: true,
+    keywords: [
+      "synthesis",
+      "research synthesis",
+      "replication",
+      "recommendation",
+      "forrt",
       "evidence",
     ],
   },

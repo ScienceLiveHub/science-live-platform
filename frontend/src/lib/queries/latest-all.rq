@@ -1,0 +1,34 @@
+# Get the latest nanopublications regardless of template type.
+# Excludes invalidated and superseded nanopubs.
+#
+# Placeholder: `?_limit` - RAW: maximum number of results to return (e.g. 10).
+# Placeholder: `?_offset` - RAW: number of results to skip for pagination (e.g. 0).
+
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix np: <http://www.nanopub.org/nschema#>
+prefix npa: <http://purl.org/nanopub/admin/>
+prefix npx: <http://purl.org/nanopub/x/>
+prefix dct: <http://purl.org/dc/terms/>
+prefix nt: <https://w3id.org/np/o/ntemplate/>
+
+select ?np ?label ?date ?creator (max(?desc) as ?description) ?template where {
+  graph npa:graph {
+    ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
+    filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+    filter not exists { ?np npx:hasNanopubType npx:ExampleNanopub }
+    ?np dct:created ?date ;
+        dct:creator ?creator .
+    optional { ?np rdfs:label ?label . }
+  }
+  graph ?pubinfo {
+    ?np nt:wasCreatedFromTemplate ?template .
+  }
+  optional {
+    graph ?pubinfo {
+      ?np npx:introduces ?introduced .
+    }
+    graph ?assertion {
+      ?introduced rdfs:label ?desc .
+    }
+  }
+} group by ?np ?label ?date ?creator ?template order by desc(?date) limit ?_limit offset ?_offset

@@ -54,6 +54,39 @@ export function getUriEnd(uri: string) {
 }
 
 /**
+ * Extract the base nanopub URI and fragment from a URI that may point to an internal subject.
+ * e.g. "https://w3id.org/np/RAxxx#Garfield" -> { baseUri: "https://w3id.org/np/RAxxx", fragment: "Garfield", fullUri: "https://w3id.org/np/RAxxx#Garfield" }
+ * Suppots both / and # (legacy) fragment.
+ */
+export function extractNanopubFragment(uri: string): {
+  baseUri: string;
+  fragment: string;
+  fullUri: string;
+} {
+  const hashIndex = uri.indexOf("#");
+  if (hashIndex > 0) {
+    return {
+      baseUri: uri.slice(0, hashIndex),
+      fragment: uri.slice(hashIndex + 1),
+      fullUri: uri,
+    };
+  }
+  // Check for internal path suffix after the nanopub hash
+  const hash = getNanopubHash(uri);
+  if (hash) {
+    const hashEndIndex = uri.indexOf(hash) + hash.length;
+    if (hashEndIndex < uri.length && uri[hashEndIndex] === "/") {
+      return {
+        baseUri: uri.slice(0, hashEndIndex),
+        fragment: uri.slice(hashEndIndex + 1),
+        fullUri: uri,
+      };
+    }
+  }
+  return { baseUri: uri, fragment: "", fullUri: uri };
+}
+
+/**
  * Detect whether it is valid nanupublication URI (without or without any additional suffix/path)
  */
 export function isNanopubUri(uri: string) {

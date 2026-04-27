@@ -2,57 +2,19 @@ import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffi
 import ApiComboboxMultipleExpandable, {
   ApiComboboxSingle,
 } from "@/components/np/api-combobox";
-import { ResultItem, WIKIDATA_ENTITY_API } from "@/components/np/api-endpoints";
+import {
+  ResultItem,
+  searchFORRTClaims,
+  WIKIDATA_ENTITY_API,
+} from "@/components/np/api-endpoints";
 import { QueryComboboxField } from "@/components/np/query-combobox";
 import { useFormedible } from "@/hooks/use-formedible";
-import { NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
-import ky from "ky";
 import { useState } from "react";
 import z from "zod";
 import {
   NanopubEditorOptionFields,
   NanopubTemplateDefComponentProps,
 } from "./component-registry";
-
-// --- FORRT Claim search via SPARQL -----------------------------------------
-
-async function searchFORRTClaims(term: string): Promise<ResultItem[]> {
-  if (term.length < 2) return [];
-
-  const query = `SELECT ?thing ?label WHERE {
-  graph ?g { ?thing a <https://w3id.org/sciencelive/o/terms/FORRT-Claim> }
-  OPTIONAL { graph ?g2 { ?thing <http://www.w3.org/2000/01/rdf-schema#label> ?label } }
-  FILTER(CONTAINS(LCASE(STR(?thing)), '${term.toLowerCase().replace(/'/g, "\\'")}')
-    || CONTAINS(LCASE(STR(?label)), '${term.toLowerCase().replace(/'/g, "\\'")}'))
-} LIMIT 10`;
-
-  try {
-    const res = await ky.post(NANOPUB_SPARQL_ENDPOINT_FULL, {
-      body: new URLSearchParams({ query }),
-      headers: {
-        Accept: "application/sparql-results+xml",
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    });
-
-    const text = await res.text();
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(text, "text/xml");
-    const results = xmlDoc.getElementsByTagName("result");
-
-    return Array.from(results).map((result) => {
-      const uri =
-        result.querySelector("binding[name='thing'] uri")?.textContent || "";
-      const label =
-        result.querySelector("binding[name='label'] literal")?.textContent ||
-        uri;
-      return { uri, label };
-    });
-  } catch (e) {
-    console.error("FORRT claim search error:", e);
-    return [];
-  }
-}
 
 // --- Study type options ----------------------------------------------------
 

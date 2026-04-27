@@ -4,6 +4,7 @@
 # Placeholder: `?_searchTerm` - the user's search string.
 # Placeholder: `?_limit` - RAW: maximum number of results to return (e.g. 10).
 # Placeholder: `?_offset` - RAW: number of results to skip for pagination (e.g. 0).
+# Placeholder: `?_sortBy` - RAW: ORDER BY clause (e.g. "desc(?maxScore)" or "desc(?date)").
 
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 prefix np: <http://www.nanopub.org/nschema#>
@@ -20,21 +21,22 @@ select ?np ?label ?date ?creator ?type ?template (count(?refNp) as ?referenceCou
     filter not exists { ?np npx:hasNanopubType npx:ExampleNanopub }
     optional { ?np rdfs:label ?label . }
     ?np np:hasAssertion ?assertion ;
-        np:hasPublicationInfo ?pubinfo ;
         dct:created ?date ;
         npx:hasNanopubType ?type;
         dct:creator ?creator .
   }
+
+  # TODO: this doesnt work
   filter not exists { graph ?assertion { ?x a nt:AssertionTemplate } }
+
   ?np search:matches [
     search:query ?_searchTerm ;
     search:property rdfs:label ;
     search:score ?score ] .
 
-  optional {
-    # Count references from other nanopubs using npa:networkGraph
-    graph npa:networkGraph { ?refNp npa:refersToNanopub ?np . }
-    # Get the template used to create it, if any
-    graph ?pubinfo { ?x nt:wasCreatedFromTemplate ?template . }
-  }
-} group by ?np ?label ?date ?creator ?type ?template order by desc(?maxScore) limit ?_limit offset ?_offset
+  # Count references from other nanopubs using npa:networkGraph
+  optional { graph npa:networkGraph { ?refNp npa:refersToNanopub ?np . } }
+
+  optional { graph npa:networkGraph { ?np nt:wasCreatedFromTemplate ?template . } }
+
+} group by ?np ?label ?date ?creator ?type ?template order by ?_sortBy limit ?_limit offset ?_offset

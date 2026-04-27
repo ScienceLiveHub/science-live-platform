@@ -11,7 +11,7 @@ import {
   NotepadTextDashed,
   User,
 } from "lucide-react";
-import { TEMPLATE_METADATA } from "../create/components/templates/registry-metadata";
+import { getTemplateMetadata } from "../create/components/templates/registry-metadata";
 import { NanopubViewerProps, ShareMenu } from "../view/NanopubViewer";
 import { NanopubStatus } from "./NanopubStatus";
 
@@ -190,7 +190,7 @@ export function NanopubOverview({
             <div>
               <span className="font-bold">From Template:</span>{" "}
               <a href={toScienceLiveNPUri(store.metadata.template)}>
-                {TEMPLATE_METADATA[store.metadata.template]?.name ||
+                {getTemplateMetadata(store.metadata.template)?.name ||
                   getLabel(store.metadata.template)}
               </a>
             </div>
