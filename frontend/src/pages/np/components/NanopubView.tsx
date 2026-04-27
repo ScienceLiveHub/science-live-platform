@@ -1,10 +1,12 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useNanopub } from "@/hooks/use-nanopub";
+import { extractNanopubFragment } from "@/lib/uri";
+import { useEffect, useMemo } from "react";
 import { NanopubViewer } from "../view/NanopubViewer";
 import { NanopubReferences } from "./NanopubReferences";
 
 interface NanopubViewProps {
-  /** The nanopub URI to load and display. */
+  /** The nanopub URI to load and display. May include a fragment pointing to an internal object. */
   uri: string;
 }
 
@@ -13,9 +15,25 @@ interface NanopubViewProps {
  *
  * Loads a nanopublication by URI and renders the full viewer with references.
  * Manages its own loading/error state via the `useNanopub` hook.
+ * If the URI contains a fragment pointing to an internal object, sets the hash
+ * so that NanopubViewer can scroll to it after loading.
  */
 export function NanopubView({ uri }: NanopubViewProps) {
-  const { store, loading, error, creatorUserIdsByOrcid } = useNanopub(uri);
+  const { baseUri, fragment, fullUri } = useMemo(
+    () => extractNanopubFragment(uri),
+    [uri],
+  );
+
+  // If the URI contains a fragment for an internal object, set it as the URL hash
+  // so NanopubViewer can scroll to it after the assertion statements are rendered.
+  useEffect(() => {
+    if (fragment && !window.location.hash) {
+      const id = `subject-${encodeURIComponent(fullUri).replace(/%/g, "-")}`;
+      window.history.replaceState(null, "", `#${id}`);
+    }
+  }, [fragment, fullUri]);
+
+  const { store, loading, error, creatorUserIdsByOrcid } = useNanopub(baseUri);
 
   if (loading) {
     return (
@@ -41,7 +59,7 @@ export function NanopubView({ uri }: NanopubViewProps) {
         store={store}
         creatorUserIdsByOrcid={creatorUserIdsByOrcid}
       />
-      <NanopubReferences nanopubUri={uri} />
+      <NanopubReferences nanopubUri={baseUri} />
     </>
   );
 }

@@ -19,11 +19,15 @@ function TripleCell({
   className,
   innerClassName,
   colSpan,
+  isInternalLink,
+  onInternalClick,
 }: {
   display: { text: string; href?: string };
   className?: string;
   innerClassName?: string;
   colSpan?: number;
+  isInternalLink?: boolean;
+  onInternalClick?: () => void;
 }) {
   return (
     <td
@@ -31,18 +35,36 @@ function TripleCell({
       colSpan={colSpan}
     >
       {display.href ? (
-        <a
-          className={`text-blue-600 dark:text-blue-300 hover:underline ${innerClassName || ""}`}
-          href={
-            isNanopubUri(display.href)
-              ? toScienceLiveNPUri(display.href)
-              : display.href
-          }
-          target="_blank"
-          rel="noreferrer"
-        >
-          {display.text}
-        </a>
+        isInternalLink ? (
+          <a
+            href={
+              isNanopubUri(display.href)
+                ? toScienceLiveNPUri(display.href)
+                : display.href
+            }
+            onClick={(e) => {
+              e.preventDefault();
+              onInternalClick?.();
+            }}
+            className={`inline-flex items-center gap-1 text-cyan-600 dark:text-cyan-300 hover:underline cursor-pointer ${innerClassName || ""}`}
+            title={`Jump to ${display.text}`}
+          >
+            {display.text}
+          </a>
+        ) : (
+          <a
+            className={`text-blue-600 dark:text-blue-300 hover:underline ${innerClassName || ""}`}
+            href={
+              isNanopubUri(display.href)
+                ? toScienceLiveNPUri(display.href)
+                : display.href
+            }
+            target="_blank"
+            rel="noreferrer"
+          >
+            {display.text}
+          </a>
+        )
       ) : (
         display.text
       )}
@@ -55,13 +77,19 @@ function TripleRow({
   st,
   excludeSub,
   className,
+  onInternalClick,
 }: {
   store: NanopubStore;
   st: Statement;
   excludeSub?: boolean;
   className?: string;
+  onInternalClick?: (uri: string) => void;
 }) {
   const { getLabel } = useLabels();
+  const nanopubUri = store.metadata.uri || store.prefixes["this"];
+
+  const isInternal = (uri: string): boolean =>
+    !!(nanopubUri && uri.startsWith(nanopubUri));
   const s = !excludeSub
     ? {
         text: decodeURI(
@@ -93,6 +121,12 @@ function TripleRow({
           display={s}
           className={`pr-3 font-bold ${className ?? ""}`}
           innerClassName={`${store.metadata.introduces?.some((i) => i.uri === s.href) ? introducedClass : ""}`}
+          isInternalLink={!!s.href && isInternal(s.href)}
+          onInternalClick={
+            s.href && isInternal(s.href)
+              ? () => onInternalClick?.(s.href!)
+              : undefined
+          }
         />
       )}
       <TripleCell
@@ -102,12 +136,13 @@ function TripleRow({
       <TripleCell
         display={o}
         className={`pl-3 wrap-anywhere ${className ?? ""}`}
-        innerClassName={
-          store.metadata.introduces?.some((i) => i.uri === o.href)
-            ? introducedClass
+        colSpan={excludeSub ? 2 : undefined}
+        isInternalLink={!!o.href && isInternal(o.href)}
+        onInternalClick={
+          o.href && isInternal(o.href)
+            ? () => onInternalClick?.(o.href!)
             : undefined
         }
-        colSpan={excludeSub ? 2 : undefined}
       />
     </tr>
   );
@@ -120,6 +155,7 @@ export function GraphSection({
   Icon = File,
   extraClasses,
   collapsible = false,
+  onInternalClick,
 }: {
   store: NanopubStore;
   title: string;
@@ -127,8 +163,15 @@ export function GraphSection({
   Icon: LucideIcon;
   extraClasses?: string;
   collapsible?: boolean;
+  onInternalClick?: (uri: string) => void;
 }) {
   const { getLabel } = useLabels();
+  const nanopubUri = store.metadata.uri || store.prefixes["this"];
+
+  const isInternal = (uri: string): boolean =>
+    !!(nanopubUri && uri.startsWith(nanopubUri));
+  const subjectId = (uri: string) =>
+    `subject-${encodeURIComponent(uri).replace(/%/g, "-")}`;
 
   const header = (
     <CardTitle className="flex items-center gap-2">
@@ -156,7 +199,7 @@ export function GraphSection({
                 {/* Avoid repeating the subject if there are multiple rows with it,
                     just show it once on its own row */}
                 {firstOfRepeat && (
-                  <tr>
+                  <tr id={subjectId(st.subject.value)}>
                     <TripleCell
                       display={{
                         text: decodeURI(
@@ -175,6 +218,12 @@ export function GraphSection({
                           : undefined
                       }`}
                       colSpan={3}
+                      isInternalLink={isInternal(st.subject.value)}
+                      onInternalClick={
+                        isInternal(st.subject.value)
+                          ? () => onInternalClick?.(st.subject.value)
+                          : undefined
+                      }
                     />
                   </tr>
                 )}
@@ -186,6 +235,7 @@ export function GraphSection({
                   className={
                     !(firstOfRepeat || repeat || idx == 0) ? "pt-6" : undefined
                   }
+                  onInternalClick={onInternalClick}
                 />
               </>
             );
@@ -220,16 +270,22 @@ export function PubInfoSection({
   statements,
   Icon = File,
   extraClasses,
+  onInternalClick,
 }: {
   store: NanopubStore;
   title: string;
   statements: Statement[];
   Icon: LucideIcon;
   extraClasses?: string;
+  onInternalClick?: (uri: string) => void;
 }) {
   const pubStatements: Statement[] = [];
   const sigStatements: Statement[] = [];
   const otherStatements: Statement[] = [];
+  const nanopubUri = store.metadata.uri || store.prefixes["this"];
+
+  const isInternal = (uri: string): boolean =>
+    !!(nanopubUri && uri.startsWith(nanopubUri));
 
   // Filter statements into sections for display
   statements.forEach((st) => {
@@ -269,7 +325,17 @@ export function PubInfoSection({
                 <table className="table-auto text-left">
                   <tbody className="divide-y">
                     {pubStatements.map((st, idx) => (
-                      <TripleRow store={store} key={idx} st={st} excludeSub />
+                      <TripleRow
+                        store={store}
+                        key={idx}
+                        st={st}
+                        excludeSub
+                        onInternalClick={
+                          isInternal(st.object.value)
+                            ? () => onInternalClick?.(st.object.value)
+                            : undefined
+                        }
+                      />
                     ))}
                   </tbody>
                 </table>
