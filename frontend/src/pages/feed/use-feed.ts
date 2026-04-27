@@ -16,6 +16,8 @@ export const FEED_TEMPLATE_KEYS = [
   "GEO_COVERAGE",
   "DATASET",
   "RESEARCH_SOFTWARE",
+  "ODRL_POLICY",
+  "ODRL_ACCESS_GRANT",
   "PICO_RESEARCH_QUESTION",
   "PCC_RESEARCH_QUESTION",
   "PRISMA_SEARCH_STRATEGY",
@@ -43,6 +45,8 @@ export const FEED_TEMPLATE_LABELS: Record<FeedTemplateKey, string> = {
   GEO_COVERAGE: "Geographical Coverage",
   DATASET: "FAIR Dataset",
   RESEARCH_SOFTWARE: "Research Software",
+  ODRL_POLICY: "ODRL Access Policy",
+  ODRL_ACCESS_GRANT: "ODRL Access Grant",
   PICO_RESEARCH_QUESTION: "PICO Research Question",
   PCC_RESEARCH_QUESTION: "PCC Research Question",
   PRISMA_SEARCH_STRATEGY: "PRISMA Search Strategy",
@@ -73,7 +77,7 @@ export const FEED_GROUPS: { label: string; keys: FeedTemplateKey[] }[] = [
   },
   {
     label: "Data & Software",
-    keys: ["DATASET", "RESEARCH_SOFTWARE"],
+    keys: ["DATASET", "RESEARCH_SOFTWARE", "ODRL_POLICY", "ODRL_ACCESS_GRANT"],
   },
   {
     label: "Systematic Review (PRISMA)",
