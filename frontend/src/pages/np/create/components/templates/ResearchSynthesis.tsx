@@ -1,3 +1,4 @@
+import ShowValidationError from "@/components/formedible/show-validation-error";
 import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import ApiComboboxMultipleExpandable from "@/components/np/api-combobox";
 import { WIKIDATA_ENTITY_API } from "@/components/np/api-endpoints";
@@ -32,8 +33,7 @@ export default function ResearchSynthesis({
       .array(z.object({ source: z.url("Must be a valid URL") }))
       .min(1, "Add at least one supporting source"),
     topicSelection: z
-      .object({ uri: z.string(), label: z.string() })
-      .array()
+      .array(z.object({ uri: z.string(), label: z.string() }))
       .min(1, "Add at least one topic"),
     st7: z.array(z.object({ source: z.string() })).optional(),
     st10: z.array(z.object({ topic: z.string() })).optional(),
@@ -89,6 +89,7 @@ export default function ResearchSynthesis({
         type: "date",
         label: "Completion date",
         required: true,
+        wrapper: (field) => <div className="max-w-2xs">{field.children}</div>,
       },
       {
         name: "sources",
@@ -127,15 +128,18 @@ export default function ResearchSynthesis({
           },
         },
         component: ({ fieldApi }) => (
-          <ApiComboboxMultipleExpandable
-            endpoints={[WIKIDATA_ENTITY_API]}
-            value={fieldApi.state.value || []}
-            onValueChange={(items) => {
-              fieldApi.setValue(items);
-            }}
-            maxShownItems={5}
-            title="Search topics (Wikidata)"
-          />
+          <>
+            <ApiComboboxMultipleExpandable
+              endpoints={[WIKIDATA_ENTITY_API]}
+              value={fieldApi.state.value || []}
+              onValueChange={(items) => {
+                fieldApi.setValue(items);
+              }}
+              maxShownItems={5}
+              title="Search topics (Wikidata)"
+            />
+            <ShowValidationError fieldApi={fieldApi} />
+          </>
         ),
       },
       ...NanopubEditorOptionFields,
@@ -170,8 +174,7 @@ export default function ResearchSynthesis({
         v.st10 = (
           v.topicSelection as { uri: string; label: string }[] | undefined
         )?.map((t) => ({ topic: t.uri }));
-        delete v.sources;
-        delete v.topicSelection;
+
         await submit(v as Record<string, string | object>);
       },
     },
