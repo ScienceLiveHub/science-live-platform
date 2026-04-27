@@ -45,6 +45,7 @@ const INITIAL_CHECKED: Record<FeedTemplateKey, boolean> = {
   FORRT_REPLICATION_OUTCOME: true,
   FORRT_KL_REPLICATION: false,
   FORRT_KL_REPLICATION_OUTCOME: true,
+  RESEARCH_SYNTHESIS: false,
 };
 
 export function LatestFeed() {

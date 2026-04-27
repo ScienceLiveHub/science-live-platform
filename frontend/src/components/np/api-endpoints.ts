@@ -1,7 +1,8 @@
 /* Useful predefined API Endpoints used for searching and returning simple uniformly structured results
  */
 
-import { KyResponse } from "ky";
+import { NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
+import ky, { KyResponse } from "ky";
 
 export type ResultItem = {
   uri: string;
@@ -39,7 +40,7 @@ export const NANOPUB_THING_API: SearchEndpoint = {
   },
 };
 
-export const WIKIDATA_ENTITY_API = {
+export const WIKIDATA_ENTITY_API: SearchEndpoint = {
   name: "wikidata",
   label: "Wikidata",
   url: "https://www.wikidata.org/w/api.php?action=wbsearchentities&language=en&format=json&origin=*&limit=5&search=",
@@ -55,3 +56,43 @@ export const WIKIDATA_ENTITY_API = {
     }));
   },
 };
+
+// --- FORRT Claim search via SPARQL -----------------------------------------
+
+export async function searchFORRTClaims(term: string): Promise<ResultItem[]> {
+  if (term.length < 2) return [];
+
+  const query = `SELECT ?thing ?label WHERE {
+  graph ?g { ?thing a <https://w3id.org/sciencelive/o/terms/FORRT-Claim> }
+  OPTIONAL { graph ?g2 { ?thing <http://www.w3.org/2000/01/rdf-schema#label> ?label } }
+  FILTER(CONTAINS(LCASE(STR(?thing)), '${term.toLowerCase().replace(/'/g, "\\'")}')
+    || CONTAINS(LCASE(STR(?label)), '${term.toLowerCase().replace(/'/g, "\\'")}'))
+} LIMIT 10`;
+
+  try {
+    const res = await ky.post(NANOPUB_SPARQL_ENDPOINT_FULL, {
+      body: new URLSearchParams({ query }),
+      headers: {
+        Accept: "application/sparql-results+xml",
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
+
+    const text = await res.text();
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(text, "text/xml");
+    const results = xmlDoc.getElementsByTagName("result");
+
+    return Array.from(results).map((result) => {
+      const uri =
+        result.querySelector("binding[name='thing'] uri")?.textContent || "";
+      const label =
+        result.querySelector("binding[name='label'] literal")?.textContent ||
+        uri;
+      return { uri, label };
+    });
+  } catch (e) {
+    console.error("FORRT claim search error:", e);
+    return [];
+  }
+}

@@ -14,6 +14,7 @@ import {
   ClipboardList,
   Code2,
   Database,
+  Dna,
   FileSpreadsheet,
   FlaskConical,
   Globe,
@@ -121,4 +122,5 @@ export const TEMPLATE_VIEW_ICONS: Record<string, LucideIcon> = {
   [TEMPLATE_URI.FORRT_CLAIM]: GraduationCap,
   [TEMPLATE_URI.FORRT_KL_REPLICATION]: FlaskConical,
   [TEMPLATE_URI.FORRT_KL_REPLICATION_OUTCOME]: ClipboardCheck,
+  [TEMPLATE_URI.RESEARCH_SYNTHESIS]: Dna,
 };

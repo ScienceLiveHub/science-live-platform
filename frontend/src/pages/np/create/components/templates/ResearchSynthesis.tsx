@@ -1,33 +1,12 @@
 import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import ApiComboboxMultipleExpandable from "@/components/np/api-combobox";
-import { SearchEndpoint } from "@/components/np/api-endpoints";
+import { WIKIDATA_ENTITY_API } from "@/components/np/api-endpoints";
 import { useFormedible } from "@/hooks/use-formedible";
-import { KyResponse } from "ky";
 import z from "zod";
 import {
   NanopubEditorOptionFields,
   NanopubTemplateDefComponentProps,
 } from "./component-registry";
-
-// --- Wikidata search endpoint -----------------------------------------------
-
-const wikidataEndpoint: SearchEndpoint[] = [
-  {
-    name: "wikidata",
-    label: "Wikidata",
-    url: "https://www.wikidata.org/w/api.php?action=wbsearchentities&language=en&format=json&origin=*&limit=5&search=",
-    parser: async (res: KyResponse) => {
-      const json = await res.json<{
-        search: { concepturi: string; label: string; description: string }[];
-      }>();
-      return (json.search || []).map((item) => ({
-        uri: item.concepturi,
-        label: item.label,
-        description: item.description,
-      }));
-    },
-  },
-];
 
 // --- Form component ---------------------------------------------------------
 
@@ -149,7 +128,7 @@ export default function ResearchSynthesis({
         },
         component: ({ fieldApi }) => (
           <ApiComboboxMultipleExpandable
-            endpoints={wikidataEndpoint}
+            endpoints={[WIKIDATA_ENTITY_API]}
             value={fieldApi.state.value || []}
             onValueChange={(items) => {
               fieldApi.setValue(items);
