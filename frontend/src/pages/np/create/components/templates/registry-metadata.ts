@@ -66,6 +66,8 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RAuLEjPp-4dTvPwMkfHggTto1CgjIftiGRAgHlyeEonjQ",
   FORRT_REPLICATION_OUTCOME:
     "https://w3id.org/np/RA2zljn0Nw9SadppOyxZoh-_Rxosslrq-vYG-p9SttnJE",
+  RESEARCH_SYNTHESIS:
+    "https://w3id.org/np/RApmrqOEr4f5bJC2vayrTnzhwnuEfAU_I4Pdg8K5JxeBw",
   // Utility templates (not shown in the nanopub editor)
   COMMENT: "http://purl.org/np/RA3gQDMnYbKCTiQeiUYJYBaH6HUhz8f3HIg71itlsZDgA",
   APPROVE_OR_DISAPPROVE:
@@ -99,6 +101,9 @@ export const LEGACY_TEMPLATE_URIS: Partial<
   ],
   PICO_RESEARCH_QUESTION: [
     "https://w3id.org/np/RAfZfE1gbUtc35W7xT12XTO0ptZwycN2-jj7Jow6COAoQ",
+  ],
+  RESEARCH_SYNTHESIS: [
+    "https://w3id.org/np/RA-ahnCOKnyLdqxUKbmRxFrXXc3PQMoa-_ce-W-J5-GLY",
   ],
 };
 
@@ -461,6 +466,24 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "knowledge loom",
       "dtreg",
       "proof",
+      "evidence",
+    ],
+  },
+  [TEMPLATE_URI.RESEARCH_SYNTHESIS]: {
+    name: "Science Live Research Synthesis",
+    description:
+      "Synthesise findings across multiple replication outcomes with conclusions, recommendations, conditions, and limitations.",
+    moreDescription:
+      "Aggregate evidence from supporting nanopubs, link Wikidata topics, and publish actionable recommendations for practitioners.",
+    category: "Replication",
+    icon: "🧬",
+    recommended: true,
+    keywords: [
+      "synthesis",
+      "research synthesis",
+      "replication",
+      "recommendation",
+      "forrt",
       "evidence",
     ],
   },

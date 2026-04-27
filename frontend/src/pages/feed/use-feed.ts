@@ -29,6 +29,7 @@ export const FEED_TEMPLATE_KEYS = [
   "FORRT_REPLICATION_OUTCOME",
   "FORRT_KL_REPLICATION",
   "FORRT_KL_REPLICATION_OUTCOME",
+  "RESEARCH_SYNTHESIS",
 ] as const satisfies (keyof typeof TEMPLATE_URI)[];
 
 export type FeedTemplateKey = (typeof FEED_TEMPLATE_KEYS)[number];
@@ -55,6 +56,7 @@ export const FEED_TEMPLATE_LABELS: Record<FeedTemplateKey, string> = {
   FORRT_REPLICATION_OUTCOME: "FORRT Replication Outcome",
   FORRT_KL_REPLICATION: "FORRT KL Replication Study",
   FORRT_KL_REPLICATION_OUTCOME: "FORRT KL Replication Outcome",
+  RESEARCH_SYNTHESIS: "Science Live Research Synthesis",
 };
 
 /** Group labels for organizing checkboxes by category. */
@@ -94,6 +96,7 @@ export const FEED_GROUPS: { label: string; keys: FeedTemplateKey[] }[] = [
       "FORRT_REPLICATION_OUTCOME",
       "FORRT_KL_REPLICATION",
       "FORRT_KL_REPLICATION_OUTCOME",
+      "RESEARCH_SYNTHESIS",
     ],
   },
 ];
