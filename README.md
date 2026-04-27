@@ -291,7 +291,7 @@ MIT — see [package.json](package.json).
 
 ## Contact
 
-- **Email:** contact@sciencelive4all.org
+- **Email:** contact@vitenhub.no
 - **Book a Call:** https://calendly.com/anne-fouilloux/30min
 - **LinkedIn:** https://www.linkedin.com/company/sciencelive
 
