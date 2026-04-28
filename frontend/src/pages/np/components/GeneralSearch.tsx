@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { usePagination } from "@/hooks/use-pagination";
 import { SEARCH_NANOPUBS } from "@/lib/queries";
 import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_TEXT } from "@/lib/sparql";
@@ -20,12 +21,25 @@ import ViewerDemo from "../ViewerDemo";
 import SearchResultList, { type SearchResult } from "./SearchResultList";
 
 /** Valid sort options for search results. */
-type SortOption = "maxScore" | "date";
+const SORT_OPTIONS = ["maxScore", "maxRefs", "dateDesc", "dateAsc"] as const;
+type SortOption = (typeof SORT_OPTIONS)[number];
 
 /** SPARQL ORDER BY clause for each sort option. */
 const SORT_ORDER_BY: Record<SortOption, string> = {
   maxScore: "desc(?maxScore)",
-  date: "desc(?date)",
+  maxRefs: "desc(?referenceCount)",
+  dateDesc: "desc(?date)",
+  dateAsc: "asc(?date)",
+};
+
+/** Valid search modes. */
+const SEARCH_MODES = ["label", "fullText"] as const;
+type SearchMode = (typeof SEARCH_MODES)[number];
+
+/** SPARQL search:property value for each search mode. */
+const SEARCH_MODE_PROPERTY: Record<SearchMode, string> = {
+  label: "rdfs:label",
+  fullText: "npa:hasFilterLiteral",
 };
 
 /**
@@ -43,8 +57,14 @@ export function GeneralSearch() {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get("q") || "";
   const uri = searchParams.get("uri") || "";
-  const sortByParam = searchParams.get("sort") || "maxScore";
-  const sortBy: SortOption = sortByParam === "date" ? "date" : "maxScore";
+  const sortByParam = (searchParams.get("sort") || "maxScore") as SortOption;
+  const sortBy: SortOption = SORT_OPTIONS.includes(sortByParam)
+    ? sortByParam
+    : "maxScore";
+  const searchModeParam = (searchParams.get("mode") || "label") as SearchMode;
+  const searchMode: SearchMode = SEARCH_MODES.includes(searchModeParam)
+    ? searchModeParam
+    : "label";
 
   const { currentPage, offset, limit, pageSize, setPage } = usePagination();
 
@@ -84,6 +104,7 @@ export function GeneralSearch() {
           SEARCH_NANOPUBS,
           {
             searchTerm: searchQuery,
+            searchProperty: SEARCH_MODE_PROPERTY[searchMode],
             limit: String(limit),
             offset: String(offset),
             sortBy: SORT_ORDER_BY[sortBy],
@@ -124,7 +145,7 @@ export function GeneralSearch() {
     return () => {
       controller.abort();
     };
-  }, [searchQuery, sortBy, currentPage]);
+  }, [searchQuery, sortBy, searchMode, currentPage]);
 
   /** Paginate raw SPARQL rows using the current page size. */
   function paginateRows<T>(rows: T[]) {
@@ -161,6 +182,34 @@ export function GeneralSearch() {
     setSearchParams(next);
   };
 
+  /** Update search mode parameter in URL, resetting to page 1. */
+  const handleSearchModeChange = (value: string) => {
+    const next = new URLSearchParams(searchParams);
+    next.set("mode", value as SearchMode);
+    next.delete("page");
+    setSearchParams(next);
+  };
+
+  /** Search mode toggle, reused in compact bar and full search interface. */
+  const renderSearchModeToggle = (size: "sm" | "default" = "default") => (
+    <ToggleGroup
+      type="single"
+      value={searchMode}
+      onValueChange={(v) => {
+        if (v) handleSearchModeChange(v);
+      }}
+      variant="outline"
+      size={size}
+    >
+      <ToggleGroupItem value="fullText" aria-label="Full-text search">
+        Full-text
+      </ToggleGroupItem>
+      <ToggleGroupItem value="label" aria-label="Label search">
+        Title only
+      </ToggleGroupItem>
+    </ToggleGroup>
+  );
+
   /** Sort select dropdown, reused in compact bar and results header. */
   const renderSortSelect = (size: "sm" | "default" = "default") => (
     <Select
@@ -173,46 +222,49 @@ export function GeneralSearch() {
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="maxScore">Relevance</SelectItem>
-        <SelectItem value="date">Newest first</SelectItem>
+        <SelectItem value="maxRefs">Most Referenced</SelectItem>
+        <SelectItem value="dateDesc">Newest first</SelectItem>
+        <SelectItem value="dateAsc">Oldest first</SelectItem>
       </SelectContent>
     </Select>
   );
 
   // Compact search bar (shown when there's active content)
   const renderCompactSearchBar = () => (
-    <div className="flex gap-2">
-      <Input
-        type="text"
-        className="w-full justify-end"
-        placeholder="Enter search query or nanopub URI..."
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            handleSubmit();
-          }
-        }}
-      />
-      {searchQuery && renderSortSelect("sm")}
-      <Button
-        className="inline-flex items-center rounded-md bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 px-6"
-        disabled={loading}
-        onClick={handleSubmit}
-      >
-        {loading ? (
-          <Spinner className="h-5 w-5" />
-        ) : isNanopubInput ? (
-          <>
-            <FileSymlink className="h-5 w-5" />
-            View
-          </>
-        ) : (
-          <>
-            <Search className="h-5 w-5" />
-            Go
-          </>
-        )}
-      </Button>
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-2">
+        <Input
+          type="text"
+          className="w-full justify-end"
+          placeholder="Enter search query or nanopub URI..."
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleSubmit();
+            }
+          }}
+        />
+        <Button
+          className="inline-flex items-center rounded-md bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 px-6"
+          disabled={loading}
+          onClick={handleSubmit}
+        >
+          {loading ? (
+            <Spinner className="h-5 w-5" />
+          ) : isNanopubInput ? (
+            <>
+              <FileSymlink className="h-5 w-5" />
+              View
+            </>
+          ) : (
+            <>
+              <Search className="h-5 w-5" />
+              Go
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 
@@ -285,13 +337,18 @@ export function GeneralSearch() {
 
     return (
       <div className="flex flex-col gap-4">
+        {searchResults.length > 0 && !isNanopubInput && (
+          <div className="flex gap-2">
+            {renderSearchModeToggle("sm")}
+            {renderSortSelect("sm")}
+          </div>
+        )}
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-lg font-semibold">
             {searchResults.length > 0
               ? `Results ${firstResultIndex} - ${lastResultIndex} for "${searchQuery}"`
               : `No results for "${searchQuery}"`}
           </h2>
-          {searchResults.length > 0 && renderSortSelect("sm")}
         </div>
         {searchResults.length > 0 ? (
           <SearchResultList searchResults={searchResults} />

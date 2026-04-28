@@ -1,7 +1,9 @@
-# Full-text search on nanopub labels.
+# Full-text search on nanopub labels or all literal fields.
 # Excludes example, invalidated, superseded, and template nanopubs.
 #
 # Placeholder: `?_searchTerm` - the user's search string.
+# Placeholder: `?_searchProperty` - RAW: the search property to match against.
+#   Use "rdfs:label" for label-only search or "npa:hasFilterLiteral" for full-text search.
 # Placeholder: `?_limit` - RAW: maximum number of results to return (e.g. 10).
 # Placeholder: `?_offset` - RAW: number of results to skip for pagination (e.g. 0).
 # Placeholder: `?_sortBy` - RAW: ORDER BY clause (e.g. "desc(?maxScore)" or "desc(?date)").
@@ -31,7 +33,7 @@ select ?np ?label ?date ?creator ?type ?template (count(?refNp) as ?referenceCou
 
   ?np search:matches [
     search:query ?_searchTerm ;
-    search:property rdfs:label ;
+    search:property ?_searchProperty ;
     search:score ?score ] .
 
   # Count references from other nanopubs using npa:networkGraph

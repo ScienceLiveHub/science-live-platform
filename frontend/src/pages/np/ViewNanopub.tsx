@@ -41,7 +41,7 @@ export default function ViewNanopub() {
       {!hasActiveContent && (
         <>
           <div className="flex flex-col items-center justify-center flex-1">
-            <h1 className="flex items-center text-xl text-muted-foreground font-black my-8">
+            <h1 className="flex items-center text-xl text-muted-foreground font-black my-2">
               <FileCode className="mr-4" />
               BROWSE NANOPUBLICATIONS
             </h1>
