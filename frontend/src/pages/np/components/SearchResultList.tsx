@@ -4,7 +4,7 @@ import { useTheme } from "@/components/theme-provider";
 import { Badge } from "@/components/ui/badge";
 import { AsyncLabel } from "@/hooks/use-labels";
 import { getUriEnd, toScienceLiveNPUri } from "@/lib/uri";
-import { FileSymlink } from "lucide-react";
+import { FilePlus, FileSymlink } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   getTemplateColorClass,
@@ -40,7 +40,13 @@ export default function SearchResultList({
             className="hover:underline"
           >
             <div className="font-medium flex flex-row">
-              <NanopubTemplateIcon template={result.template} />
+              {result.type ===
+              "https://w3id.org/np/o/ntemplate/AssertionTemplate" ? (
+                <FilePlus className="w-4 h-4 min-w-4 min-h-4 mt-1 mr-2 text-purple-400 dark:text-purple-300" />
+              ) : (
+                <NanopubTemplateIcon template={result.template} />
+              )}
+
               {result.label || "Untitled Nanopublication"}
             </div>
           </Link>
@@ -98,7 +104,7 @@ export function NanopubTemplateIcon({ template }: { template?: string }) {
   const color = template && getTemplateMetadata(template)?.color;
   return Icon ? (
     <Icon
-      className={`w-4 h-4 min-w-4 min-h-4 mt-1 mr-2 font-medium flex flex-row ${getTemplateColorClass(color, resolvedTheme)}`}
+      className={`w-4 h-4 min-w-4 min-h-4 mt-1 mr-2 ${getTemplateColorClass(color, resolvedTheme)}`}
     />
   ) : (
     <NanopubIcon className="w-3 h-3 min-w-3 min-h-3 mt-1.5 mr-2 text-link" />

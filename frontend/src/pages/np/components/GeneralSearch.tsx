@@ -1,4 +1,6 @@
+import { NanopubIcon } from "@/components/nanopub-icon";
 import { PaginationControls } from "@/components/pagination-controls";
+import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,13 +13,31 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { usePagination } from "@/hooks/use-pagination";
-import { SEARCH_NANOPUBS } from "@/lib/queries";
+import { SEARCH_NANOPUBS, SEARCH_NANOPUBS_BY_TEMPLATES } from "@/lib/queries";
 import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_TEXT } from "@/lib/sparql";
 import { isNanopubUri } from "@/lib/uri";
-import { ArrowDownNarrowWide, FileSymlink, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  FEED_GROUPS,
+  FEED_TEMPLATE_LABELS,
+  type FeedTemplateKey,
+} from "@/pages/feed/use-feed";
+import {
+  getTemplateColorClass,
+  LEGACY_TEMPLATE_URIS,
+  TEMPLATE_METADATA,
+  TEMPLATE_URI,
+} from "@/pages/np/create/components/templates/registry-metadata";
+import { TEMPLATE_VIEW_ICONS } from "@/pages/np/view/view-registry";
+import {
+  ArrowDownNarrowWide,
+  Check,
+  FileSymlink,
+  FilterX,
+  Minus,
+  Search,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import ViewerDemo from "../ViewerDemo";
 import SearchResultList, { type SearchResult } from "./SearchResultList";
 
 /** Valid sort options for search results. */
@@ -42,6 +62,46 @@ const SEARCH_MODE_PROPERTY: Record<SearchMode, string> = {
   fullText: "npa:hasFilterLiteral",
 };
 
+/** Initial checked state for each template key — all unchecked by default in search */
+const INITIAL_CHECKED: Record<FeedTemplateKey, boolean> = {
+  AIDA_SENTENCE: false,
+  CITATION_CITO: false,
+  ANNOTATE_QUOTATION: false,
+  COMMENT_PAPER: false,
+  GEO_COVERAGE: false,
+  DATASET: false,
+  RESEARCH_SOFTWARE: false,
+  ODRL_POLICY: false,
+  ODRL_ACCESS_GRANT: false,
+  PICO_RESEARCH_QUESTION: false,
+  PCC_RESEARCH_QUESTION: false,
+  PRISMA_SEARCH_STRATEGY: false,
+  PRISMA_DATABASE_SEARCH: false,
+  PRISMA_SEARCH_EXECUTION_DATASET: false,
+  PRISMA_STUDY_INCLUSION: false,
+  PRISMA_STUDY_ASSESSMENT: false,
+  PRISMA_FULL_SCREENING: false,
+  FORRT_CLAIM: false,
+  FORRT_REPLICATION: false,
+  FORRT_REPLICATION_OUTCOME: false,
+  FORRT_KL_REPLICATION: false,
+  FORRT_KL_REPLICATION_OUTCOME: false,
+  RESEARCH_SYNTHESIS: false,
+};
+
+/** Collect all URIs (current + legacy) for the selected template keys. */
+function getTemplateUris(keys: FeedTemplateKey[]): string[] {
+  const uris: string[] = [];
+  for (const key of keys) {
+    uris.push(TEMPLATE_URI[key]);
+    const legacy = LEGACY_TEMPLATE_URIS[key];
+    if (legacy) {
+      uris.push(...legacy);
+    }
+  }
+  return uris;
+}
+
 /**
  * GeneralSearch
  *
@@ -52,8 +112,10 @@ const SEARCH_MODE_PROPERTY: Record<SearchMode, string> = {
  *
  * Handles both keyword search and nanopub URI navigation.
  * Supports pagination via the `page` URL search parameter.
+ * Supports filtering by template type via the sidebar.
  */
 export function GeneralSearch() {
+  const { resolvedTheme } = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get("q") || "";
   const uri = searchParams.get("uri") || "";
@@ -66,7 +128,8 @@ export function GeneralSearch() {
     ? searchModeParam
     : "label";
 
-  const { currentPage, offset, limit, pageSize, setPage } = usePagination();
+  const { currentPage, offset, limit, pageSize, setPage, resetPage } =
+    usePagination();
 
   const [inputValue, setInputValue] = useState(searchQuery || uri);
   const [searchResults, setSearchResults] = useState<SearchResult[] | null>(
@@ -77,8 +140,53 @@ export function GeneralSearch() {
   /** Whether there are likely more results beyond the current page. */
   const [hasMore, setHasMore] = useState(false);
 
+  const [checked, setChecked] =
+    useState<Record<FeedTemplateKey, boolean>>(INITIAL_CHECKED);
+
+  const selectedTemplates = useMemo(() => {
+    const s = new Set<FeedTemplateKey>();
+    for (const [key, val] of Object.entries(checked)) {
+      if (val) s.add(key as FeedTemplateKey);
+    }
+    return s;
+  }, [checked]);
+
   const isNanopubInput = isNanopubUri(inputValue);
   const hasActiveContent = searchQuery || uri;
+
+  const toggleTemplate = useCallback(
+    (key: FeedTemplateKey) => {
+      setChecked((prev) => ({ ...prev, [key]: !prev[key] }));
+      resetPage();
+    },
+    [resetPage],
+  );
+
+  const clearFilters = useCallback(() => {
+    setChecked((prev) => {
+      const next = { ...prev };
+      for (const key of Object.keys(next) as FeedTemplateKey[]) {
+        next[key] = false;
+      }
+      return next;
+    });
+    resetPage();
+  }, [resetPage]);
+
+  const toggleGroup = useCallback(
+    (keys: FeedTemplateKey[]) => {
+      setChecked((prev) => {
+        const allOn = keys.every((k) => prev[k]);
+        const next = { ...prev };
+        for (const k of keys) {
+          next[k] = !allOn;
+        }
+        return next;
+      });
+      resetPage();
+    },
+    [resetPage],
+  );
 
   // Sync input value when URL params change externally
   useEffect(() => {
@@ -100,18 +208,37 @@ export function GeneralSearch() {
     const performSearch = async () => {
       try {
         // Fetch one extra row to detect whether there is a next page
-        const rows = await executeBindSparql(
-          SEARCH_NANOPUBS,
-          {
-            searchTerm: searchQuery,
-            searchProperty: SEARCH_MODE_PROPERTY[searchMode],
-            limit: String(limit),
-            offset: String(offset),
-            sortBy: SORT_ORDER_BY[sortBy],
-          },
-          NANOPUB_SPARQL_ENDPOINT_TEXT,
-          controller.signal,
-        );
+        const rows =
+          selectedTemplates.size === 0
+            ? // No template filters: use unfiltered search query
+              await executeBindSparql(
+                SEARCH_NANOPUBS,
+                {
+                  searchTerm: searchQuery,
+                  searchProperty: SEARCH_MODE_PROPERTY[searchMode],
+                  limit: String(limit),
+                  offset: String(offset),
+                  sortBy: SORT_ORDER_BY[sortBy],
+                },
+                NANOPUB_SPARQL_ENDPOINT_TEXT,
+                controller.signal,
+              )
+            : // Template filters active: use template-filtered search query
+              await executeBindSparql(
+                SEARCH_NANOPUBS_BY_TEMPLATES,
+                {
+                  searchTerm: searchQuery,
+                  searchProperty: SEARCH_MODE_PROPERTY[searchMode],
+                  templateValues: getTemplateUris([...selectedTemplates])
+                    .map((u) => `(<${u}>)`)
+                    .join(" "),
+                  limit: String(limit),
+                  offset: String(offset),
+                  sortBy: SORT_ORDER_BY[sortBy],
+                },
+                NANOPUB_SPARQL_ENDPOINT_TEXT,
+                controller.signal,
+              );
 
         const { visibleRows, hasMore: moreResultsAvailable } =
           paginateRows(rows);
@@ -145,7 +272,7 @@ export function GeneralSearch() {
     return () => {
       controller.abort();
     };
-  }, [searchQuery, sortBy, searchMode, currentPage]);
+  }, [searchQuery, sortBy, searchMode, currentPage, selectedTemplates]);
 
   /** Paginate raw SPARQL rows using the current page size. */
   function paginateRows<T>(rows: T[]) {
@@ -306,10 +433,73 @@ export function GeneralSearch() {
         Search across the Nanopublications network or enter a nanopublication
         URI to view it
       </p>
-
-      {/* Example links shown when idle */}
-      <ViewerDemo />
     </div>
+  );
+
+  // Template filter sidebar
+  const renderTemplateSidebar = () => (
+    <aside className="flex w-full flex-col gap-4 lg:w-64 lg:min-w-64">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-medium text-muted-foreground">
+          Filter by template
+        </h2>
+        {selectedTemplates.size > 0 && (
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <FilterX className="h-3.5 w-3.5" />
+            Clear filters
+          </button>
+        )}
+      </div>
+      {FEED_GROUPS.map((group) => {
+        const allOn = group.keys.every((k) => checked[k]);
+        const someOn = !allOn && group.keys.some((k) => checked[k]);
+        return (
+          <div key={group.label} className="flex flex-col gap-1.5">
+            <label
+              className="flex cursor-pointer items-center gap-2 text-left select-none"
+              onClick={() => toggleGroup(group.keys)}
+            >
+              <FeedCheckbox
+                state={
+                  allOn ? "checked" : someOn ? "indeterminate" : "unchecked"
+                }
+              />
+              <span className="text-sm font-medium">{group.label}</span>
+            </label>
+            <div className="ml-6 flex flex-col gap-1">
+              {group.keys.map((key) => {
+                const templateUri = TEMPLATE_URI[key];
+                const Icon = TEMPLATE_VIEW_ICONS[templateUri];
+                const color = TEMPLATE_METADATA[templateUri]?.color;
+                return (
+                  <label
+                    key={key}
+                    className="flex cursor-pointer items-center gap-2 text-sm font-normal select-none"
+                    onClick={() => toggleTemplate(key)}
+                  >
+                    <FeedCheckbox
+                      state={checked[key] ? "checked" : "unchecked"}
+                    />
+                    {Icon ? (
+                      <Icon
+                        className={`w-3.5 h-3.5 min-w-3.5 min-h-3.5 ${getTemplateColorClass(color, resolvedTheme)}`}
+                      />
+                    ) : (
+                      <NanopubIcon className="w-2.5 h-2.5 min-w-2.5 min-h-2.5 text-muted-foreground" />
+                    )}
+                    {FEED_TEMPLATE_LABELS[key]}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </aside>
   );
 
   // Render search results
@@ -372,7 +562,31 @@ export function GeneralSearch() {
       {hasActiveContent
         ? renderCompactSearchBar()
         : renderFullSearchInterface()}
-      {searchQuery && renderSearchResults()}
+      {searchQuery && (
+        <div className="flex flex-col gap-6 lg:flex-row">
+          {renderTemplateSidebar()}
+          <section className="flex-1">{renderSearchResults()}</section>
+        </div>
+      )}
     </div>
+  );
+}
+
+function FeedCheckbox({
+  state,
+}: {
+  state: "checked" | "unchecked" | "indeterminate";
+}) {
+  return (
+    <span
+      className={`flex size-4 shrink-0 items-center justify-center rounded-lg border shadow-xs ${
+        state === "unchecked"
+          ? "border-input dark:bg-input/30"
+          : "border-primary bg-primary text-primary-foreground"
+      }`}
+    >
+      {state === "checked" && <Check className="size-3.5" />}
+      {state === "indeterminate" && <Minus className="size-3.5" />}
+    </span>
   );
 }

@@ -16,22 +16,22 @@ import { NanopubView } from "./components/NanopubView";
  *
  * Unified entry point for browsing nanopublications. Provides:
  *
- * 1. **General Search** - keyword search across the nanopub network.
- * 2. **Geographic Search** - map-based region search, optionally filtered by keyword.
- * 3. **AI Search** - COMING SOON - AI assisted queries.
- * 4. **View Nanopub** - load and display a nanopub by its URI.
+ * 1. **Latest** - Find latest nanopubs filtered by type/template.
+ * 2. **General Search** - keyword search across the nanopub network.
+ * 3. **AI Search** - AI assisted queries.
+ * 4. **Geographic Search** - map-based region search, optionally filtered by keyword.
+ * 5. **View Nanopub** - load and display a nanopub by its URI, via the Search tab.
  *
- * Each tab manages its own search input. The component shows either the tab
- * interface (when no content is active) or the content views (when a URI or
- * search query is active).
+ * Each tab manages its own input. The component shows either the tab
+ * interface (when no content is active) or the content views (when a URI is set).
  */
 export default function ViewNanopub() {
   const [searchParams] = useSearchParams();
   const uri = searchParams.get("uri") || "";
   const searchQuery = searchParams.get("q") || "";
 
-  // Check if we have active content (URI loaded or search performed)
-  const hasActiveContent = uri || searchQuery;
+  // Check if we have active content (URI loaded)
+  const hasActiveContent = !!uri;
 
   return (
     <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-6xl">
@@ -101,17 +101,10 @@ export default function ViewNanopub() {
       )}
 
       {/* ----------------------------------------------------------------- */}
-      {/* Active Content Area - shows compact search + results              */}
+      {/* Active Content Area - shows active content instead of tabs        */}
       {/* ----------------------------------------------------------------- */}
 
-      {/* General Search with compact search bar */}
-      {searchQuery && (
-        <div className="w-full max-w-2xl mx-auto">
-          <GeneralSearch />
-        </div>
-      )}
-
-      {/* View a single nanopub by URI */}
+      {/* View a single nanopub by URI if set */}
       {uri && !searchQuery && <NanopubView uri={uri} />}
     </main>
   );
