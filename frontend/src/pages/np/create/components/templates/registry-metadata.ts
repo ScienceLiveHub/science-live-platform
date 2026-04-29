@@ -551,3 +551,101 @@ export function getTemplateBorderClass(
   if (!color) return fallback;
   return TEMPLATE_BORDER_CLASSES[color]?.[resolveTheme(theme)] ?? fallback;
 }
+
+/** Template keys that are shown in the browse (filter) and create pages (excludes utility templates). */
+export const FEED_TEMPLATE_KEYS = [
+  "AIDA_SENTENCE",
+  "CITATION_CITO",
+  "ANNOTATE_QUOTATION",
+  "COMMENT_PAPER",
+  "GEO_COVERAGE",
+  "DATASET",
+  "RESEARCH_SOFTWARE",
+  "ODRL_POLICY",
+  "ODRL_ACCESS_GRANT",
+  "PICO_RESEARCH_QUESTION",
+  "PCC_RESEARCH_QUESTION",
+  "PRISMA_SEARCH_STRATEGY",
+  "PRISMA_DATABASE_SEARCH",
+  "PRISMA_SEARCH_EXECUTION_DATASET",
+  "PRISMA_STUDY_INCLUSION",
+  "PRISMA_STUDY_ASSESSMENT",
+  "PRISMA_FULL_SCREENING",
+  "FORRT_CLAIM",
+  "FORRT_REPLICATION",
+  "FORRT_REPLICATION_OUTCOME",
+  "FORRT_KL_REPLICATION",
+  "FORRT_KL_REPLICATION_OUTCOME",
+  "RESEARCH_SYNTHESIS",
+] as const satisfies (keyof typeof TEMPLATE_URI)[];
+
+export type FeedTemplateKey = (typeof FEED_TEMPLATE_KEYS)[number];
+
+/** Human-readable labels for the filter checkboxes. */
+export const FEED_TEMPLATE_LABELS: Record<FeedTemplateKey, string> = {
+  AIDA_SENTENCE: "AIDA Sentence",
+  CITATION_CITO: "Citation (CiTO)",
+  ANNOTATE_QUOTATION: "Annotate Quotation",
+  COMMENT_PAPER: "Comment on Paper",
+  GEO_COVERAGE: "Geographical Coverage",
+  DATASET: "FAIR Dataset",
+  RESEARCH_SOFTWARE: "Research Software",
+  ODRL_POLICY: "ODRL Access Policy",
+  ODRL_ACCESS_GRANT: "ODRL Access Grant",
+  PICO_RESEARCH_QUESTION: "PICO Research Question",
+  PCC_RESEARCH_QUESTION: "PCC Research Question",
+  PRISMA_SEARCH_STRATEGY: "PRISMA Search Strategy",
+  PRISMA_DATABASE_SEARCH: "PRISMA Database Search",
+  PRISMA_SEARCH_EXECUTION_DATASET: "PRISMA Search Execution Dataset",
+  PRISMA_STUDY_INCLUSION: "PRISMA Study Inclusion",
+  PRISMA_STUDY_ASSESSMENT: "PRISMA Study Assessment",
+  PRISMA_FULL_SCREENING: "PRISMA Full Screening",
+  FORRT_CLAIM: "FORRT Claim",
+  FORRT_REPLICATION: "FORRT Replication Study",
+  FORRT_REPLICATION_OUTCOME: "FORRT Replication Outcome",
+  FORRT_KL_REPLICATION: "FORRT KL Replication Study",
+  FORRT_KL_REPLICATION_OUTCOME: "FORRT KL Replication Outcome",
+  RESEARCH_SYNTHESIS: "Science Live Research Synthesis",
+};
+
+/** Group labels for organizing checkboxes by category. */
+export const FEED_GROUPS: { label: string; keys: FeedTemplateKey[] }[] = [
+  {
+    label: "Core",
+    keys: [
+      "AIDA_SENTENCE",
+      "CITATION_CITO",
+      "ANNOTATE_QUOTATION",
+      "COMMENT_PAPER",
+      "GEO_COVERAGE",
+    ],
+  },
+  {
+    label: "Data & Software",
+    keys: ["DATASET", "RESEARCH_SOFTWARE", "ODRL_POLICY", "ODRL_ACCESS_GRANT"],
+  },
+  {
+    label: "Systematic Review (PRISMA)",
+    keys: [
+      "PICO_RESEARCH_QUESTION",
+      "PCC_RESEARCH_QUESTION",
+      "PRISMA_SEARCH_STRATEGY",
+      "PRISMA_DATABASE_SEARCH",
+      "PRISMA_SEARCH_EXECUTION_DATASET",
+      "PRISMA_STUDY_INCLUSION",
+      "PRISMA_STUDY_ASSESSMENT",
+      "PRISMA_FULL_SCREENING",
+    ],
+  },
+  {
+    label: "Replication (FORRT)",
+    keys: [
+      "FORRT_CLAIM",
+      "FORRT_REPLICATION",
+      "FORRT_REPLICATION_OUTCOME",
+      "FORRT_KL_REPLICATION",
+      "FORRT_KL_REPLICATION_OUTCOME",
+      "RESEARCH_SYNTHESIS",
+    ],
+  },
+];

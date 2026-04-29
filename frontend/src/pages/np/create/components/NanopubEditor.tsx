@@ -28,11 +28,6 @@ import {
   toScienceLiveNPUri,
 } from "@/lib/uri";
 import {
-  FEED_GROUPS,
-  FEED_TEMPLATE_LABELS,
-  type FeedTemplateKey,
-} from "@/pages/feed/use-feed";
-import {
   AlertTriangle,
   BookCheck,
   CheckCircle2,
@@ -51,6 +46,9 @@ import { TEMPLATE_VIEW_ICONS } from "../../view/view-registry";
 import AnyStatementTemplate from "./AnyStatementTemplate";
 import { POPULAR_TEMPLATES } from "./templates/registry";
 import {
+  FEED_GROUPS,
+  FEED_TEMPLATE_LABELS,
+  FeedTemplateKey,
   TEMPLATE_METADATA,
   TEMPLATE_URI,
   getTemplateColorClass,

@@ -12,6 +12,7 @@ export { default as NANOPUB_COMMENTS } from "./nanopub-comments.rq";
 export { default as NANOPUB_REFERENCES } from "./nanopub-references.rq";
 export { default as NANOPUB_STATUS } from "./nanopub-status.rq";
 export { default as SEARCH_NANOPUBS } from "./search-nanopubs.rq";
+export { default as SEARCH_NANOPUBS_BY_TEMPLATES } from "./search-nanopubs-by-templates.rq";
 export { default as SEARCH_NANOPUBS_BY_TYPE } from "./search-nanopubs-by-type.rq";
 export { default as SEARCH_RELATED_NANOPUBS } from "./search-related-nanopubs.rq";
 export { default as USERS_LATEST } from "./users-latest.rq";

@@ -2,13 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
-import {
-  ArrowRight,
-  MessageCircleCheck,
-  PenTool,
-  Rss,
-  Search,
-} from "lucide-react";
+import { ArrowRight, MessageCircleCheck, PenTool, Search } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 export function Home() {
@@ -44,11 +38,11 @@ export function Home() {
       </section>
 
       {/* Action Cards */}
-      <section className="grid gap-4 sm:grid-cols-3">
+      <section className="grid px-30 gap-4 sm:grid-cols-2">
         <Link to="/np/" className="group">
           <Card className="h-full hover:shadow-md hover:scale-110 transition-transform">
             <CardHeader className="pb-2 text-center">
-              <Rss className="h-5 w-5 text-primary mb-2 mx-auto" />
+              <Search className="h-5 w-5 text-primary mb-2 mx-auto" />
               <CardTitle className="text-base">Browse</CardTitle>
             </CardHeader>
             <CardContent>
@@ -68,20 +62,6 @@ export function Home() {
             <CardContent>
               <p className="text-sm text-secondary-foreground">
                 Publish FAIR nanopublications from your research
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link to="/np/" className="group">
-          <Card className="h-full hover:shadow-md hover:scale-110 transition-transform">
-            <CardHeader className="pb-2 text-center">
-              <Search className="h-5 w-5 text-primary mb-2 mx-auto" />
-              <CardTitle className="text-base">Search</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-secondary-foreground">
-                Find nanopublications by keyword, AI query, or location
               </p>
             </CardContent>
           </Card>
