@@ -28,9 +28,7 @@ import { isNanopubUri } from "@/lib/uri";
 import {
   FEED_GROUPS,
   FEED_TEMPLATE_LABELS,
-  type FeedTemplateKey,
-} from "@/pages/feed/use-feed";
-import {
+  FeedTemplateKey,
   getTemplateColorClass,
   LEGACY_TEMPLATE_URIS,
   TEMPLATE_METADATA,
