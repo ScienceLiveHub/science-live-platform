@@ -20,7 +20,15 @@ select ?np ?label ?date ?creator ?type ?template (count(?refNp) as ?referenceCou
   graph npa:graph {
     ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
     filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+
+    # Exclude examples
     filter not exists { ?np npx:hasNanopubType npx:ExampleNanopub }
+
+    # Exclude templates
+    filter not exists { ?np npx:hasNanopubType nt:AssertionTemplate }
+    filter not exists { ?np npx:hasNanopubType nt:ProvenanceTemplate }
+    filter not exists { ?np npx:hasNanopubType nt:PubinfoTemplate }
+
     optional { ?np rdfs:label ?label . }
     ?np np:hasAssertion ?assertion ;
         dct:created ?date ;
@@ -28,8 +36,6 @@ select ?np ?label ?date ?creator ?type ?template (count(?refNp) as ?referenceCou
         dct:creator ?creator .
   }
 
-  # TODO: this doesnt work
-  filter not exists { graph ?assertion { ?x a nt:AssertionTemplate } }
 
   ?np search:matches [
     search:query ?_searchTerm ;

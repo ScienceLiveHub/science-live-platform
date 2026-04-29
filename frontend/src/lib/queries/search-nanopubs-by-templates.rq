@@ -1,5 +1,5 @@
 # Full-text search on nanopub labels or all literal fields, filtered by template.
-# Excludes example, invalidated, and superseded.
+# Excludes example, templates, invalidated, and superseded.
 # Only returns nanopubs created from one of the provided templates.
 #
 # Placeholder: `?_searchTerm` - the user's search string.
@@ -24,7 +24,15 @@ select ?np ?label ?date ?creator ?type ?template (count(?refNp) as ?referenceCou
   graph npa:graph {
     ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
     filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+
+    # Exclude examples
     filter not exists { ?np npx:hasNanopubType npx:ExampleNanopub }
+
+    # Exclude templates
+    filter not exists { ?np npx:hasNanopubType nt:AssertionTemplate }
+    filter not exists { ?np npx:hasNanopubType nt:ProvenanceTemplate }
+    filter not exists { ?np npx:hasNanopubType nt:PubinfoTemplate }
+
     optional { ?np rdfs:label ?label . }
     ?np dct:created ?date ;
         npx:hasNanopubType ?type;

@@ -1,5 +1,5 @@
 # Get the latest nanopublications regardless of template type.
-# Excludes invalidated and superseded nanopubs.
+# Excludes invalidated and superseded nanopubs, as well as examples and templates.
 #
 # Placeholder: `?_sortBy` - RAW: ORDER BY clause (e.g. "desc(?date)" or "desc(?referenceCount)").
 # Placeholder: `?_limit` - RAW: maximum number of results to return (e.g. 10).
@@ -16,7 +16,15 @@ select ?np ?label ?date ?creator ?type ?template (max(?desc) as ?description) (c
   graph npa:graph {
     ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
     filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+
+    # Exclude examples
     filter not exists { ?np npx:hasNanopubType npx:ExampleNanopub }
+
+    # Exclude templates
+    filter not exists { ?np npx:hasNanopubType nt:AssertionTemplate }
+    filter not exists { ?np npx:hasNanopubType nt:ProvenanceTemplate }
+    filter not exists { ?np npx:hasNanopubType nt:PubinfoTemplate }
+
     ?np dct:created ?date ;
         dct:creator ?creator ;
         npx:hasNanopubType ?type .

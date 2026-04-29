@@ -1,5 +1,5 @@
 # Get the latest nanopublications created from any of the given templates.
-# Excludes invalidated and superseded nanopubs.
+# Excludes examples, templates, invalidated and superseded nanopubs.
 # Use this for templates with legacy versions (e.g. AIDA Sentence, FORRT Claim).
 #
 # Placeholder: `?_templateValues` - raw: a SPARQL VALUES block, e.g.
@@ -20,7 +20,15 @@ select ?np ?label ?date ?creator ?type ?template (max(?desc) as ?description) (c
   graph npa:graph {
     ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
     filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+
+    # Exclude examples
     filter not exists { ?np npx:hasNanopubType npx:ExampleNanopub }
+
+    # Exclude templates
+    filter not exists { ?np npx:hasNanopubType nt:AssertionTemplate }
+    filter not exists { ?np npx:hasNanopubType nt:ProvenanceTemplate }
+    filter not exists { ?np npx:hasNanopubType nt:PubinfoTemplate }
+
     ?np dct:created ?date ;
         dct:creator ?creator ;
         npx:hasNanopubType ?type .
