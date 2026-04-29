@@ -5,14 +5,17 @@
  */
 declare const query: import("../sparql").SparqlQuery<{
   templateValues: "raw";
+  sortBy: "raw";
   limit: "raw";
   offset: "raw";
 }, {
   description: "string";
+  referenceCount: "string";
   np: "string";
   label: "string";
   date: "string";
   creator: "string";
+  type: "string";
   template: "string";
 }>;
 export default query;

@@ -162,6 +162,7 @@ export function useFeed({
           executeBindSparql(
             LATEST_ALL,
             {
+              sortBy: "desc(?date)",
               limit: String(limit),
               offset: String(offset),
             },
@@ -175,6 +176,7 @@ export function useFeed({
               templateValues: getTemplateUris([...selectedKeys])
                 .map((u) => `(<${u}>)`)
                 .join(" "),
+              sortBy: "desc(?date)",
               limit: String(limit),
               offset: String(offset),
             },

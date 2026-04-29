@@ -1,6 +1,7 @@
 # Get the latest nanopublications regardless of template type.
 # Excludes invalidated and superseded nanopubs.
 #
+# Placeholder: `?_sortBy` - RAW: ORDER BY clause (e.g. "desc(?date)" or "desc(?referenceCount)").
 # Placeholder: `?_limit` - RAW: maximum number of results to return (e.g. 10).
 # Placeholder: `?_offset` - RAW: number of results to skip for pagination (e.g. 0).
 
@@ -11,13 +12,14 @@ prefix npx: <http://purl.org/nanopub/x/>
 prefix dct: <http://purl.org/dc/terms/>
 prefix nt: <https://w3id.org/np/o/ntemplate/>
 
-select ?np ?label ?date ?creator (max(?desc) as ?description) ?template where {
+select ?np ?label ?date ?creator ?type ?template (max(?desc) as ?description) (count(?refNp) as ?referenceCount) where {
   graph npa:graph {
     ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
     filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
     filter not exists { ?np npx:hasNanopubType npx:ExampleNanopub }
     ?np dct:created ?date ;
-        dct:creator ?creator .
+        dct:creator ?creator ;
+        npx:hasNanopubType ?type .
     optional { ?np rdfs:label ?label . }
   }
   graph ?pubinfo {
@@ -31,4 +33,5 @@ select ?np ?label ?date ?creator (max(?desc) as ?description) ?template where {
       ?introduced rdfs:label ?desc .
     }
   }
-} group by ?np ?label ?date ?creator ?template order by desc(?date) limit ?_limit offset ?_offset
+  optional { graph npa:networkGraph { ?refNp npa:refersToNanopub ?np . } }
+} group by ?np ?label ?date ?creator ?type ?template order by ?_sortBy limit ?_limit offset ?_offset

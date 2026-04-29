@@ -1,10 +1,9 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Brain, FileCode, Globe, Rss, Search } from "lucide-react";
+import { Brain, FileCode, Globe, Search } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { AiQueryTab } from "./components/ai-query";
 import { GeneralSearch } from "./components/GeneralSearch";
 import { GeoSearch } from "./components/GeoSearch";
-import { LatestFeed } from "./components/LatestFeed";
 import { NanopubView } from "./components/NanopubView";
 
 // ---------------------------------------------------------------------------
@@ -47,15 +46,8 @@ export default function ViewNanopub() {
             </h1>
           </div>
           <div className="w-full">
-            <Tabs defaultValue="latest" className="w-full">
+            <Tabs defaultValue="general" className="w-full">
               <TabsList className="w-full justify-center">
-                <TabsTrigger
-                  value="latest"
-                  className="flex items-center gap-1.5"
-                >
-                  <Rss className="h-4 w-4" />
-                  Latest
-                </TabsTrigger>
                 <TabsTrigger
                   value="general"
                   className="flex items-center gap-1.5"
@@ -75,11 +67,6 @@ export default function ViewNanopub() {
                   Geographic
                 </TabsTrigger>
               </TabsList>
-
-              {/* Latest Feed Tab */}
-              <TabsContent value="latest" className="mt-4">
-                <LatestFeed />
-              </TabsContent>
 
               {/* General Search Tab */}
               <TabsContent value="general" className="mt-4">

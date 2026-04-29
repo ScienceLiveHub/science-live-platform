@@ -13,8 +13,17 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { usePagination } from "@/hooks/use-pagination";
-import { SEARCH_NANOPUBS, SEARCH_NANOPUBS_BY_TEMPLATES } from "@/lib/queries";
-import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_TEXT } from "@/lib/sparql";
+import {
+  LATEST_ALL,
+  LATEST_BY_TEMPLATES,
+  SEARCH_NANOPUBS,
+  SEARCH_NANOPUBS_BY_TEMPLATES,
+} from "@/lib/queries";
+import {
+  executeBindSparql,
+  NANOPUB_SPARQL_ENDPOINT_FULL,
+  NANOPUB_SPARQL_ENDPOINT_TEXT,
+} from "@/lib/sparql";
 import { isNanopubUri } from "@/lib/uri";
 import {
   FEED_GROUPS,
@@ -35,6 +44,7 @@ import {
   FilterX,
   Minus,
   Search,
+  X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -137,6 +147,8 @@ export function GeneralSearch() {
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Incremented to force a re-fetch when the same query is re-submitted. */
+  const [refetchCounter, setRefetchCounter] = useState(0);
   /** Whether there are likely more results beyond the current page. */
   const [hasMore, setHasMore] = useState(false);
 
@@ -152,7 +164,6 @@ export function GeneralSearch() {
   }, [checked]);
 
   const isNanopubInput = isNanopubUri(inputValue);
-  const hasActiveContent = searchQuery || uri;
 
   const toggleTemplate = useCallback(
     (key: FeedTemplateKey) => {
@@ -193,67 +204,101 @@ export function GeneralSearch() {
     setInputValue(searchQuery || uri);
   }, [searchQuery, uri]);
 
-  // Load search results when searchQuery or page changes
-  useEffect(() => {
-    if (!searchQuery) {
-      setSearchResults(null);
-      setHasMore(false);
-      return;
-    }
+  // Whether we are showing the "latest nanopubs" default view (no search query)
+  const isLatestView = !searchQuery;
 
+  /** Effective sort: "Relevance" (maxScore) is only available with a search query. */
+  const effectiveSortBy: SortOption =
+    isLatestView && sortBy === "maxScore" ? "dateDesc" : sortBy;
+
+  // Load results when searchQuery, page, or template filters change
+  useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
     setError(null);
 
-    const performSearch = async () => {
+    const fetchResults = async () => {
       try {
-        // Fetch one extra row to detect whether there is a next page
-        const rows =
-          selectedTemplates.size === 0
-            ? // No template filters: use unfiltered search query
-              await executeBindSparql(
-                SEARCH_NANOPUBS,
-                {
-                  searchTerm: searchQuery,
-                  searchProperty: SEARCH_MODE_PROPERTY[searchMode],
-                  limit: String(limit),
-                  offset: String(offset),
-                  sortBy: SORT_ORDER_BY[sortBy],
-                },
-                NANOPUB_SPARQL_ENDPOINT_TEXT,
-                controller.signal,
-              )
-            : // Template filters active: use template-filtered search query
-              await executeBindSparql(
-                SEARCH_NANOPUBS_BY_TEMPLATES,
-                {
-                  searchTerm: searchQuery,
-                  searchProperty: SEARCH_MODE_PROPERTY[searchMode],
-                  templateValues: getTemplateUris([...selectedTemplates])
-                    .map((u) => `(<${u}>)`)
-                    .join(" "),
-                  limit: String(limit),
-                  offset: String(offset),
-                  sortBy: SORT_ORDER_BY[sortBy],
-                },
-                NANOPUB_SPARQL_ENDPOINT_TEXT,
-                controller.signal,
-              );
+        let rows: any[];
+
+        // Shared params included in every query
+        const sharedParams = {
+          sortBy: SORT_ORDER_BY[effectiveSortBy],
+          limit: String(limit),
+          offset: String(offset),
+        };
+
+        // Pre-compute template values string if filters are active
+        const templateValues =
+          selectedTemplates.size > 0
+            ? getTemplateUris([...selectedTemplates])
+                .map((u) => `(<${u}>)`)
+                .join(" ")
+            : undefined;
+
+        if (isLatestView) {
+          // Browse latest nanopubs (no search text)
+          if (templateValues) {
+            rows = await executeBindSparql(
+              LATEST_BY_TEMPLATES,
+              { ...sharedParams, templateValues },
+              NANOPUB_SPARQL_ENDPOINT_FULL,
+              controller.signal,
+            );
+          } else {
+            rows = await executeBindSparql(
+              LATEST_ALL,
+              sharedParams,
+              NANOPUB_SPARQL_ENDPOINT_FULL,
+              controller.signal,
+            );
+          }
+        } else {
+          // Text search with optional template filter
+          if (templateValues) {
+            rows = await executeBindSparql(
+              SEARCH_NANOPUBS_BY_TEMPLATES,
+              {
+                ...sharedParams,
+                searchTerm: searchQuery,
+                searchProperty: SEARCH_MODE_PROPERTY[searchMode],
+                templateValues,
+              },
+              NANOPUB_SPARQL_ENDPOINT_TEXT,
+              controller.signal,
+            );
+          } else {
+            rows = await executeBindSparql(
+              SEARCH_NANOPUBS,
+              {
+                ...sharedParams,
+                searchTerm: searchQuery,
+                searchProperty: SEARCH_MODE_PROPERTY[searchMode],
+              },
+              NANOPUB_SPARQL_ENDPOINT_TEXT,
+              controller.signal,
+            );
+          }
+        }
 
         const { visibleRows, hasMore: moreResultsAvailable } =
           paginateRows(rows);
 
         setHasMore(moreResultsAvailable);
         setSearchResults(
-          visibleRows.map((row) => ({
+          visibleRows.map((row: any) => ({
             np: row.np,
-            label: row.label || "",
+            label: row.label || row.description || "",
             date: new Date(row.date),
             creator: row.creator || "",
             type: row.type,
             template: row.template,
-            maxScore: parseFloat(row.maxScore),
-            referenceCount: parseInt(row.referenceCount),
+            maxScore:
+              row.maxScore != null ? parseFloat(row.maxScore) : undefined,
+            referenceCount:
+              row.referenceCount != null
+                ? parseInt(row.referenceCount)
+                : undefined,
           })),
         );
       } catch (e: any) {
@@ -263,16 +308,26 @@ export function GeneralSearch() {
         setSearchResults(null);
         setHasMore(false);
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
-    performSearch();
+    fetchResults();
 
     return () => {
       controller.abort();
     };
-  }, [searchQuery, sortBy, searchMode, currentPage, selectedTemplates]);
+  }, [
+    searchQuery,
+    effectiveSortBy,
+    searchMode,
+    currentPage,
+    selectedTemplates,
+    isLatestView,
+    refetchCounter,
+  ]);
 
   /** Paginate raw SPARQL rows using the current page size. */
   function paginateRows<T>(rows: T[]) {
@@ -282,8 +337,6 @@ export function GeneralSearch() {
   }
 
   const handleSubmit = () => {
-    if (!inputValue.trim()) return;
-
     if (isNanopubUri(inputValue)) {
       // It's a nanopub URI - navigate to view it
       const next = new URLSearchParams(searchParams);
@@ -292,12 +345,19 @@ export function GeneralSearch() {
       next.delete("page");
       setSearchParams(next);
     } else {
-      // It's a search query - perform search (resets to page 1)
+      // It's a search query (or empty) - perform search (resets to page 1)
       const next = new URLSearchParams(searchParams);
-      next.set("q", inputValue);
+      if (inputValue.trim()) {
+        next.set("q", inputValue);
+      } else {
+        next.delete("q");
+      }
       next.delete("uri");
       next.delete("page");
       setSearchParams(next);
+      // Force re-fetch even if params are unchanged
+      setRefetchCounter((c) => c + 1);
+      setLoading(true);
     }
   };
 
@@ -317,61 +377,85 @@ export function GeneralSearch() {
     setSearchParams(next);
   };
 
-  /** Search mode toggle, reused in compact bar and full search interface. */
   const renderSearchModeToggle = (size: "sm" | "default" = "default") => (
-    <ToggleGroup
-      type="single"
-      value={searchMode}
-      onValueChange={(v) => {
-        if (v) handleSearchModeChange(v);
-      }}
-      variant="outline"
-      size={size}
-    >
-      <ToggleGroupItem value="fullText" aria-label="Full-text search">
-        Full-text
-      </ToggleGroupItem>
-      <ToggleGroupItem value="label" aria-label="Label search">
-        Title only
-      </ToggleGroupItem>
-    </ToggleGroup>
+    <div className="flex gap-2 items-center">
+      <span className="text-sm">Search in:</span>
+      <ToggleGroup
+        type="single"
+        value={searchMode}
+        onValueChange={(v) => {
+          if (v) handleSearchModeChange(v);
+        }}
+        variant="outline"
+        size={size}
+      >
+        <ToggleGroupItem value="fullText" aria-label="Full-text search">
+          Full-text
+        </ToggleGroupItem>
+        <ToggleGroupItem value="label" aria-label="Label search">
+          Title only
+        </ToggleGroupItem>
+      </ToggleGroup>
+    </div>
   );
 
-  /** Sort select dropdown, reused in compact bar and results header. */
   const renderSortSelect = (size: "sm" | "default" = "default") => (
-    <Select
-      value={sortBy}
-      onValueChange={(v) => handleSortChange(v as SortOption)}
-    >
-      <SelectTrigger size={size} className="gap-1">
-        <ArrowDownNarrowWide className="size-4" />
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="maxScore">Relevance</SelectItem>
-        <SelectItem value="maxRefs">Most Referenced</SelectItem>
-        <SelectItem value="dateDesc">Newest first</SelectItem>
-        <SelectItem value="dateAsc">Oldest first</SelectItem>
-      </SelectContent>
-    </Select>
+    <div className="flex gap-2 items-center">
+      <span className="text-sm">Sort by:</span>
+      <Select
+        value={effectiveSortBy}
+        onValueChange={(v) => handleSortChange(v as SortOption)}
+      >
+        <SelectTrigger size={size} className="gap-1">
+          <ArrowDownNarrowWide className="size-4" />
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="maxScore" disabled={isLatestView}>
+            Relevance
+          </SelectItem>
+          <SelectItem value="maxRefs">Most Referenced</SelectItem>
+          <SelectItem value="dateDesc">Newest first</SelectItem>
+          <SelectItem value="dateAsc">Oldest first</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
   );
 
-  // Compact search bar (shown when there's active content)
-  const renderCompactSearchBar = () => (
-    <div className="flex flex-col gap-2">
+  const renderSearchBar = () => (
+    <div className="flex flex-col gap-2 mb-4">
       <div className="flex gap-2">
-        <Input
-          type="text"
-          className="w-full justify-end"
-          placeholder="Enter search query or nanopub URI..."
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSubmit();
-            }
-          }}
-        />
+        <div className="relative flex-1">
+          <Input
+            type="text"
+            className="w-full pr-8"
+            placeholder="Enter search query or nanopub URI..."
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit();
+              }
+            }}
+          />
+          {inputValue && (
+            <button
+              type="button"
+              onClick={() => {
+                setInputValue("");
+                const next = new URLSearchParams(searchParams);
+                next.delete("q");
+                next.delete("uri");
+                next.delete("page");
+                setSearchParams(next);
+              }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Clear search"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
         <Button
           className="inline-flex items-center rounded-md bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 px-6"
           disabled={loading}
@@ -392,51 +476,13 @@ export function GeneralSearch() {
           )}
         </Button>
       </div>
-    </div>
-  );
-
-  // Full search interface (shown when no content is active)
-  const renderFullSearchInterface = () => (
-    <div className="flex flex-col gap-4">
-      <div className="flex gap-2">
-        <Input
-          type="text"
-          className="h-12 text-lg px-6"
-          placeholder="Enter search query or nanopub URI..."
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSubmit();
-            }
-          }}
-        />
-        <Button
-          className="inline-flex items-center rounded-md bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 h-12 px-8 text-lg"
-          onClick={handleSubmit}
-        >
-          {isNanopubInput ? (
-            <>
-              <FileSymlink className="h-5 w-5 mr-2" />
-              View
-            </>
-          ) : (
-            <>
-              <Search className="h-5 w-5 mr-2" />
-              Go
-            </>
-          )}
-        </Button>
+      <div className="flex gap-4 items-center">
+        {renderSearchModeToggle("sm")}
+        {renderSortSelect("sm")}
       </div>
-
-      <p className="text-center text-muted-foreground text-sm">
-        Search across the Nanopublications network or enter a nanopublication
-        URI to view it
-      </p>
     </div>
   );
 
-  // Template filter sidebar
   const renderTemplateSidebar = () => (
     <aside className="flex w-full flex-col gap-4 lg:w-64 lg:min-w-64">
       <div className="flex items-center justify-between">
@@ -502,12 +548,13 @@ export function GeneralSearch() {
     </aside>
   );
 
-  // Render search results
+  // Render search results (used for both latest and search views)
   const renderSearchResults = () => {
     if (loading) {
       return (
         <div className="rounded-md border bg-muted/30 p-4 flex items-center gap-3 text-muted-foreground">
-          <Spinner /> <span>Searching…</span>
+          <Spinner />{" "}
+          <span>{isLatestView ? "Loading latest…" : "Searching…"}</span>
         </div>
       );
     }
@@ -527,24 +574,27 @@ export function GeneralSearch() {
 
     return (
       <div className="flex flex-col gap-4">
-        {searchResults.length > 0 && !isNanopubInput && (
-          <div className="flex gap-2">
-            {renderSearchModeToggle("sm")}
-            {renderSortSelect("sm")}
-          </div>
-        )}
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
           <h2 className="text-lg font-semibold">
-            {searchResults.length > 0
-              ? `Results ${firstResultIndex} - ${lastResultIndex} for "${searchQuery}"`
-              : `No results for "${searchQuery}"`}
+            {isLatestView
+              ? searchResults.length > 0
+                ? selectedTemplates.size > 0
+                  ? `Nanopublications`
+                  : `Latest Nanopublications`
+                : `No nanopublications found`
+              : searchResults.length > 0
+                ? `Results ${firstResultIndex} - ${lastResultIndex} for "${searchQuery}"`
+                : `No results for "${searchQuery}"`}
+            {selectedTemplates.size > 0 && " with selected Template(s)"}
           </h2>
         </div>
         {searchResults.length > 0 ? (
           <SearchResultList searchResults={searchResults} />
         ) : (
           <div className="rounded-md border bg-muted/30 p-4 text-muted-foreground">
-            No results found for your search.
+            {isLatestView
+              ? "No nanopublications found."
+              : "No results found for your search."}
           </div>
         )}
         <PaginationControls
@@ -559,15 +609,11 @@ export function GeneralSearch() {
 
   return (
     <div className="flex flex-col gap-4">
-      {hasActiveContent
-        ? renderCompactSearchBar()
-        : renderFullSearchInterface()}
-      {searchQuery && (
-        <div className="flex flex-col gap-6 lg:flex-row">
-          {renderTemplateSidebar()}
-          <section className="flex-1">{renderSearchResults()}</section>
-        </div>
-      )}
+      {renderSearchBar()}
+      <div className="flex flex-row gap-6">
+        <div className="flex flex-col gap-6">{renderTemplateSidebar()}</div>
+        <section className="flex-1">{renderSearchResults()}</section>
+      </div>
     </div>
   );
 }
