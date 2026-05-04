@@ -18,7 +18,7 @@ export interface SearchResult {
   label: string;
   date: Date;
   creator: string;
-  type?: string;
+  types?: string[];
   template?: string;
   maxScore?: number;
   referenceCount?: number;
@@ -40,8 +40,9 @@ export default function SearchResultList({
             className="hover:underline"
           >
             <div className="font-medium flex flex-row">
-              {result.type ===
-              "https://w3id.org/np/o/ntemplate/AssertionTemplate" ? (
+              {result.types?.includes(
+                "https://w3id.org/np/o/ntemplate/AssertionTemplate",
+              ) ? (
                 <FilePlus className="w-4 h-4 min-w-4 min-h-4 mt-1 mr-2 text-purple-400 dark:text-purple-300" />
               ) : (
                 <NanopubTemplateIcon template={result.template} />
@@ -58,20 +59,18 @@ export default function SearchResultList({
             </span>
           </div>
 
-          {/* Type */}
-          {result.type && (
+          {/* Type badges */}
+          {result.types && result.types.length > 0 && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="text-xs truncate">
-                <a href={result.type}>
-                  <Badge
-                    key={result.type}
-                    variant="secondary"
-                    className="text-xs h-6 px-2 gap-1"
-                  >
-                    {result.type && getUriEnd(result.type)}
-                  </Badge>
-                </a>
-              </span>
+              {result.types.map((type) => (
+                <span key={type} className="text-xs truncate">
+                  <a href={type}>
+                    <Badge variant="outline" className="text-xs h-6 px-2 gap-1">
+                      {getUriEnd(type)}
+                    </Badge>
+                  </a>
+                </span>
+              ))}
             </div>
           )}
 

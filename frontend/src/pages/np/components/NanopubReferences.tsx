@@ -112,7 +112,9 @@ export function NanopubReferences({ nanopubUri }: { nanopubUri: string }) {
           </div>
         ) : references.length > 0 ? (
           <div className="pt-2">
-            <span>Other Nanopublications which refererence this one:</span>
+            <p className="mb-4 text-muted-foreground">
+              Nanopublications referring to this one:
+            </p>
             <SearchResultList searchResults={references} />
           </div>
         ) : hasFetched.current ? (

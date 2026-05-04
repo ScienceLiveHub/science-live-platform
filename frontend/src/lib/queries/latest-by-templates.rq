@@ -15,7 +15,7 @@ prefix npx: <http://purl.org/nanopub/x/>
 prefix dct: <http://purl.org/dc/terms/>
 prefix nt: <https://w3id.org/np/o/ntemplate/>
 
-select ?np ?label ?date ?creator ?type ?template (max(?desc) as ?description) (count(?refNp) as ?referenceCount) where {
+select ?np ?label ?date ?creator (group_concat(distinct ?type; separator="|") as ?types) ?template (max(?desc) as ?description) (count(distinct ?refNp) as ?referenceCount) where {
   values (?template) { ?_templateValues }
   graph npa:graph {
     ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
@@ -46,4 +46,4 @@ select ?np ?label ?date ?creator ?type ?template (max(?desc) as ?description) (c
     }
   }
   optional { graph npa:networkGraph { ?refNp npa:refersToNanopub ?np . } }
-} group by ?np ?label ?date ?creator ?type ?template order by ?_sortBy limit ?_limit offset ?_offset
+} group by ?np ?label ?date ?creator ?template order by ?_sortBy limit ?_limit offset ?_offset

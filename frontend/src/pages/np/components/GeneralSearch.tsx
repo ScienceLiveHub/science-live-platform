@@ -289,7 +289,7 @@ export function GeneralSearch() {
             label: row.label || row.description || "",
             date: new Date(row.date),
             creator: row.creator || "",
-            type: row.type,
+            types: row.types ? row.types.split("|") : [],
             template: row.template,
             maxScore:
               row.maxScore != null ? parseFloat(row.maxScore) : undefined,

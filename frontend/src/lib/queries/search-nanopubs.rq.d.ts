@@ -10,13 +10,13 @@ declare const query: import("../sparql").SparqlQuery<{
   offset: "raw";
   sortBy: "raw";
 }, {
+  types: "string";
   referenceCount: "string";
   maxScore: "string";
   np: "string";
   label: "string";
   date: "string";
   creator: "string";
-  type: "string";
   template: "string";
 }>;
 export default query;
