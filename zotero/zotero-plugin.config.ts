@@ -71,6 +71,19 @@ export default defineConfig({
         },
         plugins: [sparqlFilesPlugin()],
       },
+      {
+        entryPoints: ["src/dialogs/nanopubSearch/index.tsx"],
+        bundle: true,
+        target: "firefox115",
+        format: "esm",
+        outdir: `.scaffold/build/addon/content/scripts/dialogs/nanopubSearch`,
+        define: metaEnvDefs,
+        loader: {
+          ".png": "file",
+          ".svg": "file",
+        },
+        plugins: [sparqlFilesPlugin()],
+      },
     ],
   },
 

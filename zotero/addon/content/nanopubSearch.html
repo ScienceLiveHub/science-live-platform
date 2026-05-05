@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Search Nanopublications</title>
+    <link rel="stylesheet" href="styles/sciencelive.css" />
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family:
+                -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        #root {
+            padding: 16px;
+            height: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root">Loading Search UI…</div>
+
+    <!--
+      This bundle is built as ESM (see zotero-plugin.config.ts).
+      Use a relative URL so this works regardless of the final addonRef.
+      Since this HTML is loaded from chrome://__addonRef__/content/nanopubSearch.html,
+      "scripts/..." resolves to chrome://__addonRef__/content/scripts/...
+    -->
+    <script type="module" src="scripts/dialogs/nanopubSearch/index.js"></script>
+</body>
+
+</html>

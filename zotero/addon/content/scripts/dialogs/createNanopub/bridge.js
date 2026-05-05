@@ -6,7 +6,7 @@
  * context where React components can run seamlessly without Zotero context limitations.
  */
 
-/* global Zotero, window, document, console, URLSearchParams, setInterval, clearInterval */
+/* global Zotero, window, document, console, URLSearchParams, injectCallbackToIframe, pollIframeReady */
 
 window.addEventListener("load", () => {
   try {
@@ -58,58 +58,18 @@ window.addEventListener("load", () => {
     );
 
     // Inject the nanopubPublishedCallback into the iframe's content world
-    // after it loads.
-    //
-    // NOTE: We cannot rely on iframe.addEventListener("load", ...) here because
-    // in XUL chrome context with type="content" iframes, the load event on the
-    // iframe element does not fire reliably. Instead we poll for the iframe's
-    // contentDocument to reach "complete" readyState after we set the new src.
-    function injectCallback() {
-      // Forward the nanopubPublishedCallback from the chrome window to the
-      // iframe's contentWindow so the React app can invoke it after publishing.
-      try {
-        if (
-          typeof window.nanopubPublishedCallback === "function" &&
-          iframe.contentWindow
-        ) {
-          iframe.contentWindow.nanopubPublishedCallback =
-            window.nanopubPublishedCallback;
-        }
-      } catch (e) {
-        console.warn(
-          "[createNanopub] could not forward nanopubPublishedCallback to iframe",
-          e,
+    // after it loads (../utils.js).
+    pollIframeReady(
+      iframe,
+      function () {
+        injectCallbackToIframe(
+          iframe,
+          "nanopubPublishedCallback",
+          "[createNanopub]",
         );
-      }
-    }
-
-    var pollAttempts = 0;
-    var maxPollAttempts = 50; // ~10 seconds at 200ms intervals
-    var pollTimer = setInterval(function () {
-      pollAttempts++;
-      try {
-        var doc =
-          iframe.contentDocument ||
-          (iframe.contentWindow && iframe.contentWindow.document);
-        if (doc && doc.readyState === "complete") {
-          clearInterval(pollTimer);
-          console.log("[createNanopub] iframe loaded (detected via polling)");
-          injectCallback();
-        } else if (pollAttempts >= maxPollAttempts) {
-          clearInterval(pollTimer);
-          console.warn("[createNanopub] iframe load polling timed out");
-        }
-      } catch (e) {
-        // Cross-origin or not-yet-ready — keep polling
-        if (pollAttempts >= maxPollAttempts) {
-          clearInterval(pollTimer);
-          console.warn(
-            "[createNanopub] iframe load polling timed out with error",
-            e,
-          );
-        }
-      }
-    }, 200);
+      },
+      "[createNanopub]",
+    );
   } catch (e) {
     console.error("[createNanopub] failed to inject prefs into iframe", e);
   }
