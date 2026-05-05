@@ -33,8 +33,8 @@ import {
   SearchBar,
   type SearchMode,
   type SortOption,
-} from "./SearchBar";
-import { TemplateFilterSidebar } from "./TemplateFilterSidebar";
+} from "./search/SearchBar";
+import { TemplateFilterSidebar } from "./search/TemplateFilterSidebar";
 
 // Detect dark mode from document class (works in Zotero iframe context)
 // TODO: if you use NanopubSearchPicker elsewhere, you may need to use a different method

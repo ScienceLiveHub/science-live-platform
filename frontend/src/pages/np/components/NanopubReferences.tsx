@@ -12,7 +12,7 @@ import {
 } from "@radix-ui/react-collapsible";
 import { ChevronDown, FileSymlink } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import SearchResultList, { SearchResult } from "./SearchResultList";
+import SearchResultList, { SearchResult } from "./search/SearchResultList";
 
 /**
  * An expandable panel that shows all nanopubs that reference the current nanopub.

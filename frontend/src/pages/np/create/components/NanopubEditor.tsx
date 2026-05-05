@@ -40,7 +40,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { NanopubTemplateIcon } from "../../components/SearchResultList";
+import { NanopubTemplateIcon } from "../../components/search/SearchResultList";
 import { NanopubViewer } from "../../view/NanopubViewer";
 import { TEMPLATE_VIEW_ICONS } from "../../view/view-registry";
 import AnyStatementTemplate from "./AnyStatementTemplate";

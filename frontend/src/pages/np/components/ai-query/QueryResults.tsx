@@ -5,7 +5,7 @@
 import { executeSparql, NANOPUB_SPARQL_ENDPOINT_TEXT } from "@/lib/sparql";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import SearchResultList, { SearchResult } from "../SearchResultList";
+import SearchResultList, { SearchResult } from "../search/SearchResultList";
 import type { QueryResultItem } from "./types";
 
 interface QueryResultsProps {

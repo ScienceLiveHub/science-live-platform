@@ -8,7 +8,6 @@ import type { LatLngBoundsExpression, LatLngExpression } from "leaflet";
 import { Globe, MapPinned } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useMap } from "react-leaflet";
-import SearchResultList from "./SearchResultList";
 import {
   GeoLayers,
   LocationDetail,
@@ -17,6 +16,7 @@ import {
   type GeoLocation,
   type MapBounds,
 } from "./geo";
+import SearchResultList from "./search/SearchResultList";
 
 /** Approximate bounding box for Southern Europe, used in Geo example. */
 const EUROPE_BOUNDS: LatLngBoundsExpression = [

@@ -26,8 +26,8 @@ import {
   SORT_ORDER_BY,
   type SearchMode,
   type SortOption,
-} from "@/pages/np/components/SearchBar";
-import type { SearchResult } from "@/pages/np/components/SearchResultList";
+} from "@/pages/np/components/search/SearchBar";
+import type { SearchResult } from "@/pages/np/components/search/SearchResultList";
 import type { FeedTemplateKey } from "@/pages/np/create/components/templates/registry-metadata";
 import { useEffect, useState } from "react";
 

@@ -28,9 +28,9 @@ import {
   SORT_OPTIONS,
   type SearchMode,
   type SortOption,
-} from "./SearchBar";
-import SearchResultList from "./SearchResultList";
-import { TemplateFilterSidebar } from "./TemplateFilterSidebar";
+} from "./search/SearchBar";
+import SearchResultList from "./search/SearchResultList";
+import { TemplateFilterSidebar } from "./search/TemplateFilterSidebar";
 
 export function GeneralSearch() {
   const { resolvedTheme } = useTheme();
