@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Shared utilities for Zotero chrome -> content iframe bridge scripts.
  *
@@ -16,7 +17,7 @@
  * @param {string} callbackName       - Property name on `window` to forward.
  * @param {string} logPrefix          - Prefix for log messages, e.g. "[createNanopub]".
  */
-export function injectCallbackToIframe(iframe, callbackName, logPrefix) {
+function injectCallbackToIframe(iframe, callbackName, logPrefix) {
   try {
     if (typeof window[callbackName] === "function" && iframe.contentWindow) {
       iframe.contentWindow[callbackName] = window[callbackName];
@@ -44,13 +45,7 @@ export function injectCallbackToIframe(iframe, callbackName, logPrefix) {
  * @param {number} [maxAttempts=50]   - Maximum number of polling attempts.
  * @param {number} [intervalMs=200]   - Milliseconds between polling attempts.
  */
-export function pollIframeReady(
-  iframe,
-  onReady,
-  logPrefix,
-  maxAttempts,
-  intervalMs,
-) {
+function pollIframeReady(iframe, onReady, logPrefix, maxAttempts, intervalMs) {
   var attempts = 0;
   var limit = maxAttempts || 50; // ~10 seconds at 200 ms intervals
   var interval = intervalMs || 200;

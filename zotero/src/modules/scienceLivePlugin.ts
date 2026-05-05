@@ -70,9 +70,16 @@ function openNanopubCreationDialog(
 
   // Register a callback on the dialog window to relay results back to the parent
   // opener (chrome) context.
-  if (dialog && onPublished) {
-    (dialog as any).nanopubPublishedCallback = (result: PublishResult) => {
-      onPublished?.(result);
+  if (dialog) {
+    if (onPublished) {
+      (dialog as any).nanopubPublishedCallback = (result: PublishResult) => {
+        onPublished?.(result);
+      };
+    }
+
+    // Allow React components in the iframe to open URLs in the OS default browser
+    (dialog as any).openExternalUrl = (url: string) => {
+      Zotero.launchURL(url);
     };
   }
 }
@@ -464,6 +471,12 @@ export class ScienceLivePlugin {
             } catch {
               /* ignore */
             }
+          };
+
+          // Allow React components in the iframe to open URLs in the OS default browser
+          (dialog as any).openExternalUrl = (url: string) => {
+            console.log(url);
+            Zotero.launchURL(url);
           };
 
           // Wait for the dialog to fully load before listening for unload,

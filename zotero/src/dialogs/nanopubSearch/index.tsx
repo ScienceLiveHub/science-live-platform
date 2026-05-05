@@ -78,6 +78,17 @@ window.addEventListener("load", () => {
                 );
               }
             }}
+            onOpenExternalUrl={(url: string) => {
+              const callback = (window as any).openExternalUrl;
+              if (typeof callback === "function") {
+                callback(url);
+              } else {
+                console.warn(
+                  "[nanopubSearch] openExternalUrl not available, falling back to window.open",
+                );
+                window.open(url, "_blank");
+              }
+            }}
           />
         </TooltipProvider>
       </React.StrictMode>,

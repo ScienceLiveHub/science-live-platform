@@ -31,7 +31,10 @@
     },
     "ghcr.io/dhoeric/features/act:1": {},
     "ghcr.io/devcontainers/features/python:1": {},
-    "ghcr.io/devcontainers-extra/features/uv:1": {}
+    "ghcr.io/devcontainers-extra/features/uv:1": {},
+    "ghcr.io/postfinance/devcontainer-features/browsers:1.0.0": {
+      "firefoxVersion": "latest"
+    }
   },
   "postCreateCommand": "bash scripts/devcontainer-setup.sh",
   "customizations": {

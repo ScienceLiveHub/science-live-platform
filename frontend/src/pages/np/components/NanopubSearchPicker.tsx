@@ -26,6 +26,10 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { AsyncLabel } from "@/hooks/use-labels";
 import { useNanopubSearch } from "@/hooks/use-nanopub-search";
+import {
+  makeExternalLinkHandler,
+  type OpenExternalUrlFn,
+} from "@/lib/external-url";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { getUriEnd, toScienceLiveNPUri } from "@/lib/uri";
 import {
@@ -158,6 +162,12 @@ export interface NanopubSearchPickerProps {
   onConfirm: (selectedUris: string[]) => void;
   /** Called when the user cancels. */
   onCancel: () => void;
+  /**
+   * Optional callback to open a URL in an external browser.
+   * In Zotero context this delegates to `Zotero.launchURL()`.
+   * When omitted, falls back to `window.open()`.
+   */
+  onOpenExternalUrl?: OpenExternalUrlFn;
 }
 
 // ---------------------------------------------------------------------------
@@ -169,7 +179,14 @@ export function NanopubSearchPicker({
   confirmLabel = "Confirm Selection",
   onConfirm,
   onCancel,
+  onOpenExternalUrl,
 }: NanopubSearchPickerProps) {
+  // ---- External link handler (memoized) ----
+  const externalLinkClickHandler = useMemo(
+    () => makeExternalLinkHandler(onOpenExternalUrl),
+    [onOpenExternalUrl],
+  );
+
   // ---- Search state (replaces URL search params) ----
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [inputValue, setInputValue] = useState(initialQuery);
@@ -412,7 +429,7 @@ export function NanopubSearchPicker({
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-1 rounded hover:bg-accent/10 text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={externalLinkClickHandler}
                       title="Open in Science Live"
                     >
                       <ExternalLink className="w-4 h-4" />

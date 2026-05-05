@@ -12,6 +12,8 @@
 /* global window, document, console, URLSearchParams, injectCallbackToIframe, pollIframeReady */
 
 window.addEventListener("load", () => {
+  const logPrefix = "[nanopubSearch]";
+
   try {
     const iframe = document.getElementById("nanopub-search-browser");
     if (!iframe) return;
@@ -34,20 +36,16 @@ window.addEventListener("load", () => {
       params.toString() ? baseSrc + "?" + params.toString() : baseSrc,
     );
 
-    // Inject the nanopubSearchCallback into the iframe's content world
-    // after it loads (../utils.js).
+    // Inject callbacks into the iframe's content world after it loads (../utils.js).
     pollIframeReady(
       iframe,
       function () {
-        injectCallbackToIframe(
-          iframe,
-          "nanopubSearchCallback",
-          "[nanopubSearch]",
-        );
+        injectCallbackToIframe(iframe, "nanopubSearchCallback", logPrefix);
+        injectCallbackToIframe(iframe, "openExternalUrl", logPrefix);
       },
-      "[nanopubSearch]",
+      logPrefix,
     );
   } catch (e) {
-    console.error("[nanopubSearch] failed to inject params into iframe", e);
+    console.error(logPrefix + " failed to inject params into iframe", e);
   }
 });

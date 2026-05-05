@@ -9,6 +9,8 @@
 /* global Zotero, window, document, console, URLSearchParams, injectCallbackToIframe, pollIframeReady */
 
 window.addEventListener("load", () => {
+  const logPrefix = "[createNanopub]";
+
   try {
     const iframe = document.getElementById("nanopub-browser");
     if (!iframe) return;
@@ -57,20 +59,18 @@ window.addEventListener("load", () => {
       params.toString() ? baseSrc + "?" + params.toString() : baseSrc,
     );
 
-    // Inject the nanopubPublishedCallback into the iframe's content world
-    // after it loads (../utils.js).
+    // Inject callbacks into the iframe's content world after it loads (../utils.js).
     pollIframeReady(
       iframe,
       function () {
-        injectCallbackToIframe(
-          iframe,
-          "nanopubPublishedCallback",
-          "[createNanopub]",
-        );
+        injectCallbackToIframe(iframe, "nanopubPublishedCallback", logPrefix);
+        // Forward openExternalUrl (set by scienceLivePlugin.ts on the dialog window)
+        // so React components in the iframe can open URLs in the OS default browser.
+        injectCallbackToIframe(iframe, "openExternalUrl", logPrefix);
       },
-      "[createNanopub]",
+      logPrefix,
     );
   } catch (e) {
-    console.error("[createNanopub] failed to inject prefs into iframe", e);
+    console.error(logPrefix + " failed to inject prefs into iframe", e);
   }
 });
