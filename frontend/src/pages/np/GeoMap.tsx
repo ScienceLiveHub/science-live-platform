@@ -16,7 +16,6 @@ import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
 import type { LatLngExpression } from "leaflet";
 import { Globe, Search } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
-import SearchResultList from "./components/SearchResultList";
 import {
   GeoLayers,
   LocationDetail,
@@ -25,6 +24,7 @@ import {
   type GeoLocation,
   type MapBounds,
 } from "./components/geo";
+import SearchResultList from "./components/search/SearchResultList";
 
 // ---------------------------------------------------------------------------
 // Main Page Component

@@ -10,8 +10,8 @@ import {
   getTemplateColorClass,
   getTemplateMetadata,
   resolveTemplateUri,
-} from "../create/components/templates/registry-metadata";
-import { TEMPLATE_VIEW_ICONS } from "../view/view-registry";
+} from "../../create/components/templates/registry-metadata";
+import { TEMPLATE_VIEW_ICONS } from "../../view/view-registry";
 
 export interface SearchResult {
   np: string;

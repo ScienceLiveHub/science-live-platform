@@ -70,9 +70,16 @@ function openNanopubCreationDialog(
 
   // Register a callback on the dialog window to relay results back to the parent
   // opener (chrome) context.
-  if (dialog && onPublished) {
-    (dialog as any).nanopubPublishedCallback = (result: PublishResult) => {
-      onPublished?.(result);
+  if (dialog) {
+    if (onPublished) {
+      (dialog as any).nanopubPublishedCallback = (result: PublishResult) => {
+        onPublished?.(result);
+      };
+    }
+
+    // Allow React components in the iframe to open URLs in the OS default browser
+    (dialog as any).openExternalUrl = (url: string) => {
+      Zotero.launchURL(url);
     };
   }
 }
@@ -405,7 +412,7 @@ export class ScienceLivePlugin {
   }
 
   /**
-   * Search for and attach related nanopublications
+   * Search for and attach related nanopublications, showing a reslts/selection window
    */
   static async searchRelatedNanopubs() {
     try {
@@ -435,41 +442,63 @@ export class ScienceLivePlugin {
 
       ztoolkit.log("Searching for nanopubs related to: " + itemTitle);
 
-      // Show progress
-      const progressWin = new ztoolkit.ProgressWindow(
-        "Searching for Nanopublications",
-      );
-      progressWin.createLine({
-        text: `"Searching for related nanopublications..."`,
+      // Open the nanopub search picker dialog and await user selection
+      const nanopubUris: string[] = await new Promise<string[]>((resolve) => {
+        const mainWin = Zotero.getMainWindow();
+        const dark = isDarkMode(mainWin);
+        let resolved = false;
+
+        const safeResolve = (uris: string[]) => {
+          if (resolved) return;
+          resolved = true;
+          resolve(uris);
+        };
+
+        const dialog = mainWin.openDialog(
+          `chrome://${addon.data.config.addonRef}/content/nanopubSearch.xhtml`,
+          "",
+          "chrome,dialog=no,modal=no,centerscreen,resizable,width=1000,height=700",
+          itemTitle, // window.arguments[0] - pre-fill search query
+          dark, // window.arguments[1] - dark mode
+        );
+
+        if (dialog) {
+          // Register the callback that the React app will invoke with selected URIs
+          (dialog as any).nanopubSearchCallback = (selectedUris: string[]) => {
+            safeResolve(selectedUris);
+            try {
+              dialog.close();
+            } catch {
+              /* ignore */
+            }
+          };
+
+          // Allow React components in the iframe to open URLs in the OS default browser
+          (dialog as any).openExternalUrl = (url: string) => {
+            console.log(url);
+            Zotero.launchURL(url);
+          };
+
+          // Wait for the dialog to fully load before listening for unload,
+          // otherwise the initial XUL load/unload cycle triggers premature resolution.
+          dialog.addEventListener("load", () => {
+            dialog.addEventListener("unload", () => {
+              safeResolve([]);
+            });
+          });
+        } else {
+          safeResolve([]);
+        }
       });
-      progressWin.show();
-
-      // Search using the search module
-      const searchModule = addon.data.searchModule;
-      const nanopubUris = await searchModule.searchForItem(targetItem);
-
-      progressWin.close();
 
       if (nanopubUris.length === 0) {
-        alert("No Results", "No nanopublications found related to this item.");
-        return;
-      }
-
-      // Ask user if they want to import all or select
-      const result = prompts.confirm(
-        win,
-        "Nanopublications Found",
-        `Found ${nanopubUris.length} related nanopublication(s).\n\nDo you want to attach all of them to this item?`,
-      );
-
-      if (!result) {
-        ztoolkit.log("User cancelled import");
         return;
       }
 
       // Import all found nanopubs
-
-      progressWin.changeHeadline("Importing Nanopublications");
+      const progressWin = new ztoolkit.ProgressWindow(
+        "Importing Nanopublications",
+      );
       progressWin.createLine({
         text: `Importing ${nanopubUris.length} nanopublications...`,
       });
@@ -495,9 +524,9 @@ export class ScienceLivePlugin {
 
       alert(
         "Import Complete",
-        `Successfully imported ${successCount} nanopublication(s).\n` +
+        `Successfully imported ${successCount} nanopublications.\n` +
           (failCount > 0
-            ? `Failed to import ${failCount} nanopublication(s).`
+            ? `Failed to import ${failCount} nanopublications.`
             : ""),
       );
     } catch (err: any) {

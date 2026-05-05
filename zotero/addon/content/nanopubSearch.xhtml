@@ -1,8 +1,8 @@
 <window
-  id="create-nanopub-dialog"
+  id="nanopub-search-dialog"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
   xmlns:html="http://www.w3.org/1999/xhtml"
-  title="Create Nanopublication"
+  title="Search Nanopublications"
 >
   <linkset>
     <html:link rel="stylesheet" href="chrome://global/skin/" type="text/css" />
@@ -19,29 +19,29 @@
 
     <html:style>
       /* Host a normal HTML page so module scripts can run reliably */
-      #nanopub-browser { width: 100%; height: 100%; min-height: 600px; }
+      #nanopub-search-browser { width: 100%; height: 100%; min-height: 600px; }
     </html:style>
   </linkset>
 
   <!--
-        We intentionally render the React UI inside a iframe pointing at a normal HTML page.
+        We intentionally render the React UI inside an iframe pointing at a normal HTML page.
         This avoids XUL/XHTML module-script edge cases that can cause the dialog to stay blank.
     -->
 
   <!--
-        Pass plugin prefs into the content iframe via query parameters.
+        Pass params into the content iframe via query parameters.
         The React bundle runs inside the iframe (content context) and cannot reliably access
-        Zotero globals like Zotero.Prefs, so the chrome parent injects the values.
+        Zotero globals, so the chrome parent injects the values via bridge.js.
     -->
   <script type="application/javascript" src="scripts/dialogs/utils.js" />
   <script
     type="application/javascript"
-    src="scripts/dialogs/createNanopub/bridge.js"
+    src="scripts/dialogs/nanopubSearch/bridge.js"
   />
   <iframe
-    id="nanopub-browser"
+    id="nanopub-search-browser"
     type="content"
     flex="1"
-    src="chrome://__addonRef__/content/createNanopub.html"
+    src="chrome://__addonRef__/content/nanopubSearch.html"
   />
 </window>
