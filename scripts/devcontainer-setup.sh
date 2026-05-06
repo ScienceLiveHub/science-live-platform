@@ -7,7 +7,7 @@ curl -sL https://raw.githubusercontent.com/retorquere/zotero-deb/master/install.
 
 sudo apt update
 sudo apt upgrade -y
-sudo apt install zotero trash-cli magic-wormhole -y
+sudo apt install zotero trash-cli magic-wormhole desktop-file-utils -y
 
 # Update to yarn 4+, which is sometimes needed for using local dev versions of nanopub-js
 export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
