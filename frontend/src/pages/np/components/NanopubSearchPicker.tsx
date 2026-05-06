@@ -26,7 +26,7 @@ import {
   type OpenExternalUrlFn,
 } from "@/lib/external-url";
 import { getUriEnd, toScienceLiveNPUri } from "@/lib/uri";
-import { NanopubPreviewPopover } from "@/pages/np/components/search/NanopubPreviewPopover";
+import { TextImportPreviewPopover } from "@/pages/np/components/search/TextImportPreviewPopover";
 import {
   type FeedTemplateKey,
   getTemplateColorClass,
@@ -346,7 +346,7 @@ export function NanopubSearchPicker({
                     )}
                   </div>
                   <div className="flex items-center gap-0.5 shrink-0">
-                    <NanopubPreviewPopover uri={result.np} />
+                    <TextImportPreviewPopover uri={result.np} />
                     <a
                       href={toScienceLiveNPUri(result.np, false)}
                       target="_blank"

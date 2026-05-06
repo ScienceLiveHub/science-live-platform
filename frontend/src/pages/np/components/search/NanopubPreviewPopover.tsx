@@ -1,11 +1,11 @@
 /**
  * NanopubPreviewPopover
  *
- * A popover that loads a nanopublication by URI and renders its markdown
- * content as HTML.  Used in search result lists to quickly preview a nanopub
- * without leaving the page.
+ * A popover that loads a nanopublication by URI and renders a preview
+ * of the assertion, or a custom View Component if available.
  */
 
+import { GraphSection } from "@/components/np/graph-section";
 import {
   Popover,
   PopoverContent,
@@ -13,29 +13,29 @@ import {
 } from "@/components/ui/popover";
 import { Spinner } from "@/components/ui/spinner";
 import { NanopubStore } from "@/lib/nanopub-store";
-import { Eye } from "lucide-react";
-import { marked } from "marked";
-import { useEffect, useState } from "react";
+import { File } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { resolveTemplateUri } from "../../create/components/templates/registry-metadata";
+import { VIEW_COMPONENTS } from "../../view/view-registry";
 
 export function NanopubPreviewPopover({ uri }: { uri: string }) {
   const [open, setOpen] = useState(false);
-  const [html, setHtml] = useState<string | null>(null);
+  const [store, setStore] = useState<NanopubStore | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) {
-      setHtml(null);
+      setStore(null);
       setError(null);
       return;
     }
     let cancelled = false;
     setLoading(true);
     NanopubStore.load(uri)
-      .then((store) => {
+      .then((s) => {
         if (cancelled) return;
-        const md = store.toMarkdownString();
-        setHtml(marked.parse(md) as string);
+        setStore(s);
         setLoading(false);
       })
       .catch((err) => {
@@ -48,6 +48,20 @@ export function NanopubPreviewPopover({ uri }: { uri: string }) {
     };
   }, [open, uri]);
 
+  const ViewComponent = useMemo(() => {
+    if (!store) return null;
+    const resolved =
+      store.metadata.template && resolveTemplateUri(store.metadata.template);
+    return resolved ? (VIEW_COMPONENTS[resolved] ?? null) : null;
+  }, [store]);
+
+  const assertionStatements = useMemo(() => {
+    if (!store) return [];
+    return store.graphUris.assertion
+      ? store.getQuads(null, null, null, store.graphUris.assertion)
+      : [];
+  }, [store]);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -57,13 +71,13 @@ export function NanopubPreviewPopover({ uri }: { uri: string }) {
           onClick={(e) => e.stopPropagation()}
           title="Preview nanopub"
         >
-          <Eye className="w-4 h-4" />
+          <File className="w-4 h-4" />
         </button>
       </PopoverTrigger>
       <PopoverContent
         side="left"
         align="start"
-        className="w-96 max-h-96 overflow-y-auto"
+        className="w-[32rem] max-h-[28rem] overflow-y-auto p-2"
         onClick={(e) => e.stopPropagation()}
       >
         {loading && (
@@ -76,11 +90,20 @@ export function NanopubPreviewPopover({ uri }: { uri: string }) {
             Failed to load preview: {error}
           </div>
         )}
-        {html && (
-          <div
-            className="prose prose-sm max-w-none dark:prose-invert"
-            dangerouslySetInnerHTML={{ __html: html }}
+        {store && ViewComponent && <ViewComponent store={store} />}
+        {store && !ViewComponent && assertionStatements.length > 0 && (
+          <GraphSection
+            store={store}
+            title="Assertion"
+            statements={assertionStatements}
+            Icon={File}
+            extraClasses="border-l-8 border-l-yellow-300"
           />
+        )}
+        {store && !ViewComponent && assertionStatements.length === 0 && (
+          <div className="text-sm text-muted-foreground p-2">
+            No assertion triples found.
+          </div>
         )}
       </PopoverContent>
     </Popover>
