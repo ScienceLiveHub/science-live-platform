@@ -122,9 +122,9 @@ export async function executeSparql(
     );
   }
 
-  const data: SparqlResults = await res.json();
+  const data: SparqlResults = (await res.json()) as any;
 
-  return data.results.bindings.map((row) => {
+  return data?.results?.bindings?.map((row) => {
     const parsed: Record<string, string> = {};
     for (const [k, v] of Object.entries(row)) {
       parsed[k] = v.value;
