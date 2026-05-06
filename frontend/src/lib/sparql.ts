@@ -1,18 +1,15 @@
 /**
  * SPARQL queries and utilities for querying the nanopub network.
  *
- * Endpoint: https://query.knowledgepixels.com/repo/text
- *   — Supports Lucene full-text search via openrdf lucenesail extensions.
- *
- * Endpoint: https://query.knowledgepixels.com/repo/full
- *   — Standard SPARQL endpoint for structured queries (no full-text search).
  */
 
 import ky, { HTTPError } from "ky";
 
+// Supports Lucene full-text search via openrdf lucenesail extensions.
 export const NANOPUB_SPARQL_ENDPOINT_TEXT =
   "https://query.knowledgepixels.com/repo/text";
 
+// Standard SPARQL endpoint for structured queries (no full-text search).
 export const NANOPUB_SPARQL_ENDPOINT_FULL =
   "https://query.knowledgepixels.com/repo/full";
 

@@ -24,13 +24,12 @@ export class NanopubDisplay {
     note.addTag("nanopublication");
     note.addTag(isCreated ? "nanopub:created" : "nanopub:imported");
 
-    // Add type-based tag if possible
-    const typeTag =
-      np.metadata.types?.join(", ") ??
-      np.metadata.title?.toLowerCase().replace(/[^\w]+/g, "-");
-    if (typeTag) {
-      note.addTag(`nanopub:${typeTag}`);
-    }
+    // Add title-based tag
+    const typeTag = np.metadata.title?.toLowerCase().replace(/[^\w]+/g, "-");
+    note.addTag(`nanopub:${typeTag}`);
+    // Add type-based tags
+    np.metadata.types?.forEach((t) => note.addTag(t.name));
+
     await note.saveTx();
   }
 
@@ -116,9 +115,12 @@ export class NanopubDisplay {
       // Add tags
       item.addTag("nanopublication");
       item.addTag("nanopub:imported");
-      // Add type-based tag
+      // Add title-based tag
       const typeTag = np.metadata.title?.toLowerCase().replace(/[^\w]+/g, "-");
       item.addTag(`nanopub:${typeTag}`);
+      // Add type-based tags
+      np.metadata.types?.forEach((t) => item.addTag(t.name));
+
       await item.saveTx();
 
       // Now create a note with the full content and attach it

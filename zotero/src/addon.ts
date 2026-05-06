@@ -4,10 +4,9 @@
  * Add any global modules or variables you want.
  */
 import { config } from "../package.json";
-import { ColumnOptions, DialogHelper } from "zotero-plugin-toolkit";
+import { DialogHelper } from "zotero-plugin-toolkit";
 import hooks from "./hooks";
 import { createZToolkit } from "./utils/ztoolkit";
-import { NanopubSearch } from "./modules/nanopubSearch";
 import { NanopubDisplay } from "./modules/nanopubDisplay";
 
 class Addon {
@@ -19,7 +18,6 @@ class Addon {
     api?: string;
     initialized?: boolean;
     ztoolkit: ZToolkit;
-    searchModule: NanopubSearch;
     displayModule: NanopubDisplay;
     locale?: {
       current: any;
@@ -42,7 +40,6 @@ class Addon {
       api: __api__,
       initialized: false,
       ztoolkit: createZToolkit(),
-      searchModule: new NanopubSearch(),
       displayModule: new NanopubDisplay(),
     };
     this.hooks = hooks;

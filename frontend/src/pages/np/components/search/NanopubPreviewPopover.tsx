@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/popover";
 import { Spinner } from "@/components/ui/spinner";
 import { NanopubStore } from "@/lib/nanopub-store";
-import { File } from "lucide-react";
+import { Eye, File } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { resolveTemplateUri } from "../../create/components/templates/registry-metadata";
 import { VIEW_COMPONENTS } from "../../view/view-registry";
@@ -71,13 +71,13 @@ export function NanopubPreviewPopover({ uri }: { uri: string }) {
           onClick={(e) => e.stopPropagation()}
           title="Preview nanopub"
         >
-          <File className="w-4 h-4" />
+          <Eye className="w-4 h-4" />
         </button>
       </PopoverTrigger>
       <PopoverContent
         side="left"
         align="start"
-        className="w-[32rem] max-h-[28rem] overflow-y-auto p-2"
+        className="w-lg max-h-112 overflow-y-auto p-2"
         onClick={(e) => e.stopPropagation()}
       >
         {loading && (
