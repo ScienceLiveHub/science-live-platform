@@ -76,6 +76,7 @@ Each query also has a \*.d.ts file which is (re)generated automatically using `n
 # Library preferences
 
 - Use `ky` rather than `fetch` where possible.
+- Note that for some code that needs to run in the Zotero native XUL/Chrome sandbox for addons (a bare Mozilla SpiderMonkey JS engine), certain Web APIs may be unavailable and libraries that depend on them, such as `ky`, might not work. For example we use `fetch` in `frontend/src/lib/sparql.ts`. So in that case stick to simplified `fetch`, or other simplified APIs provided by that engine. Zotero addons can launch browser windows with full browser context, where everything, including `ky`, work as expected - but this is seperate context and data will need to be pass through callbacks and messages, see the existing bridge.js scripts etc.
 
 # Forms for creating nanopublications using Templates
 

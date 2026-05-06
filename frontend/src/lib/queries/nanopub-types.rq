@@ -1,0 +1,14 @@
+# Get all nanopub types for a given nanopublication.
+# Returns the type URIs associated with the specified nanopub via npx:hasNanopubType.
+#
+# Placeholder: `?_nanopubUri` - URI: the URI of the nanopub.
+
+prefix npa: <http://purl.org/nanopub/admin/>
+prefix npx: <http://purl.org/nanopub/x/>
+
+select distinct ?type
+where {
+  graph npa:graph {
+    ?_nanopubUri npx:hasNanopubType ?type .
+  }
+}

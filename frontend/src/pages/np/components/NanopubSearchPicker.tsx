@@ -18,11 +18,6 @@ import { RelativeDateTime } from "@/components/relative-datetime";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Spinner } from "@/components/ui/spinner";
 import { AsyncLabel } from "@/hooks/use-labels";
 import { useNanopubSearch } from "@/hooks/use-nanopub-search";
@@ -30,16 +25,15 @@ import {
   makeExternalLinkHandler,
   type OpenExternalUrlFn,
 } from "@/lib/external-url";
-import { NanopubStore } from "@/lib/nanopub-store";
 import { getUriEnd, toScienceLiveNPUri } from "@/lib/uri";
+import { TextImportPreviewPopover } from "@/pages/np/components/search/TextImportPreviewPopover";
 import {
   type FeedTemplateKey,
   getTemplateColorClass,
   TEMPLATE_METADATA,
 } from "@/pages/np/create/components/templates/registry-metadata";
 import { TEMPLATE_VIEW_ICONS } from "@/pages/np/view/view-registry";
-import { ExternalLink, Eye } from "lucide-react";
-import { marked } from "marked";
+import { ExternalLink } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FilterCheckbox,
@@ -75,77 +69,6 @@ function PickerTemplateIcon({ template }: { template?: string }) {
     />
   ) : (
     <NanopubIcon className="w-3 h-3 min-w-3 min-h-3 mt-1.5 mr-2 text-muted-foreground" />
-  );
-}
-
-/** Popover that loads a nanopub and renders its markdown preview. */
-function NanopubPreviewPopover({ uri }: { uri: string }) {
-  const [open, setOpen] = useState(false);
-  const [html, setHtml] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!open) {
-      setHtml(null);
-      setError(null);
-      return;
-    }
-    let cancelled = false;
-    setLoading(true);
-    NanopubStore.load(uri)
-      .then((store) => {
-        if (cancelled) return;
-        const md = store.toMarkdownString();
-        setHtml(marked.parse(md) as string);
-        setLoading(false);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        setError(err instanceof Error ? err.message : String(err));
-        setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [open, uri]);
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="p-1 rounded hover:bg-accent/10 text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          onClick={(e) => e.stopPropagation()}
-          title="Preview nanopub"
-        >
-          <Eye className="w-4 h-4">titlefdfd</Eye>
-        </button>
-      </PopoverTrigger>
-      <PopoverContent
-        side="left"
-        align="start"
-        className="w-96 max-h-96 overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {loading && (
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Spinner /> <span>Loading preview…</span>
-          </div>
-        )}
-        {error && (
-          <div className="text-red-600 dark:text-red-400 text-sm">
-            Failed to load preview: {error}
-          </div>
-        )}
-        {html && (
-          <div
-            className="prose prose-sm max-w-none dark:prose-invert"
-            dangerouslySetInnerHTML={{ __html: html }}
-          />
-        )}
-      </PopoverContent>
-    </Popover>
   );
 }
 
@@ -423,7 +346,7 @@ export function NanopubSearchPicker({
                     )}
                   </div>
                   <div className="flex items-center gap-0.5 shrink-0">
-                    <NanopubPreviewPopover uri={result.np} />
+                    <TextImportPreviewPopover uri={result.np} />
                     <a
                       href={toScienceLiveNPUri(result.np, false)}
                       target="_blank"

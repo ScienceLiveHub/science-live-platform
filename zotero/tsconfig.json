@@ -4,6 +4,7 @@
     "src",
     "typings",
     "../frontend/src/pages/np/create/components/templates/registry-metadata.ts",
+    "../frontend/src/lib/queries",
     "../frontend/src/lib/nanopub-store.ts",
     "../frontend/src/lib/uri.ts",
     "../frontend/src/lib/rdf.ts",

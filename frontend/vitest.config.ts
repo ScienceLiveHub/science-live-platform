@@ -1,7 +1,9 @@
 import path from "path";
 import { defineConfig } from "vitest/config";
+import { sparqlFiles } from "../shared/sparql-plugin/vite";
 
 export default defineConfig({
+  plugins: [sparqlFiles()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

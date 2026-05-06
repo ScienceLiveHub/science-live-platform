@@ -1,18 +1,13 @@
 /**
  * SPARQL queries and utilities for querying the nanopub network.
  *
- * Endpoint: https://query.knowledgepixels.com/repo/text
- *   — Supports Lucene full-text search via openrdf lucenesail extensions.
- *
- * Endpoint: https://query.knowledgepixels.com/repo/full
- *   — Standard SPARQL endpoint for structured queries (no full-text search).
  */
 
-import ky, { HTTPError } from "ky";
-
+// Supports Lucene full-text search via openrdf lucenesail extensions.
 export const NANOPUB_SPARQL_ENDPOINT_TEXT =
   "https://query.knowledgepixels.com/repo/text";
 
+// Standard SPARQL endpoint for structured queries (no full-text search).
 export const NANOPUB_SPARQL_ENDPOINT_FULL =
   "https://query.knowledgepixels.com/repo/full";
 
@@ -100,50 +95,42 @@ export async function executeSparql(
   endpoint: string = NANOPUB_SPARQL_ENDPOINT_TEXT,
   signal?: AbortSignal,
 ): Promise<Record<string, string>[]> {
-  try {
-    const res = await ky.post(endpoint, {
-      body: new URLSearchParams({ query }),
-      headers: {
-        Accept: "application/sparql-results+json",
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      signal,
-    });
+  // Use plain fetch rather than ky, as this code may need to run in the Zotero
+  // addon XUL sandbox which has limited JS functionality as apposed to browser windows.
+  const res = await fetch(endpoint, {
+    method: "POST",
+    body: new URLSearchParams({ query }),
+    headers: {
+      Accept: "application/sparql-results+json",
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    signal,
+  });
 
-    const data = await res.json<SparqlResults>();
-
-    return data.results.bindings.map((row) => {
-      const parsed: Record<string, string> = {};
-      for (const [k, v] of Object.entries(row)) {
-        parsed[k] = v.value;
-      }
-      return parsed;
-    });
-  } catch (err) {
-    // Handle HTTP errors (like 400 Bad Request) by extracting the response body
-    if (err instanceof HTTPError) {
-      const response = err.response;
-      let errorDetail: string;
-
-      try {
-        // Try to get the error details from the response body
-        errorDetail = await response.text();
-      } catch {
-        // If we can't read the body, fall back to status text
-        errorDetail = response.statusText || `HTTP ${response.status}`;
-      }
-
-      // Create a new error with the detailed message, preserving the original as cause
-      throw new Error(
-        errorDetail ||
-          `SPARQL query failed: ${response.status} ${response.statusText}`,
-        { cause: err },
-      );
+  if (!res.ok) {
+    let errorDetail: string;
+    try {
+      errorDetail = await res.text();
+    } catch {
+      errorDetail = res.statusText || `HTTP ${res.status}`;
     }
-
-    // Re-throw other errors (including AbortError)
-    throw err;
+    // Prefer not to render HTML code (i.e. starts with "<"), as an error message
+    throw new Error(
+      errorDetail && !errorDetail.startsWith("<")
+        ? errorDetail
+        : `SPARQL query failed: ${res.status} ${res.statusText}`,
+    );
   }
+
+  const data: SparqlResults = (await res.json()) as any;
+
+  return data?.results?.bindings?.map((row) => {
+    const parsed: Record<string, string> = {};
+    for (const [k, v] of Object.entries(row)) {
+      parsed[k] = v.value;
+    }
+    return parsed;
+  });
 }
 
 // =============================================================================
