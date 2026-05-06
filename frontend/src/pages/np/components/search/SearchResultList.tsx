@@ -12,6 +12,7 @@ import {
   resolveTemplateUri,
 } from "../../create/components/templates/registry-metadata";
 import { TEMPLATE_VIEW_ICONS } from "../../view/view-registry";
+import { NanopubPreviewPopover } from "./NanopubPreviewPopover";
 
 export interface SearchResult {
   np: string;
@@ -32,25 +33,30 @@ export default function SearchResultList({
   return (
     <div className="flex flex-col gap-3">
       {searchResults.map((result, index) => (
-        <div className="flex flex-col gap-2 rounded-lg border bg-card p-4">
-          {/* Label/Title */}
-          <Link
-            key={result.np || index}
-            to={toScienceLiveNPUri(result.np)}
-            className="hover:underline"
-          >
-            <div className="font-medium flex flex-row">
-              {result.types?.includes(
-                "https://w3id.org/np/o/ntemplate/AssertionTemplate",
-              ) ? (
-                <FilePlus className="w-4 h-4 min-w-4 min-h-4 mt-1 mr-2 text-purple-400 dark:text-purple-300" />
-              ) : (
-                <NanopubTemplateIcon template={result.template} />
-              )}
+        <div
+          key={result.np || index}
+          className="flex flex-col gap-2 rounded-lg border bg-card p-4"
+        >
+          {/* Label/Title + Preview button */}
+          <div className="flex items-start justify-between gap-2">
+            <Link
+              to={toScienceLiveNPUri(result.np)}
+              className="hover:underline min-w-0 flex-1"
+            >
+              <div className="font-medium flex flex-row">
+                {result.types?.includes(
+                  "https://w3id.org/np/o/ntemplate/AssertionTemplate",
+                ) ? (
+                  <FilePlus className="w-4 h-4 min-w-4 min-h-4 mt-1 mr-2 text-purple-400 dark:text-purple-300" />
+                ) : (
+                  <NanopubTemplateIcon template={result.template} />
+                )}
 
-              {result.label || "Untitled Nanopublication"}
-            </div>
-          </Link>
+                {result.label || "Untitled Nanopublication"}
+              </div>
+            </Link>
+            <NanopubPreviewPopover uri={result.np} />
+          </div>
 
           {/* Author */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
