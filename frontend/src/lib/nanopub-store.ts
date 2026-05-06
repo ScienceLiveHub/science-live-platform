@@ -6,6 +6,7 @@ import {
   Util,
   Writer,
 } from "n3";
+import { NANOPUB_TYPES } from "./queries";
 import {
   extractSubjectProps,
   fetchQuads,
@@ -14,6 +15,7 @@ import {
   shrinkUri,
   Statement,
 } from "./rdf";
+import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_FULL } from "./sparql";
 import {
   getNanopubHash,
   getNanopubSuffix,
@@ -127,7 +129,9 @@ const WELL_KNOWN_URI_LABELS: Record<string, string> = {
 
 /** Look up a well-known URI label, normalizing trailing slashes */
 export function getWellKnownLabel(uri: string): string | undefined {
-  return WELL_KNOWN_URI_LABELS[uri] ?? WELL_KNOWN_URI_LABELS[uri.replace(/\/+$/, "")];
+  return (
+    WELL_KNOWN_URI_LABELS[uri] ?? WELL_KNOWN_URI_LABELS[uri.replace(/\/+$/, "")]
+  );
 }
 
 export const COMMON_LICENSES: Record<string, string> = {
@@ -368,50 +372,77 @@ export class NanopubStore extends N3Store {
         href: q.object.value,
       };
     });
-    // Also check prov:wasAttributedTo in provenance
-    // const provCreators = this.matchPredicate(
-    //   PROV("wasAttributedTo"),
-    //   this.graphUris.provenance,
-    // ).map((q) => q.object.value);
 
     // Find all applicable "types" "classes" and "tags" for this nanopub
-    const types: any = [];
-    this.match(
-      namedNode(this.graphUris.assertion!),
-      RDF("type"),
-      null,
-      namedNode(this.graphUris.assertion!),
-    ).forEach((q) => {
-      types.push({
-        name:
-          this.findInternalLabel(namedNode(q.object.value)) ?? q.object.value,
-        href: q.object.value,
-      });
-    });
-    this.match(
-      namedNode(this.prefixes["this"]),
-      NPX("hasNanopubType"),
-      null,
-      namedNode(this.graphUris.pubinfo!),
-    ).forEach((q) => {
-      types.push({
-        name:
-          this.findInternalLabel(namedNode(q.object.value)) ?? q.object.value,
-        href: q.object.value,
-      });
-    });
-    this.match(
-      namedNode(this.prefixes["this"]),
-      RDF("type"),
-      null,
-      namedNode(this.graphUris.pubinfo!),
-    ).forEach((q) => {
-      types.push({
-        name:
-          this.findInternalLabel(namedNode(q.object.value)) ?? q.object.value,
-        href: q.object.value,
-      });
-    });
+    const types: Metadata["types"] = [];
+    const nanopubUri = this.prefixes["this"];
+
+    // Prefer the SPARQL query against the nanopub network index
+    // for authoritative npx:hasNanopubType information
+    // TODO: We could also us the query to get authoritative introduces, creator, date, title etc
+    //       We always need a fallback to local in the case of non-published RDF loaded
+    if (nanopubUri) {
+      try {
+        const sparqlTypes = await executeBindSparql(
+          NANOPUB_TYPES,
+          { nanopubUri },
+          NANOPUB_SPARQL_ENDPOINT_FULL,
+        );
+        if (sparqlTypes?.length < 1) {
+          throw new Error("Types not found");
+        }
+        for (const row of sparqlTypes) {
+          types.push({
+            name: this.findInternalLabel(namedNode(row.type)) ?? row.type,
+            href: row.type,
+          });
+        }
+      } catch {
+        // Fall back to local store matching for unpublished or unindexed nanopubs
+        this.match(
+          namedNode(nanopubUri),
+          NPX("hasNanopubType"),
+          null,
+          namedNode(this.graphUris.pubinfo!),
+        ).forEach((q) => {
+          types.push({
+            name:
+              this.findInternalLabel(namedNode(q.object.value)) ??
+              q.object.value,
+            href: q.object.value,
+          });
+        });
+        // Also include rdf:type from the assertion graph (types of the assertion subject)
+        this.match(
+          namedNode(this.graphUris.assertion!),
+          RDF("type"),
+          null,
+          namedNode(this.graphUris.assertion!),
+        ).forEach((q) => {
+          types.push({
+            name:
+              this.findInternalLabel(namedNode(q.object.value)) ??
+              q.object.value,
+            href: q.object.value,
+          });
+        });
+        // And rdf:type from the pubinfo graph
+        this.match(
+          namedNode(this.prefixes["this"]),
+          RDF("type"),
+          null,
+          namedNode(this.graphUris.pubinfo!),
+        ).forEach((q) => {
+          types.push({
+            name:
+              this.findInternalLabel(namedNode(q.object.value)) ??
+              q.object.value,
+            href: q.object.value,
+          });
+        });
+      }
+    }
+
     const introduces: IntroducedObject[] | undefined = this.match(
       namedNode(this.prefixes["this"]),
       NPX("introduces"),
@@ -538,7 +569,10 @@ export class NanopubStore extends N3Store {
           new Date(this.metadata.created),
         )
       : "Unknown";
-    const type = this.metadata.types?.[0]?.name ?? "Unknown";
+    const types =
+      this.metadata.types && this.metadata.types.length > 0
+        ? this.metadata.types
+        : [{ name: "Unknown", href: "" }];
     const license = this.metadata.license
       ? (() => {
           const label =
@@ -592,7 +626,7 @@ export class NanopubStore extends N3Store {
       "",
       `**Published:** ${published}`,
       "",
-      `**Type:** \`${type}\``,
+      `**Types:** ${types.map((t) => `[${t.name}](${t.href})`).join(", ")}`,
       "",
       `**License:** ${license}`,
       "",
