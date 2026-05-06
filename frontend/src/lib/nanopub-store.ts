@@ -1,3 +1,4 @@
+import { NANOPUB_TYPES } from "@/lib/queries";
 import {
   DataFactory,
   Store as N3Store,
@@ -6,7 +7,6 @@ import {
   Util,
   Writer,
 } from "n3";
-import { NANOPUB_TYPES } from "./queries";
 import {
   extractSubjectProps,
   fetchQuads,
