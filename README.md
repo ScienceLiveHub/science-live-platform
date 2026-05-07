@@ -113,11 +113,13 @@ graph TB
   classDef apiBox fill:#fff3e0,stroke:#f5a623,stroke-width:2px,color:#1a1a1a
   classDef dataBox fill:#e8f5e9,stroke:#4caf50,stroke-width:2px,color:#1a1a1a
   classDef extBox fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px,color:#1a1a1a
+  classDef mainBox font-weight:bold
 
   class frontend,zotero,homepage clientBox
   class auth,profile,sign,notif,prxy,orc,hlth apiBox
   class pg,nanopub dataBox
   class cf,neon,orcid,resend extBox
+  class clients,api,data,ext mainBox
 ```
 
 Currently the `frontend` is a static SPA, with no SSR required, and client-side routing using react-router-dom. All data is pulled from the `api` which includes authentication and the database connection, and all dynamic content (nanopubs) are on the Nanopub Network. This keeps the UX fast and responsive, as well as being easy to deploy as serverless without edge.
