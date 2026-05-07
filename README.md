@@ -8,15 +8,15 @@ Science Live enables researchers to create [FAIR](https://www.go-fair.org/fair-p
 
 ## Deployed Applications
 
-### Science Live Platform (web)
+### Science Live Platform
 
-The **Science Live Platform** lets anyone browse and create signed nanopublications via a user-friendly interface in a web browser.
+Allows anyone to browse and create signed nanopublications via a user-friendly web interface.
 
 Visit [**platform.sciencelive4all.org**](https://platform.sciencelive4all.org/) to get started
 
 ### Zotero Plugin
 
-The **Science Live Zotero Plugin** lets researchers create signed nanopublications directly from their Zotero library, as well as search and import nanopubs into their library.
+Allows researchers to create signed nanopublications directly from their Zotero library, as well as search and import nanopubs into their library.
 
 - **Download:** [science-live.xpi](https://github.com/ScienceLiveHub/science-live-platform/releases/latest)
 - **Compatibility:** Zotero 7+
