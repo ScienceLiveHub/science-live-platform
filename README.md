@@ -2,11 +2,27 @@
 
 Transform research into FAIR nanopublications — discoverable, reusable, and properly credited.
 
-**Live platform:** https://platform.sciencelive4all.org/
-
 ## Vision
 
 Science Live enables researchers to create [FAIR](https://www.go-fair.org/fair-principles/) (Findable, Accessible, Interoperable, Reusable) [nanopublications](https://nanopub.net/) from every stage of their research — from systematic reviews to data analysis — making scientific work discoverable, reusable, and properly credited while advancing Open Science practices.
+
+## Deployed Applications
+
+### Science Live Platform (web)
+
+The **Science Live Platform** lets anyone browse and create signed nanopublications via a user-friendly interface in a web browser.
+
+Visit [**platform.sciencelive4all.org**](https://platform.sciencelive4all.org/) to get started
+
+### Zotero Plugin
+
+The **Science Live Zotero Plugin** lets researchers create signed nanopublications directly from their Zotero library, as well as search and import nanopubs into their library.
+
+- **Download:** [science-live.xpi](https://github.com/ScienceLiveHub/science-live-platform/releases/latest)
+- **Compatibility:** Zotero 7+
+- **Install:** Download the `.xpi` file, then in Zotero go to Tools > Plugins and drag the `.xpi` onto the Plugins window.
+- Auto-updates are supported via the Zotero plugin manager.
+- In order to publish, you need a free [Science Live Platform](https://platform.sciencelive4all.org/) account.
 
 ## Project Status
 
@@ -21,15 +37,6 @@ Science Live enables researchers to create [FAIR](https://www.go-fair.org/fair-p
 | 🔄 Step 7 | In progress | AI tools for NP creation                                  |
 | 🔄 Step 8 | In progress | AI-powered search and info presentation                   |
 | ⏳ Step 9 | Planned     | Credit system (templates ready, awaiting first customers) |
-
-## Zotero Plugin
-
-The **Science Live Zotero Plugin** lets researchers create signed nanopublications directly from their Zotero library.
-
-- **Download:** [science-live.xpi](https://github.com/ScienceLiveHub/science-live-platform/releases/latest)
-- **Compatibility:** Zotero 7+
-- **Install:** Download the `.xpi` file, then in Zotero go to Tools > Plugins and drag the `.xpi` onto the Plugins window.
-- Auto-updates are supported via the Zotero plugin manager.
 
 ## Architecture
 
