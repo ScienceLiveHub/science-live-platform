@@ -2,31 +2,31 @@
 
 Transform research into FAIR nanopublications — discoverable, reusable, and properly credited.
 
+**Live platform:** https://platform.sciencelive4all.org/
+
 ## Vision
 
 Science Live enables researchers to create [FAIR](https://www.go-fair.org/fair-principles/) (Findable, Accessible, Interoperable, Reusable) [nanopublications](https://nanopub.net/) from every stage of their research — from systematic reviews to data analysis — making scientific work discoverable, reusable, and properly credited while advancing Open Science practices.
 
-**Live platform:** https://platform.sciencelive4all.org/
-
 ## Project Status
 
-| Phase     | Status      | Description                                  |
-| --------- | ----------- | -------------------------------------------- |
-| ✅ Step 1 | Complete    | Foundation setup (monorepo, React)           |
-| ✅ Step 2 | Complete    | Database integration (PostgreSQL)            |
-| ✅ Step 3 | Complete    | ORCID authentication and Org support         |
-| ✅ Step 4 | Complete    | Nanopub parser and viewer with display modes |
-| ✅ Step 5 | Complete    | Template processing engine for NP creation   |
-| ✅ Step 6 | Complete    | Zotero plugin V1 release                     |
-| 🔄 Step 7 | In progress | AI tools for NP creation                     |
-| 🔄 Step 8 | In progress | AI-powered search and info presentation      |
+| Phase     | Status      | Description                                               |
+| --------- | ----------- | --------------------------------------------------------- |
+| ✅ Step 1 | Complete    | Foundation setup (monorepo, React)                        |
+| ✅ Step 2 | Complete    | Database integration (PostgreSQL)                         |
+| ✅ Step 3 | Complete    | ORCID authentication and Org support                      |
+| ✅ Step 4 | Complete    | Nanopub parser and viewer with display modes              |
+| ✅ Step 5 | Complete    | Template processing engine for NP creation                |
+| ✅ Step 6 | Complete    | Zotero plugin V1 release                                  |
+| 🔄 Step 7 | In progress | AI tools for NP creation                                  |
+| 🔄 Step 8 | In progress | AI-powered search and info presentation                   |
 | ⏳ Step 9 | Planned     | Credit system (templates ready, awaiting first customers) |
 
 ## Zotero Plugin
 
 The **Science Live Zotero Plugin** lets researchers create signed nanopublications directly from their Zotero library.
 
-- **Download:** [science-live.xpi](https://github.com/ScienceLiveHub/science-live-platform/releases/download/v1.0.0/science-live.xpi)
+- **Download:** [science-live.xpi](https://github.com/ScienceLiveHub/science-live-platform/releases/latest)
 - **Compatibility:** Zotero 7+
 - **Install:** Download the `.xpi` file, then in Zotero go to Tools > Plugins and drag the `.xpi` onto the Plugins window.
 - Auto-updates are supported via the Zotero plugin manager.
@@ -36,7 +36,7 @@ The **Science Live Zotero Plugin** lets researchers create signed nanopublicatio
 ### Architecture preferences
 
 - Open Source
-- GDPR compliant
+- GDPR compliant (TBD)
 - Modern developer experience
 - Serverless and low running cost (economical scale up and down)
 - Option of deployment full data-sovereignty of user and app data
@@ -46,41 +46,74 @@ The **Science Live Zotero Plugin** lets researchers create signed nanopublicatio
   - Cloudflare is the default deployment but can be hosted elsewhere easily
 - Future potential for private enterprise self-hosted instance
 
-```
-┌─────────────────────────────────────────────────────────┐
-│           Science Live Platform                         │
-├─────────────────────────────────────────────────────────┤
-│  Frontend SPA (React + TypeScript + Vite)               │
-│  - Landing pages & marketing                            │
-│  - User dashboard & credit system                       │
-│  - Nanopub creation & display                           │
-│  - Template-based forms                                 │
-├─────────────────────────────────────────────────────────┤
-│  Backend API (Serverless, Hono)                         │
-│  - /auth/*       - Better Auth + ORCID OIDC             │
-│  - /users/*      - User profiles & credits              │
-│  - /nanopubs/*   - Create, validate, fetch              │
-│  - /templates/*  - Template management                  │
-└─────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-         ┌─────────────────────────────────────────┐
-         │  Deployment, Data & Infrastructure      │
-         ├─────────────────────────────────────────┤
-         │  Cloudflare                             │
-         │  - Default deployment                   │
-         ├─────────────────────────────────────────┤
-         │  PostgreSQL                             │
-         │  - Users, credits, transactions         │
-         │  - Organizations, travel grants         │
-         ├─────────────────────────────────────────┤
-         │  Knowledge Pixels Nanopub Network       │
-         │  - Decentralized RDF storage            │
-         │  - SPARQL query endpoints               │
-         └─────────────────────────────────────────┘
+```mermaid
+graph TB
+  %% ── Client layer ──────────────────────────────────────────
+  subgraph clients ["Client Facing"]
+    direction LR
+    frontend["🌐 <b>Science Live Platform</b><br/><i>Web interface (SPA)</br>React · TypeScript</i><br/>─────────────────<br/>• Search &amp; browse nanopubs<br/>• Create nanopubs using template-based forms<br/>• User account dashboard &amp; settings<br/>• Manage signing keys<br/>• Credit system <i>(TBD)</i>"]
+    zotero["🔬 <b>Zotero Plugin</b><br/><i>Addon .xpi · Zotero 7+</i><br/>─────────────────<br/>• Zotero library integration<br/>• Connect via API key<br/>• Search &amp; import nanopubs<br/>• Create nanopubs using Zotero items, template-based forms"]
+    homepage["📄 <b>Homepage</b><br/><i>Gatsby · Static Site</i><br/>─────────────────<br/>• Product info &amp; marketing<br/>• Landing pages"]
+  end
+
+  %% ── API layer ─────────────────────────────────────────────
+  subgraph api ["Backend API — Hono"]
+    direction LR
+    auth["/auth/*<br/>Better Auth + OIDC"]
+    profile["/user-profile/*<br/>Public profiles"]
+    sign["/signing/*<br/>Nanopub signing &amp; keys"]
+    notif["/notifications/*<br/>User notifications"]
+    subgraph utils ["Utilities"]
+      prxy["/proxy/*<br/>CORS proxy (SPARQL, etc.)"]
+      orc["/orcid/*<br/>ORCID lookup"]
+      hlth["/health<br/>Health check"]
+    end
+  end
+
+  %% ── Data layer ────────────────────────────────────────────
+  subgraph data ["Data &amp; Infrastructure"]
+    direction LR
+    pg[("🐘 <b>PostgreSQL</b><br/>──────────<br/>Users · Orgs · Teams<br/>Keys · Notifications<br/>App data")]
+    nanopub["🌍 <b>Nanopub Network</b><br/><i>Knowledge Pixels</i><br/>──────────<br/>Decentralized RDF store<br/>SPARQL endpoints<br/>Trusty URI verification"]
+  end
+
+  %% ── External Hosting Services ─────────────────────────────────────
+  subgraph ext ["External Hosting Services (Defaults, can be replaced or self hosted)"]
+    direction LR
+    cf["☁️ Cloudflare<br/>Workers · Hyperdrive<br/>Static Assets"]
+    neon["🗄️ Neon<br/>Database host"]
+    orcid["🆔 ORCID<br/>OIDC Provider"]
+    resend["✉️ Resend<br/>Transactional Email"]
+  end
+
+  %% ── Connections ───────────────────────────────────────────
+  frontend -- "REST / OAUTH" --> api
+  zotero -- "REST / API key" --> api
+  frontend -. "SPARQL queries<br/>(via proxy or direct)" .-> nanopub
+
+  auth --> pg
+  profile --> pg
+  sign --> pg
+  notif --> pg
+  auth -. "OIDC" .-> orcid
+  auth -. "email" .-> resend
+  api --- cf
+  pg ---> neon
+  neon --- cf
+
+  %% ── Styles ────────────────────────────────────────────────
+  classDef clientBox fill:#e8f4fd,stroke:#4a90d9,stroke-width:2px,color:#1a1a1a
+  classDef apiBox fill:#fff3e0,stroke:#f5a623,stroke-width:2px,color:#1a1a1a
+  classDef dataBox fill:#e8f5e9,stroke:#4caf50,stroke-width:2px,color:#1a1a1a
+  classDef extBox fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px,color:#1a1a1a
+
+  class frontend,zotero,homepage clientBox
+  class auth,profile,sign,notif,prxy,orc,hlth apiBox
+  class pg,nanopub dataBox
+  class cf,neon,orcid,resend extBox
 ```
 
-Currently the `frontend` is a static SPA, with no SSR required, and client-side routing using react-router-dom. All dynamic content and data is pulled from the `api` which includes authentication and the database connection. This keeps the UX fast and responsive, as well as being easy to deploy as serverless without edge.
+Currently the `frontend` is a static SPA, with no SSR required, and client-side routing using react-router-dom. All data is pulled from the `api` which includes authentication and the database connection, and all dynamic content (nanopubs) are on the Nanopub Network. This keeps the UX fast and responsive, as well as being easy to deploy as serverless without edge.
 
 ## Developer Quick Start
 
@@ -94,6 +127,10 @@ Currently the `frontend` is a static SPA, with no SSR required, and client-side 
 - **If NOT using the recommended devcontainer** (which has everything built in), you need to manually install:
   - Node.js v24 or higher
   - npm (comes with Node.js)
+  - Optional:
+    - Zotero (if you want to develop the Zotero plugin)
+    - Wrangler (if using Cloudflare)
+    - Nektos act (if wanting to run `pr-check` script or test gh workflows)
 - **If you want to deploy to Cloudflare:**
   - A [Cloudflare](https://dash.cloudflare.com) account (free tier works fine)
     - Either log into `wrangler` CLI (`npx wrangler login`), OR set your `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in both the frontend and api .env files
@@ -122,24 +159,15 @@ Currently the `frontend` is a static SPA, with no SSR required, and client-side 
 
    Mainly, the variables marked REQUIRED must be changed.
 
-### Development - using devcontainer (_RECOMMENDED_)
+4. **Install project** (choose either a. or b.)
 
-Simply build and start the [devcontainer](https://code.visualstudio.com/docs/devcontainers/containers) by clicking the blue icon in the bottom-left-most corner of the vscode window. Wait for the container to build for the first time and start running.
+   a. _Using Devcontainer (recommended)_:
+   Start the [devcontainer](https://code.visualstudio.com/docs/devcontainers/containers) by clicking the blue icon in the bottom-left-most corner of the vscode window. Wait for the container to build for the first time and start running. The running container will automatically close when you exit vscode.
 
-If you are starting with a blank database, run initial [database migrations](#database-migrations)
+   b. _Manual setup_:
+   Install the [Prerequisites](#prerequisites) and then run `npm install`.
 
-The running container will automatically close when you exit vscode.
-
-### Development - using manual setup
-
-_Note: You dont need to do any of this if you are using the devcontainer mentioned above_
-
-```bash
-# Install all dependencies
-npm install
-```
-
-If you are starting with a blank database, run initial [database migrations](#database-migrations)
+5. If you are starting with a blank database, run initial [database migrations](#database-migrations)
 
 ### Database migrations
 
@@ -149,7 +177,7 @@ You will need to run this initially on a blank database to set up the schema:
 npm -w api run db:migrate
 ```
 
-Then if you change the databse [schema](./api/src/db/schema), you will need to generate the new migration and apply it to the db:
+Then if you change the database [schema](./api/src/db/schema), you will need to generate the new migration and apply it to the db:
 
 ```bash
 npm -w api run db:generate
@@ -162,7 +190,7 @@ npm -w api run db:migrate
 
 1. You can hit `Ctrl + Shift + P`
 2. Type "Run Task", `Enter`
-3. Select the `runDevelopment` task to start the frontend Vite server and backend Bun server.
+3. Select the `runDevelopment` task to start the frontend Vite server and backend Wrangler/Bun server.
 
 Alternatively use the `npm run dev` and `npm run dev:api` commands.
 
@@ -233,7 +261,7 @@ curl http://localhost:3001/health
 
 #### Frontend
 
-- **React 19** - UI library
+- **React 19** - Frontend Framework
 - **shadcn/ui** - Components
 - **Tailwind CSS** - CSS/Styling
 - **Formedible** - Form generation using **Tanstack Form** and **Zod**
@@ -244,10 +272,10 @@ curl http://localhost:3001/health
 #### Backend
 
 - **Hono** - API endpoints
-- **Bun** - Dev server
 - **Better-Auth** - Auth library and user management
 - **Drizzle** - ORM
-- **Wrangler** - CLI for Cloudflare Serverless Deployment
+- **Wrangler** - Dev server and CLI for Cloudflare Serverless Deployment (optional)
+- **Bun** - Alternative Dev server
 
 #### Database
 
@@ -273,12 +301,6 @@ Contributions are welcome! Please open an issue or pull request.
 - **Semantic Consulting:** Barbara Magagna (Mabablue)
 - **Funding:** Astera Institute
 
-## Security
-
-- **Environment Variables:** Never commit `.env` files. Use `.env.example` as template.
-- **API Keys:** Keep backend keys secret. Only use anon keys in frontend.
-- **GDPR Compliance:** Data stored in EU region (Frankfurt).
-
 ## License
 
 MIT — see [package.json](package.json).
@@ -287,7 +309,7 @@ MIT — see [package.json](package.json).
 
 - **Platform:** https://platform.sciencelive4all.org/
 - **Website:** https://sciencelive4all.org
-- **Zotero Plugin:** [Download .xpi](https://github.com/ScienceLiveHub/science-live-platform/releases/download/v1.0.0/science-live.xpi)
+- **Zotero Plugin:** [Download .xpi](https://github.com/ScienceLiveHub/science-live-platform/releases/latest)
 
 ## Contact
 

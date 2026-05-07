@@ -136,7 +136,7 @@ Flexible semantic statements:
 
 ## Requirements
 
-- Zotero 8.0 or later
+- Zotero 7.0 or later
 - Internet connection
 - For publishing: Science Live Platform account (verified and ORCID linked)
 
