@@ -56,7 +56,7 @@ Allows researchers to create signed nanopublications directly from their Zotero 
 ```mermaid
 graph TB
   %% ── Client layer ──────────────────────────────────────────
-  subgraph clients ["Client Facing"]
+  subgraph clients ["User Facing"]
     direction LR
     frontend["🌐 <b>Science Live Platform</b><br/><i>Web interface (SPA)</br>React · TypeScript</i><br/>─────────────────<br/>• Search &amp; browse nanopubs<br/>• Create nanopubs using template-based forms<br/>• User account dashboard &amp; settings<br/>• Manage signing keys<br/>• Credit system <i>(TBD)</i>"]
     zotero["🔬 <b>Zotero Plugin</b><br/><i>Addon .xpi · Zotero 7+</i><br/>─────────────────<br/>• Zotero library integration<br/>• Connect via API key<br/>• Search &amp; import nanopubs<br/>• Create nanopubs using Zotero items, template-based forms"]
@@ -87,7 +87,7 @@ graph TB
   %% ── External Hosting Services ─────────────────────────────────────
   subgraph ext ["External Hosting Services (Defaults, can be replaced or self hosted)"]
     direction LR
-    cf["☁️ Cloudflare<br/>Workers · Hyperdrive<br/>Static Assets"]
+    cf["☁️ Cloudflare<br/>Workers · Hyperdrive<br/>Static Assets (SPA)"]
     neon["🗄️ Neon<br/>Database host"]
     orcid["🆔 ORCID<br/>OIDC Provider"]
     resend["✉️ Resend<br/>Transactional Email"]
