@@ -559,22 +559,50 @@ export class NanopubTemplate extends NanopubStore {
     );
 
     // Add label based on template pattern
-    const label = this.templateMetadata.targetlabelPattern
-      ? this.templateMetadata.targetlabelPattern.replaceAll(
-          /\$\{([^}]+)\}/g,
-          (match, placeholder) => {
-            const value = placeholderValues[placeholder] as string;
-            if (!value) return match;
+    let label: string;
+    if (this.templateMetadata.targetlabelPattern) {
+      label = this.templateMetadata.targetlabelPattern.replaceAll(
+        /\$\{([^}]+)\}/g,
+        (match, placeholder) => {
+          const value = placeholderValues[placeholder] as string;
+          if (!value) return match;
 
-            // If the value looks like a URI, use getUriEnd, otherwise use the literal value
-            if (value.startsWith("http")) {
-              return getUriEnd(value) || value;
-            }
-            return value;
-          },
-        )
-      : "NP created using " +
-        (this.metadata.title || "Nanopublication Template");
+          // If the value looks like a URI, use getUriEnd, otherwise use the literal value
+          if (value.startsWith("http")) {
+            return getUriEnd(value) || value;
+          }
+          return value;
+        },
+      );
+    } else {
+      // Try to find a label from introduced resources that have an rdfs:label
+      label = "";
+      for (const f of introducedFields) {
+        const statementName = getUriEnd(f.id) || f.id;
+        if (placeholderValues[statementName]) {
+          const introducedUri = formatValue(f.id, placeholderValues);
+          const labelQuads = outputStore.getQuads(
+            namedNode(introducedUri),
+            NS.RDFS("label"),
+            null,
+            assertionGraph,
+          );
+          if (
+            labelQuads.length > 0 &&
+            labelQuads[0].object.termType === "Literal"
+          ) {
+            label = labelQuads[0].object.value;
+            break;
+          }
+        }
+      }
+      // Fallback to default label if no label found from introduced resources
+      if (!label) {
+        label =
+          "NP created using " +
+          (this.metadata.title || "Nanopublication Template");
+      }
+    }
 
     outputStore.addQuad(outSub, NS.RDFS("label"), literal(label), pubinfoGraph);
 

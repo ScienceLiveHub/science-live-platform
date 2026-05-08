@@ -14,7 +14,7 @@ import { useLabels } from "@/hooks/use-labels";
 import { useNanopub } from "@/hooks/use-nanopub";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
-import { toScienceLiveNPUri } from "@/lib/uri";
+import { getNanopubHash, isNanopubUri, toScienceLiveNPUri } from "@/lib/uri";
 import { Dna, Tag } from "lucide-react";
 import { DataFactory } from "n3";
 import { useMemo } from "react";
@@ -42,20 +42,6 @@ const SCHEMA_END_DATE = "http://schema.org/endDate";
 const CITO_IS_SUPPORTED_BY = "http://purl.org/spar/cito/isSupportedBy";
 const DCT_SUBJECT = "http://purl.org/dc/terms/subject";
 
-const NANOPUB_URI_RE = /\/np\/(RA[A-Za-z0-9_-]{43})$/;
-
-function isNanopubUri(uri: string) {
-  return NANOPUB_URI_RE.test(uri);
-}
-
-// Nanopub trusty URIs all share the "NP created using ..." rdfs:label pattern,
-// which makes a list of sources indistinguishable. Show the trusty hash
-// instead so the reader can tell them apart.
-function nanopubShortId(uri: string): string {
-  const m = uri.match(NANOPUB_URI_RE);
-  return m ? m[1] : uri;
-}
-
 const FORRT_OUTCOME_TYPE =
   "https://w3id.org/sciencelive/o/terms/FORRT-Replication-Outcome";
 
@@ -82,7 +68,9 @@ function getForrtOutcomeLabel(store: NanopubStore): string | undefined {
 function SupportingOutcomeLink({ uri }: { uri: string }) {
   const { store, loading } = useNanopub(uri);
   const outcomeLabel = store ? getForrtOutcomeLabel(store) : undefined;
-  const label = outcomeLabel ?? (loading ? "Loading…" : nanopubShortId(uri));
+  const label =
+    outcomeLabel ??
+    (loading ? "Loading…" : (getNanopubHash(uri)?.substring(0, 10) ?? uri));
   return (
     <RelatedNanopubLink
       uri={uri}
@@ -147,8 +135,7 @@ function extractResearchSynthesis(
 
   // Wikidata labels written by Nanodash are stored as "label - description"
   // in a single literal. Keep only the short label part for display.
-  const shortLabel = (s?: string) =>
-    s ? s.split(/\s+-\s+/, 1)[0] : undefined;
+  const shortLabel = (s?: string) => (s ? s.split(/\s+-\s+/, 1)[0] : undefined);
 
   const topics = store
     .getQuads(s, namedNode(DCT_SUBJECT), null, g)
