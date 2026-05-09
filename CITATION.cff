@@ -1,0 +1,41 @@
+cff-version: 1.2.0
+title: "Science Live: Platform for FAIR Nanopublications"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: Fouilloux
+    given-names: Anne
+    orcid: "https://orcid.org/0000-0002-1784-2920"
+    affiliation: "LifeWatch ERIC"
+  - family-names: Prema
+    given-names: Vijay
+    affiliation: "Prophet Town"
+  - name: "VitenHub AS"
+abstract: >-
+  Science Live transforms research into FAIR (Findable, Accessible,
+  Interoperable, Reusable) nanopublications — cryptographically signed,
+  machine-readable RDF assertions discoverable, citable, and composable
+  across the global nanopub network. The platform supports every stage
+  of the research lifecycle, from systematic reviews (PCC, PICO, PRISMA)
+  to claim publication (FORRT Claim, Replication Study, Replication
+  Outcome, Citation with CiTO) and synthesis (Research Software,
+  Research Synthesis), with ORCID-based author identity and Knowledge
+  Pixels nanopub network integration.
+repository-code: "https://github.com/ScienceLiveHub/science-live-platform"
+url: "https://platform.sciencelive4all.org"
+license: MIT
+version: "1.0.6"
+date-released: "2026-05-06"
+keywords:
+  - nanopublication
+  - FAIR
+  - FAIR4RS
+  - FORRT
+  - open-science
+  - semantic-web
+  - RDF
+  - ORCID
+  - research-software
+  - reproducibility
+  - knowledge-pixels
+  - cloudflare-workers

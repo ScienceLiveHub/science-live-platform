@@ -1,0 +1,80 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "name": "Science Live: Platform for FAIR Nanopublications",
+  "description": "Science Live transforms research into FAIR (Findable, Accessible, Interoperable, Reusable) nanopublications — cryptographically signed, machine-readable RDF assertions discoverable, citable, and composable across the global nanopub network. The platform supports every stage of the research lifecycle, from systematic reviews (PCC, PICO, PRISMA) to claim publication (FORRT Claim, Replication Study, Replication Outcome, Citation with CiTO) and synthesis (Research Software, Research Synthesis), with ORCID-based author identity and Knowledge Pixels nanopub network integration.",
+  "version": "1.0.6",
+  "dateCreated": "2025-12-01",
+  "dateModified": "2026-05-06",
+  "license": "https://spdx.org/licenses/MIT",
+  "codeRepository": "https://github.com/ScienceLiveHub/science-live-platform",
+  "url": "https://platform.sciencelive4all.org",
+  "programmingLanguage": [
+    {
+      "@type": "ComputerLanguage",
+      "name": "TypeScript"
+    },
+    {
+      "@type": "ComputerLanguage",
+      "name": "JavaScript"
+    }
+  ],
+  "operatingSystem": "Web (any modern browser)",
+  "applicationCategory": "Open Science / Research Infrastructure",
+  "developmentStatus": "active",
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Anne",
+      "familyName": "Fouilloux",
+      "@id": "https://orcid.org/0000-0002-1784-2920",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "LifeWatch ERIC"
+      }
+    },
+    {
+      "@type": "Person",
+      "givenName": "Vijay",
+      "familyName": "Prema",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "Prophet Town"
+      }
+    },
+    {
+      "@type": "Organization",
+      "name": "VitenHub AS"
+    }
+  ],
+  "keywords": [
+    "nanopublication",
+    "FAIR",
+    "FAIR4RS",
+    "FORRT",
+    "open-science",
+    "semantic-web",
+    "RDF",
+    "ORCID",
+    "research-software",
+    "reproducibility",
+    "knowledge-pixels",
+    "cloudflare-workers"
+  ],
+  "softwareRequirements": [
+    "Node.js >=20",
+    "React 19",
+    "Vite 7",
+    "Tailwind CSS 4",
+    "Hono",
+    "Better-Auth",
+    "Drizzle ORM",
+    "PostgreSQL",
+    "TypeScript >=5.9"
+  ],
+  "isPartOf": {
+    "@type": "Organization",
+    "name": "Science Live",
+    "url": "https://platform.sciencelive4all.org"
+  }
+}
