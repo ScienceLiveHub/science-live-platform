@@ -474,6 +474,20 @@ export class NanopubStore extends N3Store {
         this.graphUris.pubinfo,
       );
 
+    // This is a special workaround, as we used to fall back to using "NP created using..."
+    // if the NP was created using a template with no hasNanopubLabelPattern specified, and
+    // that was not ideal because all the NPs send up with the same name.
+    // So if we detect legacy nanopubs, try best effort to get the label of the first
+    // introduced subject, which is the newer strategy as of early May 2026.
+    // Determine the title value, potentially overriding the default if it's a legacy placeholder
+    const defaultTitleValue = title?.object?.value || null;
+    const titleValue =
+      defaultTitleValue?.startsWith("NP created using") &&
+      introduces &&
+      introduces.length > 0
+        ? (introduces.find((intro) => intro.label)?.label ?? defaultTitleValue)
+        : defaultTitleValue;
+
     const license = this.matchOne(
       namedNode(this.prefixes["this"]),
       DCT("license"),
@@ -499,7 +513,7 @@ export class NanopubStore extends N3Store {
       creators,
       types,
       introduces: introduces,
-      title: title?.object?.value || null,
+      title: titleValue,
       assertionSubjects: unique(assertionSubjects),
       license,
       uri: this.prefixes["this"],
