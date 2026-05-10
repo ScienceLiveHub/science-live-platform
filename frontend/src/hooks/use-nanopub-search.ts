@@ -152,20 +152,29 @@ export function useNanopubSearch({
 
         setHasMore(moreResultsAvailable);
         setSearchResults(
-          visibleRows.map((row: any) => ({
-            np: row.np,
-            label: row.label || row.description || "",
-            date: new Date(row.date),
-            creator: row.creator || "",
-            types: row.types ? row.types.split("|") : [],
-            template: row.template,
-            maxScore:
-              row.maxScore != null ? parseFloat(row.maxScore) : undefined,
-            referenceCount:
-              row.referenceCount != null
-                ? parseInt(row.referenceCount)
-                : undefined,
-          })),
+          visibleRows.map((row: any) => {
+            // Apply workaround for legacy "NP created using..." labels
+            // If label starts with "NP created using" and we have a description
+            // (from introduced subject's rdfs:label), use the description instead
+            const labelValue =
+              row.label?.startsWith("NP created using") && row.description
+                ? row.description
+                : row.label || row.description || "";
+            return {
+              np: row.np,
+              label: labelValue,
+              date: new Date(row.date),
+              creator: row.creator || "",
+              types: row.types ? row.types.split("|") : [],
+              template: row.template,
+              maxScore:
+                row.maxScore != null ? parseFloat(row.maxScore) : undefined,
+              referenceCount:
+                row.referenceCount != null
+                  ? parseInt(row.referenceCount)
+                  : undefined,
+            };
+          }),
         );
       } catch (e: any) {
         if (e?.name === "AbortError") return;
