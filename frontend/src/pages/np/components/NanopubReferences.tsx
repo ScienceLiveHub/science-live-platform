@@ -43,13 +43,22 @@ export function NanopubReferences({ nanopubUri }: { nanopubUri: string }) {
         );
 
         setReferences(
-          rows.map((row) => ({
-            np: row.np,
-            label: row.label || "",
-            date: new Date(row.date),
-            creator: row.creator || "",
-            template: row.template,
-          })),
+          rows.map((row) => {
+            // Apply workaround for legacy "NP created using..." labels
+            // If label starts with "NP created using" and we have a description
+            // (from introduced subject's rdfs:label), use the description instead
+            const labelValue =
+              row.label?.startsWith("NP created using") && row.description
+                ? row.description
+                : row.label || "";
+            return {
+              np: row.np,
+              label: labelValue,
+              date: new Date(row.date),
+              creator: row.creator || "",
+              template: row.template,
+            };
+          }),
         );
         hasFetched.current = true;
       } catch (e: any) {

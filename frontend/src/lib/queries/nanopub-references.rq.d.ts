@@ -6,6 +6,7 @@
 declare const query: import("../sparql").SparqlQuery<{
   nanopubUri: "uri";
 }, {
+  description: "string";
   np: "string";
   label: "string";
   date: "string";
