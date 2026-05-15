@@ -36,3 +36,13 @@ export const wrapKeyPEM = (base64Key: string) => {
 
   return `${pemHeader}\n${formattedKey}\n${pemFooter}`;
 };
+
+export const bestLabelForRow = (row: any) => {
+  // Largely to apply workaround for confusing legacy "NP created using..."
+  // labels appearing in search result listing.
+  // If label starts with "NP created using" and we have a description
+  // (e,g, from introduced subject's rdfs:label), use the description instead
+  return row.label?.startsWith("NP created using") && row.description
+    ? row.description
+    : row.label || "";
+};

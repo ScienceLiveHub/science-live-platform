@@ -1,0 +1,18 @@
+# Get the labels of all nanopubs referred to within a specified nanopub.
+# Uses npa:networkGraph to efficiently find outgoing references.
+#
+# Placeholder: `?_nanopubUri` - URI: the URI of the nanopub to find outgoing references for.
+
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix npa: <http://purl.org/nanopub/admin/>
+
+select ?refNanopub ?label where {
+  graph npa:networkGraph {
+    ?_nanopubUri npa:refersToNanopub ?refNanopub .
+  }
+  optional {
+    graph npa:graph {
+      ?refNanopub rdfs:label ?label .
+    }
+  }
+}

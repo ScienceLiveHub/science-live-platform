@@ -19,6 +19,7 @@ import {
   NANOPUB_SPARQL_ENDPOINT_FULL,
   NANOPUB_SPARQL_ENDPOINT_TEXT,
 } from "@/lib/sparql";
+import { bestLabelForRow } from "@/lib/string-format";
 import {
   getTemplateUris,
   paginateRows,
@@ -153,16 +154,9 @@ export function useNanopubSearch({
         setHasMore(moreResultsAvailable);
         setSearchResults(
           visibleRows.map((row: any) => {
-            // Apply workaround for legacy "NP created using..." labels
-            // If label starts with "NP created using" and we have a description
-            // (from introduced subject's rdfs:label), use the description instead
-            const labelValue =
-              row.label?.startsWith("NP created using") && row.description
-                ? row.description
-                : row.label || row.description || "";
             return {
               np: row.np,
-              label: labelValue,
+              label: bestLabelForRow(row),
               date: new Date(row.date),
               creator: row.creator || "",
               types: row.types ? row.types.split("|") : [],

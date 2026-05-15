@@ -6,7 +6,7 @@ import {
   Util,
   Writer,
 } from "n3";
-import { NANOPUB_TYPES } from "./queries";
+import { NANOPUB_LABELS, NANOPUB_REFERS_TO, NANOPUB_TYPES } from "./queries";
 import {
   extractSubjectProps,
   fetchQuads,
@@ -161,7 +161,7 @@ export class NanopubStore extends N3Store {
    * (Technically this will load any RDF given a URL, not just nanopubs)
    *
    */
-  static async load(url: string) {
+  static async load(url: string, fillLabelCache = false) {
     const store = new NanopubStore();
     const prefixes: any = {};
     await fetchQuads(
@@ -172,6 +172,9 @@ export class NanopubStore extends N3Store {
     store.prefixes = prefixes;
     store.extractGraphUris();
     await store.extractMetadata();
+    if (fillLabelCache) {
+      await store.fillLabelCacheFromRefersTo();
+    }
 
     return store;
   }
@@ -182,7 +185,7 @@ export class NanopubStore extends N3Store {
    * (Technically this will load any RDF, not just nanopubs)
    *
    */
-  static async loadString(rdf: string) {
+  static async loadString(rdf: string, fillLabelCache = false) {
     const store = new NanopubStore();
     const prefixes: any = {};
     await parseRdf(
@@ -193,6 +196,9 @@ export class NanopubStore extends N3Store {
     store.prefixes = prefixes;
     store.extractGraphUris();
     await store.extractMetadata();
+    if (fillLabelCache) {
+      await store.fillLabelCacheFromReferencedNanopubs();
+    }
 
     return store;
   }
@@ -210,6 +216,7 @@ export class NanopubStore extends N3Store {
     if (uri) {
       // Search the document internally, then the local labelCache, then a list of COMMON_LABELS
       label =
+        this.labelCache[uri] ||
         this.matchOne(namedNode(uri), NS.FOAF("name"), null, null)?.object
           .value ||
         this.matchOne(namedNode(uri), NS.NPTs("hasLabelFromApi"), null, null)
@@ -479,6 +486,7 @@ export class NanopubStore extends N3Store {
     // that was not ideal because all the NPs send up with the same name.
     // So if we detect legacy nanopubs, try best effort to get the label of the first
     // introduced subject, which is the newer strategy as of early May 2026.
+    // Also related: bestLabelForRow() helper function.
     // Determine the title value, potentially overriding the default if it's a legacy placeholder
     const defaultTitleValue = title?.object?.value || null;
     const titleValue =
@@ -519,6 +527,82 @@ export class NanopubStore extends N3Store {
       uri: this.prefixes["this"],
       template,
     };
+  }
+
+  /**
+   * Use the nanopub-refers-to SPARQL query to populate the labelCache
+   * with labels of nanopubs referred to by this nanopub.
+   * Suitable for published nanopubs loaded via URL.
+   */
+  protected async fillLabelCacheFromRefersTo() {
+    const nanopubUri = this.metadata.uri ?? this.prefixes["this"];
+    if (!nanopubUri) return;
+
+    try {
+      const results = await executeBindSparql(
+        NANOPUB_REFERS_TO,
+        { nanopubUri },
+        NANOPUB_SPARQL_ENDPOINT_FULL,
+      );
+      if (results) {
+        for (const row of results) {
+          if (row.refNanopub && row.label) {
+            this.labelCache[row.refNanopub] = row.label;
+          }
+        }
+      }
+    } catch {
+      // Silently ignore – label cache is best-effort
+    }
+  }
+
+  /**
+   * Scan the store for nanopub URIs referenced in quads (excluding this
+   * nanopub's own URI) and use a single SPARQL query with a VALUES clause
+   * to fetch their labels into the labelCache.
+   * Suitable for unpublished nanopubs loaded from a string, where the
+   * nanopub-refers-to network index query would not work.
+   */
+  protected async fillLabelCacheFromReferencedNanopubs() {
+    const ownUri = this.metadata.uri ?? this.prefixes["this"];
+    const seenUris = new Set<string>();
+
+    // Collect unique nanopub URIs referenced as objects in quads
+    for (const quad of this.getQuads(null, null, null, null)) {
+      if (quad.object.termType === "NamedNode") {
+        const objUri = quad.object.value;
+        if (
+          objUri &&
+          objUri !== ownUri &&
+          isNanopubUri(objUri) &&
+          !seenUris.has(objUri)
+        ) {
+          seenUris.add(objUri);
+        }
+      }
+    }
+
+    if (seenUris.size === 0) return;
+
+    // Build a VALUES list of URI references and fetch all labels in a single query
+    const valuesList = [...seenUris].map((uri) => `<${uri}>`).join(" ");
+
+    try {
+      const results = await executeBindSparql(
+        NANOPUB_LABELS,
+        { nanopubUris: valuesList },
+        NANOPUB_SPARQL_ENDPOINT_FULL,
+      );
+      if (results) {
+        for (const row of results) {
+          if (row.nanopubUri && row.label) {
+            this.labelCache[row.nanopubUri] = row.label;
+          }
+        }
+      }
+    } catch {
+      // Silently ignore – label cache is best-effort
+    }
   }
 
   /**

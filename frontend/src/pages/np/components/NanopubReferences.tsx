@@ -5,6 +5,7 @@
 import { Spinner } from "@/components/ui/spinner";
 import { NANOPUB_REFERENCES } from "@/lib/queries";
 import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
+import { bestLabelForRow } from "@/lib/string-format";
 import {
   Collapsible,
   CollapsibleContent,
@@ -44,16 +45,9 @@ export function NanopubReferences({ nanopubUri }: { nanopubUri: string }) {
 
         setReferences(
           rows.map((row) => {
-            // Apply workaround for legacy "NP created using..." labels
-            // If label starts with "NP created using" and we have a description
-            // (from introduced subject's rdfs:label), use the description instead
-            const labelValue =
-              row.label?.startsWith("NP created using") && row.description
-                ? row.description
-                : row.label || "";
             return {
               np: row.np,
-              label: labelValue,
+              label: bestLabelForRow(row),
               date: new Date(row.date),
               creator: row.creator || "",
               template: row.template,
