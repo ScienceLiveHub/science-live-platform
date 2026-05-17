@@ -1,0 +1,45 @@
+# Get all nanopubs that the specified nanopub references (the inverse
+# direction of nanopub-references.rq). Uses the KP admin networkGraph
+# which materialises npa:refersToNanopub edges from each nanopub's
+# triples — so finding what a nanopub points at is a single hop.
+#
+# Placeholder: `?_nanopubUri` - URI: the URI of the *source* nanopub
+# (i.e., the nanopub whose outgoing references we want).
+#
+# Returns the referenced (downstream) nanopub plus its metadata, with
+# the same filtering and ordering as the upstream nanopub-references.rq:
+# excludes invalidated / superseded nanopubs, comments, approvals.
+
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix np: <http://www.nanopub.org/nschema#>
+prefix npa: <http://purl.org/nanopub/admin/>
+prefix npx: <http://purl.org/nanopub/x/>
+prefix dct: <http://purl.org/dc/terms/>
+prefix nt: <https://w3id.org/np/o/ntemplate/>
+
+select ?np ?label ?date ?creator ?template where {
+  # Find nanopubs that the entry refers to (the "downstream" direction).
+  graph npa:networkGraph {
+    ?_nanopubUri npa:refersToNanopub ?np .
+  }
+
+  # Same metadata + invalidation/comment/approval filtering as
+  # nanopub-references.rq.
+  graph npa:graph {
+    ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
+    filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+    filter not exists { ?np npx:invalidates ?_nanopubUri . }
+    optional { ?np rdfs:label ?label . }
+    ?np np:hasAssertion ?assertion ;
+        dct:created ?date ;
+        dct:creator ?creator .
+  }
+
+  filter not exists { graph ?assertion { ?_nanopubUri rdfs:comment ?_s . } }
+  filter not exists { graph ?assertion { ?approver npx:approvesOf ?_nanopubUri . } }
+  filter not exists { graph ?assertion { ?disapprover npx:disapprovesOf ?_nanopubUri . } }
+
+  optional { graph npa:networkGraph { ?np nt:wasCreatedFromTemplate ?template . } }
+}
+order by desc(?date)
+limit 100

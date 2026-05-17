@@ -3,6 +3,7 @@ import { Session, User } from "better-auth";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import health from "./health";
+import np from "./np";
 import notifications from "./notifications";
 import orcid from "./orcid";
 import proxy from "./proxy";
@@ -62,6 +63,7 @@ app.on(["POST", "GET"], "/auth/*", (c) => getAuth(c.env).handler(c.req.raw));
 
 // Endpoints that require auth
 app.route("/notifications", notifications);
+app.route("/np", np);
 app.route("/proxy", proxy);
 app.route("/signing", signing);
 
