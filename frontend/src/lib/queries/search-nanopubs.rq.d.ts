@@ -11,7 +11,6 @@ declare const query: import("../sparql").SparqlQuery<{
   sortBy: "raw";
 }, {
   types: "string";
-  description: "string";
   referenceCount: "string";
   maxScore: "string";
   np: "string";
