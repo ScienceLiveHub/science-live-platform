@@ -205,7 +205,7 @@ export function GeneralSearch() {
           next.delete("page");
           setSearchParams(next);
         }}
-        placeholder="Enter search query or nanopub URI..."
+        placeholder="Enter search terms or nanopub URI..."
         loading={loading}
         searchMode={searchMode}
         onSearchModeChange={handleSearchModeChange}

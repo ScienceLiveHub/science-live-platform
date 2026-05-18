@@ -61,17 +61,7 @@ If available (e.g. via MCP), always use context7 when I need code generation, se
 
 # SPARQL Queries
 
-These should be defined in `frontend/src/lib/queries`. Each query has its own query file \*.rq which must contain a comment that starts with its description at the top and then list its placeholders, then the actual SPARQL content. Example of header comment:
-
-```
-# Search for nanopubs of a specific RDF type.
-# Excludes invalidated and superseded nanopubs.
-#
-# Placeholder: `?_searchTerm` - the user's search string.
-# Placeholder: `?_rdfType` - URI: the full type.
-```
-
-Each query also has a \*.d.ts file which is (re)generated automatically using `npm run generate:query-types` in the frontend workspace. That same npm script will also generate `frontend/src/lib/queries/index.ts` barrel exports for convenient usage. A query can be run (including binding parameters) using functions in `frontend/src/lib/sparql.ts`, usually via `executeBindSparql()`. When using those query execution functions, especially within a React hook that could get run twice in dev mode (React Strict Mode), make sure you implement AbortSignal as per the comment above where `executeBindSparql()` is defined.
+SPARQL queries are used to query the nanopublication repositories. Look in [agent-docs/SPARQL.md](agent-docs/SPARQL.md) for more guidance about SPARQL queries for nanopubs.
 
 # Library preferences
 
@@ -82,7 +72,7 @@ Each query also has a \*.d.ts file which is (re)generated automatically using `n
 
 Under `frontend/src/pages/np/create/components/templates/` you will find a number of user-friendly forms for creating popular types of nanopubs using templates (which are themselves nanopubs, listed in `frontend/src/pages/np/create/components/templates/registry-metadata.ts`).
 
-The lightweight library `formedible` provides simplified form generation functionality with reduced boilerplate (using TanStack Form, Zod and shadcn/ui). Use this approach for complex forms and templates for creating Nanopublications, where possible. More information, including examples, are availble in the file `agent-docs/FORMEDIBLE.md`. You can also follow some of the existing forms under `frontend/src/pages/np/create/components/templates/` as examples but feel free to improve on it.
+The lightweight library `formedible` provides simplified form generation functionality with reduced boilerplate (using TanStack Form, Zod and shadcn/ui). Use this approach for complex forms and templates for creating Nanopublications, where possible. More information, including examples, are availble in the file [agent-docs/FORMEDIBLE.md](agent-docs/FORMEDIBLE.md). You can also follow some of the existing forms under `frontend/src/pages/np/create/components/templates/` as examples but feel free to improve on it.
 
 The forms gather the required information defined in the template ("placeholders"), then pass that to the `generateNanopublication()` function which generates the "statements" (RDF triples) and the rest of the output nanopub, including signing it and generating a globally unique trustyHash to indentify it.
 
