@@ -30,12 +30,10 @@ select ?np ?label ?date ?creator (group_concat(distinct ?type; separator="|") as
     filter not exists { ?np npx:hasNanopubType nt:PubinfoTemplate }
 
     optional { ?np rdfs:label ?label . }
-    ?np np:hasAssertion ?assertion ;
-        dct:created ?date ;
+    ?np dct:created ?date ;
         npx:hasNanopubType ?type;
         dct:creator ?creator .
   }
-
 
   ?np search:matches [
     search:query ?_searchTerm ;

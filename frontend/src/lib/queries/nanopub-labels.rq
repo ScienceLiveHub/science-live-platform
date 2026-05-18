@@ -1,0 +1,14 @@
+# Get the labels for a set of nanopub URIs from the nanopub network.
+# Uses a VALUES clause to efficiently look up multiple labels in a single query.
+#
+# Placeholder: `?_nanopubUris` - Raw: space-separated URIs in VALUES syntax, e.g. `<https://w3id.org/np/RAabc> <https://w3id.org/np/RAdef>`
+
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix npa: <http://purl.org/nanopub/admin/>
+
+select ?nanopubUri ?label where {
+  graph npa:graph {
+    ?nanopubUri rdfs:label ?label .
+  }
+  values ?nanopubUri { ?_nanopubUris }
+}

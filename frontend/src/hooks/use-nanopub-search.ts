@@ -19,6 +19,7 @@ import {
   NANOPUB_SPARQL_ENDPOINT_FULL,
   NANOPUB_SPARQL_ENDPOINT_TEXT,
 } from "@/lib/sparql";
+import { bestLabelForRow } from "@/lib/string-format";
 import {
   getTemplateUris,
   paginateRows,
@@ -152,20 +153,22 @@ export function useNanopubSearch({
 
         setHasMore(moreResultsAvailable);
         setSearchResults(
-          visibleRows.map((row: any) => ({
-            np: row.np,
-            label: row.label || row.description || "",
-            date: new Date(row.date),
-            creator: row.creator || "",
-            types: row.types ? row.types.split("|") : [],
-            template: row.template,
-            maxScore:
-              row.maxScore != null ? parseFloat(row.maxScore) : undefined,
-            referenceCount:
-              row.referenceCount != null
-                ? parseInt(row.referenceCount)
-                : undefined,
-          })),
+          visibleRows.map((row: any) => {
+            return {
+              np: row.np,
+              label: bestLabelForRow(row),
+              date: new Date(row.date),
+              creator: row.creator || "",
+              types: row.types ? row.types.split("|") : [],
+              template: row.template,
+              maxScore:
+                row.maxScore != null ? parseFloat(row.maxScore) : undefined,
+              referenceCount:
+                row.referenceCount != null
+                  ? parseInt(row.referenceCount)
+                  : undefined,
+            };
+          }),
         );
       } catch (e: any) {
         if (e?.name === "AbortError") return;

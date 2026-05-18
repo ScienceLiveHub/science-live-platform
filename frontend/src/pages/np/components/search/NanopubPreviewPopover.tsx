@@ -32,7 +32,7 @@ export function NanopubPreviewPopover({ uri }: { uri: string }) {
     }
     let cancelled = false;
     setLoading(true);
-    NanopubStore.load(uri)
+    NanopubStore.load(uri, true)
       .then((s) => {
         if (cancelled) return;
         setStore(s);

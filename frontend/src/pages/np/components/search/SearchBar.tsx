@@ -257,6 +257,9 @@ export function SearchBar({
               <SelectItem value="dateAsc">Oldest first</SelectItem>
             </SelectContent>
           </Select>
+          <span className="text-xs text-muted-foreground">
+            Wildcard match * in search term supported
+          </span>
         </div>
       </div>
     </div>

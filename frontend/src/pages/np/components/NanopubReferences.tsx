@@ -5,6 +5,7 @@
 import { Spinner } from "@/components/ui/spinner";
 import { NANOPUB_REFERENCES } from "@/lib/queries";
 import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
+import { bestLabelForRow } from "@/lib/string-format";
 import {
   Collapsible,
   CollapsibleContent,
@@ -43,13 +44,15 @@ export function NanopubReferences({ nanopubUri }: { nanopubUri: string }) {
         );
 
         setReferences(
-          rows.map((row) => ({
-            np: row.np,
-            label: row.label || "",
-            date: new Date(row.date),
-            creator: row.creator || "",
-            template: row.template,
-          })),
+          rows.map((row) => {
+            return {
+              np: row.np,
+              label: bestLabelForRow(row),
+              date: new Date(row.date),
+              creator: row.creator || "",
+              template: row.template,
+            };
+          }),
         );
         hasFetched.current = true;
       } catch (e: any) {

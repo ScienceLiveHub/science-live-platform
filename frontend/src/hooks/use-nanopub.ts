@@ -43,7 +43,7 @@ export function useNanopub(
         let newStore: NanopubStore;
 
         if (typeof uriOrStore === "string") {
-          newStore = await NanopubStore.load(uriOrStore);
+          newStore = await NanopubStore.load(uriOrStore, true);
         } else {
           newStore = uriOrStore;
         }

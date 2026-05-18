@@ -184,7 +184,6 @@ export async function fetchPossibleValuesFromQuads(url: string) {
   return options;
 }
 
-// export type Store = N3Store;
 export type Statement = RDFT.Quad;
 
 export function groupByGraph(
