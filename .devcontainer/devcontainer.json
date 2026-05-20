@@ -7,7 +7,7 @@
   "runArgs": [
     /* Name the container to easily identify it in Docker */
     "--name=science-live-platform",
-    /* Use host network, so we dont bother forwarding ports and can easily access any localhost services if required */
+    /* Use host network, so we don't bother forwarding ports and can easily access any localhost services if required */
     "--network=host"
   ],
   /* Mounts must be absolute paths on the host so adjust for your machine as necessary */
@@ -57,8 +57,8 @@
         "bradlc.vscode-tailwindcss",
         "vitest.explorer",
         "maattdd.gitless",
-        /* Roo Code is my preferred agentic coding assistant in vscode */
-        "RooVeterinaryInc.roo-cline",
+        /* Zoo Code is my preferred agentic coding assistant in vscode */
+        "zoocodeorganization.zoo-code",
         /* OpenCode is a popular agentic coding CLI */
         "sst-dev.opencode",
         /* Syntax highlighting for trig/RDF */
