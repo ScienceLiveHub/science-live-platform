@@ -4,7 +4,6 @@
 #
 # Required GitHub Secrets:
 #   CLOUDFLARE_API_TOKEN      - Cloudflare API token with Workers deploy permissions
-#   CLOUDFLARE_ACCOUNT_ID     - Cloudflare account ID
 #
 # Required GitHub Variables (non-sensitive, set in repo Settings > Variables):
 #   Production:
@@ -15,6 +14,7 @@
 #     VITE_API_URL_DEV          - The dev API URL (e.g. https://api-dev.sciencelive4all.org)
 #   Both:
 #     FRONTEND_WRANGLER_CONFIG  - Full contents of frontend/wrangler.jsonc (gitignored, deployment-specific)
+#     CLOUDFLARE_ACCOUNT_ID     - Cloudflare account ID
 #
 # Note: Worker secrets (BETTER_AUTH_SECRET, ENCRYPTION_KEY, ORCID_CLIENT_SECRET,
 #       RESEND_API_KEY, DATABASE_URL) should be configured directly in the
@@ -134,7 +134,7 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: api
 
   deploy-frontend:
@@ -178,7 +178,7 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: frontend
           preCommands: ${{ github.event.inputs.environment == 'prod' && 'npm run build' || 'npm run build-dev' }}
           command: ${{ github.event.inputs.environment == 'prod' && 'deploy' || 'deploy --name platform-dev' }}
