@@ -10,6 +10,8 @@
  */
 import { Hono } from "hono";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { NANOPUB_SPARQL_ENDPOINT_FULL } from "./queries";
+import { UpstreamError } from "./sparql";
 
 const buildConstellationMock = vi.fn();
 vi.mock("./constellation", () => ({
@@ -43,7 +45,18 @@ const CONSTELLATION_PAYLOAD = {
   entry: "https://w3id.org/sciencelive/np/RAabc",
   nodeCount: 3,
   edgeCount: 2,
-  sparqlEndpoint: "https://query.knowledgepixels.com/repo/full",
+  sparqlEndpoint: NANOPUB_SPARQL_ENDPOINT_FULL,
+  nodes: [],
+  edges: [],
+  externalCitations: [],
+};
+
+const EMPTY_CONSTELLATION_PAYLOAD = {
+  entry:
+    "https://w3id.org/sciencelive/np/RAnotfound000000000000000000000000000000",
+  nodeCount: 0,
+  edgeCount: 0,
+  sparqlEndpoint: NANOPUB_SPARQL_ENDPOINT_FULL,
   nodes: [],
   edges: [],
   externalCitations: [],
@@ -137,9 +150,9 @@ describe("GET /np/constellation", () => {
     );
   });
 
-  it("returns 502 when buildConstellation throws", async () => {
+  it("returns 502 when buildConstellation throws UpstreamError", async () => {
     buildConstellationMock.mockRejectedValueOnce(
-      new Error("KP unreachable after retries"),
+      new UpstreamError("KP unreachable after retries"),
     );
     const app = mountWithUser({ id: "u1" });
     const res = await app.request(
@@ -148,6 +161,43 @@ describe("GET /np/constellation", () => {
     expect(res.status).toBe(502);
     const body = (await res.json()) as { error: string };
     expect(body.error).toMatch(/KP unreachable/);
+  });
+
+  it("returns 500 when buildConstellation throws a regular Error", async () => {
+    buildConstellationMock.mockRejectedValueOnce(
+      new Error("Unexpected programmer error"),
+    );
+    const app = mountWithUser({ id: "u1" });
+    const res = await app.request(
+      "/np/constellation?uri=https://w3id.org/sciencelive/np/RAabcdefghijklmnopqrstuvwxyz0000000",
+    );
+    expect(res.status).toBe(500);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toMatch(/Unexpected programmer error/);
+  });
+
+  it("returns 404 when the entry URI is not found (nodeCount === 0)", async () => {
+    buildConstellationMock.mockResolvedValueOnce(EMPTY_CONSTELLATION_PAYLOAD);
+    const app = mountWithUser({ id: "u1" });
+    const res = await app.request(
+      "/np/constellation?uri=https://w3id.org/sciencelive/np/RAnotfound000000000000000000000000000000",
+    );
+    expect(res.status).toBe(404);
+    const body = (await res.json()) as { error: string; notFound?: boolean };
+    expect(body.error).toMatch(/Nanopub not found/);
+    expect(body.notFound).toBe(true);
+  });
+
+  it("passes AbortSignal to buildConstellation", async () => {
+    buildConstellationMock.mockResolvedValueOnce(CONSTELLATION_PAYLOAD);
+    const app = mountWithUser({ id: "u1" });
+    await app.request(
+      "/np/constellation?uri=https://w3id.org/sciencelive/np/RAabcdefghijklmnopqrstuvwxyz0000000",
+    );
+    expect(buildConstellationMock).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
   });
 });
 
@@ -193,51 +243,43 @@ describe("depth and maxNodes boundary clamping", () => {
   beforeEach(() => buildConstellationMock.mockReset());
   afterEach(() => vi.restoreAllMocks());
 
-  it("clamps depth=0 to 1 (lower bound)", async () => {
+  it("accepts depth=0 (metadata probe mode)", async () => {
     buildConstellationMock.mockResolvedValueOnce(CONSTELLATION_PAYLOAD);
     const app = mountWithUser({ id: "u1" });
-    await app.request(
-      `/np/constellation?uri=${VALID_URI}&depth=0`,
-    );
+    await app.request(`/np/constellation?uri=${VALID_URI}&depth=0`);
     expect(buildConstellationMock).toHaveBeenCalledWith(
       expect.any(String),
-      expect.objectContaining({ depthLimit: 1 }),
+      expect.objectContaining({ depthLimit: 0 }),
     );
   });
 
-  it("clamps depth=-5 to 1 (negative lower bound)", async () => {
+  it("clamps depth=-5 to 0 (negative lower bound)", async () => {
     buildConstellationMock.mockResolvedValueOnce(CONSTELLATION_PAYLOAD);
     const app = mountWithUser({ id: "u1" });
-    await app.request(
-      `/np/constellation?uri=${VALID_URI}&depth=-5`,
-    );
+    await app.request(`/np/constellation?uri=${VALID_URI}&depth=-5`);
     expect(buildConstellationMock).toHaveBeenCalledWith(
       expect.any(String),
-      expect.objectContaining({ depthLimit: 1 }),
+      expect.objectContaining({ depthLimit: 0 }),
     );
   });
 
   it("clamps maxNodes=0 to 1 (lower bound)", async () => {
     buildConstellationMock.mockResolvedValueOnce(CONSTELLATION_PAYLOAD);
     const app = mountWithUser({ id: "u1" });
-    await app.request(
-      `/np/constellation?uri=${VALID_URI}&maxNodes=0`,
-    );
+    await app.request(`/np/constellation?uri=${VALID_URI}&maxNodes=0`);
     expect(buildConstellationMock).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({ maxNodes: 1 }),
     );
   });
 
-  it("accepts depth at the exact lower bound (1)", async () => {
+  it("accepts depth at the exact lower bound (0)", async () => {
     buildConstellationMock.mockResolvedValueOnce(CONSTELLATION_PAYLOAD);
     const app = mountWithUser({ id: "u1" });
-    await app.request(
-      `/np/constellation?uri=${VALID_URI}&depth=1&maxNodes=1`,
-    );
+    await app.request(`/np/constellation?uri=${VALID_URI}&depth=0&maxNodes=1`);
     expect(buildConstellationMock).toHaveBeenCalledWith(
       expect.any(String),
-      expect.objectContaining({ depthLimit: 1, maxNodes: 1 }),
+      expect.objectContaining({ depthLimit: 0, maxNodes: 1 }),
     );
   });
 
@@ -258,9 +300,7 @@ describe("depth and maxNodes boundary clamping", () => {
     // Lock it in so a future regex tightening doesn't break the contract.
     buildConstellationMock.mockResolvedValueOnce(CONSTELLATION_PAYLOAD);
     const app = mountWithUser({ id: "u1" });
-    await app.request(
-      `/np/constellation?uri=${VALID_URI}&depth=3abc`,
-    );
+    await app.request(`/np/constellation?uri=${VALID_URI}&depth=3abc`);
     expect(buildConstellationMock).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({ depthLimit: 3 }),
@@ -302,10 +342,31 @@ describe("/np route coverage", () => {
     buildConstellationMock.mockRejectedValueOnce("plain string thrown");
     const app = mountWithUser({ id: "u1" });
     const res = await app.request(`/np/constellation?uri=${VALID_URI}`);
-    expect(res.status).toBe(502);
+    expect(res.status).toBe(500);
     const body = (await res.json()) as { error: string };
     expect(body.error).toMatch(/Constellation build failed/);
   });
+
+  // Enable/update these tests if we enable Cache-Control
+  // it("returns Cache-Control header on success", async () => {
+  //   buildConstellationMock.mockResolvedValueOnce(CONSTELLATION_PAYLOAD);
+  //   const app = mountWithUser({ id: "u1" });
+  //   const res = await app.request(`/np/constellation?uri=${VALID_URI}`);
+  //   expect(res.status).toBe(200);
+  //   const cacheControl = res.headers.get("cache-control");
+  //   expect(cacheControl).toMatch(/public/);
+  //   expect(cacheControl).toMatch(/max-age=300/);
+  // });
+
+  // it("does NOT return Cache-Control header on error", async () => {
+  //   buildConstellationMock.mockRejectedValueOnce(new Error("boom"));
+  //   const app = mountWithUser({ id: "u1" });
+  //   const res = await app.request(`/np/constellation?uri=${VALID_URI}`);
+  //   expect(res.status).toBe(500);
+  //   // Hono may not set cache-control on error responses
+  //   const cacheControl = res.headers.get("cache-control");
+  //   expect(cacheControl).toBeNull();
+  // });
 });
 
 // =============================================================================
@@ -319,10 +380,9 @@ describe("/np/constellation protocol gaps", () => {
   it("HEAD requests pass through Hono — return same response shape as GET (no body)", async () => {
     buildConstellationMock.mockResolvedValueOnce(CONSTELLATION_PAYLOAD);
     const app = mountWithUser({ id: "u1" });
-    const res = await app.request(
-      `/np/constellation?uri=${VALID_URI}`,
-      { method: "HEAD" },
-    );
+    const res = await app.request(`/np/constellation?uri=${VALID_URI}`, {
+      method: "HEAD",
+    });
     // Hono routes only respond to GET (we declared `app.get()`). HEAD is
     // typically auto-handled by Hono via the matching GET route, but our
     // route's `get()` only matches GET — HEAD returns 404 unless explicitly
@@ -357,8 +417,10 @@ describe("/np/constellation protocol gaps", () => {
   it("multiple `uri` query params — Hono picks one deterministically", async () => {
     buildConstellationMock.mockResolvedValueOnce(CONSTELLATION_PAYLOAD);
     const app = mountWithUser({ id: "u1" });
-    const a = "https://w3id.org/sciencelive/np/RAaaa00000000000000000000000000000000000000";
-    const b = "https://w3id.org/sciencelive/np/RAbbb00000000000000000000000000000000000000";
+    const a =
+      "https://w3id.org/sciencelive/np/RAaaa00000000000000000000000000000000000000";
+    const b =
+      "https://w3id.org/sciencelive/np/RAbbb00000000000000000000000000000000000000";
     await app.request(
       `/np/constellation?uri=${encodeURIComponent(a)}&uri=${encodeURIComponent(b)}`,
     );

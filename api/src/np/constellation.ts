@@ -1,10 +1,12 @@
-import { bindUri, REFERENCES_FROM, REFERENCES_TO } from "./queries";
+import {
+  bindUri,
+  NANOPUB_SPARQL_ENDPOINT_FULL,
+  REFERENCES_FROM,
+  REFERENCES_TO,
+} from "./queries";
 import { executeSparql, fetchTrig } from "./sparql";
 import {
   canonicalNanopubUri,
-  type AidaFields,
-  type CitoFields,
-  type ClaimFields,
   extractAidaFields,
   extractCitoFields,
   extractClaimFields,
@@ -21,6 +23,9 @@ import {
   extractStudyFields,
   extractTemplateLabel,
   isTemplateDefinitionLabel,
+  type AidaFields,
+  type CitoFields,
+  type ClaimFields,
   type OutcomeFields,
   type QuoteFields,
   type ResearchSoftwareFields,
@@ -74,7 +79,14 @@ export type ConstellationEdge = {
 };
 
 export type ChainStep = {
-  step: "Quote" | "AIDA" | "Claim" | "Study" | "Outcome" | "CiTO" | "ResearchSoftware";
+  step:
+    | "Quote"
+    | "AIDA"
+    | "Claim"
+    | "Study"
+    | "Outcome"
+    | "CiTO"
+    | "ResearchSoftware";
   uri: string;
   label?: string;
   text?: string;
@@ -183,10 +195,8 @@ export async function buildConstellation(
     for (const n of toProcess) visited.add(n.uri);
     if (toProcess.length === 0) continue;
 
-    const results = await runWithConcurrency(
-      toProcess,
-      concurrency,
-      (n) => processNode(n, templateLabelCache, signal),
+    const results = await runWithConcurrency(toProcess, concurrency, (n) =>
+      processNode(n, templateLabelCache, signal),
     );
 
     for (const r of results) {
@@ -225,7 +235,7 @@ export async function buildConstellation(
     chains,
     nodeCount: nodes.size,
     edgeCount: edges.length,
-    sparqlEndpoint: "https://query.knowledgepixels.com/repo/full",
+    sparqlEndpoint: NANOPUB_SPARQL_ENDPOINT_FULL,
     nodes: nodeList,
     edges,
     externalCitations: [...externals].sort(),
@@ -461,7 +471,7 @@ function assembleChains(
     const studyUri = canonicalNanopubUri(out.studyUri) ?? out.studyUri;
     const study = byUri.get(studyUri) ?? findRelated(outcome, studies);
     const claimUri = study?.study?.claimUri
-      ? canonicalNanopubUri(study.study.claimUri) ?? study.study.claimUri
+      ? (canonicalNanopubUri(study.study.claimUri) ?? study.study.claimUri)
       : "";
     const claim = byUri.get(claimUri) ?? findRelated(outcome, claims);
 
@@ -470,7 +480,8 @@ function assembleChains(
     const aida = findAidaForClaim(claim, aidas) ?? findRelated(outcome, aidas);
 
     // Quote — find the Quote node that the AIDA or Claim references.
-    const quote = findQuoteForAida(aida, quotes) ?? findRelated(outcome, quotes);
+    const quote =
+      findQuoteForAida(aida, quotes) ?? findRelated(outcome, quotes);
 
     // CiTO node whose citing entity (subject) is THIS outcome. This is the
     // outcome-level CiTO citation that connects the Outcome to the upstream

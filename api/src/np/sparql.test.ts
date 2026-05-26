@@ -19,7 +19,8 @@ const SPARQL_OK_BODY = {
       {
         np: {
           type: "uri",
-          value: "https://w3id.org/sciencelive/np/RA1q6c0fG2bMbiozF8Az2UpIfzAzqp8hoVEl6QIzfUpH8",
+          value:
+            "https://w3id.org/sciencelive/np/RA1q6c0fG2bMbiozF8Az2UpIfzAzqp8hoVEl6QIzfUpH8",
         },
       },
     ],
@@ -65,9 +66,7 @@ describe("executeSparql", () => {
   it("retries on transient 503 and succeeds on next attempt", async () => {
     fetchMock
       .mockResolvedValueOnce(mockResponse(503, "<html>upstream busy</html>"))
-      .mockResolvedValueOnce(
-        mockResponse(200, JSON.stringify(SPARQL_OK_BODY)),
-      );
+      .mockResolvedValueOnce(mockResponse(200, JSON.stringify(SPARQL_OK_BODY)));
     const rows = await executeSparql("SELECT ?np WHERE { ?np a ?x }");
     expect(rows.length).toBe(1);
     expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -107,13 +106,12 @@ describe("resolverUrl", () => {
       resolverUrl(
         "https://w3id.org/sciencelive/np/RA1q6c0fG2bMbiozF8Az2UpIfzAzqp8hoVEl6QIzfUpH8",
       ),
-    ).toBe(
-      "https://w3id.org/np/RA1q6c0fG2bMbiozF8Az2UpIfzAzqp8hoVEl6QIzfUpH8",
-    );
+    ).toBe("https://w3id.org/np/RA1q6c0fG2bMbiozF8Az2UpIfzAzqp8hoVEl6QIzfUpH8");
   });
 
   it("leaves bare np/ URIs unchanged", () => {
-    const u = "https://w3id.org/np/RA1q6c0fG2bMbiozF8Az2UpIfzAzqp8hoVEl6QIzfUpH8";
+    const u =
+      "https://w3id.org/np/RA1q6c0fG2bMbiozF8Az2UpIfzAzqp8hoVEl6QIzfUpH8";
     expect(resolverUrl(u)).toBe(u);
   });
 });
@@ -145,9 +143,7 @@ sub:Head { this: a np:Nanopublication . }`;
   it("retries 5xx then succeeds", async () => {
     fetchMock
       .mockResolvedValueOnce(mockResponse(503, "busy"))
-      .mockResolvedValueOnce(
-        mockResponse(200, TRIG_OK, "application/trig"),
-      );
+      .mockResolvedValueOnce(mockResponse(200, TRIG_OK, "application/trig"));
     const body = await fetchTrig("https://w3id.org/np/RAX");
     expect(body).toBe(TRIG_OK);
     expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -155,11 +151,7 @@ sub:Head { this: a np:Nanopublication . }`;
 
   it("throws on HTML response (URI form not supported by resolver)", async () => {
     fetchMock.mockResolvedValueOnce(
-      mockResponse(
-        200,
-        "<!DOCTYPE html><html>nope</html>",
-        "text/html",
-      ),
+      mockResponse(200, "<!DOCTYPE html><html>nope</html>", "text/html"),
     );
     await expect(fetchTrig("https://w3id.org/np/RAX")).rejects.toThrow(
       /Resolver returned HTML/,
@@ -244,9 +236,7 @@ describe("executeSparql edge cases", () => {
       .mockResolvedValueOnce(mockResponse(502, "x"))
       .mockResolvedValueOnce(mockResponse(503, "x"))
       .mockResolvedValueOnce(mockResponse(504, "x"))
-      .mockResolvedValueOnce(
-        mockResponse(200, JSON.stringify(SPARQL_OK_BODY)),
-      );
+      .mockResolvedValueOnce(mockResponse(200, JSON.stringify(SPARQL_OK_BODY)));
     const rows = await executeSparql("SELECT ?np WHERE { ?np a ?x }");
     expect(rows.length).toBe(1);
     expect(fetchMock).toHaveBeenCalledTimes(4);
@@ -255,9 +245,7 @@ describe("executeSparql edge cases", () => {
   it("retries on a fetch-level network throw (not an HTTP response)", async () => {
     fetchMock
       .mockRejectedValueOnce(new TypeError("fetch failed"))
-      .mockResolvedValueOnce(
-        mockResponse(200, JSON.stringify(SPARQL_OK_BODY)),
-      );
+      .mockResolvedValueOnce(mockResponse(200, JSON.stringify(SPARQL_OK_BODY)));
     const rows = await executeSparql("SELECT ?np WHERE { ?np a ?x }");
     expect(rows.length).toBe(1);
     expect(fetchMock).toHaveBeenCalledTimes(2);

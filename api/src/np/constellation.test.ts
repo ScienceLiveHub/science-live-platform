@@ -18,17 +18,26 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildConstellation, classifyStepKind } from "./constellation";
+import { NANOPUB_SPARQL_ENDPOINT_FULL } from "./queries";
 
 // Tiny FORRT-shaped graph used as fixture across the tests.
-const APEX = "https://w3id.org/sciencelive/np/RAapex0000000000000000000000000000000000000";
-const OUTCOME = "https://w3id.org/sciencelive/np/RAoutcome000000000000000000000000000000000";
-const CLAIM = "https://w3id.org/sciencelive/np/RAclaim00000000000000000000000000000000000";
-const QUOTE = "https://w3id.org/sciencelive/np/RAquote00000000000000000000000000000000000";
+const APEX =
+  "https://w3id.org/sciencelive/np/RAapex0000000000000000000000000000000000000";
+const OUTCOME =
+  "https://w3id.org/sciencelive/np/RAoutcome000000000000000000000000000000000";
+const CLAIM =
+  "https://w3id.org/sciencelive/np/RAclaim00000000000000000000000000000000000";
+const QUOTE =
+  "https://w3id.org/sciencelive/np/RAquote00000000000000000000000000000000000";
 
-const TPL_CITO = "https://w3id.org/np/RAtplCito00000000000000000000000000000000000";
-const TPL_OUTCOME = "https://w3id.org/np/RAtplOutcome00000000000000000000000000000000";
-const TPL_CLAIM = "https://w3id.org/np/RAtplClaim000000000000000000000000000000000000";
-const TPL_QUOTE = "https://w3id.org/np/RAtplQuote000000000000000000000000000000000000";
+const TPL_CITO =
+  "https://w3id.org/np/RAtplCito00000000000000000000000000000000000";
+const TPL_OUTCOME =
+  "https://w3id.org/np/RAtplOutcome00000000000000000000000000000000";
+const TPL_CLAIM =
+  "https://w3id.org/np/RAtplClaim000000000000000000000000000000000000";
+const TPL_QUOTE =
+  "https://w3id.org/np/RAtplQuote000000000000000000000000000000000000";
 
 function trigFor(self: string, body: string, templateUri: string): string {
   return `
@@ -66,15 +75,11 @@ function sparqlBindings(rows: { np: string; template?: string }[]): string {
     results: {
       bindings: rows.map((r) => ({
         np: { type: "uri", value: r.np },
-        ...(r.template
-          ? { template: { type: "uri", value: r.template } }
-          : {}),
+        ...(r.template ? { template: { type: "uri", value: r.template } } : {}),
       })),
     },
   });
 }
-
-const SPARQL_URL = "https://query.knowledgepixels.com/repo/full";
 
 /**
  * Synthetic KP — returns canned bodies for known URIs. The chain shape:
@@ -118,7 +123,10 @@ function makeMockKp() {
   // Networkgraph edges that KP would materialise — note Outcome→Claim and
   // Claim→Quote are MISSING here on purpose. That's the bug class we mine
   // from TriG bodies to bridge.
-  const sparqlEdges: Record<string, { references: string[]; referencedBy: string[] }> = {
+  const sparqlEdges: Record<
+    string,
+    { references: string[]; referencedBy: string[] }
+  > = {
     [APEX]: { references: [OUTCOME], referencedBy: [] },
     [OUTCOME]: { references: [], referencedBy: [APEX] },
     [CLAIM]: { references: [], referencedBy: [] },
@@ -130,11 +138,11 @@ function makeMockKp() {
       const urlStr = typeof url === "string" ? url : url.toString();
 
       // SPARQL query
-      if (urlStr === SPARQL_URL) {
+      if (urlStr === NANOPUB_SPARQL_ENDPOINT_FULL) {
         const body = init?.body;
         const queryText =
           body instanceof URLSearchParams
-            ? body.get("query") ?? ""
+            ? (body.get("query") ?? "")
             : String(body ?? "");
         // Extract the URI from the bracketed `<URI>` substitution.
         const uriMatch = /<([^>]+)>/.exec(queryText);
@@ -147,13 +155,10 @@ function makeMockKp() {
           queryText,
         );
         const rows = useReferences ? edges.references : edges.referencedBy;
-        return new Response(
-          sparqlBindings(rows.map((np) => ({ np }))),
-          {
-            status: 200,
-            headers: { "content-type": "application/sparql-results+json" },
-          },
-        );
+        return new Response(sparqlBindings(rows.map((np) => ({ np }))), {
+          status: 200,
+          headers: { "content-type": "application/sparql-results+json" },
+        });
       }
 
       // TriG resolver
@@ -261,9 +266,12 @@ describe("buildConstellation edge cases", () => {
   });
 
   it("does not infinite-loop on cycles (A → B → A)", async () => {
-    const A = "https://w3id.org/sciencelive/np/RAcycleA000000000000000000000000000000000000";
-    const B = "https://w3id.org/sciencelive/np/RAcycleB000000000000000000000000000000000000";
-    const TPL = "https://w3id.org/np/RAtplCycle00000000000000000000000000000000000";
+    const A =
+      "https://w3id.org/sciencelive/np/RAcycleA000000000000000000000000000000000000";
+    const B =
+      "https://w3id.org/sciencelive/np/RAcycleB000000000000000000000000000000000000";
+    const TPL =
+      "https://w3id.org/np/RAtplCycle00000000000000000000000000000000000";
 
     const trigMap: Record<string, string> = {
       [`https://w3id.org/np/${A.split("/").pop()}`]: trigFor(
@@ -283,7 +291,7 @@ describe("buildConstellation edge cases", () => {
       "fetch",
       vi.fn(async (url: string | URL | Request) => {
         const u = typeof url === "string" ? url : url.toString();
-        if (u === SPARQL_URL) {
+        if (u === NANOPUB_SPARQL_ENDPOINT_FULL) {
           return new Response(sparqlBindings([]), {
             status: 200,
             headers: { "content-type": "application/sparql-results+json" },
@@ -314,11 +322,16 @@ describe("buildConstellation edge cases", () => {
     // Entry is a real chain step that references a template-DEFINITION
     // nanopub. The template-def MUST be added to nodes (it's a neighbour)
     // but its OWN neighbours (which the fixture provides) must NOT appear.
-    const ENTRY = "https://w3id.org/sciencelive/np/RAentry000000000000000000000000000000000000";
-    const TDEF = "https://w3id.org/sciencelive/np/RAtdef00000000000000000000000000000000000000";
-    const POISON = "https://w3id.org/sciencelive/np/RApoison0000000000000000000000000000000000";
-    const TPL_DEF_LABEL = "https://w3id.org/np/RAtplDef000000000000000000000000000000000000";
-    const TPL_NORMAL = "https://w3id.org/np/RAtplNormal0000000000000000000000000000000000";
+    const ENTRY =
+      "https://w3id.org/sciencelive/np/RAentry000000000000000000000000000000000000";
+    const TDEF =
+      "https://w3id.org/sciencelive/np/RAtdef00000000000000000000000000000000000000";
+    const POISON =
+      "https://w3id.org/sciencelive/np/RApoison0000000000000000000000000000000000";
+    const TPL_DEF_LABEL =
+      "https://w3id.org/np/RAtplDef000000000000000000000000000000000000";
+    const TPL_NORMAL =
+      "https://w3id.org/np/RAtplNormal0000000000000000000000000000000000";
 
     const trigMap: Record<string, string> = {
       [`https://w3id.org/np/${ENTRY.split("/").pop()}`]: trigFor(
@@ -344,7 +357,7 @@ describe("buildConstellation edge cases", () => {
       "fetch",
       vi.fn(async (url: string | URL | Request) => {
         const u = typeof url === "string" ? url : url.toString();
-        if (u === SPARQL_URL) {
+        if (u === NANOPUB_SPARQL_ENDPOINT_FULL) {
           return new Response(sparqlBindings([]), {
             status: 200,
             headers: { "content-type": "application/sparql-results+json" },
@@ -391,20 +404,25 @@ describe("buildConstellation edge cases", () => {
   it("a TriG that self-references its own URI does not produce a self-edge", async () => {
     const SELF =
       "https://w3id.org/sciencelive/np/RAselfRef00000000000000000000000000000000000";
-    const TPL = "https://w3id.org/np/RAtplSelf00000000000000000000000000000000000";
+    const TPL =
+      "https://w3id.org/np/RAtplSelf00000000000000000000000000000000000";
 
     vi.stubGlobal(
       "fetch",
       vi.fn(async (url: string | URL | Request) => {
         const u = typeof url === "string" ? url : url.toString();
-        if (u === SPARQL_URL)
+        if (u === NANOPUB_SPARQL_ENDPOINT_FULL)
           return new Response(sparqlBindings([]), {
             status: 200,
             headers: { "content-type": "application/sparql-results+json" },
           });
         if (u === `https://w3id.org/np/${SELF.split("/").pop()}`)
           return new Response(
-            trigFor(SELF, `<${SELF}> <http://example.org/self> <${SELF}> .`, TPL),
+            trigFor(
+              SELF,
+              `<${SELF}> <http://example.org/self> <${SELF}> .`,
+              TPL,
+            ),
             { status: 200, headers: { "content-type": "application/trig" } },
           );
         if (u === TPL)
@@ -426,9 +444,12 @@ describe("buildConstellation edge cases", () => {
   });
 
   it("accumulates external citations across all visited nodes", async () => {
-    const A = "https://w3id.org/sciencelive/np/RAextcitA00000000000000000000000000000000000";
-    const B = "https://w3id.org/sciencelive/np/RAextcitB00000000000000000000000000000000000";
-    const TPL = "https://w3id.org/np/RAtplExt000000000000000000000000000000000000";
+    const A =
+      "https://w3id.org/sciencelive/np/RAextcitA00000000000000000000000000000000000";
+    const B =
+      "https://w3id.org/sciencelive/np/RAextcitB00000000000000000000000000000000000";
+    const TPL =
+      "https://w3id.org/np/RAtplExt000000000000000000000000000000000000";
 
     const trigMap: Record<string, string> = {
       [`https://w3id.org/np/${A.split("/").pop()}`]: trigFor(
@@ -448,7 +469,7 @@ describe("buildConstellation edge cases", () => {
       "fetch",
       vi.fn(async (url: string | URL | Request) => {
         const u = typeof url === "string" ? url : url.toString();
-        if (u === SPARQL_URL)
+        if (u === NANOPUB_SPARQL_ENDPOINT_FULL)
           return new Response(sparqlBindings([]), {
             status: 200,
             headers: { "content-type": "application/sparql-results+json" },
@@ -505,17 +526,19 @@ describe("buildConstellation edge cases", () => {
     const kp = makeMockKp();
     let sparqlCallCount = 0;
     const originalFetch = kp.fetch;
-    const flakyFetch = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
-      const u = typeof url === "string" ? url : url.toString();
-      if (u === SPARQL_URL) {
-        sparqlCallCount++;
-        if (sparqlCallCount === 2) {
-          // Inject one transient failure on the second SPARQL call.
-          return new Response("503", { status: 503 });
+    const flakyFetch = vi.fn(
+      async (url: string | URL | Request, init?: RequestInit) => {
+        const u = typeof url === "string" ? url : url.toString();
+        if (u === NANOPUB_SPARQL_ENDPOINT_FULL) {
+          sparqlCallCount++;
+          if (sparqlCallCount === 2) {
+            // Inject one transient failure on the second SPARQL call.
+            return new Response("503", { status: 503 });
+          }
         }
-      }
-      return originalFetch(url, init);
-    });
+        return originalFetch(url, init);
+      },
+    );
     vi.stubGlobal("fetch", flakyFetch);
 
     const c = await buildConstellation(APEX, {
@@ -550,22 +573,16 @@ describe("buildConstellation edge cases", () => {
 describe("classifyStepKind", () => {
   it("maps each FORRT template label to its step kind", () => {
     const cases: [string, ReturnType<typeof classifyStepKind>][] = [
-      [
-        "Declaring a replication study outcome according to FORRT",
-        "outcome",
-      ],
+      ["Declaring a replication study outcome according to FORRT", "outcome"],
       ["Declaring a replication study design according to FORRT", "study"],
       ["Declaring an original claim according to FORRT", "claim"],
-      [
-        "Annotating a paper quotation with personal interpretation",
-        "quote",
-      ],
-      [
-        "Expressing a statement about research as an AIDA sentence",
-        "aida",
-      ],
+      ["Annotating a paper quotation with personal interpretation", "quote"],
+      ["Expressing a statement about research as an AIDA sentence", "aida"],
       ["Declare citations with CiTO", "cito"],
-      ["Describing research software at summary level - simple", "research-software"],
+      [
+        "Describing research software at summary level - simple",
+        "research-software",
+      ],
       ["Science Live Research Synthesis", "research-synthesis"],
     ];
     for (const [label, expected] of cases) {
@@ -579,9 +596,11 @@ describe("classifyStepKind", () => {
   });
 
   it("is case-insensitive", () => {
-    expect(classifyStepKind("DECLARING A REPLICATION STUDY OUTCOME according to forrt")).toBe(
-      "outcome",
-    );
+    expect(
+      classifyStepKind(
+        "DECLARING A REPLICATION STUDY OUTCOME according to forrt",
+      ),
+    ).toBe("outcome");
   });
 });
 
@@ -603,7 +622,8 @@ describe("buildConstellation chain assembly", () => {
     "https://w3id.org/sciencelive/np/RAoutcomeAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
   const CITO_OUTCOME =
     "https://w3id.org/sciencelive/np/RAcitoOutAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-  const RS = "https://w3id.org/sciencelive/np/RArsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+  const RS =
+    "https://w3id.org/sciencelive/np/RArsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
   const SYNTHESIS =
     "https://w3id.org/sciencelive/np/RAsynthesisAAAAAAAAAAAAAAAAAAAAAAAAAAA";
   const PAPER_DOI = "https://doi.org/10.1126/science.aax8591";
@@ -615,13 +635,23 @@ describe("buildConstellation chain assembly", () => {
     return `https://w3id.org/np/${label.replace(/[^A-Za-z]/g, "")}T0000000000000000000000`;
   }
   const TPL_APEX = tplOf("Declare citations with CiTO");
-  const TPL_OUTCOME = tplOf("Declaring a replication study outcome according to FORRT");
-  const TPL_STUDY = tplOf("Declaring a replication study design according to FORRT");
+  const TPL_OUTCOME = tplOf(
+    "Declaring a replication study outcome according to FORRT",
+  );
+  const TPL_STUDY = tplOf(
+    "Declaring a replication study design according to FORRT",
+  );
   const TPL_CLAIM = tplOf("Declaring an original claim according to FORRT");
-  const TPL_QUOTE = tplOf("Annotating a paper quotation with personal interpretation");
-  const TPL_AIDA = tplOf("Expressing a statement about research as an AIDA sentence");
+  const TPL_QUOTE = tplOf(
+    "Annotating a paper quotation with personal interpretation",
+  );
+  const TPL_AIDA = tplOf(
+    "Expressing a statement about research as an AIDA sentence",
+  );
   const TPL_CITO = tplOf("Declare citations with CiTO");
-  const TPL_RS = tplOf("Describing research software at summary level - simple");
+  const TPL_RS = tplOf(
+    "Describing research software at summary level - simple",
+  );
   const TPL_SYNTH = tplOf("Science Live Research Synthesis");
 
   function tplTrig(label: string): string {
@@ -779,10 +809,9 @@ sub:pubinfo {
       );
 
     const trigMap: Record<string, string> = {
-      [`https://w3id.org/np/${APEX.split("/").pop()}`]: inject(
-        bodyApexCito(),
-        [SYNTHESIS],
-      ),
+      [`https://w3id.org/np/${APEX.split("/").pop()}`]: inject(bodyApexCito(), [
+        SYNTHESIS,
+      ]),
       [`https://w3id.org/np/${SYNTHESIS.split("/").pop()}`]: inject(
         bodySynthesis(),
         [OUTCOME],
@@ -827,7 +856,7 @@ sub:pubinfo {
 
     return vi.fn(async (url: string | URL | Request) => {
       const u = typeof url === "string" ? url : url.toString();
-      if (u === SPARQL_URL)
+      if (u === NANOPUB_SPARQL_ENDPOINT_FULL)
         return new Response(sparqlBindings([]), {
           status: 200,
           headers: { "content-type": "application/sparql-results+json" },
@@ -919,10 +948,7 @@ sub:pubinfo {
       maxNodes: 80,
       concurrency: 2,
     });
-    expect(c.chains[0].citoRelations.sort()).toEqual([
-      "extends",
-      "qualifies",
-    ]);
+    expect(c.chains[0].citoRelations.sort()).toEqual(["extends", "qualifies"]);
   });
 
   it("carries the Outcome's Zenodo repository on the chain", async () => {
@@ -985,7 +1011,7 @@ sub:pubinfo {
       "fetch",
       vi.fn(async (url: string | URL | Request) => {
         const u = typeof url === "string" ? url : url.toString();
-        if (u === SPARQL_URL)
+        if (u === NANOPUB_SPARQL_ENDPOINT_FULL)
           return new Response(sparqlBindings([]), {
             status: 200,
             headers: { "content-type": "application/sparql-results+json" },
@@ -1011,11 +1037,16 @@ describe("buildConstellation — apex-is-Outcome (entry not a CiTO)", () => {
   // endpoint must still return a usable chain even though apexCito is null.
   const OUTCOME_AS_ENTRY =
     "https://w3id.org/sciencelive/np/RAoutcomeEntry00000000000000000000000000";
-  const STUDY_E = "https://w3id.org/sciencelive/np/RAstudyE000000000000000000000000000000";
-  const CLAIM_E = "https://w3id.org/sciencelive/np/RAclaimE000000000000000000000000000000";
-  const TPL_OUT = "https://w3id.org/np/RAtplOutE0000000000000000000000000000000";
-  const TPL_STU = "https://w3id.org/np/RAtplStuE0000000000000000000000000000000";
-  const TPL_CLA = "https://w3id.org/np/RAtplClaE0000000000000000000000000000000";
+  const STUDY_E =
+    "https://w3id.org/sciencelive/np/RAstudyE000000000000000000000000000000";
+  const CLAIM_E =
+    "https://w3id.org/sciencelive/np/RAclaimE000000000000000000000000000000";
+  const TPL_OUT =
+    "https://w3id.org/np/RAtplOutE0000000000000000000000000000000";
+  const TPL_STU =
+    "https://w3id.org/np/RAtplStuE0000000000000000000000000000000";
+  const TPL_CLA =
+    "https://w3id.org/np/RAtplClaE0000000000000000000000000000000";
 
   it("returns apexCito=null when the entry isn't a CiTO Citation", async () => {
     const trigMap: Record<string, string> = {
@@ -1059,7 +1090,7 @@ sub:pubinfo {
       "fetch",
       vi.fn(async (url: string | URL | Request) => {
         const u = typeof url === "string" ? url : url.toString();
-        if (u === SPARQL_URL)
+        if (u === NANOPUB_SPARQL_ENDPOINT_FULL)
           return new Response(sparqlBindings([]), {
             status: 200,
             headers: { "content-type": "application/sparql-results+json" },
@@ -1116,7 +1147,7 @@ sub:pubinfo {
       "fetch",
       vi.fn(async (url: string | URL | Request) => {
         const u = typeof url === "string" ? url : url.toString();
-        if (u === SPARQL_URL)
+        if (u === NANOPUB_SPARQL_ENDPOINT_FULL)
           return new Response(sparqlBindings([]), {
             status: 200,
             headers: { "content-type": "application/sparql-results+json" },
@@ -1180,7 +1211,7 @@ sub:pubinfo {
       "fetch",
       vi.fn(async (url: string | URL | Request) => {
         const u = typeof url === "string" ? url : url.toString();
-        if (u === SPARQL_URL)
+        if (u === NANOPUB_SPARQL_ENDPOINT_FULL)
           return new Response(sparqlBindings([]), {
             status: 200,
             headers: { "content-type": "application/sparql-results+json" },
@@ -1226,7 +1257,7 @@ describe("buildConstellation — pathological cases", () => {
       "fetch",
       vi.fn(async (url: string | URL | Request) => {
         const u = typeof url === "string" ? url : url.toString();
-        if (u === SPARQL_URL)
+        if (u === NANOPUB_SPARQL_ENDPOINT_FULL)
           return new Response(sparqlBindings([]), {
             status: 200,
             headers: { "content-type": "application/sparql-results+json" },
@@ -1271,7 +1302,7 @@ sub:pubinfo {
       "fetch",
       vi.fn(async (url: string | URL | Request) => {
         const u = typeof url === "string" ? url : url.toString();
-        if (u === SPARQL_URL)
+        if (u === NANOPUB_SPARQL_ENDPOINT_FULL)
           return new Response(sparqlBindings([]), {
             status: 200,
             headers: { "content-type": "application/sparql-results+json" },
@@ -1331,7 +1362,7 @@ describe("buildConstellation — adversarial TriGs", () => {
       "fetch",
       vi.fn(async (url: string | URL | Request) => {
         const u = typeof url === "string" ? url : url.toString();
-        if (u === SPARQL_URL)
+        if (u === NANOPUB_SPARQL_ENDPOINT_FULL)
           return new Response(sparqlBindings([]), {
             status: 200,
             headers: { "content-type": "application/sparql-results+json" },
@@ -1364,7 +1395,7 @@ describe("buildConstellation — adversarial TriGs", () => {
       "fetch",
       vi.fn(async (url: string | URL | Request) => {
         const u = typeof url === "string" ? url : url.toString();
-        if (u === SPARQL_URL)
+        if (u === NANOPUB_SPARQL_ENDPOINT_FULL)
           return new Response(sparqlBindings([]), {
             status: 200,
             headers: { "content-type": "application/sparql-results+json" },
@@ -1412,12 +1443,13 @@ sub:pubinfo {
   it("survives a TriG with extreme nesting of triple-quoted strings", async () => {
     const URI =
       "https://w3id.org/sciencelive/np/RAnestedTriple000000000000000000000000";
-    const TPL = "https://w3id.org/np/RAtplNest000000000000000000000000000000000";
+    const TPL =
+      "https://w3id.org/np/RAtplNest000000000000000000000000000000000";
     vi.stubGlobal(
       "fetch",
       vi.fn(async (url: string | URL | Request) => {
         const u = typeof url === "string" ? url : url.toString();
-        if (u === SPARQL_URL)
+        if (u === NANOPUB_SPARQL_ENDPOINT_FULL)
           return new Response(sparqlBindings([]), {
             status: 200,
             headers: { "content-type": "application/sparql-results+json" },
@@ -1472,7 +1504,7 @@ sub:pubinfo {
       "fetch",
       vi.fn(async (url: string | URL | Request) => {
         const u = typeof url === "string" ? url : url.toString();
-        if (u === SPARQL_URL)
+        if (u === NANOPUB_SPARQL_ENDPOINT_FULL)
           return new Response(sparqlBindings([]), {
             status: 200,
             headers: { "content-type": "application/sparql-results+json" },

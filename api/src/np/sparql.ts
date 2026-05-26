@@ -9,6 +9,22 @@ const MAX_RETRIES = 3;
 const RETRY_BASE_MS = 600;
 
 /**
+ * Error thrown when an upstream service (SPARQL endpoint, TriG resolver)
+ * fails after retries or returns an unexpected response. This allows the
+ * route handler to distinguish upstream failures (502) from programmer
+ * errors (500).
+ */
+export class UpstreamError extends Error {
+  constructor(
+    message: string,
+    public readonly cause?: unknown,
+  ) {
+    super(message);
+    this.name = "UpstreamError";
+  }
+}
+
+/**
  * POST a SPARQL query to the KnowledgePixels endpoint and return rows as
  * `{ var: stringValue }` objects. Retries on transient 5xx / network errors
  * with exponential backoff — KP's nginx returns intermittent 503s under
@@ -44,14 +60,12 @@ export async function executeSparql(
       continue;
     }
     if (res.status >= 500 && res.status < 600) {
-      lastError = new Error(
-        `SPARQL transient ${res.status} ${res.statusText}`,
-      );
+      lastError = new Error(`SPARQL transient ${res.status} ${res.statusText}`);
       continue;
     }
     if (!res.ok) {
       const detail = await res.text().catch(() => res.statusText);
-      throw new Error(
+      throw new UpstreamError(
         `SPARQL query failed: ${res.status} ${res.statusText}: ${detail.slice(0, 200)}`,
       );
     }
@@ -62,9 +76,12 @@ export async function executeSparql(
       return out;
     });
   }
-  throw lastError instanceof Error
-    ? lastError
-    : new Error("SPARQL query failed after retries");
+  throw new UpstreamError(
+    lastError instanceof Error
+      ? lastError.message
+      : "SPARQL query failed after retries",
+    lastError,
+  );
 }
 
 /**
@@ -115,23 +132,23 @@ export async function fetchTrig(
       continue;
     }
     if (!res.ok) {
-      throw new Error(
+      throw new UpstreamError(
         `TriG fetch failed for ${uri}: ${res.status} ${res.statusText}`,
       );
     }
     const body = await res.text();
     const stripped = body.trimStart().slice(0, 32).toLowerCase();
-    if (
-      stripped.startsWith("<!doctype html") ||
-      stripped.startsWith("<html")
-    ) {
-      throw new Error(
+    if (stripped.startsWith("<!doctype html") || stripped.startsWith("<html")) {
+      throw new UpstreamError(
         `Resolver returned HTML for ${uri}; expected TriG. The URI form may not be supported by the W3ID redirect.`,
       );
     }
     return body;
   }
-  throw lastError instanceof Error
-    ? lastError
-    : new Error("TriG fetch failed after retries");
+  throw new UpstreamError(
+    lastError instanceof Error
+      ? lastError.message
+      : "TriG fetch failed after retries",
+    lastError,
+  );
 }
