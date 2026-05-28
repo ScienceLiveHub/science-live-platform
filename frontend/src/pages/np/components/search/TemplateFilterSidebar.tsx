@@ -7,6 +7,14 @@
  *
  * Notifies the parent via `onSelectedTemplatesChange` whenever the selection changes
  * (so the parent can e.g. reset the page).
+ *
+ * NOTE: the parent is notified only from user-interaction handlers (toggle /
+ * clear), NOT from an effect that runs on mount. Calling the parent's
+ * change-handler on mount would (in `GeneralSearch`) trigger a `resetPage()`
+ * which strips `?page=N` from the URL on direct/deep links — breaking
+ * pagination. A `useEffect`/`useRef` "skip initial mount" guard does not
+ * survive React Strict Mode's intentional mount→unmount→remount cycle in dev,
+ * so we deliberately avoid that pattern here.
  */
 
 import { NanopubIcon } from "@/components/nanopub-icon";
@@ -20,7 +28,7 @@ import {
 } from "@/pages/np/create/components/templates/registry-metadata";
 import { TEMPLATE_VIEW_ICONS } from "@/pages/np/view/view-registry";
 import { FilterX } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FilterCheckbox, INITIAL_CHECKED } from "./SearchBar";
 
 // ---------------------------------------------------------------------------
@@ -37,6 +45,21 @@ export interface TemplateFilterSidebarProps {
 }
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Build a Set<FeedTemplateKey> from a `checked` record. */
+function buildSelectedSet(
+  checked: Record<FeedTemplateKey, boolean>,
+): Set<FeedTemplateKey> {
+  const s = new Set<FeedTemplateKey>();
+  for (const [key, val] of Object.entries(checked)) {
+    if (val) s.add(key as FeedTemplateKey);
+  }
+  return s;
+}
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
@@ -48,43 +71,59 @@ export function TemplateFilterSidebar({
   const [checked, setChecked] =
     useState<Record<FeedTemplateKey, boolean>>(INITIAL_CHECKED);
 
-  const selectedTemplates = useMemo(() => {
-    const s = new Set<FeedTemplateKey>();
-    for (const [key, val] of Object.entries(checked)) {
-      if (val) s.add(key as FeedTemplateKey);
-    }
-    return s;
-  }, [checked]);
+  const selectedTemplates = useMemo(() => buildSelectedSet(checked), [checked]);
 
-  // Notify parent whenever selectedTemplates changes
-  useEffect(() => {
-    onSelectedTemplatesChange(selectedTemplates);
-  }, [selectedTemplates, onSelectedTemplatesChange]);
+  /**
+   * Update `checked` and synchronously notify the parent of the new selection.
+   * We do NOT use a useEffect for the notification because that would fire on
+   * mount (including Strict Mode remount), causing the parent to reset
+   * pagination on every page load.
+   */
+  const updateChecked = useCallback(
+    (
+      updater: (
+        prev: Record<FeedTemplateKey, boolean>,
+      ) => Record<FeedTemplateKey, boolean>,
+    ) => {
+      setChecked((prev) => {
+        const next = updater(prev);
+        onSelectedTemplatesChange(buildSelectedSet(next));
+        return next;
+      });
+    },
+    [onSelectedTemplatesChange],
+  );
 
-  const toggleTemplate = useCallback((key: FeedTemplateKey) => {
-    setChecked((prev) => ({ ...prev, [key]: !prev[key] }));
-  }, []);
+  const toggleTemplate = useCallback(
+    (key: FeedTemplateKey) => {
+      updateChecked((prev) => ({ ...prev, [key]: !prev[key] }));
+    },
+    [updateChecked],
+  );
 
   const clearFilters = useCallback(() => {
-    setChecked((prev) => {
+    updateChecked((prev) => {
       const next = { ...prev };
       for (const key of Object.keys(next) as FeedTemplateKey[]) {
         next[key] = false;
       }
       return next;
     });
-  }, []);
+  }, [updateChecked]);
 
-  const toggleGroup = useCallback((keys: FeedTemplateKey[]) => {
-    setChecked((prev) => {
-      const allOn = keys.every((k) => prev[k]);
-      const next = { ...prev };
-      for (const k of keys) {
-        next[k] = !allOn;
-      }
-      return next;
-    });
-  }, []);
+  const toggleGroup = useCallback(
+    (keys: FeedTemplateKey[]) => {
+      updateChecked((prev) => {
+        const allOn = keys.every((k) => prev[k]);
+        const next = { ...prev };
+        for (const k of keys) {
+          next[k] = !allOn;
+        }
+        return next;
+      });
+    },
+    [updateChecked],
+  );
 
   return (
     <aside

@@ -33,15 +33,17 @@ export function usePagination(
   /** Set the current page (updates the URL). */
   const setPage = useCallback(
     (page: number) => {
-      const next = new URLSearchParams(searchParams);
-      if (page <= 1) {
-        next.delete(pageParam);
-      } else {
-        next.set(pageParam, String(page));
-      }
-      setSearchParams(next);
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        if (page <= 1) {
+          next.delete(pageParam);
+        } else {
+          next.set(pageParam, String(page));
+        }
+        return next;
+      });
     },
-    [searchParams, setSearchParams, pageParam],
+    [setSearchParams, pageParam],
   );
 
   /** Reset to page 1 (removes the param from the URL). */
