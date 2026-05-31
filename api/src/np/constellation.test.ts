@@ -17,7 +17,11 @@
  *   - SPARQL 503 retry stays correct under the BFS traversal load.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { buildConstellation, classifyStepKind } from "./constellation";
+import {
+  buildConstellation,
+  classifyStepKind,
+  extractAidaStatementIris,
+} from "./constellation";
 import { NANOPUB_SPARQL_ENDPOINT_FULL } from "./queries";
 
 // Tiny FORRT-shaped graph used as fixture across the tests.
@@ -1546,5 +1550,137 @@ sub:assertion {
     expect(c.nodes[0].plainTextExcerpts).toContain(
       "real human-readable content with spaces",
     );
+  });
+});
+
+// =============================================================================
+// AIDA-statement bridge — Claim -> AIDA -> Quote across a content IRI
+// =============================================================================
+
+describe("extractAidaStatementIris", () => {
+  it("extracts purl.org/aida statement IRIs and ignores nanopub URIs", () => {
+    const trig = `
+sub:assertion {
+  <https://w3id.org/sciencelive/np/RAclaim00000000000000000000000000000000000>
+    <https://w3id.org/sciencelive/o/terms/asAidaStatement>
+    <http://purl.org/aida/Some%20atomic%20finding%20about%20X.> .
+}`;
+    expect(extractAidaStatementIris(trig)).toEqual([
+      "http://purl.org/aida/Some%20atomic%20finding%20about%20X.",
+    ]);
+  });
+
+  it("returns [] when there is no AIDA-statement IRI", () => {
+    expect(
+      extractAidaStatementIris(
+        `<https://w3id.org/sciencelive/np/RAx0000000000000000000000000000000000000000> a <http://example.org/Thing> .`,
+      ),
+    ).toEqual([]);
+  });
+
+  it("de-duplicates repeated IRIs", () => {
+    const iri = "http://purl.org/aida/Repeated%20finding.";
+    const trig = `<a> <p> <${iri}> . <b> <q> <${iri}> .`;
+    expect(extractAidaStatementIris(trig)).toEqual([iri]);
+  });
+});
+
+describe("buildConstellation — AIDA-statement bridge", () => {
+  // The Claim links to its AIDA ONLY via asAidaStatement -> purl.org/aida IRI
+  // (a content IRI, never a nanopub URI). Neither refersToNanopub nor TriG
+  // URI-mining can cross it; only the AIDA-statement SPARQL query bridges it.
+  // From the AIDA, the Quote follows via an ordinary mined nanopub URI.
+  const CLAIM =
+    "https://w3id.org/sciencelive/np/RAclaimAida0000000000000000000000000000000";
+  const AIDA =
+    "https://w3id.org/sciencelive/np/RAaidaNode00000000000000000000000000000000";
+  const QUOTE =
+    "https://w3id.org/sciencelive/np/RAquoteNode0000000000000000000000000000000";
+  const AIDA_IRI = "http://purl.org/aida/Some%20atomic%20finding%20about%20X.";
+  const TPL_CLAIM =
+    "https://w3id.org/np/RAtplClaimB00000000000000000000000000000000000";
+  const TPL_AIDA =
+    "https://w3id.org/np/RAtplAidaB000000000000000000000000000000000000";
+  const TPL_QUOTE =
+    "https://w3id.org/np/RAtplQuoteB00000000000000000000000000000000000";
+
+  const resolver = (uri: string) =>
+    `https://w3id.org/np/${uri.split("/").pop()}`;
+
+  function makeMock() {
+    const trigMap: Record<string, string> = {
+      [resolver(CLAIM)]: trigFor(
+        CLAIM,
+        `<${CLAIM}> <https://w3id.org/sciencelive/o/terms/asAidaStatement> <${AIDA_IRI}> .`,
+        TPL_CLAIM,
+      ),
+      [resolver(AIDA)]: trigFor(
+        AIDA,
+        `<${AIDA_IRI}> a <http://purl.org/petapico/o/hycl#AIDA-Sentence> ;
+           <http://www.w3.org/2004/02/skos/core#related> <${QUOTE}> .`,
+        TPL_AIDA,
+      ),
+      [resolver(QUOTE)]: trigFor(
+        QUOTE,
+        `<${QUOTE}> a <https://example.org/Quote> .`,
+        TPL_QUOTE,
+      ),
+      [TPL_CLAIM]: tplTrigFor("Declaring an original claim according to FORRT"),
+      [TPL_AIDA]: tplTrigFor("Expressing a claim as an AIDA sentence"),
+      [TPL_QUOTE]: tplTrigFor(
+        "Annotating a paper quotation with personal interpretation",
+      ),
+    };
+
+    return vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+      const u = typeof url === "string" ? url : url.toString();
+      if (u === NANOPUB_SPARQL_ENDPOINT_FULL) {
+        const body = init?.body;
+        const queryText =
+          body instanceof URLSearchParams
+            ? (body.get("query") ?? "")
+            : String(body ?? "");
+        // The AIDA-statement bridge query is the only one mentioning the
+        // AIDA-Sentence type; return the AIDA np when its IRI is bound in.
+        if (queryText.includes("hycl:AIDA-Sentence")) {
+          const m = /<(http:\/\/purl\.org\/aida\/[^>]+)>/.exec(queryText);
+          const rows = m && m[1] === AIDA_IRI ? [{ np: AIDA }] : [];
+          return new Response(sparqlBindings(rows), {
+            status: 200,
+            headers: { "content-type": "application/sparql-results+json" },
+          });
+        }
+        // refersToNanopub queries return nothing — the chain is TriG/bridge only.
+        return new Response(sparqlBindings([]), {
+          status: 200,
+          headers: { "content-type": "application/sparql-results+json" },
+        });
+      }
+      const trig = trigMap[u];
+      if (trig)
+        return new Response(trig, {
+          status: 200,
+          headers: { "content-type": "application/trig" },
+        });
+      return new Response("nf", { status: 404 });
+    });
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("bridges asAidaStatement IRI to reach the AIDA nanopub and the Quote beyond it", async () => {
+    vi.stubGlobal("fetch", makeMock());
+    const c = await buildConstellation(CLAIM, {
+      depthLimit: 5,
+      maxNodes: 80,
+      concurrency: 2,
+    });
+    const uris = c.nodes.map((n) => n.uri);
+    expect(uris).toContain(AIDA);
+    // Quote is reachable only THROUGH the bridged AIDA — proves the bridge
+    // re-enables downstream TriG mining past the Claim terminus.
+    expect(uris).toContain(QUOTE);
   });
 });

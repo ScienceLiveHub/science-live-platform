@@ -1,4 +1,5 @@
 import {
+  AIDA_STATEMENT_NANOPUB,
   bindUri,
   NANOPUB_SPARQL_ENDPOINT_FULL,
   REFERENCES_FROM,
@@ -330,6 +331,13 @@ async function processNode(
   for (const u of extractNanopubUris(trig)) {
     if (u !== uri) merged.add(u);
   }
+  // Bridge AIDA-statement IRIs: a FORRT Claim links to its AIDA only via
+  // `asAidaStatement -> http://purl.org/aida/<sentence>` (a content IRI, not a
+  // nanopub URI), so without this the walk stops at the Claim and the upstream
+  // AIDA + Quote never surface. Resolve each such IRI to its AIDA nanopub.
+  for (const u of await discoverAidaStatementNeighbours(trig, signal)) {
+    if (u !== uri) merged.add(u);
+  }
   const neighbours = [...merged];
 
   return { depth, node, neighbours, dois: extractDois(trig) };
@@ -348,6 +356,52 @@ async function discoverNeighbours(
   for (const row of [...incoming, ...outgoing]) {
     const canon = canonicalNanopubUri(row.np ?? "");
     if (canon && canon !== uri) out.add(canon);
+  }
+  return [...out];
+}
+
+/**
+ * AIDA-statement IRIs are content-derived `http://purl.org/aida/<sentence>`
+ * identifiers. A FORRT Claim references its AIDA only as the object of
+ * `sciencelive:asAidaStatement <aida-IRI>`, so the link to the AIDA
+ * *nanopublication* is invisible to both the `npa:refersToNanopub` index and
+ * TriG URI-mining. Pull every such IRI out of a node's TriG body so we can
+ * resolve it to its asserting nanopub.
+ */
+export function extractAidaStatementIris(trig: string): string[] {
+  const out = new Set<string>();
+  for (const m of trig.matchAll(/<(https?:\/\/purl\.org\/aida\/[^>\s]+)>/g)) {
+    out.add(m[1]);
+  }
+  return [...out];
+}
+
+/**
+ * Resolve the AIDA-statement IRIs in a node's TriG to the nanopub(s) that
+ * assert them (the AIDA Sentence nanopubs), bridging the Claim -> AIDA gap.
+ * Best-effort: a SPARQL failure for one IRI must not abort the BFS.
+ */
+async function discoverAidaStatementNeighbours(
+  trig: string,
+  signal?: AbortSignal,
+): Promise<string[]> {
+  const iris = extractAidaStatementIris(trig);
+  if (iris.length === 0) return [];
+  const out = new Set<string>();
+  for (const iri of iris) {
+    let rows: Record<string, string>[] = [];
+    try {
+      rows = await executeSparql(
+        bindUri(AIDA_STATEMENT_NANOPUB, iri, "?_aidaStatementIri"),
+        signal,
+      );
+    } catch {
+      rows = [];
+    }
+    for (const row of rows) {
+      const canon = canonicalNanopubUri(row.np ?? "");
+      if (canon) out.add(canon);
+    }
   }
   return [...out];
 }

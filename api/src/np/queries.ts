@@ -81,8 +81,52 @@ limit 100
 `;
 
 /**
- * Substitute the `?_nanopubUri` placeholder with a bracketed URI literal.
+ * Source: frontend/src/lib/queries/aida-statement-nanopub.rq
+ * Returns the nanopub(s) that assert a given AIDA-statement IRI
+ * (`http://purl.org/aida/<sentence>`), i.e. the AIDA Sentence nanopub.
+ *
+ * A FORRT Claim links to its AIDA only through this shared statement IRI
+ * (`sciencelive:asAidaStatement <aida-IRI>`), never by the AIDA's nanopub URI.
+ * So neither the `npa:refersToNanopub` index nor TriG URI-mining can reach the
+ * AIDA nanopub from the Claim — without this query the constellation walk stops
+ * at the Claim and the upstream AIDA + Quote never surface.
  */
-export function bindUri(query: string, nanopubUri: string): string {
-  return query.replaceAll("?_nanopubUri", `<${nanopubUri}>`);
+export const AIDA_STATEMENT_NANOPUB = `
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix np: <http://www.nanopub.org/nschema#>
+prefix npa: <http://purl.org/nanopub/admin/>
+prefix npx: <http://purl.org/nanopub/x/>
+prefix dct: <http://purl.org/dc/terms/>
+prefix nt: <https://w3id.org/np/o/ntemplate/>
+prefix hycl: <http://purl.org/petapico/o/hycl#>
+
+select ?np ?label ?date ?creator ?template where {
+  graph npa:graph {
+    ?np npa:hasValidSignatureForPublicKeyHash ?pubkey .
+    filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+    optional { ?np rdfs:label ?label . }
+    ?np np:hasAssertion ?assertion ;
+        dct:created ?date ;
+        dct:creator ?creator .
+  }
+  graph ?assertion {
+    ?_aidaStatementIri a hycl:AIDA-Sentence .
+  }
+  optional { graph npa:networkGraph { ?np nt:wasCreatedFromTemplate ?template . } }
+}
+order by desc(?date)
+limit 100
+`;
+
+/**
+ * Substitute a `?_…` placeholder with a bracketed URI literal. Defaults to the
+ * `?_nanopubUri` placeholder used by the reference queries; pass an explicit
+ * placeholder for other queries (e.g. `?_aidaStatementIri`).
+ */
+export function bindUri(
+  query: string,
+  uri: string,
+  placeholder = "?_nanopubUri",
+): string {
+  return query.replaceAll(placeholder, `<${uri}>`);
 }
