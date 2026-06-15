@@ -1,0 +1,62 @@
+# Every independent replication of a paper's claims, with the verdict each reached.
+#
+# Enumerates by the CiTO->DOI method: a replication Outcome makes a verdict-citation
+# (cito:confirms / qualifies / disputes / …) to the original paper's DOI. This is the
+# reliable "all replications of paper X" set — unlike a graph BFS from the paper, which
+# bleeds into adjacent chains and misses disconnected replications.
+#
+# Each matching Outcome is then walked up its FORRT chain for display:
+#   Outcome  -> verdict, confidence, conclusion, deposit repository
+#   isOutcomeOf -> Study  -> label, scope, methodology, deviations
+#   targetsClaim -> Claim -> label, AIDA statement (the atomic claim sentence), FORRT type
+#
+# Outcomes that have been retracted / invalidated / superseded by their own signer are
+# excluded via the admin graph (npx:invalidates covers retract + supersede; the matching
+# public-key hash ensures only the original signer can retract their own work — a third
+# party cannot suppress someone else's outcome). Disapproval is deliberately not a filter.
+#
+# Placeholder: `?_doiUri` - URI: the paper DOI as an IRI, e.g. https://doi.org/10.1126/science.aax8591
+
+prefix np: <http://www.nanopub.org/nschema#>
+prefix nt: <https://w3id.org/np/o/ntemplate/>
+prefix npa: <http://purl.org/nanopub/admin/>
+prefix npx: <http://purl.org/nanopub/x/>
+prefix cito: <http://purl.org/spar/cito/>
+prefix slt: <https://w3id.org/sciencelive/o/terms/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+select distinct ?outcome ?status ?rel ?confidence ?conclusion ?repo
+                ?study ?studyLabel ?scope ?method ?deviation
+                ?claim ?claimLabel ?aida ?ctype where {
+  # A CiTO nanopub whose assertion verdict-cites the paper DOI; its subject is the Outcome.
+  values ?relP { cito:confirms cito:qualifies cito:disputes cito:critiques cito:extends cito:supports cito:refutes }
+  graph ?ca { ?outcome ?relP ?_doiUri . }
+  ?citoNp np:hasAssertion ?ca .
+  graph npa:networkGraph { ?citoNp nt:wasCreatedFromTemplate <https://w3id.org/np/RA43F9EoOuzF0xoNUnCMNyFsfIqlsuWDdPHCnN0wCdCAw> . }
+  bind(strafter(str(?relP), "http://purl.org/spar/cito/") as ?rel)
+
+  # The Outcome must be valid: not invalidated/superseded by a nanopub from the same signer.
+  graph npa:graph {
+    ?outcome npa:hasValidSignatureForPublicKeyHash ?pubkey ; np:hasAssertion ?oa .
+    filter not exists { ?inv npx:invalidates ?outcome ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+  }
+  graph ?oa {
+    ?oc slt:hasValidationStatus ?s ; slt:isOutcomeOf ?study .
+    optional { ?oc slt:hasConfidenceLevel ?cf . }
+    optional { ?oc slt:hasConclusionDescription ?conclusion . }
+    optional { ?oc slt:hasOutcomeRepository ?repo . }
+  }
+  bind(strafter(str(?s), "/terms/") as ?status)
+  bind(strafter(str(?cf), "/terms/") as ?confidence)
+
+  optional { graph ?sg { ?study rdfs:label ?studyLabel . } }
+  optional { graph ?sg2 { ?study slt:hasScopeDescription ?scope . } }
+  optional { graph ?sg3 { ?study slt:hasMethodologyDescription ?method . } }
+  optional { graph ?sg4 { ?study slt:hasDeviationDescription ?deviation . } }
+  optional {
+    graph ?sg5 { ?study slt:targetsClaim ?claim . }
+    graph ?clg { ?claim rdfs:label ?claimLabel . }
+    optional { graph ?clg { ?claim slt:asAidaStatement ?aida . } }
+    optional { graph ?clg { ?claim a ?ctype . filter(contains(str(?ctype), "-FORRT-Claim")) } }
+  }
+}
