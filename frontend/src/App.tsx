@@ -9,6 +9,7 @@ import EmailVerified from "./pages/EmailVerified";
 import { Home } from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import CreateNanopub from "./pages/np/create/CreateNanopub";
+import ReplicationSummary from "./pages/np/ReplicationSummary";
 import ViewNanopub from "./pages/np/ViewNanopub";
 import Policies from "./pages/Policies";
 import AccountSettings from "./pages/settings/AccountSettings";
@@ -57,6 +58,7 @@ function App() {
           {/* Main App Pages */}
           <Route path="/" element={<Home />} />
           <Route path="/np/" element={<ViewNanopub />} />
+          <Route path="/np/replications" element={<ReplicationSummary />} />
           <Route path="/np/create" element={<CreateNanopub />} />
           <Route path="/np/create/:uri" element={<CreateNanopub />} />
           <Route path="/email-verified" element={<EmailVerified />} />
