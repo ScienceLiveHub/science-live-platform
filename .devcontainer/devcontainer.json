@@ -34,6 +34,11 @@
     "ghcr.io/devcontainers-extra/features/uv:1": {},
     "ghcr.io/postfinance/devcontainer-features/browsers:1.0.0": {
       "firefoxVersion": "latest"
+    },
+    "ghcr.io/postfinance/devcontainer-features/playwright-deps:1.0.0": {
+      "installChromiumDeps": true,
+      "installFirefoxDeps": false,
+      "installWebkitDeps": false
     }
   },
   "postCreateCommand": "bash scripts/devcontainer-setup.sh",

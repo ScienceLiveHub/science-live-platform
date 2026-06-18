@@ -15,6 +15,8 @@
     "dev:api-bun": "npm run dev-bun --workspace=api",
     "build": "npm run build --workspace=frontend",
     "test": "npm run test --workspaces",
+    "test:e2e": "vitest run --config e2e/vitest.config.ts",
+    "test:e2e:watch": "vitest --config e2e/vitest.config.ts",
     "check:frontend": "npm --workspace=frontend run check",
     "check:api": "npm --workspace=api run check",
     "deploy:frontend": "npm --workspace=frontend run deploy",
@@ -27,8 +29,10 @@
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/node": "^25.6.0",
     "eslint-plugin-jsonc": "^3.1.2",
+    "playwright": "^1.61.0",
     "prettier-plugin-organize-imports": "^4.3.0",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.4"
   },
   "dependencies": {
     "dotenv": "^17.4.2"
