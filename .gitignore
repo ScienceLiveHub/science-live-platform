@@ -1,6 +1,9 @@
 # Personal notes
 step-by-step.md
 
+# Script output
+scripts/output/
+
 # Dependencies
 node_modules/
 .pnp
@@ -65,3 +68,11 @@ api/package-lock.json
 
 # Artifacts generated from running nektos act to simulate github actions (npm run pr-check)
 .artifacts
+
+# Python env
+.venv
+
+# e2e test artifacts
+e2e/**/screenshots
+e2e/**/*_log.txt
+e2e/**/plan.md
