@@ -9,7 +9,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-    description: Check the code and build for all workspaces
+    inputs:
+      e2e_base_url:
+        description: "External base URL for e2e tests (skips local stack if set)"
+        required: false
+        default: ""
 
 env:
   NODE_VERSION: "24"
@@ -197,3 +201,228 @@ jobs:
       - name: Build
         working-directory: ./zotero
         run: npm run build
+
+  # E2E tests drive a real browser (Playwright) against the app.
+  # By default the job spins up a complete local stack (Postgres + API + Frontend)
+  # in CI and tests against http://localhost:3000.  If the e2e_base_url workflow
+  # input is set, the local stack is skipped and tests run against that URL instead.
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [build-nanopub-js, install]
+    if: >-
+      !cancelled() &&
+      (needs.build-nanopub-js.result == 'success' || needs.build-nanopub-js.result == 'skipped') &&
+      needs.install.result == 'success'
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: sciencelive
+          POSTGRES_PASSWORD: sciencelive
+          POSTGRES_DB: sciencelive
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      # Only needed when relying on local nanopub-js, not npm package
+      - name: Download nanopub-js artifact
+        if: ${{ vars.CUSTOM_NANOPUB_JS == 'true' }}
+        uses: actions/download-artifact@v8
+        with:
+          name: nanopub-js
+          path: ../nanopub-js
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore node_modules
+        uses: actions/cache@v5
+        with:
+          path: |
+            node_modules
+            frontend/node_modules
+            api/node_modules
+            zotero/node_modules
+            homepage/node_modules
+          key: nm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps firefox
+
+      # ── Local stack setup (skipped when e2e_base_url points to an external instance) ──
+
+      - name: Configure API for local dev
+        if: ${{ github.event.inputs.e2e_base_url == '' }}
+        working-directory: ./api
+        run: |
+          ENCRYPTION_KEY=$(openssl rand -base64 32)
+          # .env is read by drizzle-kit (via dotenv) for migrations
+          cat > .env << EOF
+          DATABASE_URL=postgresql://sciencelive:sciencelive@localhost:5432/sciencelive
+          EOF
+          # .dev.vars is read by wrangler dev for secret bindings.
+          # DATABASE_URL is set here so createDb() picks it up via env.DATABASE_URL
+          # without needing a Hyperdrive binding.
+          cat > .dev.vars << EOF
+          BETTER_AUTH_SECRET=ci-test-secret-do-not-use-in-production
+          ENCRYPTION_KEY=${ENCRYPTION_KEY}
+          DATABASE_URL=postgresql://sciencelive:sciencelive@localhost:5432/sciencelive
+          ORCID_CLIENT_ID=ci-dummy
+          ORCID_CLIENT_SECRET=ci-dummy
+          RESEND_API_KEY=ci-dummy
+          EOF
+          # Minimal wrangler.jsonc without Hyperdrive — DATABASE_URL is supplied
+          # via .dev.vars instead, and createDb() checks env.DATABASE_URL first.
+          cat > wrangler.jsonc << 'WRANGLER'
+          {
+            "$schema": "../node_modules/wrangler/config-schema.json",
+            "name": "api",
+            "main": "src/index.ts",
+            "compatibility_date": "2025-11-01",
+            "compatibility_flags": ["nodejs_compat"],
+            "observability": { "enabled": true },
+            "upload_source_maps": true,
+            "vars": {
+              "FRONTEND_URL": "http://localhost:3000",
+              "ALLOWED_ORIGINS": "",
+              "API_URL": "http://localhost:3001",
+              "ORCID_CLIENT_ID": "ci-dummy"
+            },
+            "dev": {
+              "port": 3001,
+              "local_protocol": "http"
+            }
+          }
+          WRANGLER
+
+      - name: Run database migrations
+        if: ${{ github.event.inputs.e2e_base_url == '' }}
+        working-directory: ./api
+        env:
+          DATABASE_URL: postgresql://sciencelive:sciencelive@localhost:5432/sciencelive
+        run: npx drizzle-kit migrate
+
+      - name: Configure Frontend for local dev
+        if: ${{ github.event.inputs.e2e_base_url == '' }}
+        working-directory: ./frontend
+        run: |
+          cp wrangler.jsonc.example wrangler.jsonc
+          # Vite reads VITE_API_URL at dev-server start time
+          cat > .env.local << EOF
+          VITE_API_URL=http://localhost:3001
+          PORT=3000
+          EOF
+
+      # Start both servers and run the e2e tests in a single step so that
+      # background processes survive until the tests finish.  (In `act` each
+      # step is a separate docker exec, so a backgrounded process launched in
+      # a previous step would be killed before this step starts.)
+      - name: Start local stack and run E2E tests
+        env:
+          E2E_BASE_URL: ${{ github.event.inputs.e2e_base_url || 'http://localhost:3000' }}
+        run: |
+          # ── External target mode: skip local stack entirely ──
+          if [ -n "$E2E_BASE_URL" ] && [ "$E2E_BASE_URL" != "http://localhost:3000" ]; then
+            echo "E2E_BASE_URL is set to $E2E_BASE_URL — skipping local stack"
+            npm run test:e2e
+            exit $?
+          fi
+
+          # ── Local stack mode ──
+          set -o pipefail
+
+          echo "Starting API server (wrangler dev)..."
+          cd api
+          npx wrangler dev --port 3001 > /tmp/api.log 2>&1 &
+          API_PID=$!
+          cd ..
+
+          # Helper: print server logs for debugging
+          print_logs() {
+            echo "=== API server log ==="
+            cat /tmp/api.log 2>/dev/null || true
+            echo ""
+            echo "=== Frontend server log ==="
+            cat /tmp/frontend.log 2>/dev/null || true
+          }
+
+          # Wait for API
+          echo "Waiting for API (http://localhost:3001/health)..."
+          API_READY=false
+          for i in $(seq 1 60); do
+            if curl -sf --connect-timeout 5 -m 15 http://localhost:3001/health > /dev/null 2>&1; then
+              echo "API is ready ✅"
+              API_READY=true
+              break
+            fi
+            # Check if the process is still alive
+            if ! kill -0 $API_PID 2>/dev/null; then
+              echo "❌ API process exited unexpectedly"
+              print_logs
+              exit 1
+            fi
+            echo "  ... still waiting ($i/60)"
+            sleep 2
+          done
+          if [ "$API_READY" = false ]; then
+            echo "❌ API did not become ready in time"
+            print_logs
+            exit 1
+          fi
+
+          echo "Starting Frontend dev server (vite)..."
+          cd frontend
+          npx vite --port 3000 > /tmp/frontend.log 2>&1 &
+          FRONTEND_PID=$!
+          sleep 2
+          if curl -sf --connect-timeout 5 -m 15 http://localhost:3000 > /dev/null 2>&1; then
+            echo "Frontend started..."
+          else
+            # Account for flakey vite start - kill and restart it
+            kill -9 $FRONTEND_PID
+            npx vite --port 3000 > /tmp/frontend.log 2>&1 &
+            FRONTEND_PID=$!
+            sleep 2
+            echo "Frontend restarted..."
+          fi
+          cd ..
+
+          # Check for Frontend AGAIN to be sure
+          echo "Waiting for Frontend (http://localhost:3000)..."
+          if curl -sf --connect-timeout 5 -m 15 http://localhost:3000 > /dev/null 2>&1; then
+            echo "Frontend is ready ✅"
+          else
+            echo "❌ Frontend did not become ready in time"
+            print_logs
+            exit 1
+          fi
+
+          # Run the e2e tests
+          echo "Running E2E tests against $E2E_BASE_URL"
+          npm run test:e2e
+          TEST_EXIT=$?
+
+          # Clean up background processes
+          kill $API_PID $FRONTEND_PID 2>/dev/null || true
+
+          exit $TEST_EXIT
+
+      - name: Upload e2e artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-artifacts
+          path: |
+            e2e/**/screenshots/
+            e2e/**/*_log.txt
+          retention-days: 14

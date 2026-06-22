@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { chromium, firefox, webkit, type Browser, type Page } from "playwright";
 
 /** Default deployment under test. Override with the E2E_BASE_URL env var. */
-export const DEFAULT_BASE_URL = "https://platform.sciencelive4all.org";
+export const DEFAULT_BASE_URL = "http://localhost:3000";
 
 /** Base URL under test. Set E2E_BASE_URL to target a different instance. */
 export function getBaseUrl(): string {
@@ -57,8 +57,10 @@ export function createArtifacts(testName: string, dir: string): Artifacts {
  * "chromium" or "webkit" to use a different engine.
  */
 export async function launchBrowser(): Promise<Browser> {
-  const headed = process.env.E2E_HEADED === "1" || process.env.E2E_HEADED === "true";
+  const headed =
+    process.env.E2E_HEADED === "1" || process.env.E2E_HEADED === "true";
   const name = (process.env.E2E_BROWSER ?? "firefox").toLowerCase();
-  const engine = name === "chromium" ? chromium : name === "webkit" ? webkit : firefox;
+  const engine =
+    name === "chromium" ? chromium : name === "webkit" ? webkit : firefox;
   return engine.launch({ headless: !headed });
 }
