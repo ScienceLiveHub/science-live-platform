@@ -62,6 +62,11 @@
       "version": "1.0.0",
       "resolved": "ghcr.io/postfinance/devcontainer-features/browsers@sha256:db688d3f9c0ceec4927719db9a1c2775a5e095a76cdcacc792477e8dc89b73ab",
       "integrity": "sha256:db688d3f9c0ceec4927719db9a1c2775a5e095a76cdcacc792477e8dc89b73ab"
+    },
+    "ghcr.io/postfinance/devcontainer-features/playwright-deps:1.0.0": {
+      "version": "1.0.0",
+      "resolved": "ghcr.io/postfinance/devcontainer-features/playwright-deps@sha256:1fbd235678d55637ddfb93c800249e48ae72af36cb382297ff3a22bab8945acb",
+      "integrity": "sha256:1fbd235678d55637ddfb93c800249e48ae72af36cb382297ff3a22bab8945acb"
     }
   }
 }
