@@ -112,7 +112,13 @@ export default function FORRTClaim({
   // where prefilledData is empty.
   const [aidaSelection, setAidaSelection] = useState<ResultItem | null>(
     typeof prefilledData.aida === "string"
-      ? { uri: prefilledData.aida, label: prefilledData.aida }
+      ? {
+          uri: prefilledData.aida,
+          label:
+            typeof prefilledData.aidaLabel === "string"
+              ? prefilledData.aidaLabel
+              : prefilledData.aida,
+        }
       : null,
   );
 

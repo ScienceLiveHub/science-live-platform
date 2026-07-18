@@ -48,7 +48,13 @@ export default function FORRTReplication({
   // where prefilledData is empty.
   const [claimSelection, setClaimSelection] = useState<ResultItem | null>(
     typeof prefilledData.claim === "string"
-      ? { uri: prefilledData.claim, label: prefilledData.claim }
+      ? {
+          uri: prefilledData.claim,
+          label:
+            typeof prefilledData.claimLabel === "string"
+              ? prefilledData.claimLabel
+              : prefilledData.claim,
+        }
       : null,
   );
 

@@ -111,7 +111,13 @@ export default function FORRTReplicationOutcome({
   // where prefilledData is empty.
   const [studySelection, setStudySelection] = useState<ResultItem | null>(
     typeof prefilledData.study === "string"
-      ? { uri: prefilledData.study, label: prefilledData.study }
+      ? {
+          uri: prefilledData.study,
+          label:
+            typeof prefilledData.studyLabel === "string"
+              ? prefilledData.studyLabel
+              : prefilledData.study,
+        }
       : null,
   );
 

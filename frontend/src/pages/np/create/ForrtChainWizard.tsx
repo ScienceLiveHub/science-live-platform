@@ -61,6 +61,14 @@ const STEP_TITLE: Record<string, string> = {
   "08_synthesis": "Research synthesis",
 };
 
+// Which prefill field holds each step's human-readable text, used to label a
+// carried-in reference in the next step's search box (the sentence / the label).
+const LABEL_SOURCE: Record<string, string> = {
+  "02_aida": "aida",
+  "03_claim": "label",
+  "04_study": "label",
+};
+
 /**
  * A browser fetch of raw.githubusercontent.com is often blocked by CORS; the
  * jsDelivr GitHub mirror serves the same file with permissive CORS. Other URLs
@@ -130,15 +138,29 @@ export default function ForrtChainWizard() {
   const step = draft?.steps[stepIndex];
   const carryEdge = draft?.carry_forward.find((e) => e.into === step?.step);
   const carriedUri = carryEdge ? publishedUris[carryEdge.from] : undefined;
+  // The human-readable text of each step, so a carried-in back-reference shows
+  // it (the sentence / label) in the search box rather than the raw URI.
+  const carriedLabel = useMemo(() => {
+    if (!carryEdge) return undefined;
+    const from = draft?.steps.find((s) => s.step === carryEdge.from);
+    const key = LABEL_SOURCE[carryEdge.from];
+    const v = from && key ? from.prefill[key] : undefined;
+    return typeof v === "string" ? v : undefined;
+  }, [draft, carryEdge]);
 
   // Pre-fill = the repo-derived values, plus the previous step's published URI
   // in this step's back-reference field. Values may be strings, arrays (repeatable
   // groups like the CiTO `st02`), or objects. A `YYYY-MM-DD` string is coerced to
-  // a Date, since the date fields' pickers and onSubmit expect a Date.
+  // a Date, since the date fields' pickers and onSubmit expect a Date. The carried
+  // URI's field also gets a `<field>Label` companion so the search box displays the
+  // referenced nanopub's text, not its URI (the template components read it).
   const prefilledData = useMemo(() => {
     if (!step) return undefined;
     const merged: Record<string, unknown> = { ...step.prefill };
-    if (carryEdge && carriedUri) merged[carryEdge.field] = carriedUri;
+    if (carryEdge && carriedUri) {
+      merged[carryEdge.field] = carriedUri;
+      if (carriedLabel) merged[`${carryEdge.field}Label`] = carriedLabel;
+    }
     const data: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(merged)) {
       data[k] =
@@ -147,7 +169,7 @@ export default function ForrtChainWizard() {
           : v;
     }
     return data;
-  }, [step, carryEdge, carriedUri]);
+  }, [step, carryEdge, carriedUri, carriedLabel]);
 
   const identityPending =
     isPending || (!isPending && !!session?.user && !signingProfile);
