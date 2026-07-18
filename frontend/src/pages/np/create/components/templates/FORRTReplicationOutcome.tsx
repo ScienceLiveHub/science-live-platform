@@ -106,7 +106,14 @@ export default function FORRTReplicationOutcome({
   submit,
   prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
-  const [studySelection, setStudySelection] = useState<ResultItem | null>(null);
+  // Seed the combobox display from a prefilled value (e.g. the chain wizard
+  // carries the published Study URI into this field). No-op for normal creation,
+  // where prefilledData is empty.
+  const [studySelection, setStudySelection] = useState<ResultItem | null>(
+    typeof prefilledData.study === "string"
+      ? { uri: prefilledData.study, label: prefilledData.study }
+      : null,
+  );
 
   const schema = z.object({
     outcome: z

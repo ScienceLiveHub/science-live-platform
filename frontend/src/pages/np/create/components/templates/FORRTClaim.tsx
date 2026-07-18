@@ -107,7 +107,14 @@ export default function FORRTClaim({
   submit,
   prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
-  const [aidaSelection, setAidaSelection] = useState<ResultItem | null>(null);
+  // Seed the combobox display from a prefilled value (e.g. the chain wizard
+  // carries the published AIDA URI into this field). No-op for normal creation,
+  // where prefilledData is empty.
+  const [aidaSelection, setAidaSelection] = useState<ResultItem | null>(
+    typeof prefilledData.aida === "string"
+      ? { uri: prefilledData.aida, label: prefilledData.aida }
+      : null,
+  );
 
   const schema = z.object({
     claim: z

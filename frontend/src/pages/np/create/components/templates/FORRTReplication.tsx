@@ -43,7 +43,14 @@ export default function FORRTReplication({
   submit,
   prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
-  const [claimSelection, setClaimSelection] = useState<ResultItem | null>(null);
+  // Seed the combobox display from a prefilled value (e.g. the chain wizard
+  // carries the published Claim URI into this field). No-op for normal creation,
+  // where prefilledData is empty.
+  const [claimSelection, setClaimSelection] = useState<ResultItem | null>(
+    typeof prefilledData.claim === "string"
+      ? { uri: prefilledData.claim, label: prefilledData.claim }
+      : null,
+  );
 
   const schema = z.object({
     study: z
