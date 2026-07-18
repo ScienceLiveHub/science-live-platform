@@ -108,7 +108,9 @@ export default function ForrtChainWizard() {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    ky.get(corsSafeUrl(draftUrl))
+    // no-store: a chain-draft.json is edited in place (committed), so never serve
+    // a cached copy — otherwise a re-generated draft loads stale.
+    ky.get(corsSafeUrl(draftUrl), { cache: "no-store" })
       .json<ChainDraft>()
       .then((d) => {
         if (cancelled) return;
@@ -121,11 +123,16 @@ export default function ForrtChainWizard() {
         const firstUnpublished = d.steps.findIndex((s) => !published[s.step]);
         setStepIndex(firstUnpublished === -1 ? 0 : firstUnpublished);
       })
-      .catch(() => {
-        if (!cancelled)
-          setError(
-            "Could not load a chain draft from that URL. It should be a public chain-draft.json (a raw GitHub or jsDelivr URL).",
-          );
+      .catch(async (e) => {
+        if (cancelled) return;
+        // Surface the real reason: an HTTP status (e.g. jsDelivr 404 for a
+        // not-yet-cached commit), a CORS/network failure, or a JSON parse error.
+        let detail = e?.message ?? String(e);
+        const res = e?.response as Response | undefined;
+        if (res) detail = `HTTP ${res.status} ${res.statusText}`.trim();
+        setError(
+          `Could not load a chain draft from that URL (${detail}). It should be a public chain-draft.json — a jsDelivr or raw GitHub URL.`,
+        );
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
