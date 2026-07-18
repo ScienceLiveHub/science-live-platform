@@ -27,7 +27,7 @@ interface ChainDraftStep {
   step: string;
   template_key: string;
   template_uri: string;
-  prefill: Record<string, string>;
+  prefill: Record<string, unknown>;
   provenance?: Record<string, string>;
   manual?: string[];
   published_uri?: string | null;
@@ -132,11 +132,20 @@ export default function ForrtChainWizard() {
   const carriedUri = carryEdge ? publishedUris[carryEdge.from] : undefined;
 
   // Pre-fill = the repo-derived values, plus the previous step's published URI
-  // in this step's back-reference field.
+  // in this step's back-reference field. Values may be strings, arrays (repeatable
+  // groups like the CiTO `st02`), or objects. A `YYYY-MM-DD` string is coerced to
+  // a Date, since the date fields' pickers and onSubmit expect a Date.
   const prefilledData = useMemo(() => {
     if (!step) return undefined;
-    const data: Record<string, string> = { ...step.prefill };
-    if (carryEdge && carriedUri) data[carryEdge.field] = carriedUri;
+    const merged: Record<string, unknown> = { ...step.prefill };
+    if (carryEdge && carriedUri) merged[carryEdge.field] = carriedUri;
+    const data: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(merged)) {
+      data[k] =
+        typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v)
+          ? new Date(`${v}T00:00:00`)
+          : v;
+    }
     return data;
   }, [step, carryEdge, carriedUri]);
 
@@ -251,9 +260,26 @@ export default function ForrtChainWizard() {
                 </span>
               ))}
             {step.manual && step.manual.length > 0 && (
-              <span className="text-muted-foreground">
-                · you choose: {step.manual.join(", ")}
-              </span>
+              <>
+                {(() => {
+                  const confirm = step.manual.filter((m) => m in step.prefill);
+                  const choose = step.manual.filter((m) => !(m in step.prefill));
+                  return (
+                    <>
+                      {confirm.length > 0 && (
+                        <span className="text-muted-foreground">
+                          · confirm: {confirm.join(", ")}
+                        </span>
+                      )}
+                      {choose.length > 0 && (
+                        <span className="text-muted-foreground">
+                          · you choose: {choose.join(", ")}
+                        </span>
+                      )}
+                    </>
+                  );
+                })()}
+              </>
             )}
           </div>
 
