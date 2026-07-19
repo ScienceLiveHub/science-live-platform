@@ -112,6 +112,13 @@ export interface NanopubEditorProps {
   showProfile?: boolean;
 
   /**
+   * If true, hide the "Advanced Mode" toggle. Guided flows (e.g. the FORRT
+   * chain wizard) pre-fill the curated forms by their field names, which the
+   * generic advanced form does not share, so advanced mode must stay off there.
+   */
+  hideAdvancedToggle?: boolean;
+
+  /**
    * A function to call if an ORCID is not found, to help the user correct it.
    */
   orcidLinkAction?: (
@@ -215,6 +222,7 @@ export default function NanopubEditor({
   orcidLinkAction,
   embedded = false,
   showProfile = true,
+  hideAdvancedToggle = false,
 }: NanopubEditorProps) {
   // Local state for the "custom URI" input (when not using predefined template)
   const [inputUri, setInputUri] = useState<string | null>(null);
@@ -412,7 +420,7 @@ export default function NanopubEditor({
             <FilePlus className="mr-4" />
             CREATE NANOPUBLICATION
           </h1>
-          {templateUri && TemplateComp && (
+          {templateUri && TemplateComp && !hideAdvancedToggle && (
             <div className="flex items-center gap-2">
               <Label htmlFor="advanced-mode" className="text-sm font-medium">
                 Advanced Mode

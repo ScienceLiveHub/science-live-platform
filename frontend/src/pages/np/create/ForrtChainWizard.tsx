@@ -322,6 +322,7 @@ export default function ForrtChainWizard() {
             prefilledData={prefilledData}
             onPublished={(r) => handlePublished(r.uri)}
             embedded={false}
+            hideAdvancedToggle
           />
 
           {allPublished && (
