@@ -37,6 +37,12 @@ interface CarryForward {
   from: string;
   into: string;
   field: string;
+  // How to inject the carried URI into `field`. Omitted = a scalar string (the
+  // linear steps' combobox back-refs, and 07's `project`). "uriList" = append to
+  // an array of strings (07 `researchOutputs`). "uriObjectList" = append
+  // `{[itemKey]: uri}` to an array of objects (08 `sources`).
+  mode?: "uriList" | "uriObjectList";
+  itemKey?: string;
 }
 
 interface ChainDraft {
@@ -143,17 +149,21 @@ export default function ForrtChainWizard() {
   }, [draftUrl]);
 
   const step = draft?.steps[stepIndex];
-  const carryEdge = draft?.carry_forward.find((e) => e.into === step?.step);
-  const carriedUri = carryEdge ? publishedUris[carryEdge.from] : undefined;
-  // The human-readable text of each step, so a carried-in back-reference shows
-  // it (the sentence / label) in the search box rather than the raw URI.
-  const carriedLabel = useMemo(() => {
-    if (!carryEdge) return undefined;
-    const from = draft?.steps.find((s) => s.step === carryEdge.from);
-    const key = LABEL_SOURCE[carryEdge.from];
+  // Every carry edge feeding THIS step. The linear steps (02-06) have exactly
+  // one; the optional side-branches link back to several earlier steps
+  // (07 software <- Claim + Outcome, 08 synthesis <- Outcome).
+  const carryEdges = useMemo(
+    () => draft?.carry_forward.filter((e) => e.into === step?.step) ?? [],
+    [draft, step],
+  );
+  // Human-readable text of a referenced step, so a scalar back-reference shows
+  // the sentence / label in its search box rather than the raw URI.
+  const labelFor = (fromStep: string): string | undefined => {
+    const from = draft?.steps.find((s) => s.step === fromStep);
+    const key = LABEL_SOURCE[fromStep];
     const v = from && key ? from.prefill[key] : undefined;
     return typeof v === "string" ? v : undefined;
-  }, [draft, carryEdge]);
+  };
 
   // Pre-fill = the repo-derived values, plus the previous step's published URI
   // in this step's back-reference field. Values may be strings, arrays (repeatable
@@ -164,9 +174,21 @@ export default function ForrtChainWizard() {
   const prefilledData = useMemo(() => {
     if (!step) return undefined;
     const merged: Record<string, unknown> = { ...step.prefill };
-    if (carryEdge && carriedUri) {
-      merged[carryEdge.field] = carriedUri;
-      if (carriedLabel) merged[`${carryEdge.field}Label`] = carriedLabel;
+    for (const edge of carryEdges) {
+      const uri = publishedUris[edge.from];
+      if (!uri) continue;
+      const cur = Array.isArray(merged[edge.field])
+        ? (merged[edge.field] as unknown[])
+        : [];
+      if (edge.mode === "uriList") {
+        merged[edge.field] = [...cur, uri];
+      } else if (edge.mode === "uriObjectList") {
+        merged[edge.field] = [...cur, { [edge.itemKey ?? "source"]: uri }];
+      } else {
+        merged[edge.field] = uri;
+        const label = labelFor(edge.from);
+        if (label) merged[`${edge.field}Label`] = label;
+      }
     }
     const data: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(merged)) {
@@ -176,7 +198,9 @@ export default function ForrtChainWizard() {
           : v;
     }
     return data;
-  }, [step, carryEdge, carriedUri, carriedLabel]);
+    // labelFor is a pure lookup over draft, already covered by carryEdges.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, carryEdges, publishedUris]);
 
   const identityPending =
     isPending || (!isPending && !!session?.user && !signingProfile);
@@ -277,17 +301,24 @@ export default function ForrtChainWizard() {
             <Badge variant="secondary">
               Step {stepIndex + 1} of {draft.steps.length}
             </Badge>
-            {carryEdge &&
-              (carriedUri ? (
-                <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-500">
+            {carryEdges.map((edge) =>
+              publishedUris[edge.from] ? (
+                <span
+                  key={edge.from}
+                  className="inline-flex items-center gap-1 text-green-600 dark:text-green-500"
+                >
                   <Link2 className="h-3.5 w-3.5" />
-                  linked to step {stepNumber(carryEdge.from)}
+                  linked to step {stepNumber(edge.from)}
                 </span>
               ) : (
-                <span className="text-amber-600 dark:text-amber-500">
-                  publish step {stepNumber(carryEdge.from)} first to link this one
+                <span
+                  key={edge.from}
+                  className="text-amber-600 dark:text-amber-500"
+                >
+                  publish step {stepNumber(edge.from)} first to link this one
                 </span>
-              ))}
+              ),
+            )}
             {step.manual && step.manual.length > 0 && (
               <>
                 {(() => {
@@ -312,10 +343,12 @@ export default function ForrtChainWizard() {
             )}
           </div>
 
-          {/* Re-key on the carried URI so the editor remounts with fresh prefill
-              once the previous step publishes. */}
+          {/* Re-key on the carried URIs so the editor remounts with fresh prefill
+              once a referenced step publishes. */}
           <NanopubEditor
-            key={`${step.step}:${carriedUri ?? ""}`}
+            key={`${step.step}:${carryEdges
+              .map((e) => publishedUris[e.from] ?? "")
+              .join("|")}`}
             identity={signingProfile}
             identityPending={identityPending}
             templateUri={step.template_uri}
