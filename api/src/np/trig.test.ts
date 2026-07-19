@@ -1378,3 +1378,130 @@ sub:assertion {
     );
   });
 });
+
+
+// ---------------------------------------------------------------------------
+// Real published nanopubs.
+//
+// Copied VERBATIM from what the resolver serves for
+//   https://w3id.org/np/RABINnMx1JSQG_DJlcsbCwExgkh8rtU7aBvVIHIRaCaB4  (PICO)
+//   https://w3id.org/np/RAEDNajh8Hz_fZbBRgOACKDxWrQYFfDYRks8-xxMEfKt4  (PCC)
+// trimmed to the @prefix header and the assertion graph.
+//
+// DO NOT TIDY THESE. Two details that look like noise are the whole point:
+//   - the root subject is a PREFIXED name (`sub:<slug>`), not an absolute <URI>
+//   - descriptions are `dc:description`, with `dc:` bound to purl.org/dc/terms
+// An earlier implementation passed every hand-written test in this file and
+// extracted NOTHING from real data because it assumed the other spelling.
+// Normalising `dc:` to `dct:` or expanding `sub:` here would silently retire
+// the only test that catches that class of bug.
+// ---------------------------------------------------------------------------
+
+const REAL_PICO_TRIG = `
+@prefix this: <https://w3id.org/sciencelive/np/RABINnMx1JSQG_DJlcsbCwExgkh8rtU7aBvVIHIRaCaB4> .
+@prefix sub: <https://w3id.org/sciencelive/np/RABINnMx1JSQG_DJlcsbCwExgkh8rtU7aBvVIHIRaCaB4/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+sub:assertion {
+  <https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w/comparatorGroup>
+    dc:description "The same detection + overlap-tracking algorithm run locally outside Galaxy (scikit-image + scipy), used to confirm the Galaxy result and to provide a hermetic, credential-free reproduction." .
+  
+  <https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w/interventionGroup>
+    dc:description "The CellProfiler object-tracking pipeline (IdentifyPrimaryObjects + MeasureObjectSizeShape + TrackObjects) segments and tracks dividing cell nuclei in fluorescence time-lapse microscopy, applied to the IVT fields through a Galaxy workflow. It is a cross-discipline transfer of a bioimaging tracker to Earth-system science. Atmospheric rivers are identified using the established Guan & Waliser (2015) criteria (IVT threshold, length, length/width ratio, poleward flux)." .
+  
+  <https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w/outcomeGroup> dc:description
+      "Recovery of coherent atmospheric-river objects per timestep — each with a persistent identity, centroid trajectory, length, IVT intensity and poleward flux — and whether the tracker follows them across time as they intensify, drift, merge and split." .
+  
+  <https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w/population> dc:description
+      "Gridded fields of integrated water-vapour transport (IVT) from the ERA5 reanalysis (here the North Pacific, early February 2017, 6-hourly, 0.25 degrees), in which atmospheric rivers appear as long narrow filaments of high IVT." .
+  
+  sub:cellprofiler-trackobjects-atmospheric-rivers a <http://data.cochrane.org/ontologies/pico/PICO>,
+      <https://w3id.org/sciencelive/o/terms/DescriptiveResearchQuestion>;
+    <http://data.cochrane.org/ontologies/pico/comparatorGroup> <https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w/comparatorGroup>;
+    <http://data.cochrane.org/ontologies/pico/interventionGroup> <https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w/interventionGroup>;
+    <http://data.cochrane.org/ontologies/pico/outcomeGroup> <https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w/outcomeGroup>;
+    <http://data.cochrane.org/ontologies/pico/population> <https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w/population>;
+    dc:description "In a time-series of ERA5 integrated water-vapour transport (IVT) fields containing atmospheric rivers, does the CellProfiler object-tracking pipeline — IdentifyPrimaryObjects plus TrackObjects, built to follow dividing nuclei in fluorescence time-lapse and applied without modification through a Galaxy workflow, compared with the same algorithm run locally outside Galaxy, recover coherent atmospheric-river objects and their trajectories across consecutive 6-hourly time steps, including rivers that intensify, drift and split?";
+    <http://www.w3.org/2000/01/rdf-schema#label> "Can a bioimaging object-tracking pipeline detect and track atmospheric rivers in ERA5 IVT via Galaxy?" .
+}
+`;
+
+const REAL_PCC_TRIG = `
+@prefix this: <https://w3id.org/sciencelive/np/RAEDNajh8Hz_fZbBRgOACKDxWrQYFfDYRks8-xxMEfKt4> .
+@prefix sub: <https://w3id.org/sciencelive/np/RAEDNajh8Hz_fZbBRgOACKDxWrQYFfDYRks8-xxMEfKt4/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+sub:assertion {
+  <https://w3id.org/np/RAmR-xqMgOq3oTJmOVDQFL2p5usID6zqRapizHy0UJb04/concept> dc:description
+      "Artificial light at night (light pollution): the presence and spatial extent of artificial light within the protected area, and the proximity of lit human settlements to it." .
+  
+  <https://w3id.org/np/RAmR-xqMgOq3oTJmOVDQFL2p5usID6zqRapizHy0UJb04/context> dc:description
+      "VIIRS night-lights radiance (NASA Black Marble) over the eastern Po Valley, analysed with the astronomy Source Extractor tool (SExtractor / SEP) running in Galaxy (usegalaxy.eu), overlaid on the EU Natura 2000 protected-area network." .
+  
+  <https://w3id.org/np/RAmR-xqMgOq3oTJmOVDQFL2p5usID6zqRapizHy0UJb04/population> dc:description
+      "The Po Delta — a Ramsar and Natura 2000 wetland on the Italian Adriatic coast and a key site for migratory and breeding birds — together with the nocturnal biodiversity it supports." .
+  
+  sub:light-pollution-po-delta-nightlights a <https://w3id.org/sciencelive/o/terms/PccReviewQuestion>;
+    dc:description "How much artificial light at night intrudes on the Po Delta Natura 2000 protected area, when lit settlements are detected from VIIRS satellite night lights using an astronomy source-extraction tool run in Galaxy? This matters because artificial light at night is a documented stressor for the nocturnal birds, insects and bats that wetland refuges like the Po Delta support, and because it tests whether a tool from one discipline (astronomy) can be reused, unchanged, to answer an Earth-observation / biodiversity question.";
+    <http://www.w3.org/2000/01/rdf-schema#label> "Artificial-light intrusion on the Po Delta protected area from night lights";
+    <https://w3id.org/sciencelive/o/terms/hasPccConcept> <https://w3id.org/np/RAmR-xqMgOq3oTJmOVDQFL2p5usID6zqRapizHy0UJb04/concept>;
+    <https://w3id.org/sciencelive/o/terms/hasPccContext> <https://w3id.org/np/RAmR-xqMgOq3oTJmOVDQFL2p5usID6zqRapizHy0UJb04/context>;
+    <https://w3id.org/sciencelive/o/terms/hasPccPopulation> <https://w3id.org/np/RAmR-xqMgOq3oTJmOVDQFL2p5usID6zqRapizHy0UJb04/population> .
+}
+`;
+
+describe("extractQuestionFields on real published nanopubs", () => {
+  it("reads a PICO root whose subject is a prefixed name", () => {
+    const q = extractQuestionFields(REAL_PICO_TRIG);
+
+    expect(q.framework).toBe("PICO");
+    expect(q.label).toMatch(/^Can a bioimaging object-tracking pipeline/);
+    // the FULL question, not the short label - different predicates, both needed
+    expect(q.question).toMatch(/^In a time-series of ERA5/);
+    expect(q.question).not.toBe(q.label);
+
+    expect(q.components.map((c) => c.label)).toEqual([
+      "Population",
+      "Intervention",
+      "Comparator",
+      "Outcome",
+    ]);
+    // each component resolved through its own node's description
+    for (const c of q.components) expect(c.text.length).toBeGreaterThan(40);
+    expect(q.components[0].text).toMatch(/integrated water-vapour transport/);
+    expect(q.components[1].text).toMatch(/CellProfiler object-tracking/);
+  });
+
+  it("reads a PCC root", () => {
+    const q = extractQuestionFields(REAL_PCC_TRIG);
+
+    expect(q.framework).toBe("PCC");
+    expect(q.label).toMatch(/^Artificial-light intrusion on the Po Delta/);
+    expect(q.question).toMatch(/^How much artificial light at night/);
+
+    expect(q.components.map((c) => c.label)).toEqual([
+      "Population",
+      "Concept",
+      "Context",
+    ]);
+    expect(q.components[0].text).toMatch(/Po Delta/);
+    expect(q.components[2].text).toMatch(/VIIRS night-lights/);
+  });
+
+  it("does not confuse a component's text with the root's question", () => {
+    // the trap: each component URI appears FIRST as an object of the root, so a
+    // subject-blind scan walks into the root's own description instead
+    const q = extractQuestionFields(REAL_PICO_TRIG);
+    for (const c of q.components) expect(c.text).not.toBe(q.question);
+  });
+});

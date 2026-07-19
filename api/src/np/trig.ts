@@ -797,6 +797,48 @@ export function extractResearchSynthesisFields(
  * finds the object occurrence first and then walks into the ROOT's
  * description, silently returning the wrong text.
  */
+/**
+ * The `@prefix` declarations the document actually makes, as prefix -> namespace.
+ * Published nanopubs bind whatever prefixes their serialiser chose: the FORRT
+ * question nanopubs bind `dc:` to `http://purl.org/dc/terms/`, NOT `dct:`.
+ */
+function declaredPrefixes(trig: string): Map<string, string> {
+  const out = new Map<string, string>();
+  const re = /@prefix\s+([A-Za-z][\w.-]*)?:\s*<([^>]+)>\s*\./g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(trig)) !== null) out.set(m[1] ?? "", m[2]);
+  return out;
+}
+
+/**
+ * Every spelling `fullUri` can legally take in this document: the absolute
+ * form plus one prefixed form per declared prefix whose namespace it starts
+ * with. Guessing a conventional prefix instead is how an extractor passes its
+ * hand-written fixtures and returns nothing on real published data.
+ */
+function uriSpellings(trig: string, fullUri: string): string[] {
+  const out = [fullUri];
+  for (const [prefix, ns] of declaredPrefixes(trig)) {
+    if (fullUri.startsWith(ns) && fullUri.length > ns.length) {
+      out.push(`${prefix}:${fullUri.slice(ns.length)}`);
+    }
+  }
+  return out;
+}
+
+/** `extractPredicateValue`, tried against every spelling the document allows. */
+function extractPredicateValueAnySpelling(
+  block: string,
+  trig: string,
+  fullUri: string,
+): string | null {
+  for (const spelling of uriSpellings(trig, fullUri)) {
+    const v = extractPredicateValue(block, spelling);
+    if (v !== null) return v;
+  }
+  return null;
+}
+
 function isSubjectPosition(trig: string, at: number): boolean {
   let j = at - 1;
   while (j >= 0 && /\s/.test(trig[j])) j--;
@@ -851,12 +893,21 @@ function extractSubjectBlocks(
   trig: string,
 ): { subject: string; block: string }[] {
   const out: { subject: string; block: string }[] = [];
-  const re = /<([^>\s]+)>\s+/g;
+  const prefixes = declaredPrefixes(trig);
+  // Either an absolute <URI> or a prefixed name. isSubjectPosition does the
+  // real filtering, so matching loosely here is safe.
+  const re = /(?:<([^>\s]+)>|([A-Za-z][\w.-]*:[\w.\-%]+))\s+/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(trig)) !== null) {
     if (!isSubjectPosition(trig, m.index)) continue;
+    let subject = m[1] ?? m[2];
+    if (m[2]) {
+      const [prefix, ...rest] = m[2].split(":");
+      const ns = prefixes.get(prefix);
+      if (ns) subject = ns + rest.join(":");
+    }
     out.push({
-      subject: m[1],
+      subject,
       block: readSubjectSegment(trig, m.index + m[0].length),
     });
   }
@@ -988,8 +1039,8 @@ export function extractQuestionFields(trig: string): QuestionFields {
 
   return {
     framework,
-    label: extractLabelLike(rootBlock, RDFS_LABEL, "rdfs:label"),
-    question: extractLabelLike(rootBlock, DCT_DESCRIPTION, "dct:description"),
+    label: extractLabelLike(rootBlock, trig, RDFS_LABEL),
+    question: extractLabelLike(rootBlock, trig, DCT_DESCRIPTION),
     components,
   };
 }
@@ -1016,16 +1067,16 @@ function resolveComponentText(trig: string, value: string): string {
   if (!/^https?:\/\//.test(value)) return value.trim();
   const block = extractSubjectBlock(trig, value);
   if (block === null) return "";
-  return extractLabelLike(block, DCT_DESCRIPTION, "dct:description");
+  return extractLabelLike(block, trig, DCT_DESCRIPTION);
 }
 
 /** Full-URI form first, prefixed form second, `""` when neither is present. */
 function extractLabelLike(
   block: string,
+  trig: string,
   fullUri: string,
-  prefixedForm: string,
 ): string {
-  return (extractPredicateValueAny(block, fullUri, prefixedForm) ?? "").trim();
+  return (extractPredicateValueAnySpelling(block, trig, fullUri) ?? "").trim();
 }
 
 /** Suppress PROV_PREFIX import warning while keeping the constant available. */
