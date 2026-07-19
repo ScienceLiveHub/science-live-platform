@@ -26,6 +26,7 @@ import {
   extractPredicateValueAny,
   extractPredicateValues,
   extractPredicateValuesAny,
+  extractQuestionFields,
   extractQuoteFields,
   extractResearchSoftwareFields,
   extractResearchSynthesisFields,
@@ -1173,5 +1174,207 @@ describe("canonicalNanopubUri security boundary", () => {
     expect(
       canonicalNanopubUri('https://w3id.org/np/RA"; SELECT * } #'),
     ).toBeNull();
+  });
+});
+
+// =============================================================================
+// PICO / PCC research-question roots
+// =============================================================================
+
+describe("extractQuestionFields — PICO", () => {
+  const ROOT =
+    "https://w3id.org/sciencelive/np/RApicoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+  const PICO_TRIG = `
+sub:assertion {
+  <${ROOT}> a <http://data.cochrane.org/ontologies/pico/PICO>,
+      <https://w3id.org/sciencelive/o/terms/DescriptiveResearchQuestion>;
+    <http://www.w3.org/2000/01/rdf-schema#label> "Grid resolution and Bombus extirpation risk";
+    <http://purl.org/dc/terms/description> """In Iberian Bombus species, does a coarse projection grid change projected extirpation risk compared with a fine grid?""";
+    <http://data.cochrane.org/ontologies/pico/population> <${ROOT}/population>;
+    <http://data.cochrane.org/ontologies/pico/interventionGroup> <${ROOT}/intervention>;
+    <http://data.cochrane.org/ontologies/pico/comparatorGroup> <${ROOT}/comparator>;
+    <http://data.cochrane.org/ontologies/pico/outcomeGroup> <${ROOT}/outcome> .
+
+  <${ROOT}/population> <http://purl.org/dc/terms/description> "Iberian Bombus species with at least 10 occupied cells" .
+  <${ROOT}/intervention> <http://purl.org/dc/terms/description> "Coarse 50 km projection grid" .
+  <${ROOT}/comparator> <http://purl.org/dc/terms/description> "Fine 10 km projection grid" .
+  <${ROOT}/outcome> <http://purl.org/dc/terms/description> "Projected per-species extirpation risk ranking" .
+}
+`;
+
+  it("detects the PICO framework", () => {
+    expect(extractQuestionFields(PICO_TRIG).framework).toBe("PICO");
+  });
+
+  it("keeps rdfs:label and dct:description distinct", () => {
+    const q = extractQuestionFields(PICO_TRIG);
+    expect(q.label).toBe("Grid resolution and Bombus extirpation risk");
+    expect(q.question).toMatch(/does a coarse projection grid change/);
+    expect(q.question).not.toBe(q.label);
+  });
+
+  it("resolves all four components through the component nodes", () => {
+    const q = extractQuestionFields(PICO_TRIG);
+    expect(q.components.map((c) => c.key)).toEqual([
+      "population",
+      "intervention",
+      "comparator",
+      "outcome",
+    ]);
+    expect(q.components.map((c) => c.label)).toEqual([
+      "Population",
+      "Intervention",
+      "Comparator",
+      "Outcome",
+    ]);
+    expect(q.components.map((c) => c.text)).toEqual([
+      "Iberian Bombus species with at least 10 occupied cells",
+      "Coarse 50 km projection grid",
+      "Fine 10 km projection grid",
+      "Projected per-species extirpation risk ranking",
+    ]);
+  });
+
+  it("never leaks a component URI into the component text", () => {
+    for (const c of extractQuestionFields(PICO_TRIG).components) {
+      expect(c.text).not.toMatch(/^https?:\/\//);
+    }
+  });
+});
+
+describe("extractQuestionFields — PCC", () => {
+  const ROOT =
+    "https://w3id.org/sciencelive/np/RApccAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+  const PCC_TRIG = `
+sub:assertion {
+  <${ROOT}> a <https://w3id.org/sciencelive/o/terms/PccReviewQuestion>;
+    <http://www.w3.org/2000/01/rdf-schema#label> "Scoping HEALPix use in Earth observation";
+    <http://purl.org/dc/terms/description> "What is the extent of HEALPix grid adoption in published Earth-observation workflows?";
+    <https://w3id.org/sciencelive/o/terms/hasPccPopulation> <${ROOT}/population>;
+    <https://w3id.org/sciencelive/o/terms/hasPccConcept> <${ROOT}/concept>;
+    <https://w3id.org/sciencelive/o/terms/hasPccContext> <${ROOT}/context> .
+
+  <${ROOT}/population> <http://purl.org/dc/terms/description> "Peer-reviewed Earth-observation studies" .
+  <${ROOT}/concept> <http://purl.org/dc/terms/description> "Adoption of HEALPix hierarchical grids" .
+  <${ROOT}/context> <http://purl.org/dc/terms/description> "Operational satellite data pipelines, 2015-2026" .
+}
+`;
+
+  it("detects the PCC framework and its three components in order", () => {
+    const q = extractQuestionFields(PCC_TRIG);
+    expect(q.framework).toBe("PCC");
+    expect(q.components.map((c) => c.label)).toEqual([
+      "Population",
+      "Concept",
+      "Context",
+    ]);
+    expect(q.components.map((c) => c.text)).toEqual([
+      "Peer-reviewed Earth-observation studies",
+      "Adoption of HEALPix hierarchical grids",
+      "Operational satellite data pipelines, 2015-2026",
+    ]);
+  });
+
+  it("carries the label and the full question separately", () => {
+    const q = extractQuestionFields(PCC_TRIG);
+    expect(q.label).toBe("Scoping HEALPix use in Earth observation");
+    expect(q.question).toBe(
+      "What is the extent of HEALPix grid adoption in published Earth-observation workflows?",
+    );
+  });
+});
+
+describe("extractQuestionFields — subject-blind dereference trap", () => {
+  // Each component URI appears TWICE: once as the OBJECT of the root's
+  // component predicate, and once as the SUBJECT of its own description.
+  // Here the root's own dct:description sits AFTER the component predicate,
+  // so a naive "first dct:description following this URI" scan starts at the
+  // object occurrence and walks straight into the ROOT's description.
+  const ROOT =
+    "https://w3id.org/sciencelive/np/RAtrapAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+  const TRAP_TRIG = `
+sub:assertion {
+  <${ROOT}> a <http://data.cochrane.org/ontologies/pico/PICO>;
+    <http://data.cochrane.org/ontologies/pico/population> <${ROOT}/population>;
+    <http://www.w3.org/2000/01/rdf-schema#label> "Trap headline";
+    <http://purl.org/dc/terms/description> "ROOT QUESTION TEXT that a subject-blind scan would wrongly return." .
+
+  <${ROOT}/population> <http://purl.org/dc/terms/description> "COMPONENT TEXT" .
+}
+`;
+
+  it("reads the component's own description, not the root's", () => {
+    const q = extractQuestionFields(TRAP_TRIG);
+    expect(q.components).toHaveLength(1);
+    expect(q.components[0].text).toBe("COMPONENT TEXT");
+    // The exact value the naive implementation returns.
+    expect(q.components[0].text).not.toMatch(/ROOT QUESTION TEXT/);
+  });
+
+  it("still reads the root's own description as the question", () => {
+    const q = extractQuestionFields(TRAP_TRIG);
+    expect(q.question).toBe(
+      "ROOT QUESTION TEXT that a subject-blind scan would wrongly return.",
+    );
+    expect(q.label).toBe("Trap headline");
+  });
+});
+
+describe("extractQuestionFields — non-questions and partials", () => {
+  it("returns an empty framework for a TriG that is not a research question", () => {
+    const trig = `<x> <http://purl.org/spar/cito/hasQuotedText> "Some quoted text here." .`;
+    expect(extractQuestionFields(trig)).toEqual({
+      framework: "",
+      label: "",
+      question: "",
+      components: [],
+    });
+  });
+
+  it("omits components whose predicate is absent", () => {
+    const ROOT =
+      "https://w3id.org/sciencelive/np/RApartialAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    const trig = `
+sub:assertion {
+  <${ROOT}> a <http://data.cochrane.org/ontologies/pico/PICO>;
+    <http://data.cochrane.org/ontologies/pico/population> <${ROOT}/population>;
+    <http://data.cochrane.org/ontologies/pico/outcomeGroup> <${ROOT}/outcome> .
+
+  <${ROOT}/population> <http://purl.org/dc/terms/description> "P text" .
+  <${ROOT}/outcome> <http://purl.org/dc/terms/description> "O text" .
+}
+`;
+    expect(extractQuestionFields(trig).components.map((c) => c.key)).toEqual([
+      "population",
+      "outcome",
+    ]);
+  });
+
+  it("returns an empty component text when the component node has no description", () => {
+    const ROOT =
+      "https://w3id.org/sciencelive/np/RAdanglingAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    const trig = `
+sub:assertion {
+  <${ROOT}> a <http://data.cochrane.org/ontologies/pico/PICO>;
+    <http://data.cochrane.org/ontologies/pico/population> <${ROOT}/population> .
+}
+`;
+    expect(extractQuestionFields(trig).components).toEqual([
+      { key: "population", label: "Population", text: "" },
+    ]);
+  });
+
+  it("accepts an inlined literal component value", () => {
+    const ROOT =
+      "https://w3id.org/sciencelive/np/RAinlineAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    const trig = `
+sub:assertion {
+  <${ROOT}> a <http://data.cochrane.org/ontologies/pico/PICO>;
+    <http://data.cochrane.org/ontologies/pico/population> "Inlined population text" .
+}
+`;
+    expect(extractQuestionFields(trig).components[0].text).toBe(
+      "Inlined population text",
+    );
   });
 });

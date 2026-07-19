@@ -588,6 +588,8 @@ describe("classifyStepKind", () => {
         "research-software",
       ],
       ["Science Live Research Synthesis", "research-synthesis"],
+      ["Defining a PICO-based research question", "question"],
+      ["Defining a PCC-based research question", "question"],
     ];
     for (const [label, expected] of cases) {
       expect(classifyStepKind(label)).toBe(expected);
@@ -605,6 +607,24 @@ describe("classifyStepKind", () => {
         "DECLARING A REPLICATION STUDY OUTCOME according to forrt",
       ),
     ).toBe("outcome");
+  });
+
+  it("classifies research-question roots despite label drift", () => {
+    // The live labels are "Defining a PICO/PCC-based research question"; we
+    // match on acronym + "research question" so a reworded template still
+    // lands on "question" instead of falling through to "other".
+    expect(classifyStepKind("Define a PICO research question")).toBe(
+      "question",
+    );
+    expect(classifyStepKind("PCC-BASED RESEARCH QUESTION")).toBe("question");
+  });
+
+  it("does not classify a Paper Quotation as a question", () => {
+    expect(
+      classifyStepKind(
+        "Annotating a paper quotation with personal interpretation",
+      ),
+    ).toBe("quote");
   });
 });
 
@@ -1682,5 +1702,229 @@ describe("buildConstellation — AIDA-statement bridge", () => {
     // Quote is reachable only THROUGH the bridged AIDA — proves the bridge
     // re-enables downstream TriG mining past the Claim terminus.
     expect(uris).toContain(QUOTE);
+  });
+});
+
+// =============================================================================
+// PICO / PCC research-question roots
+// =============================================================================
+
+describe("buildConstellation — question-rooted chain", () => {
+  // Regression: a FORRT chain whose ROOT is a PICO or PCC research question
+  // (not a Paper Quotation) used to classify as "other", so `chains[].steps`
+  // started at AIDA and the root was reachable only via `nodes[]`.
+  const QUESTION =
+    "https://w3id.org/sciencelive/np/RAquestionBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
+  const AIDA =
+    "https://w3id.org/sciencelive/np/RAaidaBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
+  const CLAIM =
+    "https://w3id.org/sciencelive/np/RAclaimBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
+  const STUDY =
+    "https://w3id.org/sciencelive/np/RAstudyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
+  const OUTCOME =
+    "https://w3id.org/sciencelive/np/RAoutcomeBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
+  const AIDA_URI =
+    "http://purl.org/aida/Coarse%20projection%20grids%20reorder%20per-species%20risk.";
+
+  const TPL_QUESTION =
+    "https://w3id.org/np/RA5e5XeXy_-aNK5giB7kBAEQslTLVydHeM4YYEzhmEE2w";
+  const TPL_AIDA = "https://w3id.org/np/RAtplAidaBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
+  const TPL_CLAIM = "https://w3id.org/np/RAtplClaimBBBBBBBBBBBBBBBBBBBBBBBBBBB";
+  const TPL_STUDY = "https://w3id.org/np/RAtplStudyBBBBBBBBBBBBBBBBBBBBBBBBBBB";
+  const TPL_OUTCOME =
+    "https://w3id.org/np/RAtplOutcomeBBBBBBBBBBBBBBBBBBBBBBBBB";
+
+  function tplTrig(label: string): string {
+    return `
+sub:assertion {
+  sub:assertion a nt:AssertionTemplate;
+    rdfs:label "${label}" .
+}
+`;
+  }
+
+  function bodyQuestion(): string {
+    return `
+@prefix this: <${QUESTION}> .
+sub:assertion {
+  <${QUESTION}#question> a <http://data.cochrane.org/ontologies/pico/PICO>,
+      <https://w3id.org/sciencelive/o/terms/DescriptiveResearchQuestion>;
+    <http://www.w3.org/2000/01/rdf-schema#label> "Grid resolution and projected risk";
+    <http://purl.org/dc/terms/description> "In Iberian Bombus species, does a coarse projection grid reorder per-species extirpation risk compared with a fine grid?";
+    <http://data.cochrane.org/ontologies/pico/population> <${QUESTION}#population>;
+    <http://data.cochrane.org/ontologies/pico/interventionGroup> <${QUESTION}#intervention>;
+    <http://data.cochrane.org/ontologies/pico/comparatorGroup> <${QUESTION}#comparator>;
+    <http://data.cochrane.org/ontologies/pico/outcomeGroup> <${QUESTION}#outcome> .
+
+  <${QUESTION}#population> <http://purl.org/dc/terms/description> "Iberian Bombus species" .
+  <${QUESTION}#intervention> <http://purl.org/dc/terms/description> "Coarse 50 km grid" .
+  <${QUESTION}#comparator> <http://purl.org/dc/terms/description> "Fine 10 km grid" .
+  <${QUESTION}#outcome> <http://purl.org/dc/terms/description> "Per-species risk ranking" .
+}
+sub:pubinfo {
+  this: <https://w3id.org/np/o/ntemplate/wasCreatedFromTemplate> <${TPL_QUESTION}> .
+}
+`;
+  }
+
+  function bodyAida(): string {
+    return `
+@prefix this: <${AIDA}> .
+sub:assertion {
+  <${AIDA_URI}> a <http://purl.org/petapico/o/hycl#AIDA-Sentence> .
+  <${QUESTION}> a <foo> .
+}
+sub:pubinfo {
+  this: <https://w3id.org/np/o/ntemplate/wasCreatedFromTemplate> <${TPL_AIDA}> .
+}
+`;
+  }
+
+  function bodyClaim(): string {
+    return `
+@prefix this: <${CLAIM}> .
+sub:assertion {
+  <${CLAIM}> a <https://w3id.org/sciencelive/o/terms/model_performance-FORRT-Claim>;
+    <https://w3id.org/sciencelive/o/terms/asAidaStatement> <${AIDA_URI}> .
+  <${AIDA}> a <foo> .
+}
+sub:pubinfo {
+  this: <https://w3id.org/np/o/ntemplate/wasCreatedFromTemplate> <${TPL_CLAIM}> .
+}
+`;
+  }
+
+  function bodyStudy(): string {
+    return `
+@prefix this: <${STUDY}> .
+sub:assertion {
+  <${STUDY}> a <https://w3id.org/sciencelive/o/terms/FORRT-Replication-Study>;
+    <https://w3id.org/sciencelive/o/terms/hasScopeDescription> "Iberian Bombus, two grid resolutions";
+    <https://w3id.org/sciencelive/o/terms/hasMethodologyDescription> "GLMM projection at 10 km and 50 km";
+    <https://w3id.org/sciencelive/o/terms/targetsClaim> <${CLAIM}> .
+}
+sub:pubinfo {
+  this: <https://w3id.org/np/o/ntemplate/wasCreatedFromTemplate> <${TPL_STUDY}> .
+}
+`;
+  }
+
+  function bodyOutcome(): string {
+    return `
+@prefix this: <${OUTCOME}> .
+sub:assertion {
+  <${OUTCOME}> a <https://w3id.org/sciencelive/o/terms/FORRT-Replication-Outcome>;
+    <http://www.w3.org/2000/01/rdf-schema#label> "Grid resolution reorders low-N species";
+    <https://w3id.org/sciencelive/o/terms/hasValidationStatus> <https://w3id.org/sciencelive/o/terms/PartiallySupported>;
+    <https://w3id.org/sciencelive/o/terms/hasConfidenceLevel> <https://w3id.org/sciencelive/o/terms/HighConfidence>;
+    <https://w3id.org/sciencelive/o/terms/isOutcomeOf> <${STUDY}> .
+}
+sub:pubinfo {
+  this: <https://w3id.org/np/o/ntemplate/wasCreatedFromTemplate> <${TPL_OUTCOME}> .
+}
+`;
+  }
+
+  function makeKp(questionTemplateLabel: string) {
+    const trigMap: Record<string, string> = {
+      [`https://w3id.org/np/${OUTCOME.split("/").pop()}`]: bodyOutcome(),
+      [`https://w3id.org/np/${STUDY.split("/").pop()}`]: bodyStudy(),
+      [`https://w3id.org/np/${CLAIM.split("/").pop()}`]: bodyClaim(),
+      [`https://w3id.org/np/${AIDA.split("/").pop()}`]: bodyAida(),
+      [`https://w3id.org/np/${QUESTION.split("/").pop()}`]: bodyQuestion(),
+      [TPL_OUTCOME]: tplTrig(
+        "Declaring a replication study outcome according to FORRT",
+      ),
+      [TPL_STUDY]: tplTrig(
+        "Declaring a replication study design according to FORRT",
+      ),
+      [TPL_CLAIM]: tplTrig("Declaring an original claim according to FORRT"),
+      [TPL_AIDA]: tplTrig(
+        "Expressing a statement about research as an AIDA sentence",
+      ),
+      [TPL_QUESTION]: tplTrig(questionTemplateLabel),
+    };
+    return vi.fn(async (url: string | URL | Request) => {
+      const u = typeof url === "string" ? url : url.toString();
+      if (u === NANOPUB_SPARQL_ENDPOINT_FULL)
+        return new Response(sparqlBindings([]), {
+          status: 200,
+          headers: { "content-type": "application/sparql-results+json" },
+        });
+      const body = trigMap[u];
+      if (body)
+        return new Response(body, {
+          status: 200,
+          headers: { "content-type": "application/trig" },
+        });
+      return new Response("nf", { status: 404 });
+    });
+  }
+
+  const OPTS = { depthLimit: 6, maxNodes: 80, concurrency: 2 };
+
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("puts the PICO Question FIRST in chains[].steps", async () => {
+    vi.stubGlobal("fetch", makeKp("Defining a PICO-based research question"));
+    const c = await buildConstellation(OUTCOME, OPTS);
+    expect(c.chains).toHaveLength(1);
+    expect(c.chains[0].steps.map((s) => s.step)).toEqual([
+      "Question",
+      "AIDA",
+      "Claim",
+      "Study",
+      "Outcome",
+    ]);
+  });
+
+  it("classifies the PICO root node as a question, not 'other'", async () => {
+    vi.stubGlobal("fetch", makeKp("Defining a PICO-based research question"));
+    const c = await buildConstellation(OUTCOME, OPTS);
+    const node = c.nodes.find((n) => n.uri === QUESTION);
+    expect(node?.stepKind).toBe("question");
+    expect(node?.question?.framework).toBe("PICO");
+  });
+
+  it("carries the label, full question text and components on the step", async () => {
+    vi.stubGlobal("fetch", makeKp("Defining a PICO-based research question"));
+    const c = await buildConstellation(OUTCOME, OPTS);
+    const step = c.chains[0].steps[0];
+    expect(step.uri).toBe(QUESTION);
+    expect(step.framework).toBe("PICO");
+    expect(step.label).toBe("Grid resolution and projected risk");
+    expect(step.text).toMatch(/does a coarse projection grid reorder/);
+    expect(step.components?.map((x) => x.label)).toEqual([
+      "Population",
+      "Intervention",
+      "Comparator",
+      "Outcome",
+    ]);
+    expect(step.components?.map((x) => x.text)).toEqual([
+      "Iberian Bombus species",
+      "Coarse 50 km grid",
+      "Fine 10 km grid",
+      "Per-species risk ranking",
+    ]);
+  });
+
+  it("also works for a PCC-rooted chain", async () => {
+    vi.stubGlobal("fetch", makeKp("Defining a PCC-based research question"));
+    const c = await buildConstellation(OUTCOME, OPTS);
+    // The fixture assertion is PICO-shaped; only the template label changes,
+    // so this pins the classifier branch rather than the extractor.
+    expect(c.chains[0].steps[0].step).toBe("Question");
+    expect(c.nodes.find((n) => n.uri === QUESTION)?.stepKind).toBe("question");
+  });
+
+  it("emits no Question step when the template label is unrecognised", async () => {
+    vi.stubGlobal("fetch", makeKp("Some unrelated template"));
+    const c = await buildConstellation(OUTCOME, OPTS);
+    expect(c.chains[0].steps.map((s) => s.step)).toEqual([
+      "AIDA",
+      "Claim",
+      "Study",
+      "Outcome",
+    ]);
   });
 });
