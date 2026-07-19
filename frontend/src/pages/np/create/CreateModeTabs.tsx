@@ -13,6 +13,14 @@ export default function CreateModeTabs() {
   const { pathname } = useLocation();
   const active = pathname.startsWith("/np/create/chain") ? "chain" : "single";
 
+  // The shared active-tab style (bg-input/30) is nearly invisible against the
+  // muted list in dark mode. Give the active tab a solid background, a border,
+  // a shadow and bolder text so the two modes are clearly distinguishable.
+  const triggerCls =
+    "flex items-center gap-1.5 data-[state=active]:font-semibold " +
+    "data-[state=active]:shadow-sm data-[state=active]:border-border " +
+    "dark:data-[state=active]:bg-background dark:data-[state=active]:border-border";
+
   return (
     <Tabs
       value={active}
@@ -21,11 +29,11 @@ export default function CreateModeTabs() {
       }
     >
       <TabsList>
-        <TabsTrigger value="single" className="flex items-center gap-1.5">
+        <TabsTrigger value="single" className={triggerCls}>
           <FileText className="h-4 w-4" />
           Create Nanopublication
         </TabsTrigger>
-        <TabsTrigger value="chain" className="flex items-center gap-1.5">
+        <TabsTrigger value="chain" className={triggerCls}>
           <Link2 className="h-4 w-4" />
           Create FORRT Chain
         </TabsTrigger>
