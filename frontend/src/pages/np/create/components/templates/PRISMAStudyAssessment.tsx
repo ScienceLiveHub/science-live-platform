@@ -1,5 +1,6 @@
 import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import { useFormedible } from "@/hooks/use-formedible";
+import { formatDateOnly } from "@/lib/string-format";
 import z from "zod";
 import {
   NanopubEditorOptionFields,
@@ -158,7 +159,7 @@ export default function PRISMAStudyAssessment({
       onSubmit: async ({ value }) => {
         const v = value as any;
         if (v.creationDate instanceof Date) {
-          v.creationDate = v.creationDate.toISOString().split("T")[0];
+          v.creationDate = formatDateOnly(v.creationDate);
         }
         await submit(v);
       },

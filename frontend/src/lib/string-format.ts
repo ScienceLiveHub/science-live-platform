@@ -1,3 +1,17 @@
+/**
+ * Format a Date as `YYYY-MM-DD` using its **local** calendar fields.
+ *
+ * Do not use `toISOString().split("T")[0]` for this: the date pickers (and the
+ * chain wizard's prefill coercion) produce a Date at local midnight, which
+ * `toISOString` converts to UTC — shifting the day back by one for every user
+ * east of UTC. The resulting date is written into a signed, immutable
+ * nanopublication, so the off-by-one is not recoverable after publishing.
+ */
+export const formatDateOnly = (date: Date) => {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
+
 export const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString("en-US", {
     year: "numeric",

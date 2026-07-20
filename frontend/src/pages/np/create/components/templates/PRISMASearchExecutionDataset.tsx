@@ -1,5 +1,6 @@
 import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import { useFormedible } from "@/hooks/use-formedible";
+import { formatDateOnly } from "@/lib/string-format";
 import z from "zod";
 import {
   NanopubEditorOptionFields,
@@ -194,7 +195,7 @@ export default function PRISMASearchExecutionDataset({
       onSubmit: async ({ value }) => {
         const v = value as any;
         if (v.creationDate instanceof Date) {
-          v.creationDate = v.creationDate.toISOString().split("T")[0];
+          v.creationDate = formatDateOnly(v.creationDate);
         }
         if (!v.st06 || v.st06.length === 0) delete v.st06;
         await submit(v);

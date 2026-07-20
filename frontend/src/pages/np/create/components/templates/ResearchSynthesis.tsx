@@ -3,6 +3,7 @@ import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffi
 import ApiComboboxMultipleExpandable from "@/components/np/api-combobox";
 import { WIKIDATA_ENTITY_API } from "@/components/np/api-endpoints";
 import { useFormedible } from "@/hooks/use-formedible";
+import { formatDateOnly } from "@/lib/string-format";
 import z from "zod";
 import {
   NanopubEditorOptionFields,
@@ -164,7 +165,7 @@ export default function ResearchSynthesis({
       onSubmit: async ({ value }) => {
         const v = { ...value } as Record<string, unknown>;
         if (v.date instanceof Date) {
-          v.date = (v.date as Date).toISOString().split("T")[0];
+          v.date = formatDateOnly(v.date);
         }
         // Map the user-facing array fields onto the repeatable statement
         // placeholder names the template engine expects.

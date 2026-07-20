@@ -2,6 +2,7 @@ import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffi
 import { ResultItem } from "@/components/np/api-endpoints";
 import { QueryComboboxField } from "@/components/np/query-combobox";
 import { useFormedible } from "@/hooks/use-formedible";
+import { formatDateOnly } from "@/lib/string-format";
 import { useState } from "react";
 import z from "zod";
 import {
@@ -229,7 +230,7 @@ export default function FORRTKLReplicationOutcome({
         const submitData: Record<string, any> = { ...value };
         // Convert Date to ISO date string (YYYY-MM-DD) for the template
         if (submitData.date instanceof Date) {
-          submitData.date = submitData.date.toISOString().split("T")[0];
+          submitData.date = formatDateOnly(submitData.date);
         }
         if (!submitData.limitations) delete submitData.limitations;
         await submit(submitData);
