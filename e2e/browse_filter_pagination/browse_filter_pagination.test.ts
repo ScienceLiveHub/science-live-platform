@@ -78,18 +78,31 @@ describe("Browse, filter and pagination", () => {
     );
 
     // CP6 - Click Next to go to Page 2
+    //
+    // Pagination can only be exercised when the filtered result set spans more
+    // than one page, which depends on how many nanopublications the browse
+    // query returns - live data this test does not control. When the set fits
+    // on one page the platform renders no pager at all, so there is no Next
+    // button AND no "Page 1"/"Page 2" text to find.
+    //
+    // Assert inside the branch. Asserting outside it made the documented
+    // "skipping" path fail unconditionally, so the whole suite turned red the
+    // day the Core-filtered result set shrank to a single page.
     artifacts.log("CP6: Clicking 'Next' button to go to Page 2");
     const nextBtn = page.getByRole("button", { name: "Next" });
-    let page2Displayed = false;
-    if ((await nextBtn.count()) > 0 && !(await nextBtn.isDisabled())) {
+    const canPaginate =
+      (await nextBtn.count()) > 0 && !(await nextBtn.isDisabled());
+    if (canPaginate) {
       await nextBtn.click();
       await page.waitForTimeout(3000);
       await artifacts.screenshot(page, "07_page_2.png");
-      page2Displayed = (await page.locator("text=Page 2").count()) > 0;
+      const page2Displayed = (await page.locator("text=Page 2").count()) > 0;
+      expect.soft(page2Displayed, "CP6 - Page 2 displayed").toBe(true);
     } else {
-      artifacts.log("CP6: Next button not available or disabled - skipping");
+      artifacts.log(
+        "CP6: no enabled Next button - the filtered result set fits on one page, so pagination is not exercisable in this run",
+      );
     }
-    expect.soft(page2Displayed, "CP6 - Page 2 displayed").toBe(true);
 
     // CP7 - Change sort back to Newest First and verify it returns to Page 1
     artifacts.log("CP7: Changing sort back to 'Newest First'");
@@ -100,8 +113,13 @@ describe("Browse, filter and pagination", () => {
     await artifacts.screenshot(page, "08_newest_first.png");
     const newestSortValue = await page.getByRole("combobox").innerText();
     const newestSorted = newestSortValue.includes("Newest");
-    const backToPage1 = (await page.locator("text=Page 1").count()) > 0;
-    expect.soft(newestSorted && backToPage1, "CP7 - Newest First sort and Page 1 restored").toBe(true);
+    // The sort itself is always checkable; "back to Page 1" only means
+    // something if we actually left page 1.
+    expect.soft(newestSorted, "CP7 - Sorted by Newest First").toBe(true);
+    if (canPaginate) {
+      const backToPage1 = (await page.locator("text=Page 1").count()) > 0;
+      expect.soft(backToPage1, "CP7 - Page 1 restored after re-sorting").toBe(true);
+    }
 
     // CP8 - Clear filters
     artifacts.log("CP8: Clicking 'Clear filters' button");
