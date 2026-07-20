@@ -18,6 +18,7 @@ import {
   extractNanopubUris,
   extractOrcids,
   extractOutcomeFields,
+  extractQuestionFields,
   extractQuoteFields,
   extractResearchSoftwareFields,
   extractResearchSynthesisFields,
@@ -28,6 +29,7 @@ import {
   type CitoFields,
   type ClaimFields,
   type OutcomeFields,
+  type QuestionFields,
   type QuoteFields,
   type ResearchSoftwareFields,
   type ResearchSynthesisFields,
@@ -41,6 +43,7 @@ import {
  */
 export type StepKind =
   | "quote"
+  | "question"
   | "aida"
   | "claim"
   | "study"
@@ -65,6 +68,7 @@ export type ConstellationNode = {
   study?: StudyFields;
   claim?: ClaimFields;
   quote?: QuoteFields;
+  question?: QuestionFields;
   aida?: AidaFields;
   cito?: CitoFields;
   researchSoftware?: ResearchSoftwareFields;
@@ -82,6 +86,7 @@ export type ConstellationEdge = {
 export type ChainStep = {
   step:
     | "Quote"
+    | "Question"
     | "AIDA"
     | "Claim"
     | "Study"
@@ -104,6 +109,10 @@ export type ChainStep = {
   zenodoDoi?: string;
   relations?: string[];
   targets?: string[];
+  /** Question steps only — "PICO" or "PCC". */
+  framework?: string;
+  /** Question steps only — the PICO/PCC components in acronym order. */
+  components?: QuestionFields["components"];
 };
 
 export type Chain = {
@@ -303,6 +312,9 @@ async function processNode(
     case "quote":
       node.quote = extractQuoteFields(trig);
       break;
+    case "question":
+      node.question = extractQuestionFields(trig);
+      break;
     case "aida":
       node.aida = extractAidaFields(trig);
       break;
@@ -444,6 +456,12 @@ export function classifyStepKind(stepType: string): StepKind {
   if (s.includes("replication study design")) return "study";
   if (s.includes("original claim")) return "claim";
   if (s.includes("paper quotation")) return "quote";
+  // A FORRT chain can be rooted in a structured research question instead of
+  // a Paper Quotation. Match on the acronym + "research question" so minor
+  // label drift ("Defining a PICO-based research question" vs a future
+  // "Define a PICO research question") still classifies.
+  if (s.includes("pico") && s.includes("research question")) return "question";
+  if (s.includes("pcc") && s.includes("research question")) return "question";
   if (s.includes("aida sentence")) return "aida";
   if (s.includes("citations with cito") || s.includes("cito citation"))
     return "cito";
@@ -510,6 +528,7 @@ function assembleChains(
   const claims = byKind.get("claim") ?? [];
   const studies = byKind.get("study") ?? [];
   const quotes = byKind.get("quote") ?? [];
+  const questions = byKind.get("question") ?? [];
   const aidas = byKind.get("aida") ?? [];
   const citos = byKind.get("cito") ?? [];
   const researchSoftwares = byKind.get("research-software") ?? [];
@@ -536,6 +555,12 @@ function assembleChains(
     // Quote — find the Quote node that the AIDA or Claim references.
     const quote =
       findQuoteForAida(aida, quotes) ?? findRelated(outcome, quotes);
+
+    // Research-question root — the alternative to a Quote root. Same weak
+    // linkage as Quote: FORRT has no AIDA->root predicate, so this only
+    // resolves when the constellation holds exactly one question node.
+    const question =
+      findQuestionForAida(aida, questions) ?? findRelated(outcome, questions);
 
     // CiTO node whose citing entity (subject) is THIS outcome. This is the
     // outcome-level CiTO citation that connects the Outcome to the upstream
@@ -564,6 +589,17 @@ function assembleChains(
         uri: quote.uri,
         text: quote.quote.quotedText,
         targets: quote.quote.citedDoi ? [quote.quote.citedDoi] : [],
+      });
+    // A chain is rooted in EITHER a Quote or a Question. If a constellation
+    // somehow yields both, emit both (Quote first) rather than dropping one.
+    if (question && question.question)
+      steps.push({
+        step: "Question",
+        uri: question.uri,
+        label: question.question.label,
+        text: question.question.question,
+        framework: question.question.framework,
+        components: question.question.components,
       });
     if (aida && aida.aida)
       steps.push({ step: "AIDA", uri: aida.uri, text: aida.aida.sentence });
@@ -696,6 +732,25 @@ function findQuoteForAida(
   // Quote in the constellation" when there's exactly one.
   if (quotes.length === 1) return quotes[0];
   return undefined;
+}
+
+/**
+ * Mirror of `findQuoteForAida` for question-rooted chains. FORRT has no
+ * explicit AIDA -> research-question predicate either, so the only linkage
+ * available is "there is exactly one question node in the constellation".
+ *
+ * KNOWN LIMITATION: in a multi-chain constellation where several chains each
+ * have their own PICO/PCC root, this returns undefined for every chain and no
+ * Question step is emitted. Attaching the wrong question to a chain would be
+ * worse than omitting it, so we stay conservative until the vocabulary gains
+ * a real root predicate.
+ */
+function findQuestionForAida(
+  aida: ConstellationNode | undefined,
+  questions: ConstellationNode[],
+): ConstellationNode | undefined {
+  void aida;
+  return questions.length === 1 ? questions[0] : undefined;
 }
 
 /**

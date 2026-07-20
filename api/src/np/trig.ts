@@ -305,6 +305,16 @@ function extractObjectsFromSegment(segment: string): string[] {
  * `cito:isSupportedBy <a>, <b>, <c>;`.
  */
 function readObjectSegment(trig: string, start: number): string {
+  return readSegment(trig, start, ";.");
+}
+
+/**
+ * Walk forward from `start` until one of `terminators` appears OUTSIDE a
+ * quoted literal or a bracketed `<URI>`. Shared engine behind
+ * `readObjectSegment` (terminators `;.` — one predicate's object list) and
+ * `readSubjectSegment` (terminator `.` — a whole property list).
+ */
+function readSegment(trig: string, start: number, terminators: string): string {
   let i = start;
   let segment = "";
   while (i < trig.length) {
@@ -350,11 +360,19 @@ function readObjectSegment(trig: string, start: number): string {
       i = end + 1;
       continue;
     }
-    if (trig[i] === ";" || trig[i] === ".") return segment;
+    if (terminators.includes(trig[i])) return segment;
     segment += trig[i];
     i++;
   }
   return segment;
+}
+
+/**
+ * Walk forward from `start` to the end of a whole Turtle property list — the
+ * next un-quoted `.` — so `;`-separated predicates stay in one segment.
+ */
+function readSubjectSegment(trig: string, start: number): string {
+  return readSegment(trig, start, ".");
 }
 
 /**
@@ -757,6 +775,308 @@ export function extractResearchSynthesisFields(
     topicQids: wikidataQs,
     endDate: extractPredicateValue(trig, `${SCHEMA_PREFIX}endDate`) ?? "",
   };
+}
+
+// =============================================================================
+// Subject-aware lookup
+// =============================================================================
+
+/**
+ * Is the `<URI>` occurrence starting at `at` in SUBJECT position?
+ *
+ * Turtle puts a URI in subject position only at the very start of the graph
+ * body or straight after a statement boundary. We skip backwards over
+ * whitespace and require the previous significant character to be `{`, `}`
+ * or `.`. Anything else — `;` (next predicate of the SAME subject), `,`
+ * (next object), a bare `a`, or the `>` that closes a predicate URI — means
+ * the occurrence is a predicate or an object, not a subject.
+ *
+ * This distinction is the whole point of the helper: a PICO/PCC component
+ * URI appears BOTH as the object of the root's component predicate AND as
+ * the subject of its own `dct:description` statement. A subject-blind scan
+ * finds the object occurrence first and then walks into the ROOT's
+ * description, silently returning the wrong text.
+ */
+/**
+ * The `@prefix` declarations the document actually makes, as prefix -> namespace.
+ * Published nanopubs bind whatever prefixes their serialiser chose: the FORRT
+ * question nanopubs bind `dc:` to `http://purl.org/dc/terms/`, NOT `dct:`.
+ */
+function declaredPrefixes(trig: string): Map<string, string> {
+  const out = new Map<string, string>();
+  const re = /@prefix\s+([A-Za-z][\w.-]*)?:\s*<([^>]+)>\s*\./g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(trig)) !== null) out.set(m[1] ?? "", m[2]);
+  return out;
+}
+
+/**
+ * Every spelling `fullUri` can legally take in this document: the absolute
+ * form plus one prefixed form per declared prefix whose namespace it starts
+ * with. Guessing a conventional prefix instead is how an extractor passes its
+ * hand-written fixtures and returns nothing on real published data.
+ */
+function uriSpellings(trig: string, fullUri: string): string[] {
+  const out = [fullUri];
+  for (const [prefix, ns] of declaredPrefixes(trig)) {
+    if (fullUri.startsWith(ns) && fullUri.length > ns.length) {
+      out.push(`${prefix}:${fullUri.slice(ns.length)}`);
+    }
+  }
+  return out;
+}
+
+/** `extractPredicateValue`, tried against every spelling the document allows. */
+function extractPredicateValueAnySpelling(
+  block: string,
+  trig: string,
+  fullUri: string,
+): string | null {
+  for (const spelling of uriSpellings(trig, fullUri)) {
+    const v = extractPredicateValue(block, spelling);
+    if (v !== null) return v;
+  }
+  return null;
+}
+
+function isSubjectPosition(trig: string, at: number): boolean {
+  let j = at - 1;
+  while (j >= 0 && /\s/.test(trig[j])) j--;
+  if (j < 0) return true;
+  return trig[j] === "{" || trig[j] === "}" || trig[j] === ".";
+}
+
+/**
+ * Return the Turtle property list attached to `subjectUri` where that URI
+ * appears as a SUBJECT — i.e. the text between the subject and the statement's
+ * closing `.`. Returns null when the URI never appears in subject position
+ * (it may still appear as an object elsewhere).
+ *
+ * Only absolute `<URI>` subjects are matched; prefixed names (`sub:assertion`)
+ * are out of scope, which is fine for FORRT assertion graphs where the chain
+ * subjects are always written out in full.
+ */
+export function extractSubjectBlock(
+  trig: string,
+  subjectUri: string,
+): string | null {
+  const escaped = subjectUri.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(`<${escaped}>\\s+`, "g");
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(trig)) !== null) {
+    if (!isSubjectPosition(trig, m.index)) continue;
+    return readSubjectSegment(trig, m.index + m[0].length);
+  }
+  return null;
+}
+
+/**
+ * `extractPredicateValue` scoped to one subject's property list. Returns null
+ * when the subject has no such statement.
+ */
+export function extractPredicateValueForSubject(
+  trig: string,
+  subjectUri: string,
+  predicate: string,
+): string | null {
+  const block = extractSubjectBlock(trig, subjectUri);
+  if (block === null) return null;
+  return extractPredicateValue(block, predicate);
+}
+
+/**
+ * Every URI that appears in SUBJECT position, paired with its property list.
+ * Document order; duplicates (a subject written twice) are kept so callers
+ * can pick the block that actually carries the predicate they want.
+ */
+function extractSubjectBlocks(
+  trig: string,
+): { subject: string; block: string }[] {
+  const out: { subject: string; block: string }[] = [];
+  const prefixes = declaredPrefixes(trig);
+  // Either an absolute <URI> or a prefixed name. isSubjectPosition does the
+  // real filtering, so matching loosely here is safe.
+  const re = /(?:<([^>\s]+)>|([A-Za-z][\w.-]*:[\w.\-%]+))\s+/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(trig)) !== null) {
+    if (!isSubjectPosition(trig, m.index)) continue;
+    let subject = m[1] ?? m[2];
+    if (m[2]) {
+      const [prefix, ...rest] = m[2].split(":");
+      const ns = prefixes.get(prefix);
+      if (ns) subject = ns + rest.join(":");
+    }
+    out.push({
+      subject,
+      block: readSubjectSegment(trig, m.index + m[0].length),
+    });
+  }
+  return out;
+}
+
+// =============================================================================
+// PICO / PCC research-question roots
+// =============================================================================
+
+const PICO_PREFIX = "http://data.cochrane.org/ontologies/pico/";
+const RDFS_LABEL = "http://www.w3.org/2000/01/rdf-schema#label";
+const DCT_DESCRIPTION = `${DCT_PREFIX}description`;
+
+/**
+ * One component of a structured research question, in a framework-neutral
+ * shape so PICO's four and PCC's three render through the same code path.
+ * `key` is stable for clients; `label` is the display heading.
+ */
+export type QuestionComponent = {
+  key: string;
+  label: string;
+  text: string;
+};
+
+export type QuestionFields = {
+  framework: "PICO" | "PCC" | "";
+  /** The root's `rdfs:label` — a short headline for the question. */
+  label: string;
+  /** The root's `dct:description` — the FULL research-question text. */
+  question: string;
+  components: QuestionComponent[];
+};
+
+type ComponentSpec = { key: string; label: string; predicate: string };
+
+// Fixed, meaningful order — this is the order the acronyms are read in.
+const PICO_COMPONENTS: ComponentSpec[] = [
+  {
+    key: "population",
+    label: "Population",
+    predicate: `${PICO_PREFIX}population`,
+  },
+  {
+    key: "intervention",
+    label: "Intervention",
+    predicate: `${PICO_PREFIX}interventionGroup`,
+  },
+  {
+    key: "comparator",
+    label: "Comparator",
+    predicate: `${PICO_PREFIX}comparatorGroup`,
+  },
+  { key: "outcome", label: "Outcome", predicate: `${PICO_PREFIX}outcomeGroup` },
+];
+
+const PCC_COMPONENTS: ComponentSpec[] = [
+  {
+    key: "population",
+    label: "Population",
+    predicate: `${FORRT_TERMS}hasPccPopulation`,
+  },
+  {
+    key: "concept",
+    label: "Concept",
+    predicate: `${FORRT_TERMS}hasPccConcept`,
+  },
+  {
+    key: "context",
+    label: "Context",
+    predicate: `${FORRT_TERMS}hasPccContext`,
+  },
+];
+
+/**
+ * Extract the root research question of a FORRT chain that starts with a
+ * PICO or PCC question rather than a Paper Quotation.
+ *
+ * Shape of the assertion (PICO; PCC is the same with the FORRT `hasPcc*`
+ * predicates and three components):
+ *
+ *   <root> a pico:PICO;
+ *     rdfs:label "Short headline";
+ *     dct:description "The full research question text?";
+ *     pico:population <root/population>;
+ *     pico:interventionGroup <root/intervention> .
+ *   <root/population> dct:description "Adults over 65" .
+ *
+ * Note the INDIRECTION: the component predicates point at component nodes,
+ * and the human-readable text hangs off each node's own `dct:description`.
+ * Reading the predicate alone yields a URI, so every component is resolved
+ * through the subject-aware lookup above.
+ *
+ * Returns `framework: ""` with empty fields when the TriG is not a research
+ * question.
+ */
+export function extractQuestionFields(trig: string): QuestionFields {
+  const empty: QuestionFields = {
+    framework: "",
+    label: "",
+    question: "",
+    components: [],
+  };
+
+  const framework = detectQuestionFramework(trig);
+  if (framework === "") return empty;
+
+  const specs = framework === "PICO" ? PICO_COMPONENTS : PCC_COMPONENTS;
+
+  // The root is the subject carrying the component predicates. Scanning
+  // subject blocks (rather than assuming the first statement) keeps this
+  // correct when the assertion graph lists component nodes first.
+  const rootBlock =
+    extractSubjectBlocks(trig).find(({ block }) =>
+      specs.some((s) => extractPredicateValue(block, s.predicate) !== null),
+    )?.block ?? "";
+  if (rootBlock === "") return { ...empty, framework };
+
+  const components: QuestionComponent[] = [];
+  for (const spec of specs) {
+    const value = extractPredicateValue(rootBlock, spec.predicate);
+    if (value === null) continue;
+    components.push({
+      key: spec.key,
+      label: spec.label,
+      text: resolveComponentText(trig, value),
+    });
+  }
+
+  return {
+    framework,
+    label: extractLabelLike(rootBlock, trig, RDFS_LABEL),
+    question: extractLabelLike(rootBlock, trig, DCT_DESCRIPTION),
+    components,
+  };
+}
+
+/**
+ * PICO vs PCC. Prefer the rdf:type marker, fall back to "any component
+ * predicate of that framework is present" so a minor vocabulary drift in the
+ * type URI doesn't lose the whole question.
+ */
+function detectQuestionFramework(trig: string): "PICO" | "PCC" | "" {
+  if (trig.includes(`${PICO_PREFIX}PICO`)) return "PICO";
+  if (trig.includes(`${FORRT_TERMS}PccReviewQuestion`)) return "PCC";
+  if (PICO_COMPONENTS.some((s) => trig.includes(s.predicate))) return "PICO";
+  if (PCC_COMPONENTS.some((s) => trig.includes(s.predicate))) return "PCC";
+  return "";
+}
+
+/**
+ * A component predicate's object is normally a component-node URI whose own
+ * `dct:description` carries the text. Some publishers inline the text as a
+ * literal instead, so accept that too.
+ */
+function resolveComponentText(trig: string, value: string): string {
+  if (!/^https?:\/\//.test(value)) return value.trim();
+  const block = extractSubjectBlock(trig, value);
+  if (block === null) return "";
+  return extractLabelLike(block, trig, DCT_DESCRIPTION);
+}
+
+/** Full-URI form first, prefixed form second, `""` when neither is present. */
+function extractLabelLike(
+  block: string,
+  trig: string,
+  fullUri: string,
+): string {
+  return (extractPredicateValueAnySpelling(block, trig, fullUri) ?? "").trim();
 }
 
 /** Suppress PROV_PREFIX import warning while keeping the constant available. */
