@@ -28,7 +28,11 @@ const { namedNode } = DataFactory;
 
 // Namespaces
 const FDOF_NS = "https://w3id.org/fdof/ontology#";
-const DCAT_NS = "http://www.w3.org/ns/dcat#";
+// The Dataset template emits dcat:contactPoint with the HTTPS namespace (the vast
+// majority of published datasets); a handful of early ones used HTTP, so we match
+// either form below. (n3 term matching is exact — http != https.)
+const DCAT_NS = "https://www.w3.org/ns/dcat#";
+const DCAT_NS_HTTP = "http://www.w3.org/ns/dcat#";
 const DCT_NS = "http://purl.org/dc/terms/";
 
 const PREDICATES = {
@@ -41,6 +45,7 @@ const PREDICATES = {
   subject: namedNode(DCT_NS + "subject"),
   license: namedNode(DCT_NS + "license"),
   contactPoint: namedNode(DCAT_NS + "contactPoint"),
+  contactPointHttp: namedNode(DCAT_NS_HTTP + "contactPoint"),
   fdoType: namedNode(FDOF_NS + "FAIRDigitalObject"),
 };
 
@@ -169,13 +174,20 @@ function extractDataset(store: NanopubStore): DatasetData | null {
     .filter((q) => Util.isNamedNode(q.object))
     .map((q) => q.object.value);
 
-  // Get contact point
-  const contactQuad = store.matchOne(
-    datasetNode,
-    PREDICATES.contactPoint,
-    null,
-    assertionGraph,
-  );
+  // Get contact point (dcat:contactPoint — https canonical, http legacy fallback)
+  const contactQuad =
+    store.matchOne(
+      datasetNode,
+      PREDICATES.contactPoint,
+      null,
+      assertionGraph,
+    ) ??
+    store.matchOne(
+      datasetNode,
+      PREDICATES.contactPointHttp,
+      null,
+      assertionGraph,
+    );
   const contactPoint = contactQuad?.object.value;
 
   // Get license

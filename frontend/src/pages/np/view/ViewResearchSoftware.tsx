@@ -10,7 +10,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLabels } from "@/hooks/use-labels";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
-import { ExternalLink, FileText, FolderGit2, Link2 } from "lucide-react";
+import {
+  ExternalLink,
+  FileText,
+  FlaskConical,
+  FolderGit2,
+  Link2,
+  Scale,
+} from "lucide-react";
 import { DataFactory, Util } from "n3";
 import { useMemo } from "react";
 import {
@@ -25,12 +32,18 @@ import { TEMPLATE_VIEW_ICONS } from "./view-registry";
 
 const { namedNode } = DataFactory;
 
-// Namespaces
+// Namespaces. schema.org appears as both http and https in nanopubs (the
+// Research Software template uses https), so match either form.
 const DCMITYPE_SOFTWARE = "http://purl.org/dc/dcmitype/Software";
-const SCHEMA_MAINTAINER = "http://schema.org/maintainer";
+const SCHEMA_MAINTAINER = [
+  "https://schema.org/maintainer",
+  "http://schema.org/maintainer",
+];
+const SCHEMA_RESULT = ["https://schema.org/result", "http://schema.org/result"];
 const SKOS_RELATED = "http://www.w3.org/2004/02/skos/core#related";
 const DCT_IS_PART_OF = "http://purl.org/dc/terms/isPartOf";
 const DCT_TITLE = "http://purl.org/dc/terms/title";
+const DCT_LICENSE = "http://purl.org/dc/terms/license";
 const CITO_SUPPORTS = "http://purl.org/spar/cito/supports";
 
 // --- Research Software extraction -----------------------------------------
@@ -42,8 +55,12 @@ interface ResearchSoftwareData {
   softwareUri: string;
   /** Repository/maintainer URL (e.g., GitHub) */
   repository?: string;
+  /** Research project (schema:result) this software was produced for */
+  project?: string;
   /** Parent project/collection this software is part of */
   partOf?: string;
+  /** License of the software (dct:license) — distinct from the nanopub's own license */
+  license?: string;
   /** Supporting publication DOIs */
   supportingPublications: string[];
   /** Related resources */
@@ -81,23 +98,32 @@ function extractResearchSoftware(
     store.findInternalLabel(softwareUri) ||
     softwareUri;
 
-  // Get repository/maintainer
-  const maintainerQuad = store.matchOne(
-    softwareNode,
-    namedNode(SCHEMA_MAINTAINER),
-    null,
-    assertionGraph,
-  );
-  const repository = maintainerQuad?.object.value;
+  // First object of the software subject under any of the given predicates.
+  const firstObject = (predicates: string[]): string | undefined => {
+    for (const p of predicates) {
+      const q = store.matchOne(
+        softwareNode,
+        namedNode(p),
+        null,
+        assertionGraph,
+      );
+      if (q) return q.object.value;
+    }
+    return undefined;
+  };
+
+  // Get repository/maintainer (schema:maintainer, http or https)
+  const repository = firstObject(SCHEMA_MAINTAINER);
+
+  // Get the research project the software was produced for (schema:result)
+  const project = firstObject(SCHEMA_RESULT);
+
+  // Get the software license (dct:license) — the license OF the software,
+  // which is distinct from the nanopublication's own license (in pubinfo).
+  const license = firstObject([DCT_LICENSE]);
 
   // Get partOf (parent project/collection)
-  const partOfQuad = store.matchOne(
-    softwareNode,
-    namedNode(DCT_IS_PART_OF),
-    null,
-    assertionGraph,
-  );
-  const partOf = partOfQuad?.object.value;
+  const partOf = firstObject([DCT_IS_PART_OF]);
 
   // Get supporting publications (cito:supports)
   const supportsQuads = store.getQuads(
@@ -125,7 +151,9 @@ function extractResearchSoftware(
     title,
     softwareUri,
     repository,
+    project,
     partOf,
+    license,
     supportingPublications,
     relatedResources,
   };
@@ -193,6 +221,40 @@ export function ViewResearchSoftware({ store }: CustomViewerProps) {
               <ExternalUriLink
                 uri={data.repository}
                 label={formatUrlForDisplay(data.repository)}
+                className="text-sm"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Research Project (schema:result) */}
+        {data.project && (
+          <div>
+            <ItemTitle
+              title="Research Project"
+              icon={<FlaskConical className="h-4 w-4 inline-block mr-1" />}
+            />
+            <div className="flex items-center gap-2">
+              <ExternalUriLink
+                uri={data.project}
+                label={getLabel(data.project) || formatUrlForDisplay(data.project)}
+                className="text-sm"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* License of the software (distinct from the nanopublication's license) */}
+        {data.license && (
+          <div>
+            <ItemTitle
+              title="License"
+              icon={<Scale className="h-4 w-4 inline-block mr-1" />}
+            />
+            <div className="flex items-center gap-2">
+              <ExternalUriLink
+                uri={data.license}
+                label={getLabel(data.license) || formatUrlForDisplay(data.license)}
                 className="text-sm"
               />
             </div>
