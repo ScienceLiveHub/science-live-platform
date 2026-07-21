@@ -82,6 +82,11 @@ Before submitting the form data to generate the nanopub, sometimes it needs to b
 - Advanced form components (API-retrieved search box that returns object that needs to be mapped to a string).
 - Special data types (Convert dates to ISO date strings, possibly with time stripped off if only the date is important).
 
+For date-only values use `formatDateOnly()` from `@/lib/string-format`, never
+`date.toISOString().split("T")[0]`. The pickers produce a Date at *local*
+midnight, which `toISOString` shifts to the previous day for every user east of
+UTC — and that wrong date is then signed into an immutable nanopublication.
+
 For example:
 
 ```ts
@@ -110,7 +115,7 @@ onSubmit: async ({ value }) => {
   }));
   v.discipline = v.disciplineSelection?.uri || "";
   if (v.date instanceof Date) {
-    v.date = v.date.toISOString().split("T")[0];
+    v.date = formatDateOnly(v.date);
   }
 
   // There is no need to delete `v.topics` etc, as extraneous values are simply

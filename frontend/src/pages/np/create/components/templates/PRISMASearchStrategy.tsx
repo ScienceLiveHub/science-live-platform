@@ -3,6 +3,7 @@ import ApiComboboxMultipleExpandable from "@/components/np/api-combobox";
 import { WIKIDATA_ENTITY_API } from "@/components/np/api-endpoints";
 import { useFormedible } from "@/hooks/use-formedible";
 import { fetchPossibleValuesFromQuads } from "@/lib/rdf";
+import { formatDateOnly } from "@/lib/string-format";
 import { useEffect, useState } from "react";
 import z, { object } from "zod";
 import {
@@ -199,10 +200,10 @@ export default function PRISMASearchStrategy({
 
         // Convert dates to ISO date strings
         if (v["start-date"] instanceof Date) {
-          v["start-date"] = v["start-date"].toISOString().split("T")[0];
+          v["start-date"] = formatDateOnly(v["start-date"]);
         }
         if (v["end-date"] instanceof Date) {
-          v["end-date"] = v["end-date"].toISOString().split("T")[0];
+          v["end-date"] = formatDateOnly(v["end-date"]);
         }
 
         await submit(v);

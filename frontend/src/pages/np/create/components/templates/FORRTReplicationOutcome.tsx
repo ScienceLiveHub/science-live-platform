@@ -3,6 +3,7 @@ import { ResultItem } from "@/components/np/api-endpoints";
 import { QueryComboboxField } from "@/components/np/query-combobox";
 import { useFormedible } from "@/hooks/use-formedible";
 import { NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
+import { formatDateOnly } from "@/lib/string-format";
 import ky from "ky";
 import { useState } from "react";
 import z from "zod";
@@ -106,7 +107,20 @@ export default function FORRTReplicationOutcome({
   submit,
   prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
-  const [studySelection, setStudySelection] = useState<ResultItem | null>(null);
+  // Seed the combobox display from a prefilled value (e.g. the chain wizard
+  // carries the published Study URI into this field). No-op for normal creation,
+  // where prefilledData is empty.
+  const [studySelection, setStudySelection] = useState<ResultItem | null>(
+    typeof prefilledData.study === "string"
+      ? {
+          uri: prefilledData.study,
+          label:
+            typeof prefilledData.studyLabel === "string"
+              ? prefilledData.studyLabel
+              : prefilledData.study,
+        }
+      : null,
+  );
 
   const schema = z.object({
     outcome: z
@@ -236,7 +250,7 @@ export default function FORRTReplicationOutcome({
         const submitData: Record<string, any> = { ...value };
         // Convert Date to ISO date string (YYYY-MM-DD) for the template
         if (submitData.date instanceof Date) {
-          submitData.date = submitData.date.toISOString().split("T")[0];
+          submitData.date = formatDateOnly(submitData.date);
         }
         if (!submitData.limitations) delete submitData.limitations;
         await submit(submitData);

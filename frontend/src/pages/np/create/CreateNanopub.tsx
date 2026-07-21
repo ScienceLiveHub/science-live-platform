@@ -2,6 +2,7 @@ import { loadSigningProfile } from "@/lib/api-utils";
 import { authClient } from "@/lib/auth-client";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import CreateModeTabs from "./CreateModeTabs";
 import NanopubEditor from "./components/NanopubEditor";
 
 export default function CreateNanopub() {
@@ -31,6 +32,7 @@ export default function CreateNanopub() {
 
   return (
     <main className="container mx-auto flex grow flex-col gap-6 p-4 md:p-6 md:max-w-6xl">
+      <CreateModeTabs />
       <NanopubEditor
         key={templateUri ?? "default"}
         identity={signingProfile}
