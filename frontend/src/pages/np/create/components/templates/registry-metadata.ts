@@ -91,11 +91,15 @@ export const TEMPLATE_URI = {
  * those show nothing in browse, so listing them would only bloat the VALUES block.
  * This is the subset of each chain that still has nanopubs a user can actually see.
  *
- * Regenerate with `node scripts/discover-legacy-template-uris.mjs` — it walks
- * each TEMPLATE_URI's `npx:supersedes` chain and counts usage. Re-run whenever a
- * template is updated, so a newly-superseded-but-used version does not silently
- * disappear from browse/search (that was the bug this list previously had — e.g.
- * COMMENT_PAPER, GEO_COVERAGE and others had used old versions that were missing).
+ * To refresh when a template is updated: for that template take the UNION of its
+ * entries here and its `npx:supersedes` chain, and keep only versions that still
+ * have LIVE nanopubs on the network (valid signature, not invalidated, not
+ * superseded). Doing this per update stops a newly-superseded-but-used version
+ * from silently disappearing from browse/search — the bug this list previously
+ * had (e.g. COMMENT_PAPER and GEO_COVERAGE had used old versions that were missing).
+ * NOTE: some live versions are NOT reachable via the supersedes chain (parallel
+ * lineages) — e.g. CITATION_CITO's RAX_4tWT — so never drop an existing entry
+ * from a chain walk alone; check it against the network first.
  *
  * NOTE: also ensure backwards-compatible support for legacy template versions in
  * custom view components.
