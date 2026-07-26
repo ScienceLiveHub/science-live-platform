@@ -79,30 +79,26 @@ export const TEMPLATE_URI = {
 /**
  * Legacy/previous versions of template URIs.
  *
- * Browse and search filter nanopubs by `wasCreatedFromTemplate`, so a nanopub
- * created with an OLDER version of a template drops out of the results unless
- * that old version's URI is listed here (see `getTemplateUris` in SearchBar).
- * Maps template key -> array of superseded template URIs.
+ * Maps template key -> array of superseded template URIs. TWO consumers:
+ *   1. Browse/search (`getTemplateUris` in SearchBar) expand a selected template
+ *      to current + these legacy URIs, so a nanopub made with an older version
+ *      still appears in results instead of silently dropping out.
+ *   2. `view-registry.tsx` keys off `LEGACY_TEMPLATE_URIS.<KEY>![0]` to render an
+ *      old nanopub with the right view component.
  *
- * Scope: only versions that have LIVE nanopubs — a valid signature, not
- * invalidated, and not itself superseded by a newer nanopub. A template's full
- * `npx:supersedes` chain often includes trial-and-error versions whose nanopubs
- * were all later superseded/retracted (e.g. ODRL_POLICY, PRISMA_SEARCH_STRATEGY);
- * those show nothing in browse, so listing them would only bloat the VALUES block.
- * This is the subset of each chain that still has nanopubs a user can actually see.
+ * Because of (2): DO NOT remove an existing entry and keep its first URI stable —
+ * a removed key makes `<KEY>![0]` evaluate `undefined[0]`, which the `!` hides from
+ * the typechecker but THROWS at module load and crashes the whole view tree. (This
+ * is exactly what broke E2E once: dropping RESEARCH_SYNTHESIS here.)
  *
- * To refresh when a template is updated: for that template take the UNION of its
- * entries here and its `npx:supersedes` chain, and keep only versions that still
- * have LIVE nanopubs on the network (valid signature, not invalidated, not
- * superseded). Doing this per update stops a newly-superseded-but-used version
- * from silently disappearing from browse/search — the bug this list previously
- * had (e.g. COMMENT_PAPER and GEO_COVERAGE had used old versions that were missing).
- * NOTE: some live versions are NOT reachable via the supersedes chain (parallel
- * lineages) — e.g. CITATION_CITO's RAX_4tWT — so never drop an existing entry
- * from a chain walk alone; check it against the network first.
- *
- * NOTE: also ensure backwards-compatible support for legacy template versions in
- * custom view components.
+ * What to ADD when a template is updated: superseded versions that still have LIVE
+ * nanopubs (valid signature, not invalidated, not superseded), so real nanopubs are
+ * not hidden from browse. A template's `npx:supersedes` chain often has trial-and-
+ * error versions with no live nanopubs (e.g. ODRL_POLICY) — no need to add those.
+ * But NOTE: some live versions are NOT in the supersedes chain (parallel lineages)
+ * — e.g. CITATION_CITO's RAX_4tWT with 100+ live nanopubs — so audit against the
+ * network (union of these entries + the chain, filtered to live), never a chain
+ * walk alone. Also keep view components backwards-compatible with legacy versions.
  */
 export const LEGACY_TEMPLATE_URIS: Partial<
   Record<keyof typeof TEMPLATE_URI, string[]>
@@ -138,8 +134,9 @@ export const LEGACY_TEMPLATE_URIS: Partial<
   PICO_RESEARCH_QUESTION: [
     "https://w3id.org/np/RAfZfE1gbUtc35W7xT12XTO0ptZwycN2-jj7Jow6COAoQ",
   ],
-  // RESEARCH_SYNTHESIS's only old version (RA-ahnCO...) has 0 live nanopubs
-  // (all superseded), so there is nothing to surface — intentionally omitted.
+  RESEARCH_SYNTHESIS: [
+    "https://w3id.org/np/RA-ahnCOKnyLdqxUKbmRxFrXXc3PQMoa-_ce-W-J5-GLY",
+  ],
 };
 
 /**
