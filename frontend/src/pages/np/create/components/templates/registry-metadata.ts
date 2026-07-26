@@ -78,11 +78,27 @@ export const TEMPLATE_URI = {
 
 /**
  * Legacy/previous versions of template URIs.
- * Used for viewing nanopubs created with older template versions.
- * Maps template key to array of legacy URIs.
  *
- * NOTE: we need to be careful to ensure backwards-compatible support for legacy
- * template versions in custom view components.
+ * Browse and search filter nanopubs by `wasCreatedFromTemplate`, so a nanopub
+ * created with an OLDER version of a template drops out of the results unless
+ * that old version's URI is listed here (see `getTemplateUris` in SearchBar).
+ * Maps template key -> array of superseded template URIs.
+ *
+ * Scope: only versions that have LIVE nanopubs — a valid signature, not
+ * invalidated, and not itself superseded by a newer nanopub. A template's full
+ * `npx:supersedes` chain often includes trial-and-error versions whose nanopubs
+ * were all later superseded/retracted (e.g. ODRL_POLICY, PRISMA_SEARCH_STRATEGY);
+ * those show nothing in browse, so listing them would only bloat the VALUES block.
+ * This is the subset of each chain that still has nanopubs a user can actually see.
+ *
+ * Regenerate with `node scripts/discover-legacy-template-uris.mjs` — it walks
+ * each TEMPLATE_URI's `npx:supersedes` chain and counts usage. Re-run whenever a
+ * template is updated, so a newly-superseded-but-used version does not silently
+ * disappear from browse/search (that was the bug this list previously had — e.g.
+ * COMMENT_PAPER, GEO_COVERAGE and others had used old versions that were missing).
+ *
+ * NOTE: also ensure backwards-compatible support for legacy template versions in
+ * custom view components.
  */
 export const LEGACY_TEMPLATE_URIS: Partial<
   Record<keyof typeof TEMPLATE_URI, string[]>
@@ -94,6 +110,22 @@ export const LEGACY_TEMPLATE_URIS: Partial<
   ],
   CITATION_CITO: [
     "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo",
+    "https://w3id.org/np/RA4lw_FPfGtGFjpBJmkso_Pbj54B2zrJeG6vohBA0g16E",
+  ],
+  COMMENT_PAPER: [
+    "http://purl.org/np/RANWGVogb5j_VQ6A4nabA34_-zkZTRYNYtItRJXGf2TVQ",
+    "http://purl.org/np/RAhMhogxA2LQGFNAbsukAuV75jhBZjPrOSMnQlYCljoP4",
+    "http://purl.org/np/RAaRGtbno5qhDnHdw0Pae1CEyVmeqE5tuwAJ9bZTc4jaU",
+    "http://purl.org/np/RA4qeqqwcQGKQX9AgSd_3nNzECBYsohceseJ5FdFU_kjQ",
+  ],
+  GEO_COVERAGE: [
+    "https://w3id.org/np/RA22xv0H-LaNAF60g8oC-O22_a24gLfAgIqtkkfaXr9-I",
+  ],
+  RESEARCH_SOFTWARE: [
+    "https://w3id.org/np/RAnoxhRd6DYfbtX6KdXeWacNnM5sAahXQjlND91zDLeJU",
+  ],
+  PRISMA_DATABASE_SEARCH: [
+    "https://w3id.org/np/RAJs3CcP1SGqpvgEP85TDcw1fm09loHN6xByiFGdymrxw",
   ],
   FORRT_CLAIM: [
     "https://w3id.org/np/RAu5uTahAxc0OLBB3vaGwK3OQDDZV7QuWtDlBk0Ea3bco",
@@ -102,9 +134,8 @@ export const LEGACY_TEMPLATE_URIS: Partial<
   PICO_RESEARCH_QUESTION: [
     "https://w3id.org/np/RAfZfE1gbUtc35W7xT12XTO0ptZwycN2-jj7Jow6COAoQ",
   ],
-  RESEARCH_SYNTHESIS: [
-    "https://w3id.org/np/RA-ahnCOKnyLdqxUKbmRxFrXXc3PQMoa-_ce-W-J5-GLY",
-  ],
+  // RESEARCH_SYNTHESIS's only old version (RA-ahnCO...) has 0 live nanopubs
+  // (all superseded), so there is nothing to surface — intentionally omitted.
 };
 
 /**
