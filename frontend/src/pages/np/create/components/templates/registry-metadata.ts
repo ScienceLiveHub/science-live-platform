@@ -68,6 +68,9 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RA2zljn0Nw9SadppOyxZoh-_Rxosslrq-vYG-p9SttnJE",
   RESEARCH_SYNTHESIS:
     "https://w3id.org/np/RApmrqOEr4f5bJC2vayrTnzhwnuEfAU_I4Pdg8K5JxeBw",
+
+  // Story (narrative composition of a constellation)
+  STORY: "https://w3id.org/np/RAfjXiLtYji0w1Y3AtKmtL_S21esoh5jprGWAPpRQ1zUk",
   // Utility templates (not shown in the nanopub editor)
   COMMENT: "http://purl.org/np/RA3gQDMnYbKCTiQeiUYJYBaH6HUhz8f3HIg71itlsZDgA",
   APPROVE_OR_DISAPPROVE:
@@ -136,6 +139,16 @@ export const LEGACY_TEMPLATE_URIS: Partial<
   ],
   RESEARCH_SYNTHESIS: [
     "https://w3id.org/np/RA-ahnCOKnyLdqxUKbmRxFrXXc3PQMoa-_ce-W-J5-GLY",
+  ],
+  // Superseded story template versions (current = v4, the STORY URI above):
+  //   v3 RADCXU2C… — used generic <np>/figNode LocalResource nodes for images
+  //   v2 RAyOwfyJ… — story subject was UriPlaceholder+LocalResource (renamed/doubled in groups)
+  //   v1 RA-qSk1k… — used unsupported ntemplate:ASSERTION/CREATOR tokens + hasPrefix on full-URI fields
+  // Kept so any nanopub made with an older version (e.g. the v1 bootstrap story) isn't hidden.
+  STORY: [
+    "https://w3id.org/np/RADCXU2CySzD6H8FxmSr-w3a0sFiEWszmSlbM0VlTwABs",
+    "https://w3id.org/np/RAyOwfyJr6t0yyuCywGIDNw0Qv6S2GlA485o4XyJA8gFU",
+    "https://w3id.org/np/RA-qSk1kdlC7e2d3kDurzMQ9_QaueAYb-NlqZw6wbobL8",
   ],
 };
 
@@ -517,6 +530,27 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
       "recommendation",
       "forrt",
       "evidence",
+    ],
+  },
+
+  // ── Story ──────────────────────────────────────────────────────────
+  [TEMPLATE_URI.STORY]: {
+    name: "Science Live Story",
+    description:
+      "A reader-facing narrative that composes a constellation: references the record, pins the AI plain-language summaries as audience tabs, and carries a hero image and evidence figures.",
+    moreDescription:
+      "The story adds only a human-authored title and framing; the record, summaries and figures are composed deterministically from the constellation (build_story_draft.py). Usually created via the Story wizard, pre-filled from a story-draft.json.",
+    category: "Replication",
+    icon: "📖",
+    color: "teal",
+    recommended: false,
+    keywords: [
+      "story",
+      "narrative",
+      "blog",
+      "science communication",
+      "constellation",
+      "forrt",
     ],
   },
 };
