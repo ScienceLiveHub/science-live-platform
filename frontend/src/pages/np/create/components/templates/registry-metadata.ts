@@ -78,11 +78,27 @@ export const TEMPLATE_URI = {
 
 /**
  * Legacy/previous versions of template URIs.
- * Used for viewing nanopubs created with older template versions.
- * Maps template key to array of legacy URIs.
  *
- * NOTE: we need to be careful to ensure backwards-compatible support for legacy
- * template versions in custom view components.
+ * Maps template key -> array of superseded template URIs. TWO consumers:
+ *   1. Browse/search (`getTemplateUris` in SearchBar) expand a selected template
+ *      to current + these legacy URIs, so a nanopub made with an older version
+ *      still appears in results instead of silently dropping out.
+ *   2. `view-registry.tsx` keys off `LEGACY_TEMPLATE_URIS.<KEY>![0]` to render an
+ *      old nanopub with the right view component.
+ *
+ * Because of (2): DO NOT remove an existing entry and keep its first URI stable —
+ * a removed key makes `<KEY>![0]` evaluate `undefined[0]`, which the `!` hides from
+ * the typechecker but THROWS at module load and crashes the whole view tree. (This
+ * is exactly what broke E2E once: dropping RESEARCH_SYNTHESIS here.)
+ *
+ * What to ADD when a template is updated: superseded versions that still have LIVE
+ * nanopubs (valid signature, not invalidated, not superseded), so real nanopubs are
+ * not hidden from browse. A template's `npx:supersedes` chain often has trial-and-
+ * error versions with no live nanopubs (e.g. ODRL_POLICY) — no need to add those.
+ * But NOTE: some live versions are NOT in the supersedes chain (parallel lineages)
+ * — e.g. CITATION_CITO's RAX_4tWT with 100+ live nanopubs — so audit against the
+ * network (union of these entries + the chain, filtered to live), never a chain
+ * walk alone. Also keep view components backwards-compatible with legacy versions.
  */
 export const LEGACY_TEMPLATE_URIS: Partial<
   Record<keyof typeof TEMPLATE_URI, string[]>
@@ -94,6 +110,22 @@ export const LEGACY_TEMPLATE_URIS: Partial<
   ],
   CITATION_CITO: [
     "https://w3id.org/np/RAX_4tWTyjFpO6nz63s14ucuejd64t2mK3IBlkwZ7jjLo",
+    "https://w3id.org/np/RA4lw_FPfGtGFjpBJmkso_Pbj54B2zrJeG6vohBA0g16E",
+  ],
+  COMMENT_PAPER: [
+    "http://purl.org/np/RANWGVogb5j_VQ6A4nabA34_-zkZTRYNYtItRJXGf2TVQ",
+    "http://purl.org/np/RAhMhogxA2LQGFNAbsukAuV75jhBZjPrOSMnQlYCljoP4",
+    "http://purl.org/np/RAaRGtbno5qhDnHdw0Pae1CEyVmeqE5tuwAJ9bZTc4jaU",
+    "http://purl.org/np/RA4qeqqwcQGKQX9AgSd_3nNzECBYsohceseJ5FdFU_kjQ",
+  ],
+  GEO_COVERAGE: [
+    "https://w3id.org/np/RA22xv0H-LaNAF60g8oC-O22_a24gLfAgIqtkkfaXr9-I",
+  ],
+  RESEARCH_SOFTWARE: [
+    "https://w3id.org/np/RAnoxhRd6DYfbtX6KdXeWacNnM5sAahXQjlND91zDLeJU",
+  ],
+  PRISMA_DATABASE_SEARCH: [
+    "https://w3id.org/np/RAJs3CcP1SGqpvgEP85TDcw1fm09loHN6xByiFGdymrxw",
   ],
   FORRT_CLAIM: [
     "https://w3id.org/np/RAu5uTahAxc0OLBB3vaGwK3OQDDZV7QuWtDlBk0Ea3bco",
