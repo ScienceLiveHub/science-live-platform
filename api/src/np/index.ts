@@ -34,8 +34,13 @@ const ENDPOINT_TIMEOUT = 60_000; // 60s
  *
  */
 app.get("/constellation", async (c) => {
-  const user = c.get("user");
-  if (!user) return c.json({ error: "Unauthorized" }, 401);
+  // Public read. A constellation only aggregates already-public nanopublications
+  // from the network, so anyone can view a reader-facing story page (/np/story)
+  // without an account — reading public data is not what authentication is for
+  // (that gates *creating/signing* nanopubs). Abuse is bounded by the
+  // depth/maxNodes/timeout limits below. NOTE: the FORRT replication template's
+  // build_story.py still requires a Science Live API key, so template/offline
+  // users continue to authenticate and get a key for the programmatic path.
 
   const rawUri = c.req.query("uri");
   if (!rawUri) return c.json({ error: "Missing 'uri' query parameter" }, 400);
