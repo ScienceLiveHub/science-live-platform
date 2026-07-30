@@ -119,6 +119,35 @@ limit 100
 `;
 
 /**
+ * Normalized per-nanopub metadata (label, creation date, creator ORCID + name)
+ * for a batch of nanopub URIs, read from the KP admin graph (`npa:graph`) rather
+ * than parsed out of each TriG. The admin graph exposes these as canonical
+ * `dct:created` / `dct:description|rdfs:label` / `dct:creator` regardless of the
+ * prefix the source nanopub serialised (published nanopubs bind dcterms to
+ * `dc:`, not `dct:`, which defeats TriG string-matching). The creator's display
+ * name is joined from its `foaf:name` statement in the pubinfo graph.
+ */
+export const NODE_METADATA = `
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix np: <http://www.nanopub.org/nschema#>
+prefix npa: <http://purl.org/nanopub/admin/>
+prefix dct: <http://purl.org/dc/terms/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+
+select ?np ?label ?date ?creator ?creatorName where {
+  values ?np { ?_uris }
+  graph npa:graph {
+    ?np np:hasAssertion ?assertion .
+    optional { ?np rdfs:label ?label . }
+    optional { ?np dct:created ?date . }
+    optional { ?np dct:creator ?creator . }
+    optional { ?np np:hasPublicationInfo ?pubinfo . }
+  }
+  optional { graph ?pubinfo { ?creator foaf:name ?creatorName . } }
+}
+`;
+
+/**
  * Substitute a `?_…` placeholder with a bracketed URI literal. Defaults to the
  * `?_nanopubUri` placeholder used by the reference queries; pass an explicit
  * placeholder for other queries (e.g. `?_aidaStatementIri`).
@@ -129,4 +158,13 @@ export function bindUri(
   placeholder = "?_nanopubUri",
 ): string {
   return query.replaceAll(placeholder, `<${uri}>`);
+}
+
+/** Substitute a `?_…` placeholder with a space-separated list of bracketed URIs (a SPARQL VALUES body). */
+export function bindUris(
+  query: string,
+  uris: string[],
+  placeholder = "?_uris",
+): string {
+  return query.replaceAll(placeholder, uris.map((u) => `<${u}>`).join(" "));
 }

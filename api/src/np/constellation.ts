@@ -1,7 +1,9 @@
 import {
   AIDA_STATEMENT_NANOPUB,
   bindUri,
+  bindUris,
   NANOPUB_SPARQL_ENDPOINT_FULL,
+  NODE_METADATA,
   REFERENCES_FROM,
   REFERENCES_TO,
 } from "./queries";
@@ -14,7 +16,6 @@ import {
   extractDois,
   extractExcerpts,
   extractGithubUrls,
-  extractNanopubMeta,
   extractNanopubUris,
   extractOrcids,
   extractOutcomeFields,
@@ -61,6 +62,8 @@ export type ConstellationNode = {
   label: string;
   date: string;
   creators: string[];
+  /** Display names (foaf:name), aligned 1:1 with `creators`; "" when unknown. */
+  creatorNames: string[];
   authorsOrcid: string[];
   plainTextExcerpts: string[];
   // Per-template structured fields — only the matching one is populated.
@@ -231,6 +234,10 @@ export async function buildConstellation(
     }
   }
 
+  // Fill node label/date/creators from the KP admin graph (normalized), before
+  // assembling chains so the reference bibliography has titles and authors.
+  await enrichNodeMetadata(nodes, signal);
+
   const nodeList = [...nodes.values()];
   const { chains, apexCito, researchSynthesis, paperDoi } = assembleChains(
     nodeList,
@@ -250,6 +257,52 @@ export async function buildConstellation(
     edges,
     externalCitations: [...externals].sort(),
   };
+}
+
+/**
+ * Fill each node's label/date/creators/creatorNames from the KP admin graph in
+ * one batched SPARQL query per chunk of URIs — normalized values, not parsed
+ * from each TriG. Best-effort: a metadata miss never fails the constellation.
+ */
+async function enrichNodeMetadata(
+  nodes: Map<string, ConstellationNode>,
+  signal?: AbortSignal,
+): Promise<void> {
+  const uris = [...nodes.keys()];
+  const CHUNK = 40;
+  for (let i = 0; i < uris.length; i += CHUNK) {
+    const chunk = uris.slice(i, i + CHUNK);
+    let rows: Record<string, string>[];
+    try {
+      rows = await executeSparql(bindUris(NODE_METADATA, chunk), signal);
+    } catch {
+      continue;
+    }
+    const creatorsByUri = new Map<string, string[]>();
+    const namesByUri = new Map<string, Map<string, string>>();
+    for (const r of rows) {
+      const node = nodes.get(r.np);
+      if (!node) continue;
+      if (r.label && !node.label) node.label = r.label;
+      if (r.date && !node.date) node.date = r.date;
+      if (!r.creator) continue;
+      const list = creatorsByUri.get(r.np) ?? [];
+      if (!list.includes(r.creator)) list.push(r.creator);
+      creatorsByUri.set(r.np, list);
+      if (r.creatorName) {
+        const nm = namesByUri.get(r.np) ?? new Map<string, string>();
+        nm.set(r.creator, r.creatorName);
+        namesByUri.set(r.np, nm);
+      }
+    }
+    for (const [uri, creators] of creatorsByUri) {
+      const node = nodes.get(uri);
+      if (!node) continue;
+      const nm = namesByUri.get(uri) ?? new Map<string, string>();
+      node.creators = creators;
+      node.creatorNames = creators.map((o) => nm.get(o) ?? "");
+    }
+  }
 }
 
 // =============================================================================
@@ -281,16 +334,18 @@ async function processNode(
     : "";
 
   const stepKind = classifyStepKind(stepType);
-  const meta = extractNanopubMeta(trig);
 
   const node: ConstellationNode = {
     uri,
     stepKind,
     stepType,
     templateUri: templateUri ?? "",
-    label: meta.label,
-    date: meta.date,
-    creators: meta.creators,
+    // label/date/creators/creatorNames are filled from the KP admin graph after
+    // the walk (enrichNodeMetadata) — normalized, not parsed from the TriG.
+    label: "",
+    date: "",
+    creators: [],
+    creatorNames: [],
     authorsOrcid: extractOrcids(trig),
     plainTextExcerpts: extractExcerpts(trig),
     githubUrls: extractGithubUrls(trig),
