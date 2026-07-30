@@ -119,20 +119,30 @@ limit 100
 `;
 
 /**
- * Display names (`foaf:name`) for a batch of creator ORCID URIs. Node label,
- * date and creator are captured from the reference-discovery rows during the
- * walk (they already select `?label ?date ?creator` from `npa:graph`), so the
- * only metadata still needing a round-trip is the human name. A constellation
- * is usually authored by 1–3 people, so this is a tiny, fast query that finishes
+ * Source: frontend/src/lib/queries/creator-names.rq
+ * Display names (foaf:name) for a batch of creator ORCID URIs. Node label, date
+ * and creator are captured from the reference-discovery rows during the walk
+ * (they already select `?label ?date ?creator` from `npa:graph`), so the only
+ * metadata still needing a round-trip is the human name. A constellation is
+ * usually authored by 1–3 people, so this is a tiny, fast query that finishes
  * comfortably even when the walk has consumed most of the request budget —
  * unlike a per-node (104-row) metadata query, which a slow walk would cut off.
  */
 export const CREATOR_NAMES = `
+prefix np: <http://www.nanopub.org/nschema#>
+prefix npa: <http://purl.org/nanopub/admin/>
+prefix dct: <http://purl.org/dc/terms/>
 prefix foaf: <http://xmlns.com/foaf/0.1/>
 
 select distinct ?orcid ?name where {
   values ?orcid { ?_uris }
-  graph ?g { ?orcid foaf:name ?name . }
+  graph npa:graph {
+    ?np dct:creator ?orcid ;
+        np:hasPublicationInfo ?pubinfo .
+  }
+  graph ?pubinfo {
+    ?orcid foaf:name ?name .
+  }
 }
 `;
 
