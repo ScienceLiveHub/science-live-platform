@@ -2,8 +2,8 @@ import {
   AIDA_STATEMENT_NANOPUB,
   bindUri,
   bindUris,
+  CREATOR_NAMES,
   NANOPUB_SPARQL_ENDPOINT_FULL,
-  NODE_METADATA,
   REFERENCES_FROM,
   REFERENCES_TO,
 } from "./queries";
@@ -196,6 +196,9 @@ export async function buildConstellation(
   const edges: ConstellationEdge[] = [];
   const externals = new Set<string>();
   const visited = new Set<string>();
+  // Node metadata (label/date/creators) captured from the discovery rows as the
+  // walk visits them — see applyDiscoveredMetadata / fetchCreatorNames below.
+  const metaByUri = new Map<string, DiscoveredMeta>();
 
   let frontier: { uri: string; depth: number }[] = [
     { uri: entryUri, depth: 0 },
@@ -216,6 +219,7 @@ export async function buildConstellation(
       if (!r) continue;
       nodes.set(r.node.uri, r.node);
       for (const d of r.dois) externals.add(d);
+      collectDiscoveredMetadata(r.discoveryRows, metaByUri);
 
       if (isTemplateDefinitionLabel(r.node.stepType)) continue;
       if (r.depth >= depthLimit) continue;
@@ -234,9 +238,22 @@ export async function buildConstellation(
     }
   }
 
-  // Fill node label/date/creators from the KP admin graph (normalized), before
+  // Apply the label/date/creator captured from the discovery rows during the
+  // walk, then resolve creator display names in one small query — done before
   // assembling chains so the reference bibliography has titles and authors.
-  await enrichNodeMetadata(nodes, signal);
+  for (const [uri, node] of nodes) {
+    const m = metaByUri.get(uri);
+    if (!m) continue;
+    if (m.label) node.label = m.label;
+    if (m.date) node.date = m.date;
+    node.creators = m.creators;
+  }
+  const names = await fetchCreatorNames(
+    [...new Set([...nodes.values()].flatMap((n) => n.creators))],
+  );
+  for (const node of nodes.values()) {
+    node.creatorNames = node.creators.map((o) => names.get(o) ?? "");
+  }
 
   const nodeList = [...nodes.values()];
   const { chains, apexCito, researchSynthesis, paperDoi } = assembleChains(
@@ -259,50 +276,58 @@ export async function buildConstellation(
   };
 }
 
+/** Node metadata captured from the reference-discovery rows during the walk. */
+type DiscoveredMeta = { label?: string; date?: string; creators: string[] };
+
 /**
- * Fill each node's label/date/creators/creatorNames from the KP admin graph in
- * one batched SPARQL query per chunk of URIs — normalized values, not parsed
- * from each TriG. Best-effort: a metadata miss never fails the constellation.
+ * Fold reference-discovery rows (`?np ?label ?date ?creator` from `npa:graph`)
+ * into the per-URI metadata map. Called for every node the walk visits, so the
+ * metadata is gathered inline — no post-walk query that a slow walk would cut.
  */
-async function enrichNodeMetadata(
-  nodes: Map<string, ConstellationNode>,
-  signal?: AbortSignal,
-): Promise<void> {
-  const uris = [...nodes.keys()];
-  const CHUNK = 40;
-  for (let i = 0; i < uris.length; i += CHUNK) {
-    const chunk = uris.slice(i, i + CHUNK);
-    let rows: Record<string, string>[];
-    try {
-      rows = await executeSparql(bindUris(NODE_METADATA, chunk), signal);
-    } catch {
-      continue;
-    }
-    const creatorsByUri = new Map<string, string[]>();
-    const namesByUri = new Map<string, Map<string, string>>();
-    for (const r of rows) {
-      const node = nodes.get(r.np);
-      if (!node) continue;
-      if (r.label && !node.label) node.label = r.label;
-      if (r.date && !node.date) node.date = r.date;
-      if (!r.creator) continue;
-      const list = creatorsByUri.get(r.np) ?? [];
-      if (!list.includes(r.creator)) list.push(r.creator);
-      creatorsByUri.set(r.np, list);
-      if (r.creatorName) {
-        const nm = namesByUri.get(r.np) ?? new Map<string, string>();
-        nm.set(r.creator, r.creatorName);
-        namesByUri.set(r.np, nm);
-      }
-    }
-    for (const [uri, creators] of creatorsByUri) {
-      const node = nodes.get(uri);
-      if (!node) continue;
-      const nm = namesByUri.get(uri) ?? new Map<string, string>();
-      node.creators = creators;
-      node.creatorNames = creators.map((o) => nm.get(o) ?? "");
-    }
+function collectDiscoveredMetadata(
+  rows: Record<string, string>[],
+  metaByUri: Map<string, DiscoveredMeta>,
+): void {
+  for (const row of rows) {
+    const uri = canonicalNanopubUri(row.np ?? "");
+    if (!uri) continue;
+    const m = metaByUri.get(uri) ?? { creators: [] };
+    if (row.label && !m.label) m.label = row.label;
+    if (row.date && !m.date) m.date = row.date;
+    if (row.creator && !m.creators.includes(row.creator))
+      m.creators.push(row.creator);
+    metaByUri.set(uri, m);
   }
+}
+
+/**
+ * Resolve `foaf:name` display names for a set of creator ORCID URIs in one small
+ * query. A constellation is authored by a handful of people, so this stays fast
+ * even at the end of a slow walk. Best-effort: on failure the references fall
+ * back to the ORCID.
+ */
+async function fetchCreatorNames(
+  orcids: string[],
+): Promise<Map<string, string>> {
+  const names = new Map<string, string>();
+  if (orcids.length === 0) return names;
+  // Its OWN short budget, not the request's AbortSignal: on a slow walk that
+  // signal has already fired by the time we get here, and this ~0.1s query
+  // shouldn't be killed by it. Names are the last, cheapest thing to fetch.
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), 15_000);
+  try {
+    const rows = await executeSparql(bindUris(CREATOR_NAMES, orcids), ac.signal);
+    for (const r of rows) {
+      const name = (r.name ?? "").trim();
+      if (r.orcid && name && !names.has(r.orcid)) names.set(r.orcid, name);
+    }
+  } catch {
+    // best-effort — references show the ORCID when the name can't be resolved
+  } finally {
+    clearTimeout(timer);
+  }
+  return names;
 }
 
 // =============================================================================
@@ -314,6 +339,8 @@ type ProcessedNode = {
   node: ConstellationNode;
   neighbours: string[];
   dois: string[];
+  /** Reference-discovery rows (np/label/date/creator), used to capture metadata. */
+  discoveryRows: Record<string, string>[];
 };
 
 async function processNode(
@@ -388,8 +415,11 @@ async function processNode(
   }
 
   let sparqlNeighbours: string[] = [];
+  let discoveryRows: Record<string, string>[] = [];
   try {
-    sparqlNeighbours = await discoverNeighbours(uri, signal);
+    const disc = await discoverNeighbours(uri, signal);
+    sparqlNeighbours = disc.neighbours;
+    discoveryRows = disc.rows;
   } catch {
     sparqlNeighbours = [];
   }
@@ -407,24 +437,28 @@ async function processNode(
   }
   const neighbours = [...merged];
 
-  return { depth, node, neighbours, dois: extractDois(trig) };
+  return { depth, node, neighbours, dois: extractDois(trig), discoveryRows };
 }
 
 async function discoverNeighbours(
   uri: string,
   signal?: AbortSignal,
-): Promise<string[]> {
+): Promise<{ neighbours: string[]; rows: Record<string, string>[] }> {
   // Serialise the two SPARQL hits — KP's nginx returns intermittent 503s
   // under concurrent load, and the executeSparql retry helper handles
   // transient failures but doesn't reduce parallel pressure.
   const incoming = await executeSparql(bindUri(REFERENCES_TO, uri), signal);
   const outgoing = await executeSparql(bindUri(REFERENCES_FROM, uri), signal);
+  const rows = [...incoming, ...outgoing];
   const out = new Set<string>();
-  for (const row of [...incoming, ...outgoing]) {
+  for (const row of rows) {
     const canon = canonicalNanopubUri(row.np ?? "");
     if (canon && canon !== uri) out.add(canon);
   }
-  return [...out];
+  // The rows also carry each neighbour's ?label ?date ?creator from npa:graph —
+  // returned so the caller can capture node metadata during the walk instead of
+  // re-querying it afterwards (which a slow walk would cut off).
+  return { neighbours: [...out], rows };
 }
 
 /**

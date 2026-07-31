@@ -71,15 +71,14 @@ describe("GET /np/constellation", () => {
     vi.restoreAllMocks();
   });
 
-  it("returns 401 when no user is signed in", async () => {
+  it("allows anonymous access (constellation read is public)", async () => {
+    buildConstellationMock.mockResolvedValue(CONSTELLATION_PAYLOAD);
     const app = mountWithUser(null);
     const res = await app.request(
       "/np/constellation?uri=https://w3id.org/sciencelive/np/RAabcdefghijklmnopqrstuvwxyz0000000",
     );
-    expect(res.status).toBe(401);
-    const body = (await res.json()) as { error: string };
-    expect(body.error).toMatch(/Unauthorized/);
-    expect(buildConstellationMock).not.toHaveBeenCalled();
+    expect(res.status).toBe(200);
+    expect(buildConstellationMock).toHaveBeenCalled();
   });
 
   it("returns 400 when the uri query parameter is missing", async () => {
