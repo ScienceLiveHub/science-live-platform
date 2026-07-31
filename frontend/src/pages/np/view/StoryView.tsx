@@ -212,6 +212,52 @@ async function resolveArchive(doiUrl: string): Promise<ArchiveLinks> {
   }
 }
 
+// Resolve a paper DOI to a citation — title + "Authors · Year · Journal" — via DOI
+// content negotiation (CSL JSON), mirroring build_story.py's link_label(). doi.org
+// is CORS-enabled, so this runs client-side.
+type PaperCitation = { doi: string; title?: string; sub?: string };
+async function resolvePaperCitation(doiUrl: string): Promise<PaperCitation> {
+  try {
+    const d = await ky
+      .get(doiUrl, {
+        headers: { Accept: "application/vnd.citationstyles.csl+json" },
+        timeout: 20000,
+      })
+      .json<{
+        title?: string;
+        author?: { family?: string }[];
+        issued?: { "date-parts"?: number[][] };
+        "container-title"?: string;
+      }>();
+    const who = (d.author ?? [])
+      .slice(0, 3)
+      .map((a) => a.family)
+      .filter(Boolean)
+      .join(", ");
+    const year = d.issued?.["date-parts"]?.[0]?.[0];
+    const sub = [who, year ? String(year) : "", d["container-title"]]
+      .filter(Boolean)
+      .join(" · ");
+    return { doi: doiUrl, title: d.title, sub };
+  } catch {
+    return { doi: doiUrl };
+  }
+}
+
+// The "original study" a replication draws from is the DOI its outcomes CITE (the
+// CiTO citation target), NOT the constellation's `paperDoi` heuristic, which can
+// pick the replication's own paper. Take the most common non-Zenodo doi.org
+// target across the chains, falling back to paperDoi.
+function drawnFromDoi(con: Constellation | null): string {
+  const targets = (con?.chains ?? [])
+    .flatMap((c) => c.steps.find((s) => s.step === "CiTO")?.targets ?? [])
+    .filter((t) => /doi\.org/.test(t) && !/zenodo/.test(t));
+  const counts = new Map<string, number>();
+  for (const t of targets) counts.set(t, (counts.get(t) ?? 0) + 1);
+  const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+  return top || con?.paperDoi || "";
+}
+
 // ---------- pinned audience summary
 type Summary = { uri: string; audienceLabel: string; text: string };
 function audienceLabel(uri?: string): string {
@@ -398,6 +444,23 @@ export default function StoryView() {
     };
   }, [con]);
 
+  // Resolve the "original study" DOI to a full citation (title/authors/year/journal).
+  const [paper, setPaper] = useState<PaperCitation | null>(null);
+  useEffect(() => {
+    const doi = drawnFromDoi(con);
+    if (!doi) {
+      setPaper(null);
+      return;
+    }
+    let cancelled = false;
+    resolvePaperCitation(doi).then((c) => {
+      if (!cancelled) setPaper(c);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [con]);
+
   const [tab, setTab] = useState("record");
 
   if (!storyUri) return <Centered>Provide a story URI: <code>?uri=…</code></Centered>;
@@ -406,7 +469,7 @@ export default function StoryView() {
   if (!data) return <Centered>That nanopublication is not a story.</Centered>;
 
   const rs = con?.researchSynthesis;
-  const paperDoi = con?.paperDoi;
+  const drawnDoi = drawnFromDoi(con);
   const limbs = (con?.chains ?? []).map((c) => limbFromChain(c, data.figures));
   const n = limbs.length;
   const origClaim = firstSentence(rs?.synthesis);
@@ -451,7 +514,7 @@ export default function StoryView() {
 
           {data.framing && <div className="synthlead"><ProseBlocks text={data.framing} /></div>}
 
-          {(origClaim || paperDoi) && (
+          {(origClaim || drawnDoi) && (
             <div className="whatcard">
               <div>
                 <span className="cardlabel">What is being replicated</span>
@@ -459,8 +522,16 @@ export default function StoryView() {
               </div>
               <div className="drawn">
                 <span className="cardlabel">Drawn from — the original study</span>
-                {paperDoi ? (
-                  <p className="srcline"><a href={paperDoi} target="_blank" rel="noopener">{paperDoi}</a></p>
+                {drawnDoi ? (
+                  <>
+                    {paper?.title && (
+                      <p className="whatpaper">
+                        <a href={drawnDoi} target="_blank" rel="noopener">{paper.title}</a>
+                      </p>
+                    )}
+                    {paper?.sub && <p className="what">{paper.sub}</p>}
+                    <p className="srcline"><a href={drawnDoi} target="_blank" rel="noopener">{drawnDoi}</a></p>
+                  </>
                 ) : (
                   <p className="what">No source identifier in the record.</p>
                 )}
