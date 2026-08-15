@@ -472,7 +472,16 @@ export default function StoryView() {
   const drawnDoi = drawnFromDoi(con);
   const limbs = (con?.chains ?? []).map((c) => limbFromChain(c, data.figures));
   const n = limbs.length;
-  const origClaim = firstSentence(rs?.synthesis);
+  // "What is being replicated": the synthesis' first sentence, or — for a single-outcome
+  // chain that has no Research Synthesis — the AIDA statement / Claim from the first chain,
+  // so the card is never empty just because the replication tests one claim.
+  const firstSteps = con?.chains?.[0]?.steps ?? [];
+  const claimStatement =
+    firstSteps.find((s) => s.step === "AIDA")?.text ||
+    firstSteps.find((s) => s.step === "AIDA")?.label ||
+    firstSteps.find((s) => s.step === "Claim")?.label ||
+    "";
+  const origClaim = firstSentence(rs?.synthesis) || claimStatement;
   const citeText = `${author?.name ?? "—"}. (${author?.created?.slice(0, 4) ?? "n.d."}). ${rs?.label ?? data.headline ?? "Research synthesis"} [Nanopublication]. ${data.apex}`;
 
   return (
