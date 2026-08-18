@@ -16,6 +16,14 @@ const app = new Hono<{
 // Adjust as needed. Deployment may have its own limits regardless.
 const ENDPOINT_TIMEOUT = 60_000; // 60s
 
+// A constellation aggregates published (immutable) nanopublications and only
+// changes when a *new* nanopub extends it, which is rare. Caching the response
+// at the Cloudflare edge turns repeat views — the common case for a shared story
+// page — from a ~1-minute walk into an instant hit. Kept modest so a newly
+// published replication still surfaces within the hour; pre-warm featured
+// stories to keep them permanently hot.
+const CACHE_TTL_SECONDS = 3600; // 1 hour
+
 /**
  * GET /np/constellation?uri=<nanopub-uri>&depth=<n>&maxNodes=<n>
  *
@@ -58,6 +66,21 @@ app.get("/constellation", async (c) => {
   const depthLimit = clampInt(c.req.query("depth"), 0, 10, 5);
   const maxNodes = clampInt(c.req.query("maxNodes"), 1, 200, 80);
 
+  // Serve from the Cloudflare edge cache if we've already walked this exact
+  // constellation. The key is normalised to the canonical (uri, depth, maxNodes)
+  // so it's independent of query-param order or extras.
+  const cacheKey = new Request(
+    `https://np-constellation.cache/?uri=${encodeURIComponent(entry)}&depth=${depthLimit}&maxNodes=${maxNodes}`,
+  );
+  // `caches` is a Workers-runtime global; absent under plain unit tests / other
+  // hosts, so guard it and fall through to a live walk when there's no cache.
+  const cache =
+    typeof caches !== "undefined"
+      ? await caches.open("np-constellation")
+      : null;
+  const cached = cache ? await cache.match(cacheKey) : null;
+  if (cached) return cached;
+
   // Request-level timeout with AbortSignal
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), ENDPOINT_TIMEOUT);
@@ -80,13 +103,19 @@ app.get("/constellation", async (c) => {
       );
     }
 
-    // TODO: if we want to utilize short-lived caching, we can enable this
-    // to reduce server load.  Other options may exist depending on deployment,
-    // e.g. within Cloudflare.
-    // Add cache headers for immutable nanopub data
-    // c.header("Cache-Control", "public, max-age=300"); // 5 minutes
-
-    return c.json(constellation);
+    // Cache the successful walk at the edge (see CACHE_TTL_SECONDS). Only 200s
+    // are cached — 404s/timeouts fall through so a transient failure isn't stuck.
+    const response = c.json(constellation);
+    response.headers.set(
+      "Cache-Control",
+      `public, max-age=${CACHE_TTL_SECONDS}`,
+    );
+    if (cache) {
+      const put = cache.put(cacheKey, response.clone());
+      if (c.executionCtx) c.executionCtx.waitUntil(put);
+      else await put;
+    }
+    return response;
   } catch (err) {
     // Differentiate upstream failures (502) from programmer errors (500)
     if (err instanceof UpstreamError) {
