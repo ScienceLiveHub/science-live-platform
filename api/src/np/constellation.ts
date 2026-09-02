@@ -124,6 +124,12 @@ export type Chain = {
   outcomeVerdict: string;
   outcomeConfidence: string;
   citoRelations: string[];
+  /**
+   * The paper THIS chain is about, from its own CiTO Citation — the
+   * authoritative answer, not a heuristic. Empty when the walk did not reach a
+   * CiTO step for this chain.
+   */
+  paperDoi: string;
   steps: ChainStep[];
 };
 
@@ -144,7 +150,12 @@ export type ResearchSynthesisSummary = {
 
 export type Constellation = {
   entry: string;
-  /** The primary cited paper DOI shared across the chain, if discoverable. */
+  /**
+   * The primary cited paper DOI for the constellation, taken from the apex
+   * CiTO or the chains' CiTO citations. Approximate by nature when a
+   * constellation spans several papers — prefer `chains[].paperDoi`, which is
+   * exact per chain.
+   */
   paperDoi: string;
   /** Top-level CiTO Citation nanopub at the apex of the constellation. */
   apexCito: ApexCito | null;
@@ -608,9 +619,8 @@ function assembleChains(
         }
       : null;
 
-  // Paper DOI — the most common DOI cited across the constellation's CiTO
-  // and Quote nodes, biased toward those that aren't Zenodo (artefact DOIs).
-  const paperDoi = findPrimaryPaperDoi(nodes);
+  // Paper DOI is derived from the chains' CiTO citations, so it is computed
+  // after the chains are assembled (see findPrimaryPaperDoi below).
 
   // Build a chain per Outcome.
   const outcomes = byKind.get("outcome") ?? [];
@@ -740,37 +750,95 @@ function assembleChains(
       outcomeVerdict: out.validationStatus,
       outcomeConfidence: out.confidenceLevel,
       citoRelations: cito?.cito?.relations ?? [],
+      paperDoi: chainPaperDoi(steps),
       steps,
     });
   }
 
+  const paperDoi = findPrimaryPaperDoi(nodes, chains, apexCito);
+
   return { chains, apexCito, researchSynthesis, paperDoi };
 }
 
-/**
- * Pick the most likely primary paper DOI from the constellation's external
- * citations. Heuristic: the DOI cited the most often across CiTO + Quote
- * nodes, with Zenodo artefact DOIs deprioritised.
- */
-function findPrimaryPaperDoi(nodes: ConstellationNode[]): string {
+function isDoiUrl(d: string): boolean {
+  return d.startsWith("https://doi.org/") || d.startsWith("http://doi.org/");
+}
+
+function isArtefactDoi(d: string): boolean {
+  return /10\.5281\/zenodo/.test(d);
+}
+
+/** Most frequent entry, Zenodo artefact DOIs last. */
+function topByCount(dois: string[]): string {
   const counts = new Map<string, number>();
-  for (const n of nodes) {
-    const dois: string[] = [];
-    if (n.cito) dois.push(...n.cito.citedTargets);
-    if (n.quote?.citedDoi) dois.push(n.quote.citedDoi);
-    for (const d of dois) {
-      if (!d.startsWith("https://doi.org/") && !d.startsWith("http://doi.org/"))
-        continue;
-      counts.set(d, (counts.get(d) ?? 0) + 1);
-    }
+  for (const d of dois) {
+    if (!isDoiUrl(d)) continue;
+    counts.set(d, (counts.get(d) ?? 0) + 1);
   }
   const sorted = [...counts.entries()].sort((a, b) => {
-    const aArtefact = /10\.5281\/zenodo/.test(a[0]) ? 1 : 0;
-    const bArtefact = /10\.5281\/zenodo/.test(b[0]) ? 1 : 0;
+    const aArtefact = isArtefactDoi(a[0]) ? 1 : 0;
+    const bArtefact = isArtefactDoi(b[0]) ? 1 : 0;
     if (aArtefact !== bArtefact) return aArtefact - bArtefact;
     return b[1] - a[1];
   });
   return sorted[0]?.[0] ?? "";
+}
+
+/**
+ * The paper a single chain is about: the DOI its CiTO Citation cites.
+ *
+ * A CiTO nanopub *is* the assertion "this outcome cites that paper, with this
+ * relation", so it is the authoritative answer rather than an estimate. Empty
+ * when the chain has no CiTO step (the walk does not always reach one).
+ */
+export function chainPaperDoi(steps: ChainStep[]): string {
+  const cito = steps.find((s) => s.step === "CiTO");
+  return topByCount((cito?.targets ?? []).filter((t) => !isArtefactDoi(t)));
+}
+
+/**
+ * The primary paper DOI for the whole constellation.
+ *
+ * Prefers what the chains actually CITE over what is merely mentioned most
+ * often. The previous implementation counted DOIs across CiTO *and Quote*
+ * nodes and took the winner, which let unrelated nanopubs reached by the walk
+ * outvote a chain's own citation: four Quote nanopubs annotating one paper
+ * outvoted the single CiTO on both the marine-heatwave chain (4 vs 1) and the
+ * Sado-estuary chain (4 vs 2), so both reported a paper neither study was
+ * about.
+ *
+ * Order of preference:
+ *   1. the apex CiTO's targets — the citation at the top of the constellation;
+ *   2. the most common target across the chains' own CiTO steps;
+ *   3. the old CiTO+Quote count, as a last resort when no CiTO was reached.
+ *
+ * Note this is inherently approximate for a constellation spanning several
+ * papers; `chains[].paperDoi` is the exact per-chain answer.
+ */
+export function findPrimaryPaperDoi(
+  nodes: ConstellationNode[],
+  chains: Chain[],
+  apexCito: ApexCito | null,
+): string {
+  const fromApex = topByCount(
+    (apexCito?.citedTargets ?? []).filter((t) => !isArtefactDoi(t)),
+  );
+  if (fromApex) return fromApex;
+
+  const fromChains = topByCount(
+    chains.flatMap((c) => {
+      const cito = c.steps.find((s) => s.step === "CiTO");
+      return (cito?.targets ?? []).filter((t) => !isArtefactDoi(t));
+    }),
+  );
+  if (fromChains) return fromChains;
+
+  return topByCount(
+    nodes.flatMap((n) => [
+      ...(n.cito?.citedTargets ?? []),
+      ...(n.quote?.citedDoi ? [n.quote.citedDoi] : []),
+    ]),
+  );
 }
 
 /**
