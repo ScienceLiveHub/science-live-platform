@@ -26,6 +26,7 @@ import {
   ScanSearch,
   SearchCheck,
   UserKey,
+  Variable,
   type LucideIcon,
 } from "lucide-react";
 import { ComponentType } from "react";
@@ -46,6 +47,7 @@ import { ViewFORRTKLReplicationOutcome } from "./ViewFORRTKLReplicationOutcome";
 import { ViewFORRTReplication } from "./ViewFORRTReplication";
 import { ViewFORRTReplicationOutcome } from "./ViewFORRTReplicationOutcome";
 import { ViewGeographicalCoverage } from "./ViewGeographicalCoverage";
+import { ViewIADOPTVariable } from "./ViewIADOPTVariable";
 import { ViewODRLAccessGrant } from "./ViewODRLAccessGrant";
 import { ViewODRLPolicy } from "./ViewODRLPolicy";
 import { ViewPCCResearchQuestion } from "./ViewPCCResearchQuestion";
@@ -91,6 +93,7 @@ export const VIEW_COMPONENTS: Record<
   [TEMPLATE_URI.FORRT_KL_REPLICATION]: ViewFORRTKLReplication,
   [TEMPLATE_URI.FORRT_KL_REPLICATION_OUTCOME]: ViewFORRTKLReplicationOutcome,
   [TEMPLATE_URI.RESEARCH_SYNTHESIS]: ViewResearchSynthesis,
+  [TEMPLATE_URI.IADOPT_VARIABLE]: ViewIADOPTVariable,
   // Legacy templates — remove when no longer needed
   [LEGACY_TEMPLATE_URIS.FORRT_CLAIM![0]]: ViewFORRTClaim,
   [LEGACY_TEMPLATE_URIS.PICO_RESEARCH_QUESTION![0]]:
@@ -127,4 +130,5 @@ export const TEMPLATE_VIEW_ICONS: Record<string, LucideIcon> = {
   [TEMPLATE_URI.FORRT_KL_REPLICATION]: FlaskConical,
   [TEMPLATE_URI.FORRT_KL_REPLICATION_OUTCOME]: ClipboardCheck,
   [TEMPLATE_URI.RESEARCH_SYNTHESIS]: Dna,
+  [TEMPLATE_URI.IADOPT_VARIABLE]: Variable,
 };

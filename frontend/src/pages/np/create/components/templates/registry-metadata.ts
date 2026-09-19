@@ -27,6 +27,9 @@ export const TEMPLATE_URI = {
     "https://w3id.org/np/RALmXhDw3rHcMveTgbv8VtWxijUHwnSqhCmtJFIPKWVaA",
   GEO_COVERAGE:
     "https://w3id.org/np/RAsPVd3bNOPg5vxQGc1Tqn69v3dSY-ASrAhEFioutCXao",
+  // View only (no creation form): variables described with I-ADOPT
+  IADOPT_VARIABLE:
+    "https://w3id.org/np/RAkcfj9W_lJjlq26paIFmTY4mZoaY27BnZCjcsL34EPIA",
 
   // Data & Software
   DATASET: "https://w3id.org/np/RAuVB37yyAuAlgusrUAoG84JI4_EfrEqIkpEZYDpSz3d8",
@@ -234,6 +237,18 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     color: "emerald",
     recommended: true,
     keywords: ["aida", "claim", "assertion", "scientific"],
+  },
+  [TEMPLATE_URI.IADOPT_VARIABLE]: {
+    name: "I-ADOPT Variable",
+    description:
+      "Describe an observed or derived variable with the I-ADOPT framework",
+    moreDescription:
+      "Breaks a variable down into what is measured (property), of what (object of interest), and optionally inside what (matrix), relative to what (context object), under which condition (constraints) and which statistic.",
+    category: "Data & Software",
+    icon: "📏",
+    color: "sky",
+    recommended: false,
+    keywords: ["i-adopt", "variable", "observable property", "fdo"],
   },
   [TEMPLATE_URI.GEO_COVERAGE]: {
     name: "Document geographical coverage",
