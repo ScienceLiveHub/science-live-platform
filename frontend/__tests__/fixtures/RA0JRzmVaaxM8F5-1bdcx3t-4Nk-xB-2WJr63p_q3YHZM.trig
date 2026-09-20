@@ -1,0 +1,77 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix fdof: <https://w3id.org/fdof/ontology#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix iop: <https://w3id.org/iadopt/ont/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix ntemplate: <https://w3id.org/np/o/ntemplate/> .
+@prefix orcid: <https://orcid.org/> .
+@prefix pav: <http://purl.org/pav/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sub: <https://w3id.org/np/RA0JRzmVaaxM8F5-1bdcx3t-4Nk-xB-2WJr63p_q3YHZM/> .
+@prefix this: <https://w3id.org/np/RA0JRzmVaaxM8F5-1bdcx3t-4Nk-xB-2WJr63p_q3YHZM> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+sub:Head {
+  this: a np:Nanopublication;
+    np:hasAssertion sub:assertion;
+    np:hasProvenance sub:provenance;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+  <http://purl.obolibrary.org/obo/ENVO_01001581> a iop:Entity;
+    rdfs:label "sea surface layer" .
+  
+  <http://qudt.org/vocab/quantitykind/ThermodynamicTemperature> a iop:Property;
+    rdfs:label "thermodynamic temperature" .
+  
+  <http://vocab.nerc.ac.uk/collection/S18/current/S1800021/> a iop:Entity;
+    rdfs:label "water" .
+  
+  <https://w3id.org/iadopt/variable/20260618T141331-22> a fdof:FAIRDigitalObject, iop:Variable;
+    dcterms:conformsTo <https://w3id.org/np/RA5MTl9GFH-QuuBHYEA2hOtxOMOV4-jrhtdx5lOy9CAQE>;
+    dcterms:created "2026-06-18T14:13:31Z"^^xsd:dateTime;
+    dcterms:creator orcid:0009-0006-1978-4302;
+    dcterms:identifier <https://w3id.org/iadopt/variable/20260618T141331-22>;
+    pav:createdWith "LLM-assisted I-ADOPT variable generation";
+    rdfs:comment "Sea water potential temperature is the temperature a parcel of sea water would have if moved adiabatically to sea level pressure.";
+    rdfs:label "Sea water potential temperature";
+    prov:wasAttributedTo orcid:0009-0006-1978-4302;
+    iop:hasConstraint sub:_n988054e662c14d1fb9272f0b1346cce9b1;
+    iop:hasMatrix <http://purl.obolibrary.org/obo/ENVO_01001581>;
+    iop:hasObjectOfInterest <http://vocab.nerc.ac.uk/collection/S18/current/S1800021/>;
+    iop:hasProperty <http://qudt.org/vocab/quantitykind/ThermodynamicTemperature> .
+  
+  sub:_n988054e662c14d1fb9272f0b1346cce9b1 a iop:Constraint;
+    rdfs:label "condition: at a water pressure of 0dbar";
+    iop:constrains <http://qudt.org/vocab/quantitykind/ThermodynamicTemperature> .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo orcid:0009-0006-1978-4302;
+    prov:wasGeneratedBy <https://w3id.org/np/RAwy2xTZzt5Y3ix-7f1HDTewgZqa6eRm5YnmrSKCy0PTA/I-ADOPT-LLM-Service> .
+}
+
+sub:pubinfo {
+  orcid:0009-0006-1978-4302 foaf:name "Arvin Rastegar" .
+  
+  this: dcterms:created "2026-06-18T14:13:35.916Z"^^xsd:dateTime;
+    dcterms:creator <https://w3id.org/np/RAwy2xTZzt5Y3ix-7f1HDTewgZqa6eRm5YnmrSKCy0PTA/I-ADOPT-LLM-Service>;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/>;
+    npx:introduces <https://w3id.org/iadopt/variable/20260618T141331-22>;
+    npx:wasCreatedAt <https://nanodash.petapico.org/>;
+    rdfs:label "Sea water potential temperature";
+    ntemplate:wasCreatedFromProvenanceTemplate <https://w3id.org/np/RANwQa4ICWS5SOjw7gp99nBpXBasapwtZF1fIM3H2gYTM>;
+    ntemplate:wasCreatedFromPubinfoTemplate <https://w3id.org/np/RA0J4vUn_dekg-U1kK3AOEt02p9mT2WO03uGxLDec1jLw>,
+      <https://w3id.org/np/RAA2MfqdBCzmz9yVWjKLXNbyfBNcwsMmOqcNUxkk1maIM>, <https://w3id.org/np/RAukAcWHRDlkqxk7H2XNSegc1WnHI569INvNr-xdptDGI>;
+    ntemplate:wasCreatedFromTemplate <https://w3id.org/np/RAkcfj9W_lJjlq26paIFmTY4mZoaY27BnZCjcsL34EPIA> .
+  
+  sub:sig npx:hasAlgorithm "RSA";
+    npx:hasPublicKey "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzymtTYCOhZMR6OcAN9w2t82zy6tPY5UkyFAEyxdvUUFaHciaH4dxdSgrCXdg8GoZIOW7wQEJGtom7D1fkFOfVFVgLb4wApmPen87msSXoAN1yPeDEkD4BFQ+GanBFQxqebpmgjF9tLIkZFziShWQrAyBOqy4K44YCYq/l94FIdRZGabV9IAngZwydWh2TBBBahuwsysHulhkdgiedWKl75mdsYgDzHlAJz4BnQ8Az9w+k7LnwQDPvThTZJtt+dFAW/y1M3WKzf+9biSlLgbHtRWYI6Z9ovetZi8vWiW2lpiCvyfGKNIgP+Q38D1i3gJEPQnj+iK8Nw9LLHhg8bV+yQIDAQAB";
+    npx:hasSignature "gMpDDqL4AITacRmnmmHQI+fW3xdRt+H0XetoCzMs0KgPvW1ocNTLIEEukFc0WV9ylDtnXcGGkeb43KmJiEXEPg1lhudY2htDTYXgz8ujAzSlF/gR4QgOR34XxBMB6ormFyhf1t4q1YIsImqQp9CIpnlhNUL2gfh9yC4ti6VLn6ElMjk/FDKZMmSmcugVHDo4clNROoZMnd0EWdY5+TvXVFfv+LovbCNWnVjsI+MksHeXVQZFFjfwMnqu5YIXLl6GnxhDjKgMMkjgkv6BWCBrEfCwkZYb7uSUfIuoDcY8fq9mY+9TdoPmxZq/XtEWqHxwFm1rLytHI12cp2V3PQcu8g==";
+    npx:hasSignatureTarget this:;
+    npx:signedBy <https://w3id.org/np/RAwy2xTZzt5Y3ix-7f1HDTewgZqa6eRm5YnmrSKCy0PTA/I-ADOPT-LLM-Service> .
+}
+
