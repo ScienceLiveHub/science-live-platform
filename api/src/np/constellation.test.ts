@@ -19,8 +19,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildConstellation,
+  chainPaperDoi,
   classifyStepKind,
   extractAidaStatementIris,
+  findPrimaryPaperDoi,
+} from "./constellation";
+import type {
+  ApexCito,
+  Chain,
+  ChainStep,
+  ConstellationNode,
 } from "./constellation";
 import { NANOPUB_SPARQL_ENDPOINT_FULL } from "./queries";
 
@@ -1926,5 +1934,129 @@ sub:pubinfo {
       "Study",
       "Outcome",
     ]);
+  });
+});
+
+/**
+ * Regression: a chain's paper is what its CiTO CITES, not what the walk
+ * mentions most.
+ *
+ * Observed live on 2026-09-02 against api-dev. A depth-5 walk drags in
+ * unrelated nanopubs through shared hubs, and the same four Quote nanopubs
+ * annotating one paper turned up in two unrelated constellations and outvoted
+ * each chain's own citation:
+ *
+ *   marine-heatwave   4 x LifeWatch (quote)  vs  1 x Oliver 2018 (cito)
+ *   Sado-estuary      4 x LifeWatch (quote)  vs  2 x Sentinel-2 (cito)
+ *
+ * Both therefore reported a paper neither study was about. A CiTO nanopub *is*
+ * the assertion "this outcome cites that paper", so it is the answer rather
+ * than one vote among many.
+ */
+describe("paper DOI comes from the CiTO citation, not a popularity vote", () => {
+  const LIFEWATCH = "https://doi.org/10.3897/rio.10.e119943";
+  const OLIVER = "https://doi.org/10.1038/s41467-018-03732-9";
+  const SENTINEL2 = "https://doi.org/10.3390/rs13051043";
+
+  function quoteNode(citedDoi: string, n: number): ConstellationNode {
+    return {
+      uri: `https://w3id.org/np/RAquoteNoise${n}`,
+      stepKind: "quote",
+      stepType: "Annotating a paper quotation with personal interpretation",
+      templateUri: "https://w3id.org/np/RAtplQuote",
+      label: `Paper annotation ${n}`,
+      date: "",
+      creators: [],
+      creatorNames: [],
+      authorsOrcid: [],
+      plainTextExcerpts: [],
+      githubUrls: [],
+      quote: { quotedText: "", citedDoi, comment: "" },
+    };
+  }
+
+  function citoStep(targets: string[]): ChainStep {
+    return {
+      step: "CiTO",
+      uri: "https://w3id.org/np/RAcito",
+      relations: ["confirms"],
+      targets,
+    };
+  }
+
+  function chainWith(steps: ChainStep[]): Chain {
+    return {
+      id: "c1",
+      outcomeUri: "https://w3id.org/np/RAoutcome",
+      outcomeVerdict: "Validated",
+      outcomeConfidence: "HighConfidence",
+      citoRelations: ["confirms"],
+      paperDoi: chainPaperDoi(steps),
+      steps,
+    };
+  }
+
+  const apex = (targets: string[]): ApexCito => ({
+    uri: "https://w3id.org/np/RAapex",
+    relations: ["confirms"],
+    citedTargets: targets,
+  });
+
+  it("does not let four unrelated quotes outvote one CiTO (marine-heatwave)", () => {
+    const nodes = [1, 2, 3, 4].map((n) => quoteNode(LIFEWATCH, n));
+    const chains = [chainWith([citoStep([OLIVER])])];
+    expect(findPrimaryPaperDoi(nodes, chains, null)).toBe(OLIVER);
+  });
+
+  it("does not let four unrelated quotes outvote two CiTOs (Sado estuary)", () => {
+    const nodes = [1, 2, 3, 4].map((n) => quoteNode(LIFEWATCH, n));
+    const chains = [
+      chainWith([citoStep([SENTINEL2])]),
+      chainWith([citoStep([SENTINEL2])]),
+    ];
+    expect(findPrimaryPaperDoi(nodes, chains, null)).toBe(SENTINEL2);
+  });
+
+  it("prefers the apex CiTO over the chains' own CiTO steps", () => {
+    const chains = [chainWith([citoStep([SENTINEL2])])];
+    expect(findPrimaryPaperDoi([], chains, apex([OLIVER]))).toBe(OLIVER);
+  });
+
+  it("still ignores Zenodo artefact DOIs cited alongside the paper", () => {
+    const zenodo = "https://doi.org/10.5281/zenodo.21950033";
+    const chains = [chainWith([citoStep([zenodo, OLIVER])])];
+    expect(findPrimaryPaperDoi([], chains, null)).toBe(OLIVER);
+  });
+
+  it("falls back to the old count when no CiTO was reached at all", () => {
+    // The walk often terminates before a CiTO; a quote-derived guess still
+    // beats returning nothing.
+    const nodes = [1, 2].map((n) => quoteNode(LIFEWATCH, n));
+    expect(findPrimaryPaperDoi(nodes, [], null)).toBe(LIFEWATCH);
+  });
+
+  it("returns '' when there is nothing to go on", () => {
+    expect(findPrimaryPaperDoi([], [], null)).toBe("");
+  });
+
+  describe("chains[].paperDoi is exact per chain", () => {
+    it("reports each limb's own cited paper", () => {
+      expect(chainPaperDoi([citoStep([OLIVER])])).toBe(OLIVER);
+      expect(chainPaperDoi([citoStep([SENTINEL2])])).toBe(SENTINEL2);
+    });
+
+    it("is empty when the chain has no CiTO step", () => {
+      // Real chains enumerate [Claim, Study, Outcome] with no CiTO when the
+      // apex CiTO is hoisted or the walk stops short.
+      expect(
+        chainPaperDoi([{ step: "Outcome", uri: "https://w3id.org/np/RAo" }]),
+      ).toBe("");
+    });
+
+    it("lets a constellation spanning two papers report each correctly", () => {
+      const a = chainWith([citoStep([OLIVER])]);
+      const b = chainWith([citoStep([SENTINEL2])]);
+      expect([a.paperDoi, b.paperDoi]).toEqual([OLIVER, SENTINEL2]);
+    });
   });
 });

@@ -245,9 +245,12 @@ async function resolvePaperCitation(doiUrl: string): Promise<PaperCitation> {
 }
 
 // The "original study" a replication draws from is the DOI its outcomes CITE (the
-// CiTO citation target), NOT the constellation's `paperDoi` heuristic, which can
-// pick the replication's own paper. Take the most common non-Zenodo doi.org
-// target across the chains, falling back to paperDoi.
+// CiTO citation target). This began as a client-side workaround because the API's
+// `paperDoi` was a popularity vote that unrelated Quote nanopubs could win. The API
+// now derives `paperDoi` from the CiTO as well, and exposes an exact per-chain
+// `chains[].paperDoi`, so this can collapse to reading that field once the change
+// has been deployed a while. Kept for now: equivalent, and it still works against
+// responses from older deployments.
 function drawnFromDoi(con: Constellation | null): string {
   const targets = (con?.chains ?? [])
     .flatMap((c) => c.steps.find((s) => s.step === "CiTO")?.targets ?? [])
