@@ -204,7 +204,12 @@ const SCHEMA_PREFIX = "http://schema.org/";
 const PROV_PREFIX = "http://www.w3.org/ns/prov#";
 const DCT_PREFIX = "http://purl.org/dc/terms/";
 
-/** All CiTO relation names that can appear on a CiTO Citation nanopub. */
+/**
+ * Common CiTO relation names. Documentation only: extraction is NOT limited to
+ * this list. The Science Live CiTO template offers the whole CiTO vocabulary
+ * (citesAsAuthority, usesDataFrom, usesMethodIn, …), and a fixed list silently
+ * dropped every citation that used a relation outside it.
+ */
 export const CITO_RELATIONS = [
   "cites",
   "confirms",
@@ -219,7 +224,17 @@ export const CITO_RELATIONS = [
   "documents",
 ] as const;
 
-export type CitoRelation = (typeof CITO_RELATIONS)[number];
+/** A CiTO relation local name, e.g. "confirms" or "citesAsAuthority". */
+export type CitoRelation = string;
+
+const CITO_PREDICATE_RE = /<http:\/\/purl\.org\/spar\/cito\/([A-Za-z]+)>/g;
+
+/** Local names of every CiTO term written as a full URI in the TriG, in order of first appearance. */
+function citoTermsIn(trig: string): string[] {
+  const names = new Set<string>();
+  for (const m of trig.matchAll(CITO_PREDICATE_RE)) names.add(m[1]);
+  return [...names];
+}
 
 /** All Outcome validation statuses defined by the FORRT vocabulary. */
 export const OUTCOME_VALIDATION_STATUSES = [
@@ -651,7 +666,9 @@ export function extractCitoFields(
 ): CitoFields {
   const relations: CitoRelation[] = [];
   const citedTargets = new Set<string>();
-  for (const rel of CITO_RELATIONS) {
+  // Any CiTO term used as a predicate with an object is a relation (a term that
+  // only appears as an object or a type yields no values and is skipped).
+  for (const rel of citoTermsIn(trig)) {
     const values = extractPredicateValues(trig, `${CITO_PREFIX}${rel}`);
     if (values.length > 0) {
       relations.push(rel);
@@ -665,7 +682,7 @@ export function extractCitoFields(
   //      common FORRT outcome-level CiTO shape `<Outcome> a <CW>; <cito:p>`
   //      where the rdf:type triple sits between subject and CiTO predicate.
   let citingEntity = "";
-  for (const rel of CITO_RELATIONS) {
+  for (const rel of relations) {
     const escaped = `${CITO_PREFIX}${rel}`.replace(
       /[.*+?^${}()|[\]\\]/g,
       "\\$&",
