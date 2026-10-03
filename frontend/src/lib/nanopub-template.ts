@@ -74,6 +74,29 @@ function isOptional(statement: Statement | GroupInfo) {
 }
 
 /**
+ * Does this statement's object name a placeholder that the author left empty?
+ *
+ * Only placeholders count: an object that is a constant (`a fdof:
+ * FAIRDigitalObject`) is always safe to emit. A repeatable statement fed rows
+ * through its statement id is handled by the caller's repeat loop, so an empty
+ * row list is not treated as unfilled here.
+ */
+function hasUnfilledPlaceholderObject(
+  statement: Statement,
+  values: FormValues,
+  uri: string,
+) {
+  if (!statement.object) return false;
+  if (isRepeatable(statement) && Array.isArray(values[statement.id])) {
+    return false;
+  }
+  const object = statement.object.value;
+  if (!object.startsWith(uri)) return false;
+  const name = getUriEnd(object);
+  return !(name && values[name]);
+}
+
+/**
  * Are all the placeholders for this statement empty?
  */
 function isAllEmpty(statement: Statement, values: FormValues, uri: string) {
@@ -378,6 +401,23 @@ export class NanopubTemplate extends NanopubStore {
       if (
         isOptional(statement) &&
         isAllEmpty(statement, placeholderValues, this.metadata.uri!)
+      ) {
+        continue;
+      }
+
+      // A REQUIRED statement whose object is an unfilled placeholder used to be
+      // emitted anyway, which published the placeholder node itself as the
+      // object — `dct:creator <…/RAuVB37yy…/creator>`, a form field asserted as
+      // a person, signed and immutable. An absent statement is merely
+      // incomplete; a placeholder node is false. Statements whose object is a
+      // constant (`a fdof:FAIRDigitalObject`) carry no placeholder and are
+      // unaffected.
+      if (
+        hasUnfilledPlaceholderObject(
+          statement,
+          placeholderValues,
+          this.metadata.uri!,
+        )
       ) {
         continue;
       }
