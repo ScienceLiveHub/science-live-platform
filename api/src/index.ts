@@ -1,4 +1,5 @@
 import { formatAllowedOrigins, getAuth } from "@/auth";
+import { sessionMiddleware } from "@/auth/session-middleware";
 import { Session, User } from "better-auth";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -42,23 +43,9 @@ app.route("/health", health);
 app.route("/user-profile", userProfile);
 app.route("/orcid", orcid);
 
-// Middleware for endpoints that require sign-in (better-auth)
-app.use("*", async (c, next) => {
-  const session = await getAuth(c.env).api.getSession({
-    headers: c.req.raw.headers,
-  });
-
-  if (!session) {
-    c.set("user", null);
-    c.set("session", null);
-    await next();
-    return;
-  }
-
-  c.set("user", session.user);
-  c.set("session", session.session);
-  await next();
-});
+// Middleware for endpoints that require sign-in (better-auth). A rejected API
+// key answers with its own 4xx and reason instead of a 500.
+app.use("*", sessionMiddleware);
 app.on(["POST", "GET"], "/auth/*", (c) => getAuth(c.env).handler(c.req.raw));
 
 // Endpoints that require auth
