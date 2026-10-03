@@ -229,6 +229,56 @@ export type CitoRelation = string;
 
 const CITO_PREDICATE_RE = /<http:\/\/purl\.org\/spar\/cito\/([A-Za-z]+)>/g;
 
+/** One citation: a CiTO relation and the work it points at. */
+export type CitoCitation = { relation: CitoRelation; target: string };
+
+/**
+ * CiTO relations that cite a work as a REFERENCE — an authority, a data source,
+ * a method, background, credit — rather than taking a position on its claims.
+ * A chain citing a work only this way is not ABOUT that work: a question-rooted
+ * study cites its foundational papers and datasets like this, and none of them
+ * is the "original study" being tested. Used to decide which cited work a chain
+ * is about (constellation `paperDoi`).
+ */
+export const REFERENCE_CITO_RELATIONS: ReadonlySet<string> = new Set([
+  "citesAsAuthority",
+  "citesAsDataSource",
+  "citesAsEvidence",
+  "citesAsMetadataDocument",
+  "citesAsPotentialSolution",
+  "citesAsRecommendedReading",
+  "citesAsRelated",
+  "citesAsSourceDocument",
+  "citesForInformation",
+  "compiles",
+  "containsAssertionFrom",
+  "credits",
+  "describes",
+  "documents",
+  "includesExcerptFrom",
+  "includesQuotationFrom",
+  "linksTo",
+  "obtainsBackgroundFrom",
+  "obtainsSupportFrom",
+  "usesConclusionsFrom",
+  "usesDataFrom",
+  "usesMethodIn",
+]);
+
+/**
+ * Targets a set of citations is ABOUT: those cited with at least one relation
+ * that is not a reference relation (confirms, qualifies, disputes, discusses,
+ * cites, extends, …). Order of first appearance, de-duplicated.
+ */
+export function aboutTargets(citations: CitoCitation[]): string[] {
+  const out: string[] = [];
+  for (const c of citations) {
+    if (REFERENCE_CITO_RELATIONS.has(c.relation)) continue;
+    if (!out.includes(c.target)) out.push(c.target);
+  }
+  return out;
+}
+
 /** Local names of every CiTO term written as a full URI in the TriG, in order of first appearance. */
 function citoTermsIn(trig: string): string[] {
   const names = new Set<string>();
@@ -652,6 +702,8 @@ export function extractAidaFields(trig: string): AidaFields {
 export type CitoFields = {
   relations: CitoRelation[];
   citedTargets: string[];
+  /** Every (relation, target) pair, so a target is never paired with the wrong relation. */
+  citations: CitoCitation[];
   /**
    * The URI that appears as the SUBJECT of the CiTO triples — i.e. the
    * "citing entity". For Science Live FORRT CiTO Citation nanopubs this is
@@ -666,13 +718,17 @@ export function extractCitoFields(
 ): CitoFields {
   const relations: CitoRelation[] = [];
   const citedTargets = new Set<string>();
+  const citations: CitoCitation[] = [];
   // Any CiTO term used as a predicate with an object is a relation (a term that
   // only appears as an object or a type yields no values and is skipped).
   for (const rel of citoTermsIn(trig)) {
     const values = extractPredicateValues(trig, `${CITO_PREFIX}${rel}`);
     if (values.length > 0) {
       relations.push(rel);
-      for (const v of values) citedTargets.add(v);
+      for (const v of values) {
+        citedTargets.add(v);
+        citations.push({ relation: rel, target: v });
+      }
     }
   }
 
@@ -707,7 +763,7 @@ export function extractCitoFields(
     }
   }
 
-  return { relations, citedTargets: [...citedTargets], citingEntity };
+  return { relations, citedTargets: [...citedTargets], citations, citingEntity };
 }
 
 export type ResearchSoftwareFields = {

@@ -27,6 +27,8 @@ import {
   extractTemplateLabel,
   isTemplateDefinitionLabel,
   type AidaFields,
+  aboutTargets,
+  type CitoCitation,
   type CitoFields,
   type ClaimFields,
   type OutcomeFields,
@@ -112,6 +114,8 @@ export type ChainStep = {
   zenodoDoi?: string;
   relations?: string[];
   targets?: string[];
+  /** CiTO steps only — every (relation, target) pair of the citation. */
+  citations?: CitoCitation[];
   /** Question steps only — "PICO" or "PCC". */
   framework?: string;
   /** Question steps only — the PICO/PCC components in acronym order. */
@@ -137,6 +141,7 @@ export type ApexCito = {
   uri: string;
   relations: string[];
   citedTargets: string[];
+  citations: CitoCitation[];
 };
 
 export type ResearchSynthesisSummary = {
@@ -600,6 +605,7 @@ function assembleChains(
       uri: entryNode.uri,
       relations: entryNode.cito.relations,
       citedTargets: entryNode.cito.citedTargets,
+      citations: entryNode.cito.citations,
     };
   }
 
@@ -734,6 +740,7 @@ function assembleChains(
         uri: cito.uri,
         relations: cito.cito.relations,
         targets: cito.cito.citedTargets,
+        citations: cito.cito.citations,
       });
     if (rs && rs.researchSoftware)
       steps.push({
@@ -793,7 +800,17 @@ function topByCount(dois: string[]): string {
  */
 export function chainPaperDoi(steps: ChainStep[]): string {
   const cito = steps.find((s) => s.step === "CiTO");
-  return topByCount((cito?.targets ?? []).filter((t) => !isArtefactDoi(t)));
+  return topByCount(citedAbout(cito).filter((t) => !isArtefactDoi(t)));
+}
+
+/**
+ * The targets a CiTO step is ABOUT (see `aboutTargets`): works cited only as
+ * references — authority, data, method — are not the work a chain tests.
+ * Falls back to all targets for a step built without `citations`.
+ */
+function citedAbout(cito: { citations?: CitoCitation[]; targets?: string[] } | undefined): string[] {
+  if (!cito) return [];
+  return cito.citations ? aboutTargets(cito.citations) : cito.targets ?? [];
 }
 
 /**
@@ -821,21 +838,21 @@ export function findPrimaryPaperDoi(
   apexCito: ApexCito | null,
 ): string {
   const fromApex = topByCount(
-    (apexCito?.citedTargets ?? []).filter((t) => !isArtefactDoi(t)),
+    (apexCito ? aboutTargets(apexCito.citations) : []).filter((t) => !isArtefactDoi(t)),
   );
   if (fromApex) return fromApex;
 
   const fromChains = topByCount(
     chains.flatMap((c) => {
       const cito = c.steps.find((s) => s.step === "CiTO");
-      return (cito?.targets ?? []).filter((t) => !isArtefactDoi(t));
+      return citedAbout(cito).filter((t) => !isArtefactDoi(t));
     }),
   );
   if (fromChains) return fromChains;
 
   return topByCount(
     nodes.flatMap((n) => [
-      ...(n.cito?.citedTargets ?? []),
+      ...(n.cito ? aboutTargets(n.cito.citations) : []),
       ...(n.quote?.citedDoi ? [n.quote.citedDoi] : []),
     ]),
   );

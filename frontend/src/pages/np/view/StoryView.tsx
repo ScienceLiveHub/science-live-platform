@@ -82,6 +82,8 @@ type ConStep = {
   repository?: string;
   relations?: string[];
   targets?: string[];
+  /** CiTO steps: every (relation, target) pair. Absent from older API deployments. */
+  citations?: { relation: string; target: string }[];
 };
 type Chain = {
   id: string;
@@ -89,6 +91,8 @@ type Chain = {
   outcomeVerdict: string;
   outcomeConfidence: string;
   citoRelations: string[];
+  /** The work this chain tests, from its CiTO (empty when it cites only references). */
+  paperDoi?: string;
   steps: ConStep[];
 };
 type Synthesis = { uri: string; label: string; synthesis: string; conditions: string; limitations: string; recommendations: string };
@@ -252,7 +256,16 @@ async function resolvePaperCitation(doiUrl: string): Promise<PaperCitation> {
 // has been deployed a while. Kept for now: equivalent, and it still works against
 // responses from older deployments.
 function drawnFromDoi(con: Constellation | null): string {
-  const targets = (con?.chains ?? [])
+  const chains = con?.chains ?? [];
+  // API with (relation, target) pairs: `chains[].paperDoi` already ignores works
+  // cited only as references (authority, data, method), so a question-rooted
+  // study is not presented as "drawn from" one of its datasets.
+  if (chains.some((c) => c.steps.some((s) => s.step === "CiTO" && s.citations))) {
+    const counts = new Map<string, number>();
+    for (const d of chains.map((c) => c.paperDoi).filter((d): d is string => !!d)) counts.set(d, (counts.get(d) ?? 0) + 1);
+    return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
+  }
+  const targets = chains
     .flatMap((c) => c.steps.find((s) => s.step === "CiTO")?.targets ?? [])
     .filter((t) => /doi\.org/.test(t) && !/zenodo/.test(t));
   const counts = new Map<string, number>();
@@ -641,7 +654,11 @@ export default function StoryView() {
               )}
               {limbs.map((limb, i) => {
                 const cito = limb.steps.find((s) => s.step === "CiTO");
-                const cites = (cito?.targets ?? []).map((target, k) => ({ rel: cito?.relations?.[k] ?? cito?.relations?.[0], target }));
+                // Pairs from the API when available; positional pairing is only
+                // right when the citation uses a single relation (older API).
+                const cites = cito?.citations
+                  ? cito.citations.map((c) => ({ rel: c.relation, target: c.target }))
+                  : (cito?.targets ?? []).map((target, k) => ({ rel: cito?.relations?.[k] ?? cito?.relations?.[0], target }));
                 return (
                   <div key={i} className={`refgroup ${limb.vclass}`}>
                     <p className="refgroup-k">Replication {i + 1} &middot; {limb.relation}</p>

@@ -13,6 +13,7 @@ import { describe, expect, it } from "vitest";
 import {
   canonicalNanopubUri,
   extractAidaFields,
+  aboutTargets,
   extractCitoFields,
   extractClaimFields,
   extractDois,
@@ -726,6 +727,20 @@ describe("extractAidaFields", () => {
   });
 });
 
+describe("aboutTargets", () => {
+  it("keeps works with a position on their claims, drops pure references", () => {
+    expect(
+      aboutTargets([
+        { relation: "citesAsAuthority", target: "a" },
+        { relation: "qualifies", target: "b" },
+        { relation: "usesDataFrom", target: "c" },
+        { relation: "cites", target: "d" },
+        { relation: "usesMethodIn", target: "b" },
+      ]),
+    ).toEqual(["b", "d"]);
+  });
+});
+
 describe("extractCitoFields", () => {
   it("identifies every CiTO relation used and the cited targets", () => {
     const trig = `
@@ -742,6 +757,7 @@ describe("extractCitoFields", () => {
     expect(extractCitoFields("<x> a <foo> .")).toEqual({
       relations: [],
       citedTargets: [],
+      citations: [],
       citingEntity: "",
     });
   });
@@ -785,6 +801,16 @@ describe("extractCitoFields", () => {
     expect(c.citingEntity).toBe(
       "https://w3id.org/sciencelive/np/RAoutcome000000000000000000000000000000000",
     );
+    // Each target keeps its own relation (no positional pairing).
+    expect(c.citations).toContainEqual({
+      relation: "usesDataFrom",
+      target: "https://doi.org/10.5067/GEDI/GEDI02_A.003",
+    });
+    expect(c.citations).toContainEqual({
+      relation: "citesAsAuthority",
+      target: "https://doi.org/10.1038/s41559-021-01451-x",
+    });
+    expect(c.citations).toHaveLength(3);
   });
 
   it("does not treat a CiTO term used only as a type as a relation", () => {
