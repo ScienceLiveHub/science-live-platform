@@ -2000,6 +2000,7 @@ describe("paper DOI comes from the CiTO citation, not a popularity vote", () => 
     uri: "https://w3id.org/np/RAapex",
     relations: ["confirms"],
     citedTargets: targets,
+    citations: targets.map((target) => ({ relation: "confirms", target })),
   });
 
   it("does not let four unrelated quotes outvote one CiTO (marine-heatwave)", () => {
@@ -2020,6 +2021,58 @@ describe("paper DOI comes from the CiTO citation, not a popularity vote", () => 
   it("prefers the apex CiTO over the chains' own CiTO steps", () => {
     const chains = [chainWith([citoStep([SENTINEL2])])];
     expect(findPrimaryPaperDoi([], chains, apex([OLIVER]))).toBe(OLIVER);
+  });
+
+  // A question-rooted chain cites reference works and datasets, not a study
+  // it tests. Naming one of them as "the paper" mislabels the story's
+  // "original study". Observed on beni-canopy-height-ebv (2026-10-03).
+  const VALBUENA = "https://doi.org/10.1016/j.tree.2020.03.006";
+  const GEDI = "https://doi.org/10.5067/GEDI/GEDI02_A.003";
+  const referenceCito = (): ChainStep => ({
+    step: "CiTO",
+    uri: "https://w3id.org/np/RAcitoRef",
+    relations: ["citesAsAuthority", "usesDataFrom"],
+    targets: [VALBUENA, GEDI],
+    citations: [
+      { relation: "citesAsAuthority", target: VALBUENA },
+      { relation: "usesDataFrom", target: GEDI },
+    ],
+  });
+
+  it("gives no paper for a chain that cites only references (question-rooted)", () => {
+    const steps = [referenceCito()];
+    expect(chainPaperDoi(steps)).toBe("");
+    expect(findPrimaryPaperDoi([], [chainWith(steps)], null)).toBe("");
+  });
+
+  it("picks the tested paper, not the dataset cited next to it", () => {
+    const steps: ChainStep[] = [{
+      step: "CiTO",
+      uri: "https://w3id.org/np/RAcitoMixed",
+      relations: ["usesDataFrom", "qualifies"],
+      targets: [GEDI, OLIVER],
+      citations: [
+        { relation: "usesDataFrom", target: GEDI },
+        { relation: "qualifies", target: OLIVER },
+      ],
+    }];
+    expect(chainPaperDoi(steps)).toBe(OLIVER);
+  });
+
+  it("ignores reference-only citations in the last-resort node count too", () => {
+    const citoNode: ConstellationNode = {
+      ...quoteNode(LIFEWATCH, 9),
+      uri: "https://w3id.org/np/RAcitoNode",
+      stepKind: "cito",
+      quote: undefined,
+      cito: {
+        relations: ["citesAsAuthority"],
+        citedTargets: [VALBUENA],
+        citations: [{ relation: "citesAsAuthority", target: VALBUENA }],
+        citingEntity: "",
+      },
+    };
+    expect(findPrimaryPaperDoi([citoNode], [], null)).toBe("");
   });
 
   it("still ignores Zenodo artefact DOIs cited alongside the paper", () => {
