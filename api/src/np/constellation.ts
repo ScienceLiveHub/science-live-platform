@@ -97,9 +97,19 @@ export type ChainStep = {
     | "Study"
     | "Outcome"
     | "CiTO"
-    | "ResearchSoftware";
+    | "ResearchSoftware"
+    /**
+     * Any other nanopublication linked to this chain — a dataset, a
+     * geographical coverage, an access policy. The chain spine is the FORRT
+     * argument (question → claim → study → outcome); everything else a study
+     * attaches to itself is carried here rather than needing its own step kind,
+     * extractor and view for every template the platform gains.
+     */
+    | "Attached";
   uri: string;
   label?: string;
+  /** Attached steps — the template's own label, e.g. "Declaring a Dataset". */
+  stepType?: string;
   text?: string;
   type?: string;
   scope?: string;
@@ -275,6 +285,7 @@ export async function buildConstellation(
   const { chains, apexCito, researchSynthesis, paperDoi } = assembleChains(
     nodeList,
     entryUri,
+    edges,
   );
 
   return {
@@ -587,6 +598,7 @@ type AssemblyResult = {
 function assembleChains(
   nodes: ConstellationNode[],
   entryUri: string,
+  edges: ConstellationEdge[] = [],
 ): AssemblyResult {
   const byUri = new Map(nodes.map((n) => [n.uri, n]));
   const byKind = new Map<StepKind, ConstellationNode[]>();
@@ -608,6 +620,13 @@ function assembleChains(
       citations: entryNode.cito.citations,
     };
   }
+
+  // Nanopublications of a kind the chain spine has no slot for — datasets,
+  // geographical coverage, access policies. They are attached to whichever
+  // chain they are linked to rather than dropped (see `attachedSteps`).
+  const attachable = (byKind.get("other") ?? []).filter(
+    (n) => n.templateUri !== "" && !isTemplateDefinitionLabel(n.stepType),
+  );
 
   // Research Synthesis — the first node of that kind. Synthesis is unique
   // at the apex of a multi-chain constellation; if there are multiple, the
@@ -750,6 +769,7 @@ function assembleChains(
         repository: rs.researchSoftware.repository,
         zenodoDoi: rs.researchSoftware.zenodoDoi,
       });
+    steps.push(...attachedSteps(steps, attachable, edges));
 
     chains.push({
       id: outcome.uri.split("/").pop() ?? outcome.uri,
@@ -864,6 +884,40 @@ export function findPrimaryPaperDoi(
  * kind in the constellation" if there's just one; otherwise returns null.
  * This is the conservative path when explicit predicate-linkage failed.
  */
+/**
+ * Steps for nanopublications linked to this chain that the spine has no slot
+ * for — a dataset, a geographical coverage, an access policy.
+ *
+ * A study's own attachments are linked to one of its steps by a nanopub-level
+ * reference, so adjacency is the test: a candidate joins the chain when an edge
+ * runs between it and any step already in that chain, in either direction.
+ * Carrying the template's own label means a template the platform gains
+ * tomorrow still reaches the reader, instead of being dropped as "other" until
+ * someone adds a step kind, an extractor and a view for it.
+ */
+export function attachedSteps(
+  steps: ChainStep[],
+  attachable: ConstellationNode[],
+  edges: ConstellationEdge[],
+): ChainStep[] {
+  if (attachable.length === 0 || edges.length === 0) return [];
+  const inChain = new Set(steps.map((s) => s.uri));
+  const linked = (uri: string) =>
+    edges.some(
+      (e) =>
+        (e.source === uri && inChain.has(e.target)) ||
+        (e.target === uri && inChain.has(e.source)),
+    );
+  return attachable
+    .filter((n) => !inChain.has(n.uri) && linked(n.uri))
+    .map((n) => ({
+      step: "Attached" as const,
+      uri: n.uri,
+      label: n.label,
+      stepType: n.stepType,
+    }));
+}
+
 function findRelated(
   _from: ConstellationNode,
   candidates: ConstellationNode[],

@@ -1,3 +1,4 @@
+import { stepTypeLabel } from "@/pages/np/view/step-label";
 import { useNanopub } from "@/hooks/use-nanopub";
 import { NanopubStore } from "@/lib/nanopub-store";
 import { NS } from "@/lib/rdf";
@@ -84,6 +85,13 @@ type ConStep = {
   targets?: string[];
   /** CiTO steps: every (relation, target) pair. Absent from older API deployments. */
   citations?: { relation: string; target: string }[];
+  /**
+   * "Attached" steps — the template's own label ("Declaring a Dataset"). The
+   * chain spine is the FORRT argument; a dataset or geographical coverage the
+   * study attached rides along as "Attached" and names itself through this.
+   * Absent from older API deployments, which dropped such nanopubs entirely.
+   */
+  stepType?: string;
 };
 type Chain = {
   id: string;
@@ -684,7 +692,8 @@ export default function StoryView() {
                         return (
                           <li key={st.uri}>
                             {citePrefix(nodeAuthor(nd), nd?.date)}{nd?.label || st.label || prettify(st.step)} [Nanopublication].{" "}
-                            <a className="u" href={npHref(st.uri)}>{st.uri}</a> <span className="nptype">{prettify(st.step)}</span>
+                            <a className="u" href={npHref(st.uri)}>{st.uri}</a>{" "}
+                            <span className="nptype">{stepTypeLabel(st)}</span>
                           </li>
                         );
                       })}

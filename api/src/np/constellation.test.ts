@@ -18,6 +18,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  attachedSteps,
   buildConstellation,
   chainPaperDoi,
   classifyStepKind,
@@ -581,6 +582,66 @@ describe("buildConstellation edge cases", () => {
 // =============================================================================
 // STRUCTURED CHAINS[] ASSEMBLY (Phase A — start-a-new-replication payload)
 // =============================================================================
+
+describe("attachedSteps", () => {
+  const OUTCOME_URI = "https://w3id.org/np/RAoutcome";
+  const DATASET_URI = "https://w3id.org/np/RAdataset";
+
+  function otherNode(uri: string, stepType: string): ConstellationNode {
+    return {
+      uri,
+      stepKind: "other",
+      stepType,
+      templateUri: "https://w3id.org/np/RAtplDataset",
+      label: "Canopy height EBV — Beni lowlands",
+      date: "",
+      creators: [],
+      creatorNames: [],
+      authorsOrcid: [],
+      plainTextExcerpts: [],
+      githubUrls: [],
+    };
+  }
+
+  const chain: ChainStep[] = [{ step: "Outcome", uri: OUTCOME_URI }];
+  const dataset = otherNode(DATASET_URI, "Declaring a Dataset (adjusted version)");
+
+  it("attaches a linked nanopub, carrying its template label", () => {
+    const out = attachedSteps(chain, [dataset], [
+      { source: OUTCOME_URI, target: DATASET_URI, relation: "refersTo" },
+    ]);
+    expect(out).toEqual([
+      {
+        step: "Attached",
+        uri: DATASET_URI,
+        label: "Canopy height EBV — Beni lowlands",
+        stepType: "Declaring a Dataset (adjusted version)",
+      },
+    ]);
+  });
+
+  it("attaches on an incoming edge too — either end may do the referring", () => {
+    const out = attachedSteps(chain, [dataset], [
+      { source: DATASET_URI, target: OUTCOME_URI, relation: "refersTo" },
+    ]);
+    expect(out.map((s) => s.uri)).toEqual([DATASET_URI]);
+  });
+
+  it("leaves unlinked nanopubs out — a constellation is not a bag of nodes", () => {
+    const other = "https://w3id.org/np/RAelsewhere";
+    const out = attachedSteps(chain, [dataset], [
+      { source: other, target: DATASET_URI, relation: "refersTo" },
+    ]);
+    expect(out).toEqual([]);
+  });
+
+  it("never duplicates a nanopub that is already a step of this chain", () => {
+    const out = attachedSteps([...chain, { step: "Attached", uri: DATASET_URI }], [dataset], [
+      { source: OUTCOME_URI, target: DATASET_URI, relation: "refersTo" },
+    ]);
+    expect(out).toEqual([]);
+  });
+});
 
 describe("classifyStepKind", () => {
   it("maps each FORRT template label to its step kind", () => {
@@ -1928,12 +1989,21 @@ sub:pubinfo {
   it("emits no Question step when the template label is unrecognised", async () => {
     vi.stubGlobal("fetch", makeKp("Some unrelated template"));
     const c = await buildConstellation(OUTCOME, OPTS);
+    // Not mistaken for the chain's root question...
+    expect(c.chains[0].steps.map((s) => s.step)).not.toContain("Question");
     expect(c.chains[0].steps.map((s) => s.step)).toEqual([
       "AIDA",
       "Claim",
       "Study",
       "Outcome",
+      // ...but carried as an attachment rather than dropped: an unrecognised
+      // template is usually one the platform has not modelled yet (a dataset,
+      // a geographical coverage), not noise.
+      "Attached",
     ]);
+    const attached = c.chains[0].steps.find((s) => s.step === "Attached");
+    expect(attached?.uri).toBe(QUESTION);
+    expect(attached?.stepType).toBe("Some unrelated template");
   });
 });
 
