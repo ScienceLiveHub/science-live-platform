@@ -1,6 +1,7 @@
 import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import { useFormedible } from "@/hooks/use-formedible";
 import { validUriPlaceholder } from "@/lib/validation";
+import { toTemplateValues } from "./dataset-fields";
 import ky from "ky";
 import z from "zod";
 import {
@@ -283,7 +284,7 @@ export default function Dataset({
         ...prefilledData,
       },
       onSubmit: async ({ value }) => {
-        await submit(value);
+        await submit(toTemplateValues(value));
       },
     },
   });
