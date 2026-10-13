@@ -5,6 +5,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -144,8 +146,9 @@ function groupByClaim(reps: Replication[]) {
 }
 
 export default function ReplicationSummary() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const doi = (searchParams.get("doi") || "").trim();
+  const [doiInput, setDoiInput] = useState(doi);
 
   const [data, setData] = useState<Summary | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -195,10 +198,30 @@ export default function ReplicationSummary() {
           </p>
         ) : (
           <p className="text-muted-foreground">
-            Add a <code>?doi=</code> parameter, e.g.{" "}
-            <code>/np/replications?doi=10.1126/science.aax8591</code>.
+            Enter a paper's DOI to see every signed replication of it on the
+            nanopub network, with the verdict each reached.
           </p>
         )}
+        <form
+          className="flex gap-2 pt-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const v = doiInput
+              .trim()
+              .replace(/^https?:\/\/(dx\.)?doi\.org\//i, "");
+            if (v) setSearchParams({ doi: v });
+          }}
+        >
+          <Input
+            value={doiInput}
+            onChange={(e) => setDoiInput(e.target.value)}
+            placeholder="e.g. 10.1126/science.aax8591"
+            aria-label="DOI"
+          />
+          <Button type="submit" disabled={!doiInput.trim()}>
+            Search
+          </Button>
+        </form>
       </header>
 
       {loading && (
