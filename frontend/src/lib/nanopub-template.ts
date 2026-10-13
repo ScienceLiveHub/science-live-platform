@@ -234,6 +234,25 @@ export class NanopubTemplate extends NanopubStore {
       // Add any field-specific augmentations (prefix etc)
       const placeholderField = this.fields.find((f) => f.id === uri);
 
+      // A plain nt:LocalResource (not also a placeholder, so not a form field) is a
+      // node the new nanopub mints for itself: <new nanopub>/<local name>, as
+      // Nanodash does. Without this it would keep the template's own URI.
+      // Skipped when a value is supplied: repeatable groups pass their own
+      // per-iteration names (permNode, permNode__1, …) that way.
+      if (
+        !placeholderField &&
+        placeholderName !== uri &&
+        !values[placeholderName] &&
+        this.getQuads(
+          namedNode(uri),
+          NS.RDF("type"),
+          NS.NPTs("LocalResource"),
+          null,
+        ).length > 0
+      ) {
+        return baseUri + encodeURI(placeholderName);
+      }
+
       if (placeholderField?.dataType === NS.XSD("dateTime").value) {
         return new Date(outputValue as string | number | Date).toISOString();
       }
