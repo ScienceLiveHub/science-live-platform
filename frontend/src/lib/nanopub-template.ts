@@ -57,6 +57,31 @@ export interface TemplateField {
   // multiple?: boolean; // For repeatable statements
   regex?: string; // For zod validation
   prefix?: string; // Optional prefix to append to value when applying template
+  /** `nt:hasDefaultValue` — used when the author supplies no value. */
+  defaultValue?: string;
+}
+
+/**
+ * Fill in `nt:hasDefaultValue` for placeholders the author left empty.
+ *
+ * The author's own values always win; a default only applies where there is no
+ * value at all, so this can never overwrite what someone typed.
+ */
+function withTemplateDefaults(
+  fields: TemplateField[],
+  values: FormValues,
+): FormValues {
+  const filled: FormValues = { ...values };
+  for (const field of fields) {
+    if (!field.defaultValue) continue;
+    const name = getUriEnd(field.id);
+    if (!name) continue;
+    const current = filled[name];
+    if (current === undefined || current === null || current === "") {
+      filled[name] = field.defaultValue as FormValues[string];
+    }
+  }
+  return filled;
 }
 
 /**
@@ -71,6 +96,29 @@ function isRepeatable(statement: Statement | GroupInfo) {
  */
 function isOptional(statement: Statement | GroupInfo) {
   return statement.types?.some((t) => t.equals(NS.NPTs("OptionalStatement")));
+}
+
+/**
+ * Does this statement's object name a placeholder that the author left empty?
+ *
+ * Only placeholders count: an object that is a constant (`a fdof:
+ * FAIRDigitalObject`) is always safe to emit. A repeatable statement fed rows
+ * through its statement id is handled by the caller's repeat loop, so an empty
+ * row list is not treated as unfilled here.
+ */
+function hasUnfilledPlaceholderObject(
+  statement: Statement,
+  values: FormValues,
+  uri: string,
+) {
+  if (!statement.object) return false;
+  if (isRepeatable(statement) && Array.isArray(values[statement.id])) {
+    return false;
+  }
+  const object = statement.object.value;
+  if (!object.startsWith(uri)) return false;
+  const name = getUriEnd(object);
+  return !(name && values[name]);
 }
 
 /**
@@ -215,6 +263,13 @@ export class NanopubTemplate extends NanopubStore {
     },
     privateKey: string,
   ) {
+    // A template may declare `nt:hasDefaultValue` for a placeholder the author
+    // is not asked about — the Dataset template types its subject
+    // `fair:Dataset` that way. Ignoring those defaults drops a statement the
+    // template intends every record of its kind to carry, so fill them in
+    // before generating; anything the author did supply wins.
+    placeholderValues = withTemplateDefaults(this.fields, placeholderValues);
+
     const baseUri = `${SCIENCELIVE_NANOPUB_URI}~~~ARTIFACTCODE~~~/`;
     const newSubUri = `${baseUri}`;
 
@@ -378,6 +433,23 @@ export class NanopubTemplate extends NanopubStore {
       if (
         isOptional(statement) &&
         isAllEmpty(statement, placeholderValues, this.metadata.uri!)
+      ) {
+        continue;
+      }
+
+      // A REQUIRED statement whose object is an unfilled placeholder used to be
+      // emitted anyway, which published the placeholder node itself as the
+      // object — `dct:creator <…/RAuVB37yy…/creator>`, a form field asserted as
+      // a person, signed and immutable. An absent statement is merely
+      // incomplete; a placeholder node is false. Statements whose object is a
+      // constant (`a fdof:FAIRDigitalObject`) carry no placeholder and are
+      // unaffected.
+      if (
+        hasUnfilledPlaceholderObject(
+          statement,
+          placeholderValues,
+          this.metadata.uri!,
+        )
       ) {
         continue;
       }
@@ -688,6 +760,7 @@ export class NanopubTemplate extends NanopubStore {
       hasRegex: [NS.NPT("hasRegex")],
       hasPrefix: [NS.NPT("hasPrefix")],
       hasPrefixLabel: [NS.NPT("hasPrefixLabel")],
+      hasDefaultValue: [NS.NPT("hasDefaultValue")],
     };
     type Placeholder = {
       placeholderType: string;
@@ -699,6 +772,7 @@ export class NanopubTemplate extends NanopubStore {
       hasRegex: string;
       hasPrefix: string;
       hasPrefixLabel: string;
+      hasDefaultValue: string;
     };
 
     type Placeholders = Map<string, Placeholder>;
@@ -824,6 +898,7 @@ export class NanopubTemplate extends NanopubStore {
         description: pv.description,
         regex: pv.hasRegex,
         prefix: pv.hasPrefix,
+        defaultValue: pv.hasDefaultValue,
         options: options?.length > 0 ? options : undefined,
         required, // Placeholders are required by default, so if this is undefined, its still required
       });

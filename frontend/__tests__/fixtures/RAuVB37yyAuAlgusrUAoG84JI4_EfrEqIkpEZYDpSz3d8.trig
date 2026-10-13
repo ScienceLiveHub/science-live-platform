@@ -1,0 +1,254 @@
+@prefix this: <https://w3id.org/np/RAuVB37yyAuAlgusrUAoG84JI4_EfrEqIkpEZYDpSz3d8> .
+@prefix sub: <https://w3id.org/np/RAuVB37yyAuAlgusrUAoG84JI4_EfrEqIkpEZYDpSz3d8/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix nt: <https://w3id.org/np/o/ntemplate/> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix orcid: <https://orcid.org/> .
+@prefix ns1: <http://purl.org/np/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+sub:Head {
+  this: a np:Nanopublication;
+    np:hasAssertion sub:assertion;
+    np:hasProvenance sub:provenance;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+  dct:contributor rdfs:label "has contributor" .
+  
+  dct:creator rdfs:label "has creator" .
+  
+  dct:hasVersion rdfs:label "has version" .
+  
+  dct:isPartOf rdfs:label "is part of" .
+  
+  dct:issued rdfs:label "was published" .
+  
+  dct:language rdfs:label "uses language" .
+  
+  dct:license rdfs:label "data usage license", "has data usage license" .
+  
+  dct:publisher rdfs:label "has publisher" .
+  
+  dct:subject rdfs:label "has domain" .
+  
+  rdf:type rdfs:label "is a" .
+  
+  rdfs:comment rdfs:label "has description" .
+  
+  rdfs:label rdfs:label "has the label" .
+  
+  <https://schema.org/funder> rdfs:label "has funder" .
+  
+  <https://w3id.org/fair/fip/terms/implements> rdfs:label "implements" .
+  
+  <https://w3id.org/fdof/ontology#FAIRDigitalObject> rdfs:label "FAIR Digital Object (FDO)" .
+  
+  <https://w3id.org/fdof/ontology#hasEncodingFormat> rdfs:label "has format", "has the format" .
+  
+  <https://w3id.org/fdof/ontology#hasMetadata> rdfs:label "has its metadata in" .
+  
+  <https://w3id.org/fdof/ontology#materializes> rdfs:label "is a concrete materialization of" .
+  
+  sub:URL a nt:ExternalUriPlaceholder;
+    rdfs:label "access URL" .
+  
+  sub:assertion a nt:AssertionTemplate;
+    rdfs:label "Declaring a Dataset (adjusted version)";
+    nt:hasStatement sub:st0, sub:st1, sub:st2, sub:st3, sub:st4, sub:st5, sub:st6, sub:st7,
+      sub:st8, sub:st9, sub:st91, sub:st92, sub:st94, sub:st95, sub:st98, sub:st99;
+    nt:hasTag "Datasets" .
+  
+  sub:class a nt:ExternalUriPlaceholder;
+    rdfs:label "class URI";
+    nt:hasDefaultValue <https://w3id.org/fair/ff/terms/Dataset> .
+  
+  sub:contact a nt:LiteralPlaceholder;
+    rdfs:label "contact email" .
+  
+  sub:contributor a nt:AgentPlaceholder;
+    rdfs:label "ORCID of contributor" .
+  
+  sub:creator a nt:AgentPlaceholder;
+    rdfs:label "ORCID of creator" .
+  
+  sub:date a nt:LiteralPlaceholder;
+    rdfs:label "publication date" .
+  
+  sub:description a nt:LongLiteralPlaceholder;
+    rdfs:label "description" .
+  
+  sub:domain a nt:RestrictedChoicePlaceholder;
+    rdfs:label "domain";
+    nt:possibleValuesFrom ns1:RACXDZHEowTYDAzZvdmD0qIGpXZwY5ghMRBBlt6N8Iu5s .
+  
+  sub:fdo a nt:IntroducedResource, nt:LocalResource, nt:UriPlaceholder;
+    rdfs:label "full URI (e.g. handle.net) or short suffix" .
+  
+  sub:fip a nt:GuidedChoicePlaceholder;
+    rdfs:label "FAIR Implementation Profile";
+    nt:possibleValuesFromApi "http://purl.org/nanopub/api/find_signed_things?type=https%3A%2F%2Fw3id.org%2Ffair%2Ffip%2Fterms%2FFAIR-Implementation-Profile&searchterm=" .
+  
+  sub:format a nt:RestrictedChoicePlaceholder;
+    rdfs:label "MIME type, such as \"text/csv\" or \"application/trig\"";
+    nt:possibleValue <https://www.iana.org/assignments/media-types/text/html>;
+    nt:possibleValuesFrom <https://w3id.org/np/RAHiMahG_NWtiAmqll6OiAc5zkfYoGFzsmieNFR8jtWuQ> .
+  
+  sub:funder a nt:ExternalUriPlaceholder;
+    rdfs:label "ROR of funder institution" .
+  
+  sub:label a nt:LiteralPlaceholder;
+    rdfs:label "label or name for this FDO" .
+  
+  sub:language a nt:RestrictedChoicePlaceholder;
+    rdfs:label "language";
+    nt:possibleValuesFrom <https://w3id.org/np/RAp57dn-l397dngANPG5jQQAX-Pc2cUgEIjXsyGOKyJLY> .
+  
+  sub:license a nt:GuidedChoicePlaceholder;
+    nt:possibleValuesFromApi "http://purl.org/nanopub/api/find_signed_things?type=https%3A%2F%2Fw3id.org%2Ffair%2Ffip%2Fterms%2FData-usage-license&searchterm=" .
+  
+  sub:materialization a nt:ExternalUriPlaceholder;
+    rdfs:label "materialization URI" .
+  
+  sub:project a nt:GuidedChoicePlaceholder;
+    rdfs:label "project";
+    nt:possibleValuesFromApi "https://w3id.org/np/l/nanopub-query-1.1/api/RAFTZ8GqPOOJQOBcEo5IB8lg5vZCFiIyr_RVLKZDQBHMk/get-projects?searchterm=" .
+  
+  sub:publisher a nt:ExternalUriPlaceholder;
+    rdfs:label "the ROR of the publishing entity" .
+  
+  sub:st0 rdf:object <https://w3id.org/fdof/ontology#FAIRDigitalObject>;
+    rdf:predicate rdf:type;
+    rdf:subject sub:fdo .
+  
+  sub:st1 a nt:OptionalStatement;
+    rdf:object sub:label;
+    rdf:predicate rdfs:label;
+    rdf:subject sub:fdo .
+  
+  sub:st2 a nt:OptionalStatement;
+    rdf:object sub:description;
+    rdf:predicate rdfs:comment;
+    rdf:subject sub:fdo .
+  
+  sub:st3 rdf:object sub:class;
+    rdf:predicate rdf:type;
+    rdf:subject sub:fdo .
+  
+  sub:st4 rdf:object nt:NANOPUB;
+    rdf:predicate <https://w3id.org/fdof/ontology#hasMetadata>;
+    rdf:subject sub:fdo .
+  
+  sub:st5 a nt:GroupedStatement, nt:OptionalStatement, nt:RepeatableStatement;
+    nt:hasStatement sub:st5a, sub:st5b, sub:st5c, sub:st5d, sub:st93 .
+  
+  sub:st5a rdf:object sub:fdo;
+    rdf:predicate <https://w3id.org/fdof/ontology#materializes>;
+    rdf:subject sub:materialization .
+  
+  sub:st5b rdf:object sub:format;
+    rdf:predicate <https://w3id.org/fdof/ontology#hasEncodingFormat>;
+    rdf:subject sub:materialization .
+  
+  sub:st5c rdf:object sub:license;
+    rdf:predicate dct:license;
+    rdf:subject sub:materialization .
+  
+  sub:st5d rdf:object sub:URL;
+    rdf:predicate <https://www.w3.org/ns/dcat#accessURL>;
+    rdf:subject sub:materialization .
+  
+  sub:st6 a nt:RepeatableStatement;
+    rdf:object sub:creator;
+    rdf:predicate dct:creator;
+    rdf:subject sub:fdo .
+  
+  sub:st7 a nt:OptionalStatement, nt:RepeatableStatement;
+    rdf:object sub:contributor;
+    rdf:predicate dct:contributor;
+    rdf:subject sub:fdo .
+  
+  sub:st8 rdf:object sub:contact;
+    rdf:predicate <https://www.w3.org/ns/dcat#contactPoint>;
+    rdf:subject sub:fdo .
+  
+  sub:st9 a nt:OptionalStatement;
+    rdf:object sub:language;
+    rdf:predicate dct:language;
+    rdf:subject sub:fdo .
+  
+  sub:st91 a nt:OptionalStatement;
+    rdf:object sub:domain;
+    rdf:predicate dct:subject;
+    rdf:subject sub:fdo .
+  
+  sub:st92 a nt:OptionalStatement;
+    rdf:object sub:publisher;
+    rdf:predicate dct:publisher;
+    rdf:subject sub:fdo .
+  
+  sub:st93 rdf:object sub:date;
+    rdf:predicate dct:issued;
+    rdf:subject sub:materialization .
+  
+  sub:st94 a nt:OptionalStatement;
+    rdf:object sub:version;
+    rdf:predicate dct:hasVersion;
+    rdf:subject sub:fdo .
+  
+  sub:st95 a nt:OptionalStatement;
+    rdf:object sub:fip;
+    rdf:predicate <https://w3id.org/fair/fip/terms/implements>;
+    rdf:subject sub:fdo .
+  
+  sub:st98 a nt:OptionalStatement;
+    rdf:object sub:funder;
+    rdf:predicate <https://schema.org/funder>;
+    rdf:subject sub:fdo .
+  
+  sub:st99 a nt:OptionalStatement;
+    rdf:object sub:project;
+    rdf:predicate dct:isPartOf;
+    rdf:subject sub:fdo .
+  
+  sub:version a nt:LiteralPlaceholder;
+    rdfs:label "version" .
+  
+  <https://www.iana.org/assignments/media-types/text/html> rdfs:label "html" .
+  
+  <https://www.w3.org/ns/dcat#accessURL> rdfs:label "has access URL" .
+  
+  <https://www.w3.org/ns/dcat#contactPoint> rdfs:label "has contact point" .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo orcid:0000-0002-1267-0234 .
+}
+
+sub:pubinfo {
+  orcid:0000-0002-1267-0234 foaf:name "Tobias Kuhn" .
+  
+  this: dct:created "2025-12-11T09:39:28.930Z"^^xsd:dateTime;
+    dct:creator orcid:0000-0002-1267-0234;
+    dct:license <https://creativecommons.org/licenses/by/4.0/>;
+    npx:wasCreatedAt <https://nanodash.knowledgepixels.com/>;
+    rdfs:label "Declaring a Dataset (adjusted version)";
+    prov:wasDerivedFrom <https://w3id.org/np/RAnSHAFu_HMWIfNsjXAvL8441RQJCbg7Gu0nMTJUM-0sA>;
+    nt:wasCreatedFromProvenanceTemplate ns1:RANwQa4ICWS5SOjw7gp99nBpXBasapwtZF1fIM3H2gYTM;
+    nt:wasCreatedFromPubinfoTemplate <https://w3id.org/np/RA0J4vUn_dekg-U1kK3AOEt02p9mT2WO03uGxLDec1jLw>,
+      <https://w3id.org/np/RARW4MsFkHuwjycNElvEVtuMjpf4yWDL10-0C5l2MqqRQ>, <https://w3id.org/np/RAukAcWHRDlkqxk7H2XNSegc1WnHI569INvNr-xdptDGI>;
+    nt:wasCreatedFromTemplate <https://w3id.org/np/RA1XuAdO6LOtlPJgWiytJHFuK4BFHjQK5x7d9FVymzFnc> .
+  
+  sub:sig npx:hasAlgorithm "RSA";
+    npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD4Wj537OijfOWVtsHMznuXKISqBhtGDQZfdO6pbb4hg9EHMcUFGTLbWaPrP783PHv8HMAAPjvEkHLaOHMIknqhaIa5236lfBO3r+ljVdYBElBcLvROmwG+ZGtmPNZf7lMhI15xf5TfoaSa84AFRd5J2EXekK6PhaFQhRm1IpSYtwIDAQAB";
+    npx:hasSignature "w+PrPZeNiaQ22VPnPbhswLL/qyjrAtoAQeytBJuOfgZokjK1qoC42cGMLv/TBifXYOUWQzbd1vZfkqLX81iRLU9pSnM2vNqeTmsNJQoQuDJyZONxJk247+0duNydgqHF317Uir4WEiQRT49duy+Mj9nc/pN48MXzi0TICPzR+Xk=";
+    npx:hasSignatureTarget this:;
+    npx:signedBy orcid:0000-0002-1267-0234 .
+}
+
