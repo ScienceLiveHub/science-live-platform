@@ -25,6 +25,17 @@ export function Home() {
         <p className="mx-auto max-w-lg text-lg text-secondary-foreground">
           Transform research into structured, citable nanopublications
         </p>
+        <p className="text-sm text-muted-foreground">
+          Learn more about the project at{" "}
+          <a
+            href="https://sciencelive4all.org"
+            className="text-link hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            sciencelive4all.org
+          </a>
+        </p>
         {!session?.user && (
           <Button
             size="lg"
