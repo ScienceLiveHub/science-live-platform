@@ -62,6 +62,14 @@ describe("Dataset nanopublication generation", () => {
     expect(assertion).not.toMatch(/RAuVB37yy\w*\/(creator|contact|contributor|fip)/);
   });
 
+  it("types the dataset with the class the template declares as a default", async () => {
+    // `nt:hasDefaultValue <https://w3id.org/fair/ff/terms/Dataset>` on the
+    // `class` placeholder, which no form field asks about. Nanodash-published
+    // dataset records carry this type; without default support ours would not.
+    const assertion = await assertionFrom({ ...FORM, creators: [ORCID_A] });
+    expect(assertion).toContain("https://w3id.org/fair/ff/terms/Dataset");
+  });
+
   it("still produces a valid assertion when the optional fields are left empty", async () => {
     const assertion = await assertionFrom(FORM);
     expect(assertion).toContain("FAIRDigitalObject");

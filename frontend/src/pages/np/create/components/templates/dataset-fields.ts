@@ -1,3 +1,34 @@
+import { validUriPlaceholder } from "@/lib/validation";
+import { z } from "zod";
+
+/**
+ * Shape of the Dataset form.
+ *
+ * `creators` is required because the template says so: `st6` (dct:creator)
+ * is the one repeatable statement declared without `nt:OptionalStatement`.
+ * A dataset record with no attribution is the FAIR failure the template was
+ * written to prevent, and it cannot be corrected after signing.
+ */
+export const datasetSchema = z.object({
+  // Required fields
+  fdo: validUriPlaceholder,
+  label: z.string().min(3).max(300),
+  description: z.string().min(10).max(2000),
+  creators: z
+    .array(z.string().url())
+    .min(1, "Name at least one creator of the dataset"),
+  // Optional fields
+  contactEmail: z.string().email().optional().or(z.literal("")),
+  version: z.string().optional().or(z.literal("")),
+  language: z.string().optional().or(z.literal("")),
+  domain: z.string().optional().or(z.literal("")),
+  publisher: z.string().url().optional().or(z.literal("")),
+  funder: z.string().url().optional().or(z.literal("")),
+  project: z.string().optional().or(z.literal("")),
+  fairProfile: z.string().optional().or(z.literal("")),
+  contributors: z.array(z.string().url()).optional(),
+});
+
 /**
  * Translate this form's field names into the names the Dataset template
  * actually declares.

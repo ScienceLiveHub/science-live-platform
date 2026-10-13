@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { toTemplateValues } from "@/pages/np/create/components/templates/dataset-fields";
+import {
+  datasetSchema,
+  toTemplateValues,
+} from "@/pages/np/create/components/templates/dataset-fields";
 
 const A = "https://orcid.org/0000-0002-1784-2920";
 const B = "https://orcid.org/0009-0001-0203-0815";
@@ -45,5 +48,26 @@ describe("Dataset form → template placeholder names", () => {
 
   it("trims whitespace the user leaves in a pasted ORCID", () => {
     expect(toTemplateValues({ creators: [` ${A} `] })).toEqual({ st6: [{ creator: A }] });
+  });
+});
+
+describe("Dataset form schema", () => {
+  const valid = {
+    fdo: "10.57780/bio-65e97bc",
+    label: "Canopy height for the Beni lowlands",
+    description: "Forest canopy height from ESA BIOMASS, validated against GEDI.",
+    creators: [A],
+  };
+
+  it("accepts a dataset that names a creator", () => {
+    expect(datasetSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("refuses a dataset with no creator at all", () => {
+    // `st6` (dct:creator) is the template's one non-optional repeatable
+    // statement, and attribution cannot be corrected once signed.
+    const { creators: _omitted, ...withoutCreators } = valid;
+    expect(datasetSchema.safeParse(withoutCreators).success).toBe(false);
+    expect(datasetSchema.safeParse({ ...valid, creators: [] }).success).toBe(false);
   });
 });
