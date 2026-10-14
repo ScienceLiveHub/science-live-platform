@@ -17,6 +17,7 @@ export { default as NANOPUB_REFERENCES } from "./nanopub-references.rq";
 export { default as NANOPUB_REFERS_TO } from "./nanopub-refers-to.rq";
 export { default as NANOPUB_STATUS } from "./nanopub-status.rq";
 export { default as NANOPUB_TYPES } from "./nanopub-types.rq";
+export { default as QUOTES_BY_DOI } from "./quotes-by-doi.rq";
 export { default as REFERENCES_FROM } from "./references-from.rq";
 export { default as REPLICATIONS_BY_PAPER } from "./replications-by-paper.rq";
 export { default as SEARCH_NANOPUBS } from "./search-nanopubs.rq";
