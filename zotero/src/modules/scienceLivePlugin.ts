@@ -39,6 +39,20 @@ function isDarkMode(win?: _ZoteroTypes.MainWindow) {
   return !!win.matchMedia("(prefers-color-scheme: dark)")?.matches;
 }
 
+/**
+ * Zotero 10 allows selecting multiple collections and removed
+ * getSelectedCollection() (it now throws). getSelectedCollections() doesn't
+ * exist before Zotero 10, so fall back to the singular getter there.
+ */
+function getSelectedCollections(pane: _ZoteroTypes.ZoteroPane) {
+  const p = pane as any;
+  if (typeof p.getSelectedCollections === "function") {
+    return p.getSelectedCollections() as Zotero.Collection[];
+  }
+  const collection = pane.getSelectedCollection();
+  return collection ? [collection] : [];
+}
+
 type PublishResult = {
   uri: string;
   signedRdf: string;
@@ -563,20 +577,18 @@ export class ScienceLivePlugin {
       const url = input.value.trim();
       ztoolkit.log("Importing nanopub as new item from URL: " + url);
 
-      // Get current collection if one is selected
+      // Get current collections if any are selected
       const pane = Zotero.getActiveZoteroPane();
-      let collectionID;
-
-      if (pane) {
-        const collection = pane.getSelectedCollection();
-        if (collection) {
-          collectionID = collection.id;
-          ztoolkit.log("Adding to collection: " + collection.name);
-        }
-      }
+      const collections = pane ? getSelectedCollections(pane) : [];
+      collections.forEach((c) =>
+        ztoolkit.log("Adding to collection: " + c.name),
+      );
 
       // Use display module to create standalone item
-      await addon.data.displayModule.importAsStandaloneItem(url, collectionID);
+      await addon.data.displayModule.importAsStandaloneItem(
+        url,
+        collections.map((c) => c.id),
+      );
 
       alert(
         "Success",
