@@ -10,6 +10,7 @@ import { Home } from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import CreateNanopub from "./pages/np/create/CreateNanopub";
 import ForrtChainWizard from "./pages/np/create/ForrtChainWizard";
+import RequestWizard from "./pages/np/create/RequestWizard";
 import StoryWizard from "./pages/np/create/StoryWizard";
 import ReplicationSummary from "./pages/np/ReplicationSummary";
 import StoryView from "./pages/np/view/StoryView";
@@ -66,6 +67,7 @@ function App() {
           <Route path="/np/create" element={<CreateNanopub />} />
           <Route path="/np/create/chain" element={<ForrtChainWizard />} />
           <Route path="/np/create/story" element={<StoryWizard />} />
+          <Route path="/np/create/request" element={<RequestWizard />} />
           <Route path="/np/create/:uri" element={<CreateNanopub />} />
           <Route path="/email-verified" element={<EmailVerified />} />
           {/* Policy Pages */}

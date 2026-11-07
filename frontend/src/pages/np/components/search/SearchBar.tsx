@@ -81,6 +81,7 @@ export const INITIAL_CHECKED: Record<FeedTemplateKey, boolean> = {
   FORRT_KL_REPLICATION: false,
   FORRT_KL_REPLICATION_OUTCOME: false,
   RESEARCH_SYNTHESIS: false,
+  REPLICATION_REQUEST: false,
 };
 
 /** Collect all URIs (current + legacy) for the selected template keys. */

@@ -1,0 +1,44 @@
+# Quote-with-comment nanopubs that quote a given paper (by DOI), newest first,
+# with the number of replication requests already pointing to each quote.
+#
+# A quote states a claim (cito:hasQuotedText) and why it matters (rdfs:comment); it is
+# step 01 of a FORRT chain and the target of a replication request (schema:object).
+# Template-agnostic: any nanopub whose assertion has `?x cito:quotes ?_doiUri` and a
+# quoted text counts (platform, Zotero and older template versions alike).
+# Quotes invalidated (retracted/superseded) by their own signer are excluded.
+# Requests are matched by artifact code, so both URI forms of the quote count
+# (https://w3id.org/np/RA… and https://w3id.org/sciencelive/np/RA…).
+#
+# Placeholder: `?_doiUri` - URI: the paper DOI as an IRI, e.g. https://doi.org/10.1038/s41586-024-08106-4
+
+prefix np: <http://www.nanopub.org/nschema#>
+prefix npa: <http://purl.org/nanopub/admin/>
+prefix npx: <http://purl.org/nanopub/x/>
+prefix cito: <http://purl.org/spar/cito/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix dct: <http://purl.org/dc/terms/>
+prefix schema: <https://schema.org/>
+
+select ?np ?quotation ?comment ?creator ?date (count(distinct ?req) as ?requests) where {
+  graph ?a {
+    ?paper cito:hasQuotedText ?quotation .
+    ?quoter cito:quotes ?_doiUri .
+    optional { ?paper rdfs:comment ?comment . }
+  }
+  filter(?paper = ?_doiUri)
+  graph npa:graph {
+    ?np np:hasAssertion ?a ;
+        npa:hasValidSignatureForPublicKeyHash ?pubkey ;
+        npa:artifactCode ?code .
+    optional { ?np dct:creator ?creator . }
+    optional { ?np dct:created ?date . }
+    filter not exists { ?inv npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+  }
+  optional {
+    graph ?ra { ?req a schema:CheckAction ; schema:object ?quoteRef . }
+    filter(strends(str(?quoteRef), ?code))
+  }
+}
+group by ?np ?quotation ?comment ?creator ?date
+order by desc(?date)
+limit 20
