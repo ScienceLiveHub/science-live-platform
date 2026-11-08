@@ -1,17 +1,21 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Link2 } from "lucide-react";
+import { FileText, HandHelping, Link2 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 /**
- * The two Create modes, as peer tabs: a single nanopublication (the existing
- * flow) or a whole FORRT replication chain. Rendered at the top of both the
- * CreateNanopub page and the ForrtChainWizard, so switching is one click and the
+ * The Create modes, as peer tabs: a single nanopublication (the existing flow), a
+ * whole FORRT replication chain, or a replication request. Rendered at the top of
+ * the CreateNanopub page and the wizards, so switching is one click and the
  * top-level nav stays just Browse / Create.
  */
 export default function CreateModeTabs() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const active = pathname.startsWith("/np/create/chain") ? "chain" : "single";
+  const active = pathname.startsWith("/np/create/chain")
+    ? "chain"
+    : pathname.startsWith("/np/create/request")
+      ? "request"
+      : "single";
 
   // The shared active-tab style (bg-input/30) is nearly invisible against the
   // muted list in dark mode. Give the active tab a solid background, a border,
@@ -25,7 +29,13 @@ export default function CreateModeTabs() {
     <Tabs
       value={active}
       onValueChange={(v) =>
-        navigate(v === "chain" ? "/np/create/chain" : "/np/create")
+        navigate(
+          v === "chain"
+            ? "/np/create/chain"
+            : v === "request"
+              ? "/np/create/request"
+              : "/np/create",
+        )
       }
     >
       <TabsList>
@@ -36,6 +46,10 @@ export default function CreateModeTabs() {
         <TabsTrigger value="chain" className={triggerCls}>
           <Link2 className="h-4 w-4" />
           Create FORRT Chain
+        </TabsTrigger>
+        <TabsTrigger value="request" className={triggerCls}>
+          <HandHelping className="h-4 w-4" />
+          Request a Replication
         </TabsTrigger>
       </TabsList>
     </Tabs>
