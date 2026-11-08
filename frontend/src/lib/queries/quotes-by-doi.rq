@@ -1,0 +1,57 @@
+# Quote-with-comment nanopubs that quote a given paper (by DOI), newest first,
+# with the number of replication requests already pointing to each quote.
+#
+# A quote states a claim (cito:hasQuotedText, plus cito:hasQuotedTextEnd for a
+# start/end quote of a longer passage) and why it matters (rdfs:comment); it is
+# step 01 of a FORRT chain and the target of a replication request (schema:object).
+# Template-agnostic: any nanopub whose assertion has `?x cito:quotes <doi>` and a
+# quoted text counts (platform, Zotero and older template versions alike).
+# Quotes invalidated (retracted/superseded) by their own signer are excluded, and so
+# are requests: only requests asserted by a validly signed, non-invalidated nanopub
+# count. Requests are matched by artifact code, so both URI forms of the quote count
+# (https://w3id.org/np/RA… and https://w3id.org/sciencelive/np/RA…).
+# One row per quote nanopub (multi-valued fields are sampled).
+#
+# Placeholder: `?_doiKey` - literal: the paper DOI IRI, lower-cased (DOIs are
+#   case-insensitive but IRIs compare exactly), e.g. "https://doi.org/10.1038/s41586-024-08106-4"
+# Placeholder: `?_limit` - raw: maximum number of quotes to return (e.g. 200).
+
+prefix np: <http://www.nanopub.org/nschema#>
+prefix npa: <http://purl.org/nanopub/admin/>
+prefix npx: <http://purl.org/nanopub/x/>
+prefix cito: <http://purl.org/spar/cito/>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix dct: <http://purl.org/dc/terms/>
+prefix schema: <https://schema.org/>
+
+select ?np (sample(?q) as ?quotation) (sample(?qEnd) as ?quotationEnd)
+       (sample(?c) as ?comment) (sample(?cr) as ?creator) (min(?d) as ?date)
+       (count(distinct ?reqNp) as ?requests) where {
+  graph ?a {
+    ?quoter cito:quotes ?doiUri .
+    filter(lcase(str(?doiUri)) = ?_doiKey)
+    ?doiUri cito:hasQuotedText ?q .
+    optional { ?doiUri cito:hasQuotedTextEnd ?qEnd . }
+    optional { ?doiUri rdfs:comment ?c . }
+  }
+  graph npa:graph {
+    ?np np:hasAssertion ?a ;
+        npa:hasValidSignatureForPublicKeyHash ?pubkey ;
+        npa:artifactCode ?code .
+    optional { ?np dct:creator ?cr . }
+    optional { ?np dct:created ?d . }
+    filter not exists { ?inv npx:invalidates ?np ; npa:hasValidSignatureForPublicKeyHash ?pubkey . }
+  }
+  optional {
+    graph ?ra { ?req a schema:CheckAction ; schema:object ?quoteRef . }
+    filter(strends(str(?quoteRef), ?code))
+    graph npa:graph {
+      ?reqNp np:hasAssertion ?ra ;
+             npa:hasValidSignatureForPublicKeyHash ?reqPubkey .
+      filter not exists { ?reqInv npx:invalidates ?reqNp ; npa:hasValidSignatureForPublicKeyHash ?reqPubkey . }
+    }
+  }
+}
+group by ?np
+order by desc(?date)
+limit ?_limit
