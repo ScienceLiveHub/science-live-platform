@@ -3,7 +3,15 @@ import {
   TEMPLATE_METADATA,
   TEMPLATE_URI,
 } from "../../../frontend/src/pages/np/create/components/templates/registry-metadata";
-import { extractDoisFromText } from "../../../frontend/src/lib/uri";
+import {
+  fetchQuotesForDoi,
+  findSameQuote,
+  type PaperQuote,
+} from "../../../frontend/src/lib/quotes";
+import {
+  extractDoisFromText,
+  SCIENCELIVE_PLATFORM_URL,
+} from "../../../frontend/src/lib/uri";
 
 function logged(
   target: any,
@@ -193,6 +201,65 @@ function splitIfTooLong(text: string): {
   return { quoteStart, quoteEnd };
 }
 
+/**
+ * An existing Quote-with-comment nanopub of this paper quoting the same passage
+ * (same start and, for a long passage, same end), or null. Network errors are
+ * treated as "none found".
+ */
+async function findExistingQuote(
+  doi: string,
+  quotation: string,
+  quotationEnd?: string,
+): Promise<PaperQuote | null> {
+  if (!doi || !quotation) return null;
+  try {
+    const quotes = await fetchQuotesForDoi(doi);
+    return findSameQuote(quotes, quotation, quotationEnd) ?? null;
+  } catch (err) {
+    ztoolkit.log("ReaderIntegration: Could not look up existing quotes:", err);
+    return null;
+  }
+}
+
+const sameText = (a: string, b: string) =>
+  a.replace(/\s+/g, " ").trim() === b.replace(/\s+/g, " ").trim();
+
+/**
+ * Someone already quoted this passage. Reuse their quote silently when the user's
+ * annotation adds no comment of its own; otherwise ask, so the user's comment (why
+ * the claim matters) is never dropped without them knowing.
+ */
+function chooseExistingQuote(
+  existing: PaperQuote,
+  comment: string,
+): "reuse" | "own" | "cancel" {
+  if (!comment.trim() || sameText(comment, existing.comment)) return "reuse";
+  const win = Zotero.getMainWindow() as mozIDOMWindowProxy;
+  const p = Services.prompt as any; // confirmEx/BUTTON_* are loosely typed
+  // Cancel sits in slot 1: closing the dialog (Esc / ✕) also returns 1.
+  const flags =
+    p.BUTTON_POS_0 * p.BUTTON_TITLE_IS_STRING +
+    p.BUTTON_POS_1 * p.BUTTON_TITLE_CANCEL +
+    p.BUTTON_POS_2 * p.BUTTON_TITLE_IS_STRING;
+  const button = p.confirmEx(
+    win,
+    "This claim is already quoted",
+    "This passage has already been quoted on Science Live" +
+      (existing.comment
+        ? `, with the comment:\n\n“${existing.comment}”`
+        : ".") +
+      "\n\nPoint your request to that quote (your annotation comment is not " +
+      "published), or publish your own quote with your comment first?",
+    flags,
+    "Use the existing quote",
+    null,
+    "Publish my own quote",
+    null,
+    {},
+  );
+  return button === 0 ? "reuse" : button === 2 ? "own" : "cancel";
+}
+
 export class ScienceLivePlugin {
   // Create Nanopublication menu and dynamically generated submenus(from predefined TEMPLATE_METADATA)
   static createNanopubMenu = () =>
@@ -206,6 +273,17 @@ export class ScienceLivePlugin {
         l10nArgs: { npLabel: `${v.icon} ${v.name}` },
         onCommand: (event: any) => {
           event?.stopPropagation?.();
+          if (k === TEMPLATE_URI.REPLICATION_REQUEST) {
+            // A request points to a quote of the paper: the web wizard lists the
+            // quotes that already exist for this DOI, or helps write one first.
+            const item = Zotero.getActiveZoteroPane()?.getSelectedItems()?.[0];
+            const doi = item?.isRegularItem() ? item.getField("DOI") : "";
+            Zotero.launchURL(
+              `${SCIENCELIVE_PLATFORM_URL}/np/create/request` +
+                (doi ? `?doi=${encodeURIComponent(doi)}` : ""),
+            );
+            return;
+          }
           openNanopubCreationDialog(k, null);
         },
       })),
@@ -406,6 +484,13 @@ export class ScienceLivePlugin {
         label: "✨ Create Nanopublication from Annotation",
         onCommand: async () => {
           await this.createNanopubFromAnnotation(reader, annotationIds[0]);
+        },
+      });
+
+      append({
+        label: "🙋 Request a Replication of this Claim",
+        onCommand: async () => {
+          await this.requestReplicationFromAnnotation(reader, annotationIds[0]);
         },
       });
 
@@ -661,6 +746,52 @@ export class ScienceLivePlugin {
   }
 
   /**
+   * Read a PDF annotation as Quote-with-comment form data (quotation, comment, DOI),
+   * plus the Zotero parent item the resulting nanopubs are shown under.
+   */
+  private static async quoteDataFromAnnotation(
+    reader: any,
+    annotationKey: string,
+  ) {
+    const annotationItem = await getAnnotationItem(reader, annotationKey);
+    if (!annotationItem) {
+      return null;
+    }
+
+    // Get annotation data
+    const annotationText = annotationItem.annotationText || "";
+    const annotationComment = annotationItem.annotationComment || "";
+
+    // Get the PDF item and parent item
+    const pdfItem = annotationItem.parentItem;
+    if (!pdfItem) {
+      ztoolkit.log("ReaderIntegration: PDF item not found");
+      alert("Error", "PDF item not found");
+      return null;
+    }
+
+    const parentItem = pdfItem.parentItem;
+    if (!parentItem) {
+      ztoolkit.log("ReaderIntegration: Parent item not found");
+      alert("Error", "Parent item not found");
+      return null;
+    }
+
+    // Process the quote text
+    const { quoteStart, quoteEnd } = splitIfTooLong(annotationText);
+
+    // Prepare annotation data for the form
+    const annotationData = {
+      quotation: quoteStart,
+      "quotation-end": quoteEnd,
+      comment: annotationComment,
+      paper: parentItem.getField("DOI"),
+      quoteType: quoteEnd && quoteEnd.length > 0 ? "ends" : "whole",
+    };
+    return { annotationData, parentItem };
+  }
+
+  /**
    * Create nanopublication from an annotation
    */
   private static async createNanopubFromAnnotation(
@@ -672,42 +803,11 @@ export class ScienceLivePlugin {
         `ReaderIntegration: Creating nanopub from annotation key: ${annotationKey}`,
       );
 
-      const annotationItem = await getAnnotationItem(reader, annotationKey);
-      if (!annotationItem) {
+      const data = await this.quoteDataFromAnnotation(reader, annotationKey);
+      if (!data) {
         return;
       }
-
-      // Get annotation data
-      const annotationText = annotationItem.annotationText || "";
-      const annotationComment = annotationItem.annotationComment || "";
-      const pageLabel = annotationItem.annotationPageLabel || "";
-
-      // Get the PDF item and parent item
-      const pdfItem = annotationItem.parentItem;
-      if (!pdfItem) {
-        ztoolkit.log("ReaderIntegration: PDF item not found");
-        alert("Error", "PDF item not found");
-        return;
-      }
-
-      const parentItem = pdfItem.parentItem;
-      if (!parentItem) {
-        ztoolkit.log("ReaderIntegration: Parent item not found");
-        alert("Error", "Parent item not found");
-        return;
-      }
-
-      // Process the quote text
-      const { quoteStart, quoteEnd } = splitIfTooLong(annotationText);
-
-      // Prepare annotation data for the form
-      const annotationData = {
-        quotation: quoteStart,
-        "quotation-end": quoteEnd,
-        comment: annotationComment,
-        paper: parentItem.getField("DOI"),
-        quoteType: quoteEnd && quoteEnd.length > 0 ? "ends" : "whole",
-      };
+      const { annotationData, parentItem } = data;
 
       openNanopubCreationDialog(
         TEMPLATE_URI.ANNOTATE_QUOTATION,
@@ -721,6 +821,79 @@ export class ScienceLivePlugin {
     } catch (err: any) {
       ztoolkit.log(
         "ReaderIntegration: Failed to create nanopub from annotation:",
+        err,
+      );
+      alert("Error", `Failed to create nanopublication:\n${err.message}`);
+    }
+  }
+
+  /**
+   * Request a replication of the claim in an annotation: first publish the
+   * annotation as a Quote-with-comment (the quotation states the claim, the
+   * comment says why it matters), then open the replication request form
+   * pre-filled with that quote.
+   */
+  private static async requestReplicationFromAnnotation(
+    reader: any,
+    annotationKey: string,
+  ) {
+    try {
+      ztoolkit.log(
+        `ReaderIntegration: Requesting a replication from annotation key: ${annotationKey}`,
+      );
+
+      const data = await this.quoteDataFromAnnotation(reader, annotationKey);
+      if (!data) {
+        return;
+      }
+      const { annotationData, parentItem } = data;
+
+      const openRequest = (quoteUri: string) =>
+        openNanopubCreationDialog(
+          TEMPLATE_URI.REPLICATION_REQUEST,
+          { quote: quoteUri },
+          async ({ signedRdf }) =>
+            await addon.data.displayModule.displayFromContent(
+              parentItem,
+              signedRdf,
+            ),
+        );
+
+      // Reuse an existing quote of the same passage, so requests and the later
+      // replication chain all point to one quote (no duplicates).
+      const existing = await findExistingQuote(
+        annotationData.paper,
+        annotationData.quotation,
+        annotationData["quotation-end"],
+      );
+      if (existing) {
+        const choice = chooseExistingQuote(existing, annotationData.comment);
+        if (choice === "cancel") return;
+        if (choice === "reuse") {
+          ztoolkit.log(
+            `ReaderIntegration: Reusing existing quote ${existing.np}`,
+          );
+          openRequest(existing.np);
+          return;
+        }
+        // "own": fall through and publish the user's quote with their comment.
+      }
+
+      // Otherwise publish the quote first (step 1), then the request (step 2).
+      openNanopubCreationDialog(
+        TEMPLATE_URI.ANNOTATE_QUOTATION,
+        annotationData,
+        async ({ uri, signedRdf }) => {
+          await addon.data.displayModule.displayFromContent(
+            parentItem,
+            signedRdf,
+          );
+          openRequest(uri);
+        },
+      );
+    } catch (err: any) {
+      ztoolkit.log(
+        "ReaderIntegration: Failed to request a replication from annotation:",
         err,
       );
       alert("Error", `Failed to create nanopublication:\n${err.message}`);
