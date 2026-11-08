@@ -5,6 +5,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -22,6 +24,7 @@ import {
   type Replication,
   type ReplicationSummary as Summary,
 } from "@/lib/replications";
+import { normalizeDoi } from "@/lib/uri";
 import {
   CheckCircle2,
   CircleAlert,
@@ -144,12 +147,31 @@ function groupByClaim(reps: Replication[]) {
 }
 
 export default function ReplicationSummary() {
-  const [searchParams] = useSearchParams();
-  const doi = (searchParams.get("doi") || "").trim();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rawDoi = (searchParams.get("doi") || "").trim();
+  // Canonical form for display/linking; an unparseable param falls through to
+  // fetchReplications, which reports it as invalid.
+  const doi = normalizeDoi(rawDoi) ?? rawDoi;
+  const [doiInput, setDoiInput] = useState(doi);
+  const [inputError, setInputError] = useState<string | null>(null);
+  // Bumped to re-run the lookup for the DOI already in the URL (retry / refresh).
+  const [attempt, setAttempt] = useState(0);
 
   const [data, setData] = useState<Summary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // When the URL's DOI changes (search, back/forward, a link from elsewhere), keep the
+  // box in step and drop results that belong to the previous DOI.
+  const [prevDoi, setPrevDoi] = useState(doi);
+  if (doi !== prevDoi) {
+    setPrevDoi(doi);
+    setDoiInput(doi);
+    setInputError(null);
+    setData(null);
+    setError(null);
+    if (!doi) setLoading(false);
+  }
 
   useEffect(() => {
     if (!doi) return;
@@ -168,7 +190,7 @@ export default function ReplicationSummary() {
         if (!ac.signal.aborted) setLoading(false);
       });
     return () => ac.abort();
-  }, [doi]);
+  }, [doi, attempt]);
 
   const groups = data ? groupByClaim(data.replications) : [];
 
@@ -195,8 +217,51 @@ export default function ReplicationSummary() {
           </p>
         ) : (
           <p className="text-muted-foreground">
-            Add a <code>?doi=</code> parameter, e.g.{" "}
-            <code>/np/replications?doi=10.1126/science.aax8591</code>.
+            Enter a paper's DOI to see every signed replication of it on the
+            nanopub network, with the verdict each reached.
+          </p>
+        )}
+        <form
+          className="flex gap-2 pt-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const v = normalizeDoi(doiInput);
+            if (!v) {
+              setInputError(
+                `"${doiInput.trim()}" is not a valid DOI (expected 10.xxxx/…).`,
+              );
+              return;
+            }
+            setInputError(null);
+            setDoiInput(v);
+            if (v === doi) {
+              setAttempt((n) => n + 1);
+              return;
+            }
+            setSearchParams((prev) => {
+              const next = new URLSearchParams(prev);
+              next.set("doi", v);
+              return next;
+            });
+          }}
+        >
+          <Input
+            value={doiInput}
+            onChange={(e) => {
+              setDoiInput(e.target.value);
+              setInputError(null);
+            }}
+            placeholder="e.g. 10.1126/science.aax8591"
+            aria-label="DOI"
+            aria-invalid={!!inputError}
+          />
+          <Button type="submit" disabled={!doiInput.trim() || loading}>
+            Search
+          </Button>
+        </form>
+        {inputError && (
+          <p className="text-sm text-destructive" role="alert">
+            {inputError}
           </p>
         )}
       </header>

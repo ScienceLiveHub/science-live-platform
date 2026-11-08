@@ -10,6 +10,7 @@
  */
 import { REPLICATIONS_BY_PAPER } from "@/lib/queries";
 import { executeBindSparql, NANOPUB_SPARQL_ENDPOINT_FULL } from "@/lib/sparql";
+import { doiIriKey, normalizeDoi } from "@/lib/uri";
 
 export type Replication = {
   outcomeNp: string;
@@ -60,20 +61,18 @@ export const isPartial = (v: string) => /partial/i.test(v);
 export const isConfirmed = (v: string) =>
   /validat|confirm|support/i.test(v) && !isContradicted(v) && !isPartial(v);
 
-const DOI_RE = /^10\.\d{3,}\/\S+$/;
-
 export async function fetchReplications(
   doi: string,
   signal?: AbortSignal,
 ): Promise<ReplicationSummary> {
-  const clean = doi.trim().replace(/^https?:\/\/doi\.org\//i, "");
-  if (!DOI_RE.test(clean)) {
+  const clean = normalizeDoi(doi);
+  if (!clean) {
     throw new Error(`"${doi}" is not a valid DOI (expected 10.xxxx/…).`);
   }
 
   const rows = await executeBindSparql(
     REPLICATIONS_BY_PAPER,
-    { doiUri: `https://doi.org/${clean}` },
+    { doiKey: doiIriKey(clean) },
     NANOPUB_SPARQL_ENDPOINT_FULL,
     signal,
   );
