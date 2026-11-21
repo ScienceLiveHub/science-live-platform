@@ -75,6 +75,10 @@ export const TEMPLATE_URI = {
   REPLICATION_REQUEST:
     "https://w3id.org/np/RAo1X8qffuzwse6EpAm3TKmM7ub2ODwifHLTpImxVdI4s",
 
+  // Requirements: "As a … I want to … so that …" (FAIR2Adapt User Story template)
+  USER_STORY:
+    "https://w3id.org/np/RACciFqZEUYYrteZnGikqUEV8ZRVYfJNB3bzy98X5s_qw",
+
   // Story (narrative composition of a constellation)
   STORY: "https://w3id.org/np/RAfjXiLtYji0w1Y3AtKmtL_S21esoh5jprGWAPpRQ1zUk",
   // Utility templates (not shown in the nanopub editor)
@@ -570,6 +574,30 @@ export const TEMPLATE_METADATA: Record<string, NanopubTemplateMetadata> = {
     ],
   },
 
+  // ── Requirements ───────────────────────────────────────────────────
+  [TEMPLATE_URI.USER_STORY]: {
+    name: "User Story",
+    description:
+      "Say what you need, in your own words: as a (who you are), I want to (what you want to do), so that (why it matters).",
+    moreDescription:
+      "Link it to the domains it covers, the climate risks it faces and the sectors exposed to them, so that the people who build data, services and tools can find what is needed and match their resources to it.",
+    category: "Requirements",
+    icon: "🗣️",
+    color: "indigo",
+    recommended: true,
+    keywords: [
+      "user story",
+      "requirement",
+      "need",
+      "as a",
+      "i want to",
+      "so that",
+      "fair2adapt",
+      "climate",
+      "risk",
+    ],
+  },
+
   // ── Story ──────────────────────────────────────────────────────────
   [TEMPLATE_URI.STORY]: {
     name: "Science Live Story",
@@ -681,6 +709,7 @@ export const FEED_TEMPLATE_KEYS = [
   "FORRT_KL_REPLICATION_OUTCOME",
   "RESEARCH_SYNTHESIS",
   "REPLICATION_REQUEST",
+  "USER_STORY",
 ] as const satisfies (keyof typeof TEMPLATE_URI)[];
 
 export type FeedTemplateKey = (typeof FEED_TEMPLATE_KEYS)[number];
@@ -711,6 +740,7 @@ export const FEED_TEMPLATE_LABELS: Record<FeedTemplateKey, string> = {
   FORRT_KL_REPLICATION_OUTCOME: "FORRT KL Replication Outcome",
   RESEARCH_SYNTHESIS: "Science Live Research Synthesis",
   REPLICATION_REQUEST: "Replication Request",
+  USER_STORY: "User Story",
 };
 
 /** Group labels for organizing checkboxes by category. */
@@ -753,5 +783,9 @@ export const FEED_GROUPS: { label: string; keys: FeedTemplateKey[] }[] = [
       "RESEARCH_SYNTHESIS",
       "REPLICATION_REQUEST",
     ],
+  },
+  {
+    label: "Requirements",
+    keys: ["USER_STORY"],
   },
 ];
