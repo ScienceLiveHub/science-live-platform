@@ -181,6 +181,55 @@ function useStyleCustomization() {
   }, [searchParams]);
 }
 
+/**
+ * An embedded page has no scroll of its own (the host sizes the iframe to its content),
+ * so it must never scroll the host. Components inside it do ask to: cmdk brings the
+ * highlighted option into view with scrollIntoView, and inputs are focused without
+ * preventScroll. Firefox applies both to every scrollable ancestor, the host page
+ * included, so picking a term from a list made the dashboard around the form jump.
+ * While embedded, scroll only the nearest scrollable container inside this page, and
+ * focus without scrolling.
+ */
+/** scrollIntoView that scrolls only the nearest scrollable container inside this page */
+function scrollWithinPage(this: Element) {
+  let box = this.parentElement;
+  while (box && box !== document.body) {
+    const { overflowY } = getComputedStyle(box);
+    if (
+      (overflowY === "auto" || overflowY === "scroll") &&
+      box.scrollHeight > box.clientHeight
+    ) {
+      const item = this.getBoundingClientRect();
+      const view = box.getBoundingClientRect();
+      if (item.top < view.top) box.scrollTop -= view.top - item.top;
+      else if (item.bottom > view.bottom)
+        box.scrollTop += item.bottom - view.bottom;
+      return;
+    }
+    box = box.parentElement;
+  }
+}
+
+const nativeScrollIntoView = Element.prototype.scrollIntoView;
+const nativeFocus = HTMLElement.prototype.focus;
+
+/** focus that never scrolls */
+function focusWithoutScrolling(this: HTMLElement, options?: FocusOptions) {
+  return nativeFocus.call(this, { ...options, preventScroll: true });
+}
+
+function useNoHostScroll() {
+  useEffect(() => {
+    if (window.parent === window) return; // not in an iframe: leave the browser alone
+    Element.prototype.scrollIntoView = scrollWithinPage;
+    HTMLElement.prototype.focus = focusWithoutScrolling;
+    return () => {
+      Element.prototype.scrollIntoView = nativeScrollIntoView;
+      HTMLElement.prototype.focus = nativeFocus;
+    };
+  }, []);
+}
+
 function useIframeResize(ref: React.RefObject<HTMLDivElement | null>) {
   useEffect(() => {
     const el = ref.current;
@@ -233,6 +282,7 @@ export function EmbedLayout() {
 
   useStyleCustomization();
   useIframeResize(contentRef);
+  useNoHostScroll();
 
   return (
     <ThemeProvider
