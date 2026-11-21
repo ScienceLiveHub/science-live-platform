@@ -15,7 +15,8 @@
 # public-key hash ensures only the original signer can retract their own work — a third
 # party cannot suppress someone else's outcome). Disapproval is deliberately not a filter.
 #
-# Placeholder: `?_doiUri` - URI: the paper DOI as an IRI, e.g. https://doi.org/10.1126/science.aax8591
+# Placeholder: `?_doiKey` - literal: the paper DOI IRI, lower-cased (DOIs are case-insensitive
+#   but IRIs compare exactly), e.g. "https://doi.org/10.1126/science.aax8591"
 
 prefix np: <http://www.nanopub.org/nschema#>
 prefix nt: <https://w3id.org/np/o/ntemplate/>
@@ -30,7 +31,8 @@ select distinct ?outcome ?status ?rel ?confidence ?conclusion ?repo
                 ?claim ?claimLabel ?aida ?ctype where {
   # A CiTO nanopub whose assertion verdict-cites the paper DOI; its subject is the Outcome.
   values ?relP { cito:confirms cito:qualifies cito:disputes cito:critiques cito:extends cito:supports cito:refutes }
-  graph ?ca { ?outcome ?relP ?_doiUri . }
+  graph ?ca { ?outcome ?relP ?doiUri . }
+  filter(lcase(str(?doiUri)) = ?_doiKey)
   ?citoNp np:hasAssertion ?ca .
   graph npa:networkGraph { ?citoNp nt:wasCreatedFromTemplate <https://w3id.org/np/RA43F9EoOuzF0xoNUnCMNyFsfIqlsuWDdPHCnN0wCdCAw> . }
   bind(strafter(str(?relP), "http://purl.org/spar/cito/") as ?rel)
