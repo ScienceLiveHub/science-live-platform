@@ -2,6 +2,7 @@ import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import { MissingEmailDialog } from "./components/missing-email-dialog";
 import { Navbar01 } from "./components/ui/shadcn-io/navbar-01";
 import { Toaster } from "./components/ui/sonner";
+import { EmbedCreate } from "./embed/EmbedCreate";
 import { EmbedLayout } from "./embed/EmbedLayout";
 import { EmbedViewer } from "./embed/EmbedViewer";
 import AuthPage from "./pages/AuthPage";
@@ -29,6 +30,7 @@ function App() {
         {/* Embed routes — minimal layout, no app shell */}
         <Route path="/embed" element={<EmbedLayout />}>
           <Route path="view" element={<EmbedViewer />} />
+          <Route path="create" element={<EmbedCreate />} />
         </Route>
 
         {/* Main app routes — full app shell with auth, navbar, etc. */}
