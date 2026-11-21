@@ -1,0 +1,98 @@
+@prefix this: <https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU> .
+@prefix sub: <https://w3id.org/np/RA24onqmqTMsraJ7ypYFOuckmNWpo4Zv5gsLqhXt7xYPU/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix nt: <https://w3id.org/np/o/ntemplate/> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix orcid: <https://orcid.org/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+sub:Head {
+  this: a np:Nanopublication;
+    np:hasAssertion sub:assertion;
+    np:hasProvenance sub:provenance;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+  <http://purl.org/spar/cito/hasQuotedText> rdfs:label "has quoted text" .
+  
+  <http://purl.org/spar/cito/hasQuotedTextEnd> rdfs:label "has quoted text end" .
+  
+  <http://purl.org/spar/cito/quotes> rdfs:label "quotes from" .
+  
+  rdfs:comment rdfs:label "has comment" .
+  
+  sub:assertion a nt:AssertionTemplate;
+    dct:description "This template allows researchers to create structured annotations when reading papers. It captures specific quotations from a paper along with the reader's interpretation. For longer passages, users can quote the beginning and end sentences to stay within copyright-friendly limits while still capturing the essence of extended arguments or findings.";
+    rdfs:label "Annotating a paper quotation with personal interpretation";
+    nt:hasNanopubLabelPattern "Paper annotation: ${quotation}";
+    nt:hasStatement sub:st01, sub:st02, sub:st03, sub:st04;
+    nt:hasTag "Annotations";
+    nt:hasTargetNanopubType <http://purl.org/spar/cito/cites> .
+  
+  sub:comment a nt:LongLiteralPlaceholder;
+    rdfs:label "our interpretation and explanation of why this quotation is relevant (max. 800 characters)";
+    nt:hasRegex "[\\s\\S]{5,800}" .
+  
+  sub:paper a nt:UriPlaceholder;
+    rdfs:label "DOI of the paper (starting with '10.')";
+    nt:hasPrefix "https://doi.org/";
+    nt:hasPrefixLabel "the paper with DOI";
+    nt:hasRegex "10.(\\d)+/(\\S)+" .
+  
+  sub:quotation a nt:LongLiteralPlaceholder;
+    rdfs:label "The exact quotation from the paper (max. 500 characters)";
+    nt:hasRegex "[\\s\\S]{5,500}" .
+  
+  sub:quotation-end a nt:LongLiteralPlaceholder;
+    rdfs:label "End of quotation (optional - use when quoting beginning and end of a longer passage, max. 500 characters)";
+    nt:hasRegex "[\\s\\S]{5,500}" .
+  
+  sub:st01 rdf:object sub:paper;
+    rdf:predicate <http://purl.org/spar/cito/quotes>;
+    rdf:subject nt:CREATOR .
+  
+  sub:st02 rdf:object sub:quotation;
+    rdf:predicate <http://purl.org/spar/cito/hasQuotedText>;
+    rdf:subject sub:paper .
+  
+  sub:st03 a nt:OptionalStatement;
+    rdf:object sub:quotation-end;
+    rdf:predicate <http://purl.org/spar/cito/hasQuotedTextEnd>;
+    rdf:subject sub:paper .
+  
+  sub:st04 rdf:object sub:comment;
+    rdf:predicate rdfs:comment;
+    rdf:subject sub:paper .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo orcid:0000-0002-1784-2920 .
+}
+
+sub:pubinfo {
+  orcid:0000-0002-1784-2920 foaf:name "Anne Fouilloux" .
+  
+  this: dct:created "2025-08-13T12:27:02.901Z"^^xsd:dateTime;
+    dct:creator orcid:0000-0002-1784-2920;
+    dct:license <https://creativecommons.org/licenses/by/4.0/>;
+    npx:supersedes <https://w3id.org/np/RASiY24ogD1E8bLnEXpShXamD--f_4ddlv5FoXk5xosiU>;
+    npx:wasCreatedAt <https://nanodash.knowledgepixels.com/>;
+    rdfs:label "Template: Annotating a paper quotation with personal interpretation";
+    nt:wasCreatedFromProvenanceTemplate <https://w3id.org/np/RA7lSq6MuK_TIC6JMSHvLtee3lpLoZDOqLJCLXevnrPoU>;
+    nt:wasCreatedFromPubinfoTemplate <https://w3id.org/np/RA0J4vUn_dekg-U1kK3AOEt02p9mT2WO03uGxLDec1jLw>,
+      <https://w3id.org/np/RAoTD7udB2KtUuOuAe74tJi1t3VzK0DyWS7rYVAq1GRvw>, <https://w3id.org/np/RAukAcWHRDlkqxk7H2XNSegc1WnHI569INvNr-xdptDGI>;
+    nt:wasCreatedFromTemplate <https://w3id.org/np/RA5reLVXOCPQFWr2UiCJb19ES7NwOpQRmudb17e2iB0c4> .
+  
+  sub:sig npx:hasAlgorithm "RSA";
+    npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDWv2pJnmDsBOq8OlT1aSvYXSuWT34WOp4FYqEzdnn2F0kqzcFevBqWGZDxJWC0lqCrDEuNfp2QFyPe/+nES9dlHGYIhqPi68fwK6ZiNUotRFxXou+rjFznVvUxtCL8Ede79EBHwWN61QtwSIcU12bLoZsNPFlqQASQ93BJuKlihwIDAQAB";
+    npx:hasSignature "HAHZJMns8TmElABDJXLlEl7YyI7nUpR5PFtSTvt6+rRFRXqP8pA9VjaXZ4qUmHUmcSYGsDxKjSXoZVsdNFDxF+lWmC+ZflFufg6KdlCdyyNZyYFsM8fSpPIt6ErftBoGqGx/XJWwvcbN3QXhO1uUKbUS2MGr5X/9ObeZxY5Za8k=";
+    npx:hasSignatureTarget this:;
+    npx:signedBy orcid:0000-0002-1784-2920 .
+}
+

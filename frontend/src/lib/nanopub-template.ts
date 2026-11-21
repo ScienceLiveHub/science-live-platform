@@ -288,6 +288,18 @@ export class NanopubTemplate extends NanopubStore {
 
     // Helper function to correctly format values outputted to generated nanopub
     const formatValue = (uri: string, values: FormValues): string => {
+      // Nanodash's special template tokens stand for parts of the nanopublication being
+      // made, not for form fields: nt:CREATOR is its author (the signer's ORCID),
+      // nt:NANOPUB the nanopublication itself and nt:ASSERTION its assertion graph.
+      // Left as they are, a statement like `nt:CREATOR cito:quotes <paper>` would be
+      // published about the template's token instead of about the author.
+      const token = uri.replace(/^http:/, "https:");
+      if (token === NS.NPTs("CREATOR").value) {
+        return cleanOrcidUri(pubData.orcid);
+      }
+      if (token === NS.NPTs("NANOPUB").value) return newSubUri;
+      if (token === NS.NPTs("ASSERTION").value) return newSubUri + "assertion";
+
       let placeholderName = uri;
       if (uri.startsWith("sub:")) {
         placeholderName = uri.substring(4); // Remove "sub:" prefix
