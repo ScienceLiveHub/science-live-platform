@@ -1,8 +1,7 @@
 import ShowOptionalWrapper from "@/components/formedible/wrappers/optional-suffix-global-wrapper";
 import { useFormedible } from "@/hooks/use-formedible";
-import { validUriPlaceholder } from "@/lib/validation";
+import { datasetSchema, toTemplateValues } from "./dataset-fields";
 import ky from "ky";
-import z from "zod";
 import {
   NanopubEditorOptionFields,
   NanopubTemplateDefComponentProps,
@@ -72,24 +71,7 @@ export default function Dataset({
   submit,
   prefilledData = {},
 }: NanopubTemplateDefComponentProps) {
-  const schema = z.object({
-    // Required fields
-    fdo: validUriPlaceholder,
-    label: z.string().min(3).max(300),
-    description: z.string().min(10).max(2000),
-    // Optional fields
-    contactEmail: z.string().email().optional().or(z.literal("")),
-    version: z.string().optional().or(z.literal("")),
-    language: z.string().optional().or(z.literal("")),
-    domain: z.string().optional().or(z.literal("")),
-    publisher: z.string().url().optional().or(z.literal("")),
-    funder: z.string().url().optional().or(z.literal("")),
-    project: z.string().optional().or(z.literal("")),
-    fairProfile: z.string().optional().or(z.literal("")),
-    // Repeatable fields
-    creators: z.array(z.string().url()).optional(),
-    contributors: z.array(z.string().url()).optional(),
-  });
+  const schema = datasetSchema;
 
   const { Form } = useFormedible({
     schema,
@@ -181,14 +163,14 @@ export default function Dataset({
         type: "array",
         name: "creators",
         label: "Creators",
-        required: false,
+        required: true,
         defaultValue: [],
         section: {
           title: "People & Organizations",
         },
         arrayConfig: {
           defaultValue: "",
-          minItems: 0,
+          minItems: 1,
           maxItems: 20,
           itemType: "text",
           addButtonLabel: "Add Creator",
@@ -283,7 +265,7 @@ export default function Dataset({
         ...prefilledData,
       },
       onSubmit: async ({ value }) => {
-        await submit(value);
+        await submit(toTemplateValues(value));
       },
     },
   });

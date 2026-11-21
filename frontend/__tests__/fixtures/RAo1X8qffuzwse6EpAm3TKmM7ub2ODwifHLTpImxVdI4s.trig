@@ -1,0 +1,125 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix nt: <https://w3id.org/np/o/ntemplate/> .
+@prefix orcid: <https://orcid.org/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <https://schema.org/> .
+@prefix sl: <https://w3id.org/sciencelive/o/terms/> .
+@prefix sub1: <https://w3id.org/np/RAo1X8qffuzwse6EpAm3TKmM7ub2ODwifHLTpImxVdI4s/> .
+@prefix this: <https://w3id.org/np/RAo1X8qffuzwse6EpAm3TKmM7ub2ODwifHLTpImxVdI4s> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+sub1:Head {
+  this: a np:Nanopublication;
+    np:hasAssertion sub1:assertion;
+    np:hasProvenance sub1:provenance;
+    np:hasPublicationInfo sub1:pubinfo .
+}
+
+sub1:assertion {
+  schema:CheckAction rdfs:label "a request to check (reproduce/replicate)" .
+  
+  schema:PotentialActionStatus rdfs:label "requested (not done yet)" .
+  
+  schema:actionStatus rdfs:label "has status" .
+  
+  schema:additionalType rdfs:label "as a" .
+  
+  schema:description rdfs:label "with approach notes" .
+  
+  schema:object rdfs:label "checks the claim in" .
+  
+  sub1:approach a nt:LongLiteralPlaceholder;
+    rdfs:label "Notes on the suggested approach (max. 800 characters)";
+    nt:hasRegex "[\\s\\S]{5,800}" .
+  
+  sub1:assertion a nt:AssertionTemplate;
+    dcterms:description "Ask for a claim to be independently reproduced or replicated. Point to a Quote-with-comment nanopublication that states the claim (the quotation) and why it matters (the comment). Optionally say what kind of study you want and suggest datasets, software or an approach. Requests are public and signed: anyone can take one on, and the replication chain that starts from the same quote is linked to it.";
+    rdfs:label "Requesting a replication or reproduction of a claim";
+    nt:hasNanopubLabelPattern "Replication request: ${quote}";
+    nt:hasStatement sub1:st01, sub1:st02, sub1:st03, sub1:st04, sub1:st05, sub1:st06,
+      sub1:st07;
+    nt:hasTag "FORRT";
+    nt:hasTargetNanopubType schema:CheckAction .
+  
+  sub1:dataset a nt:ExternalUriPlaceholder;
+    rdfs:label "Suggested dataset (DOI or URL)" .
+  
+  sub1:quote a nt:UriPlaceholder;
+    rdfs:label "Quote-with-comment nanopublication with the claim to check and why it matters";
+    nt:hasRegex "https://w3id\\.org/(sciencelive/)?np/RA[A-Za-z0-9_-]{43}" .
+  
+  sub1:request a nt:LocalResource;
+    rdfs:label "this replication request" .
+  
+  sub1:software a nt:ExternalUriPlaceholder;
+    rdfs:label "Suggested software: link (best: version DOI or Software Heritage ID; else CRAN/PyPI/conda-forge/bio.tools page, repository, Wikidata entry or vendor page)" .
+  
+  sub1:st01 rdf:object schema:CheckAction;
+    rdf:predicate rdf:type;
+    rdf:subject sub1:request .
+  
+  sub1:st02 rdf:object schema:PotentialActionStatus;
+    rdf:predicate schema:actionStatus;
+    rdf:subject sub1:request .
+  
+  sub1:st03 rdf:object sub1:quote;
+    rdf:predicate schema:object;
+    rdf:subject sub1:request .
+  
+  sub1:st04 a nt:OptionalStatement;
+    rdf:object sub1:studyType;
+    rdf:predicate schema:additionalType;
+    rdf:subject sub1:request .
+  
+  sub1:st05 a nt:OptionalStatement, nt:RepeatableStatement;
+    rdf:object sub1:dataset;
+    rdf:predicate sl:hasInputDataSource;
+    rdf:subject sub1:request .
+  
+  sub1:st06 a nt:OptionalStatement, nt:RepeatableStatement;
+    rdf:object sub1:software;
+    rdf:predicate sl:usesSoftwarePackage;
+    rdf:subject sub1:request .
+  
+  sub1:st07 a nt:OptionalStatement;
+    rdf:object sub1:approach;
+    rdf:predicate schema:description;
+    rdf:subject sub1:request .
+  
+  sub1:studyType a nt:RestrictedChoicePlaceholder;
+    rdfs:label "What should be done? (leave empty if either is fine)";
+    nt:possibleValue sl:Replication-Study, sl:Reproduction-Replication-Study, sl:Reproduction-Study .
+  
+  sl:Replication-Study rdfs:label "Replication: different data and/or methods" .
+  
+  sl:Reproduction-Replication-Study rdfs:label "Both reproduction and replication" .
+  
+  sl:Reproduction-Study rdfs:label "Reproduction: same data and same methods/tools" .
+  
+  sl:hasInputDataSource rdfs:label "suggests the dataset" .
+  
+  sl:usesSoftwarePackage rdfs:label "suggests the software" .
+}
+
+sub1:provenance {
+  sub1:assertion prov:wasAttributedTo orcid:0000-0002-1784-2920 .
+}
+
+sub1:pubinfo {
+  this: dcterms:creator orcid:0000-0002-1784-2920;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/>;
+    rdfs:label "Template: Requesting a replication or reproduction of a claim";
+    prov:generatedAtTime "2026-10-12T14:59:51.312530+00:00"^^xsd:dateTime;
+    nt:wasCreatedFromTemplate <https://w3id.org/np/RA5reLVXOCPQFWr2UiCJb19ES7NwOpQRmudb17e2iB0c4> .
+  
+  sub1:sig npx:hasAlgorithm "RSA";
+    npx:hasPublicKey "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyuQ7Hi/zQ7hDZtMtLWK1JKU83Kgo8NqC+b8sxD5IoiekPctXVA8iM0zD/9pcp1txGXjX/fUj5HRUkOn4RVHP3fFa/3irQYpZFQ5fHRj8MQ7kJ6AEd1oggfajDevZGz63hj6Vigo+BNYBXqhcbWVAfLfbzQPAegce9zH6n9vTqKYMrwrSxPQdhoAcoaKOqY8gRiJgzekeEr+iEqa63X1HwWtYDs7X25a9xWbgaDSsRjzZGVUVOn1vYdSfWAaIw+EB9CiJfKm1zuXcur5PDziMW1pnZG6/NQtrA7AM3gLnoSoU3glkm5UhksGNqu2SV+j8oZLg7v6C5/sg2f6LIJMeFwIDAQAB";
+    npx:hasSignature "CEt6SvF3rg4oVYV7yd1LCUqSTcfYebWn9UlRXmMINbQBOCzgECWIqPZcoT+hF4sNBQIBB5ALWsimaoE7RKLWZz4fIcZKqD2Mm7kXQ3I8n2JcJObQjTlDd9Dmuo5kN5cNSsVtkyJ2vdkWjRexC7Ih+EN3i64rIH7ZOBq1QHNA5QGijkzOTGymFaH4C/dYhcrYYiZ/RjLJLhIjScw0URTdVdLbn8ZVWPqm57FUEC5ifzClk424O6KZEV1EkPXSAsYOyNfHoILdiVF/gbk6NMlGxuF1Y8M6YB4rsgvwl+kDJDXzzhZYWPEVO85F79LMh81JmYA8P/ZV8ww+wI+y7LntPg==";
+    npx:hasSignatureTarget this:;
+    npx:signedBy <https://w3id.org/np/RAIA9ECaN2ypOVvl4YeNjT6nbpwko9xMcctxB_uYscLG4/claude-ai-agent> .
+}
+
