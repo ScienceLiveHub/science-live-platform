@@ -2,9 +2,13 @@
  * Vocabulary shared by the User Story form and view.
  */
 
-/** The fixed domain list the template restricts `sub:domain` to */
+/**
+ * The fixed domain list the template restricts `sub:domain` to: since template v2
+ * (RAFwCQ_…), Barbara Magagna's climate-adaptation list of 41 domains. v1 used a general
+ * AGROVOC list (RACXDZHE…, 425 terms).
+ */
 export const USER_STORY_DOMAIN_OPTIONS =
-  "https://w3id.org/np/RACXDZHEowTYDAzZvdmD0qIGpXZwY5ghMRBBlt6N8Iu5s";
+  "https://w3id.org/np/RADj5kIS6YAzoRyzVfiuV97Kla8U5rkU6sMTsbkYVjBUI";
 
 /**
  * Nanopub types of the terms the template's guided choices offer. The template searches
