@@ -9,6 +9,7 @@ import {
   extractSubjectsFiltered,
   fetchPossibleValuesFromQuads,
   NS,
+  termsAreEqual,
 } from "./rdf";
 import { unwrapPEMKey } from "./string-format";
 import {
@@ -739,6 +740,20 @@ export class NanopubTemplate extends NanopubStore {
   }
 
   /**
+   * The subject that carries the template: whichever subject in the assertion graph is
+   * typed nt:AssertionTemplate, or the assertion graph itself when none says so.
+   */
+  findAssertionTemplate() {
+    const assertion = namedNode(this.graphUris.assertion!);
+    const declared = this.getQuads(null, NS.RDF("type"), null, assertion).find(
+      (quad) =>
+        quad.subject.termType === "NamedNode" &&
+        termsAreEqual(quad.object, NS.NPTs("AssertionTemplate")),
+    );
+    return declared ? namedNode(declared.subject.value) : assertion;
+  }
+
+  /**
    * Afer loading a nanopub template, extract its fields
    */
   async extractFields() {
@@ -755,8 +770,12 @@ export class NanopubTemplate extends NanopubStore {
       tags_$array: [NS.NPT("hasTag")],
     };
 
-    // We are only interested in the assertion graph which contains the template
-    const thisTemplate = namedNode(this.graphUris.assertion!);
+    // We are only interested in the assertion graph which contains the template.
+    // By convention the assertion itself is the template, but the ontology calls that a
+    // convention rather than a rule ("maybe to be revisited at some point"), and templates
+    // exist that declare nt:AssertionTemplate on another subject in the same graph. Follow
+    // the type where it is declared, and fall back to the convention.
+    const thisTemplate = this.findAssertionTemplate();
 
     const props = extractSubjectProps(
       this,
