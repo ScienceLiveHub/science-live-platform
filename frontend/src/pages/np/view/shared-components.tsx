@@ -3,6 +3,7 @@
  *
  */
 
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ExternalLink, Link, Link2, MessageCircle, Quote } from "lucide-react";
 import { ReactNode } from "react";
@@ -326,6 +327,46 @@ export function ScientificClaimBlock({
       <ItemTitle title={title} className="mb-2" />
       <div className={cn("rounded-md border-l-4 p-4", colorClass, bgClass)}>
         <p className="text-lg font-medium leading-relaxed">{text}</p>
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
+// LINKED TERMS
+// =============================================================================
+
+interface TermBadgeListProps {
+  /** Section title */
+  title: ReactNode;
+  /** URIs of the terms, each shown as a badge linking to it */
+  uris: string[];
+  /** Resolves a URI to the label shown on its badge */
+  labelOf: (uri: string) => string;
+  /** Additional CSS classes */
+  className?: string;
+}
+
+/**
+ * A titled list of linked vocabulary terms (domains, risks, types…) shown as badges.
+ * Renders nothing when there are no terms.
+ */
+export function TermBadgeList({
+  title,
+  uris,
+  labelOf,
+  className,
+}: TermBadgeListProps) {
+  if (uris.length === 0) return null;
+  return (
+    <div className={className}>
+      <ItemTitle title={title} />
+      <div className="flex flex-wrap gap-1.5">
+        {uris.map((uri) => (
+          <a key={uri} href={uri} target="_blank" rel="noreferrer" title={uri}>
+            <Badge variant="secondary">{labelOf(uri)}</Badge>
+          </a>
+        ))}
       </div>
     </div>
   );

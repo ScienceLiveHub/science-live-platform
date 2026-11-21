@@ -1,0 +1,20 @@
+# List the things introduced by live nanopubs of a given nanopub type, with their labels.
+# The same terms the `find-things` API offers a GuidedChoicePlaceholder, but without its
+# whole-word text search, so a short vocabulary can be offered in full and filtered
+# client-side. Excludes invalidated and superseded nanopubs.
+#
+# Placeholder: `?_type` - URI: the nanopub type (npx:hasNanopubType) of the term nanopubs.
+
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix npa: <http://purl.org/nanopub/admin/>
+prefix npx: <http://purl.org/nanopub/x/>
+
+select distinct ?thing ?label where {
+  graph npa:graph {
+    ?np npx:hasNanopubType ?_type .
+    ?np npa:hasValidSignatureForPublicKey ?pubkey .
+    filter not exists { ?npx npx:invalidates ?np ; npa:hasValidSignatureForPublicKey ?pubkey . }
+    ?np npx:introduces|npx:describes|npx:embeds ?thing .
+    ?np rdfs:label ?label .
+  }
+} order by lcase(str(?label)) limit 500

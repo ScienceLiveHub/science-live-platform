@@ -206,6 +206,15 @@ export type FormValues = Record<
   | Array<Record<string, string>>
 >;
 
+/**
+ * Form value key under which a form may pass `{ [uri]: label }` for values the user
+ * picked from an API search (a GuidedChoicePlaceholder backed by
+ * `nt:possibleValuesFromApi`). Such terms often cannot be dereferenced for a label
+ * later, so, as Nanodash does, the label is recorded in the pubinfo with
+ * `nt:hasLabelFromApi`, which viewers read back through `findInternalLabel()`.
+ */
+export const API_LABELS_KEY = "_apiLabels";
+
 export class NanopubTemplate extends NanopubStore {
   /**
    * Fields specific to Templates
@@ -598,6 +607,29 @@ export class NanopubTemplate extends NanopubStore {
     );
 
     outputStore.addQuad(outSub, NS.DCT("creator"), orcidNode, pubinfoGraph);
+
+    // Labels of values picked from an API search, for terms the assertion uses
+    const apiLabels = placeholderValues[API_LABELS_KEY];
+    if (
+      apiLabels &&
+      typeof apiLabels === "object" &&
+      !Array.isArray(apiLabels)
+    ) {
+      for (const [uri, label] of Object.entries(apiLabels)) {
+        if (
+          label &&
+          outputStore.getQuads(null, null, namedNode(uri), assertionGraph)
+            .length > 0
+        ) {
+          outputStore.addQuad(
+            namedNode(uri),
+            NS.NPTs("hasLabelFromApi"),
+            literal(label),
+            pubinfoGraph,
+          );
+        }
+      }
+    }
 
     // For each field of type IntroducedResource, the generated nanopub should introduce them
     const introducedFields = this.fields.filter((f) =>
