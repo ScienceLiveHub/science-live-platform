@@ -158,6 +158,41 @@ export function toScienceLiveNPUri(sourceUri: string, relative = true) {
     : sourceUri;
 }
 
+// Anything a user is likely to paste in front of a bare DOI.
+const DOI_PREFIX_RE = /^(?:doi:\s*|(?:https?:\/\/)?(?:dx\.|www\.)?doi\.org\/)/i;
+// Same registrant rule as `validDoi` (4–9 digits, Wiley's 10.1002 excepted).
+const BARE_DOI_RE = /^(?:10\.1002\/\S+|10\.\d{4,9}\/\S+)$/;
+
+/**
+ * Turn whatever a user typed or pasted (bare DOI, `doi:` prefix, any doi.org URL,
+ * trailing citation punctuation) into a bare DOI — or `null` if it isn't one.
+ * Case is preserved for display; compare with `doiKey` (DOIs are case-insensitive).
+ */
+export function normalizeDoi(input: string | null | undefined): string | null {
+  if (!input) return null;
+  let v = input.trim().replace(DOI_PREFIX_RE, "");
+  if (/%2f/i.test(v)) {
+    try {
+      v = decodeURIComponent(v);
+    } catch {
+      /* keep as-is */
+    }
+  }
+  v = v.replace(/[.,;:]+$/, "");
+  return BARE_DOI_RE.test(v) ? v : null;
+}
+
+/** Case-insensitive identity of a DOI, for de-duplication and comparison. */
+export const doiKey = (doi: string) => doi.toLowerCase();
+
+/**
+ * The lower-cased https://doi.org/ IRI of a bare DOI, as a string — bind it as a
+ * literal and match with `filter(lcase(str(?doiUri)) = ?_doiKey)`: DOIs are
+ * case-insensitive, but triple stores compare IRIs exactly and every casing occurs
+ * in the wild (e.g. 10.3897/BDJ.10.e77516).
+ */
+export const doiIriKey = (doi: string) => `https://doi.org/${doiKey(doi)}`;
+
 // TODO: use validDoi zod/regex instead?
 // TODO: this only checks one domain, there are other valid ones
 export function isDoiUri(uri: string) {
