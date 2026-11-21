@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import CreateModeTabs from "./CreateModeTabs";
 import NanopubEditor from "./components/NanopubEditor";
+import { prefillFromLink } from "./prefill-from-link";
 
 export default function CreateNanopub() {
   const [searchParams, setSearchParams] = useSearchParams();
   const templateUri = searchParams.get("template") || null;
+  const prefilledData = prefillFromLink(searchParams);
   const [signingProfile, setSigningProfile] = useState<any>(null);
   const { data: session, isPending } = authClient.useSession();
 
@@ -40,6 +42,7 @@ export default function CreateNanopub() {
           isPending || (!isPending && session?.user && !signingProfile)
         }
         templateUri={templateUri}
+        prefilledData={prefilledData}
         onTemplateUriChange={handleTemplateChange}
         embedded={false}
         orcidLinkAction={async () =>
