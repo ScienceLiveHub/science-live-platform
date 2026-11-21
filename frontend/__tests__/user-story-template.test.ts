@@ -152,3 +152,17 @@ describe("the User Story template", () => {
 function getGraphEnd(uri: string) {
   return uri.split(/[/#]/).pop();
 }
+
+describe("the short name made from the title", () => {
+  it("keeps letters, digits and dashes, as np-user-story-service does", async () => {
+    const { shortNameFrom } =
+      await import("../src/pages/np/create/components/templates/user-story-terms");
+    expect(shortNameFrom("F2A CS2 US4")).toBe("F2A-CS2-US4");
+    expect(shortNameFrom("  Knowledge broker: finds the stories!  ")).toBe(
+      "Knowledge-broker-finds-the-stories",
+    );
+    expect(shortNameFrom("Évaluer les crues")).toBe("Evaluer-les-crues");
+    expect(shortNameFrom("x".repeat(80))).toHaveLength(60);
+    expect(shortNameFrom("???")).toBe("user-story");
+  });
+});

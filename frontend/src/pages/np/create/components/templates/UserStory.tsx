@@ -12,6 +12,7 @@ import {
   NanopubTemplateDefComponentProps,
 } from "./component-registry";
 import {
+  shortNameFrom,
   USER_STORY_DOMAIN_OPTIONS,
   USER_STORY_TERM_TYPES,
 } from "./user-story-terms";
@@ -95,7 +96,8 @@ export default function UserStory({
   const { options, loading, error } = useStoryOptions();
 
   const schema = z.object({
-    US: validUriPlaceholder.min(1, "Give the story a short name"),
+    // Optional: made from the title when left empty
+    US: z.union([z.literal(""), validUriPlaceholder]).optional(),
     label: z.string().min(3).max(200),
     user: z.string().min(2).max(300),
     action: z.string().min(3).max(1000),
@@ -141,6 +143,16 @@ export default function UserStory({
         placeholder: "e.g., F2A CS2 US4",
         description: "How the story is listed and cited",
         required: true,
+        section: { title: "The story" },
+      },
+      {
+        name: "US",
+        type: "text",
+        label: "Short name",
+        placeholder: "e.g., F2A-CS2-US4",
+        description:
+          "Used in the story's permanent address (letters, digits and dashes). Leave it empty to make it from the title.",
+        required: false,
         section: { title: "The story" },
       },
       {
@@ -195,16 +207,6 @@ export default function UserStory({
         "Kinds of data, models or other digital objects it calls for",
         false,
       ),
-      {
-        name: "US",
-        type: "text",
-        label: "Short name",
-        placeholder: "e.g., F2A-CS2-US4",
-        description:
-          "Used in the story's permanent address: letters, digits and dashes",
-        required: true,
-        section: { title: "Identifier" },
-      },
       ...NanopubEditorOptionFields,
     ],
     globalWrapper: ShowOptionalWrapper,
@@ -226,6 +228,9 @@ export default function UserStory({
       },
       onSubmit: async ({ value }) => {
         const v = value as any;
+
+        // The short name, made from the title when left empty
+        v.US = (v.US ?? "").trim() || shortNameFrom(v.label ?? "");
 
         // Multi-selections → the template's repeatable statements
         v.st03 = (v.domains ?? []).map((domain: string) => ({ domain }));

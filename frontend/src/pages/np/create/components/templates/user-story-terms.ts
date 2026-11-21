@@ -29,3 +29,19 @@ export const USER_STORY_NAMESPACES = [
 
 export const DECLARED_FOR_DIGITAL_OBJECT_TYPE =
   "https://w3id.org/fair/fip/terms/declared-for-digital-object-type";
+
+/**
+ * The short name a story is minted under, made from its title when none is given:
+ * letters, digits and dashes, e.g. "F2A CS2 US4" → "F2A-CS2-US4". The same rule as
+ * np-user-story-service's `localName`, so a story gets the same name either way.
+ */
+export function shortNameFrom(title: string): string {
+  return (
+    String(title)
+      .normalize("NFKD")
+      .replace(/[^\w\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-")
+      .slice(0, 60) || "user-story"
+  );
+}
