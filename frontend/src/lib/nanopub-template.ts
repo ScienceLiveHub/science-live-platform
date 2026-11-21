@@ -740,20 +740,22 @@ export class NanopubTemplate extends NanopubStore {
   }
 
   /**
-   * Afer loading a nanopub template, extract its fields
-   */
-  /**
    * The subject that carries the template: whichever subject in the assertion graph is
    * typed nt:AssertionTemplate, or the assertion graph itself when none says so.
    */
   findAssertionTemplate() {
     const assertion = namedNode(this.graphUris.assertion!);
-    const declared = this.getQuads(null, NS.RDF("type"), null, assertion).find((quad) =>
-      termsAreEqual(quad.object as RDFT.Term, NS.NPTs("AssertionTemplate")),
+    const declared = this.getQuads(null, NS.RDF("type"), null, assertion).find(
+      (quad) =>
+        quad.subject.termType === "NamedNode" &&
+        termsAreEqual(quad.object, NS.NPTs("AssertionTemplate")),
     );
-    return declared ? (declared.subject as RDFT.NamedNode) : assertion;
+    return declared ? namedNode(declared.subject.value) : assertion;
   }
 
+  /**
+   * Afer loading a nanopub template, extract its fields
+   */
   async extractFields() {
     const fields: TemplateField[] = [];
 

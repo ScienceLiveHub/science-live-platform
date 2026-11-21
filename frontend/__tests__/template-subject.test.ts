@@ -16,9 +16,13 @@ describe("a template declared on a subject other than the assertion", () => {
 
   it("finds the template, its description and its fields", async () => {
     // sub:short-name-of-user-story a nt:AssertionTemplate, not sub:assertion
-    const template = await load("RACciFqZEUYYrteZnGikqUEV8ZRVYfJNB3bzy98X5s_qw.trig");
+    const template = await load(
+      "RACciFqZEUYYrteZnGikqUEV8ZRVYfJNB3bzy98X5s_qw.trig",
+    );
 
-    expect(template.templateMetadata.description).toBe("Describes a User Story.");
+    expect(template.templateMetadata.description).toBe(
+      "Describes a User Story.",
+    );
     expect(template.statements.size).toBeGreaterThan(0);
     const labels = template.fields.map((f) => f.label);
     expect(labels).toEqual(
