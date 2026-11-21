@@ -2,7 +2,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
-import { ArrowRight, MessageCircleCheck, PenTool, Search } from "lucide-react";
+import {
+  ArrowRight,
+  FileCheck2,
+  MessageCircleCheck,
+  PenTool,
+  Search,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 export function Home() {
@@ -25,6 +31,17 @@ export function Home() {
         <p className="mx-auto max-w-lg text-lg text-secondary-foreground">
           Transform research into structured, citable nanopublications
         </p>
+        <p className="text-sm text-muted-foreground">
+          Learn more about the project at{" "}
+          <a
+            href="https://sciencelive4all.org"
+            className="text-link hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            sciencelive4all.org
+          </a>
+        </p>
         {!session?.user && (
           <Button
             size="lg"
@@ -38,7 +55,7 @@ export function Home() {
       </section>
 
       {/* Action Cards */}
-      <section className="grid px-30 gap-4 sm:grid-cols-2">
+      <section className="grid gap-4 sm:grid-cols-3">
         <Link to="/np/" className="group">
           <Card className="h-full hover:shadow-md hover:scale-110 transition-transform">
             <CardHeader className="pb-2 text-center">
@@ -62,6 +79,20 @@ export function Home() {
             <CardContent>
               <p className="text-sm text-secondary-foreground">
                 Publish FAIR nanopublications from your research
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link to="/np/replications" className="group">
+          <Card className="h-full hover:shadow-md hover:scale-110 transition-transform">
+            <CardHeader className="pb-2 text-center">
+              <FileCheck2 className="h-5 w-5 text-primary mb-2 mx-auto" />
+              <CardTitle className="text-base">Replications</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-secondary-foreground">
+                See how a paper's claims held up when others tried to reproduce
+                them
               </p>
             </CardContent>
           </Card>

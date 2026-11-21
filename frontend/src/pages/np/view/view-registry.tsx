@@ -20,12 +20,14 @@ import {
   FlaskConical,
   Globe,
   GraduationCap,
+  HandHelping,
   MessageSquare,
   Microscope,
   Quote,
   ScanSearch,
   SearchCheck,
   UserKey,
+  UsersRound,
   Variable,
   type LucideIcon,
 } from "lucide-react";
@@ -59,8 +61,10 @@ import { ViewPRISMASearchExecutionDataset } from "./ViewPRISMASearchExecutionDat
 import { ViewPRISMASearchStrategy } from "./ViewPRISMASearchStrategy";
 import { ViewPRISMAStudyAssessment } from "./ViewPRISMAStudyAssessment";
 import { ViewPRISMAStudyInclusion } from "./ViewPRISMAStudyInclusion";
+import { ViewReplicationRequest } from "./ViewReplicationRequest";
 import { ViewResearchSoftware } from "./ViewResearchSoftware";
 import { ViewResearchSynthesis } from "./ViewResearchSynthesis";
+import { ViewUserStory } from "./ViewUserStory";
 
 /**
  * Registry mapping template URIs to their custom view components.
@@ -93,6 +97,8 @@ export const VIEW_COMPONENTS: Record<
   [TEMPLATE_URI.FORRT_KL_REPLICATION]: ViewFORRTKLReplication,
   [TEMPLATE_URI.FORRT_KL_REPLICATION_OUTCOME]: ViewFORRTKLReplicationOutcome,
   [TEMPLATE_URI.RESEARCH_SYNTHESIS]: ViewResearchSynthesis,
+  [TEMPLATE_URI.REPLICATION_REQUEST]: ViewReplicationRequest,
+  [TEMPLATE_URI.USER_STORY]: ViewUserStory,
   [TEMPLATE_URI.IADOPT_VARIABLE]: ViewIADOPTVariable,
   // Legacy templates — remove when no longer needed
   [LEGACY_TEMPLATE_URIS.FORRT_CLAIM![0]]: ViewFORRTClaim,
@@ -130,5 +136,7 @@ export const TEMPLATE_VIEW_ICONS: Record<string, LucideIcon> = {
   [TEMPLATE_URI.FORRT_KL_REPLICATION]: FlaskConical,
   [TEMPLATE_URI.FORRT_KL_REPLICATION_OUTCOME]: ClipboardCheck,
   [TEMPLATE_URI.RESEARCH_SYNTHESIS]: Dna,
+  [TEMPLATE_URI.REPLICATION_REQUEST]: HandHelping,
+  [TEMPLATE_URI.USER_STORY]: UsersRound,
   [TEMPLATE_URI.IADOPT_VARIABLE]: Variable,
 };

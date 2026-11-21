@@ -78,7 +78,7 @@ export class NanopubDisplay {
    */
   async importAsStandaloneItem(
     nanopubUri: string,
-    collectionID?: number,
+    collectionIDs: number[] = [],
   ): Promise<any> {
     try {
       ztoolkit.log(
@@ -106,9 +106,9 @@ export class NanopubDisplay {
         });
       }
       item.setField("date", np.metadata.created!);
-      // Add to collection if specified
-      if (collectionID) {
-        item.setCollections([collectionID]);
+      // Add to collections if specified
+      if (collectionIDs.length > 0) {
+        item.setCollections(collectionIDs);
       }
       // Save the item first
       await item.saveTx();

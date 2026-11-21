@@ -96,6 +96,54 @@ The embed automatically detects the template type and renders the appropriate vi
 
 ---
 
+## Embed a creation form
+
+You can also embed a form that **creates** nanopublications, so that people can contribute
+from your own website without a Science Live account or an ORCID:
+
+```html
+<iframe
+  src="https://platform.sciencelive4all.org/embed/create?template=https://w3id.org/np/RACciFqZEUYYrteZnGikqUEV8ZRVYfJNB3bzy98X5s_qw&service=https://your-service.example.org/publish&primaryColor=0f4e8a"
+  width="100%"
+  height="900"
+  frameborder="0">
+</iframe>
+```
+
+The form cannot sign in the browser, because whoever opens your page has no key. It posts
+the answers to a **publishing service that you run** (`service`), which holds a software
+agent's key and signs and publishes what it receives. The key never reaches the browser.
+[np-user-story-service](https://github.com/annefou/np-user-story-service) is such a service
+for the FAIR2Adapt User Story template, deployed as a Netlify function; add
+`https://platform.sciencelive4all.org` to its `ALLOWED_ORIGINS`.
+
+| Parameter | Description |
+|-----------|-------------|
+| `template` | Required. The template's URI. Currently: the FAIR2Adapt **User Story** template. |
+| `service` | Required. The `https` address of your publishing service. |
+| `example` | `example=true` publishes everything as an example (`npx:ExampleNanopub`) and shows a "test mode" notice. Use it while testing your page; leave it out once you collect real contributions. |
+| `title` | `title=false` hides the template's title and description. |
+
+The style parameters above (`primaryColor`, `theme`, `bgColor`, `cardColor`, `fgColor`,
+`borderRadius`) apply to the form as well, and so does auto-resize. Participants can also
+tick **Create Example Nanopub** themselves to try the form without publishing a real
+contribution.
+
+When something is published, the form tells your page:
+
+```js
+window.addEventListener('message', (event) => {
+  if (event.data?.type === 'nanopub-embed-published') {
+    console.log('published', event.data.uri);   // e.g. refresh a list of contributions
+  }
+});
+```
+
+Anyone who finds your page can publish through your service, and nanopublications cannot be
+withdrawn: give the service a key of its own, check the origin, and keep length limits.
+
+---
+
 ## Use cases
 
 - **Journal websites** — embed nanopubs alongside published papers

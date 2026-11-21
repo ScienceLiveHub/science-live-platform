@@ -25,9 +25,11 @@ import PRISMASearchExecutionDataset from "./PRISMASearchExecutionDataset";
 import PRISMASearchStrategy from "./PRISMASearchStrategy";
 import PRISMAStudyAssessment from "./PRISMAStudyAssessment";
 import PRISMAStudyInclusion from "./PRISMAStudyInclusion";
+import ReplicationRequest from "./ReplicationRequest";
 import ResearchSoftware from "./ResearchSoftware";
 import ResearchSynthesis from "./ResearchSynthesis";
 import StoryTemplate from "./StoryTemplate";
+import UserStory from "./UserStory";
 import { TEMPLATE_URI } from "./registry-metadata";
 
 export interface NanopubTemplateDefComponentProps {
@@ -66,6 +68,8 @@ export const TEMPLATE_COMPONENTS: Record<
   [TEMPLATE_URI.FORRT_KL_REPLICATION_OUTCOME]: FORRTKLReplicationOutcome,
   [TEMPLATE_URI.RESEARCH_SYNTHESIS]: ResearchSynthesis,
   [TEMPLATE_URI.STORY]: StoryTemplate,
+  [TEMPLATE_URI.USER_STORY]: UserStory,
+  [TEMPLATE_URI.REPLICATION_REQUEST]: ReplicationRequest,
 };
 
 export const NanopubEditorOptionFields = [

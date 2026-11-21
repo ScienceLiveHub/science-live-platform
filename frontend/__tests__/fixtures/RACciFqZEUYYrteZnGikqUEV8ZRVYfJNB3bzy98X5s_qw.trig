@@ -1,0 +1,148 @@
+@prefix this: <https://w3id.org/np/RACciFqZEUYYrteZnGikqUEV8ZRVYfJNB3bzy98X5s_qw> .
+@prefix sub: <https://w3id.org/np/RACciFqZEUYYrteZnGikqUEV8ZRVYfJNB3bzy98X5s_qw/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix nt: <https://w3id.org/np/o/ntemplate/> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix orcid: <https://orcid.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ns1: <http://purl.org/np/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+sub:Head {
+  this: a np:Nanopublication;
+    np:hasAssertion sub:assertion;
+    np:hasProvenance sub:provenance;
+    np:hasPublicationInfo sub:pubinfo .
+}
+
+sub:assertion {
+  rdf:type rdfs:label "is a" .
+  
+  rdfs:label rdfs:label "has the name" .
+  
+  <https://w3id.org/fair/fip/terms/declared-for-digital-object-type> rdfs:label "for specific" .
+  
+  <https://w3id.org/fff/User-Story> rdfs:label "user story" .
+  
+  <https://w3id.org/fff/as-a> rdfs:label "As a" .
+  
+  <https://w3id.org/fff/covers-domain> rdfs:label "covers domain" .
+  
+  <https://w3id.org/fff/exposed-entity> rdfs:label "exposed entity" .
+  
+  <https://w3id.org/fff/faces-challenge> rdfs:label "faces challenge" .
+  
+  <https://w3id.org/fff/i-want-to> rdfs:label "I want to" .
+  
+  <https://w3id.org/fff/so-that> rdfs:label "so that" .
+  
+  sub:DO a nt:GuidedChoicePlaceholder;
+    rdfs:label "digital object type";
+    nt:possibleValuesFromApi "https://w3id.org/np/l/nanopub-query-1.1/api/RAom4OoQ8U2K6A629YRXKo9-XU-ZJM7-KZs1h11OD6c1w/find-things?type=https://w3id.org/fair/fip/terms/Digital-Object-Type" .
+  
+  sub:US a nt:IntroducedResource, nt:LocalResource, nt:UriPlaceholder .
+  
+  sub:action a nt:LiteralPlaceholder;
+    rdfs:label "activity" .
+  
+  sub:challenge a nt:GuidedChoicePlaceholder;
+    rdfs:label "risk";
+    nt:possibleValuesFromApi "https://w3id.org/np/l/nanopub-query-1.1/api/RAom4OoQ8U2K6A629YRXKo9-XU-ZJM7-KZs1h11OD6c1w/find-things?type=https://w3id.org/fff/Challenge" .
+  
+  sub:domain a nt:RestrictedChoicePlaceholder;
+    rdfs:label "domain";
+    nt:possibleValuesFrom ns1:RACXDZHEowTYDAzZvdmD0qIGpXZwY5ghMRBBlt6N8Iu5s .
+  
+  sub:exposed a nt:GuidedChoicePlaceholder;
+    rdfs:label "sector exposed";
+    nt:possibleValuesFromApi "https://w3id.org/np/l/nanopub-query-1.1/api/RAom4OoQ8U2K6A629YRXKo9-XU-ZJM7-KZs1h11OD6c1w/find-things?type=https://w3id.org/fff/Exposed-Entity" .
+  
+  sub:label a nt:LiteralPlaceholder .
+  
+  sub:purpose a nt:LiteralPlaceholder;
+    rdfs:label "purpose" .
+  
+  sub:short-name-of-user-story a nt:AssertionTemplate;
+    dct:description "Describes a User Story.";
+    rdfs:label "User Story";
+    nt:hasNanopubLabelPattern "${label}";
+    nt:hasStatement sub:st01, sub:st02, sub:st03, sub:st04, sub:st05, sub:st06, sub:st07,
+      sub:st08, sub:st09;
+    nt:hasTag "Requirements Elicitation";
+    nt:hasTargetNanopubType <https://schema.org/FundingScheme> .
+  
+  sub:st01 rdf:object <https://w3id.org/fff/User-Story>;
+    rdf:predicate rdf:type;
+    rdf:subject sub:US .
+  
+  sub:st02 rdf:object sub:label;
+    rdf:predicate rdfs:label;
+    rdf:subject sub:US .
+  
+  sub:st03 a nt:RepeatableStatement;
+    rdf:object sub:domain;
+    rdf:predicate <https://w3id.org/fff/covers-domain>;
+    rdf:subject sub:US .
+  
+  sub:st04 a nt:RepeatableStatement;
+    rdf:object sub:challenge;
+    rdf:predicate <https://w3id.org/fff/faces-challenge>;
+    rdf:subject sub:US .
+  
+  sub:st05 a nt:RepeatableStatement;
+    rdf:object sub:exposed;
+    rdf:predicate <https://w3id.org/fff/exposed-entity>;
+    rdf:subject sub:US .
+  
+  sub:st06 rdf:object sub:user;
+    rdf:predicate <https://w3id.org/fff/as-a>;
+    rdf:subject sub:US .
+  
+  sub:st07 rdf:object sub:action;
+    rdf:predicate <https://w3id.org/fff/i-want-to>;
+    rdf:subject sub:US .
+  
+  sub:st08 rdf:object sub:purpose;
+    rdf:predicate <https://w3id.org/fff/so-that>;
+    rdf:subject sub:US .
+  
+  sub:st09 a nt:OptionalStatement, nt:RepeatableStatement;
+    rdf:object sub:DO;
+    rdf:predicate <https://w3id.org/fair/fip/terms/declared-for-digital-object-type>;
+    rdf:subject sub:US .
+  
+  sub:user a nt:LiteralPlaceholder;
+    rdfs:label "user" .
+}
+
+sub:provenance {
+  sub:assertion prov:wasAttributedTo orcid:0009-0007-7713-900X .
+}
+
+sub:pubinfo {
+  orcid:0000-0003-2195-3997 foaf:name "Barbara Magagna" .
+  
+  this: dct:created "2026-11-17T20:17:46.201Z"^^xsd:dateTime;
+    dct:creator orcid:0000-0003-2195-3997;
+    dct:license <https://creativecommons.org/licenses/by/4.0/>;
+    npx:embeds sub:short-name-of-user-story;
+    npx:supersedes <https://w3id.org/np/RAFUj62CDqvYby7aOeRmOdueT9Svyko4oFwjK6631r-AY>;
+    npx:wasCreatedAt <https://nanodash.knowledgepixels.com/>;
+    rdfs:label "User Story";
+    nt:wasCreatedFromProvenanceTemplate <https://w3id.org/np/RA7lSq6MuK_TIC6JMSHvLtee3lpLoZDOqLJCLXevnrPoU>;
+    nt:wasCreatedFromPubinfoTemplate <https://w3id.org/np/RACJ58Gvyn91LqCKIO9zu1eijDQIeEff28iyDrJgjSJF8>,
+      <https://w3id.org/np/RAKc76yHLDbloE6ObluzYQsfX37v6qrZXbYeIKpe8-YUo>, <https://w3id.org/np/RAoTD7udB2KtUuOuAe74tJi1t3VzK0DyWS7rYVAq1GRvw>,
+      <https://w3id.org/np/RAukAcWHRDlkqxk7H2XNSegc1WnHI569INvNr-xdptDGI>;
+    nt:wasCreatedFromTemplate <https://w3id.org/np/RAgeON_vGgJCt5E4DPMi0eOPaGwNv9tbfFTRZtBwdQL0w/templateVersion> .
+  
+  sub:sig npx:hasAlgorithm "RSA";
+    npx:hasPublicKey "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCM0tu3I/KK6A/qPha/6pfngQZ4LBQpLnKAcIUuZLnSEb0epJ2IoY3zh/4N42us/6LpCHgZZZtSOTm5/KVo+OTDIqo294PpEZAO70u5DcMcGMC5OufzxGKs3Dwdo6XqPiDHxXuiaKCTO7/ABWAi7CtFoMrqJAHfeyqe82dAiH2IiwIDAQAB";
+    npx:hasSignature "jB69gpc345nh1bBkj1adq0L4hwIf6W6lMUR7Mwqla6GzDTbL7Gr8liCOvF1P/DsroVLI10Q5pAIn1E77/KHQ6pc1eNb/9jJbwBfwoNsmV98LIdukMW5lDXKi0tHBz/7ZPArmtbOUmlcdaCjypbMoysP7pG8j2ExxbjTBxeZARec=";
+    npx:hasSignatureTarget this:;
+    npx:signedBy orcid:0000-0003-2195-3997 .
+}
+

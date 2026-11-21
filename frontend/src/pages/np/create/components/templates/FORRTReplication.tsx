@@ -15,27 +15,7 @@ import {
   NanopubEditorOptionFields,
   NanopubTemplateDefComponentProps,
 } from "./component-registry";
-
-// --- Study type options ----------------------------------------------------
-
-const STUDY_TYPE_OPTIONS = [
-  {
-    value: "https://w3id.org/sciencelive/o/terms/Reproduction-Study",
-    label:
-      "Reproduction Study - direct reproduction: same methodology, same tools",
-  },
-  {
-    value: "https://w3id.org/sciencelive/o/terms/Replication-Study",
-    label:
-      "Replication Study - replication with different methodology or conditions",
-  },
-  {
-    value:
-      "https://w3id.org/sciencelive/o/terms/Reproduction-Replication-Study",
-    label:
-      "Reproduction/Replication Study - study that is both, reproduction and replication",
-  },
-];
+import { STUDY_TYPE_OPTIONS } from "./study-type-options";
 
 // --- Form component --------------------------------------------------------
 

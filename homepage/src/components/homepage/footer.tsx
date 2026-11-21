@@ -32,7 +32,7 @@ const footerLinks = {
     { name: "Nanopublications", href: "http://nanopub.org/" },
   ],
   contact: [
-    { name: "Email", href: "mailto:contact@sciencelive4all.org" },
+    { name: "Email", href: "mailto:contact@vitenhub.no" },
     { name: "Book a Call", href: "https://calendly.com/anne-fouilloux/30min" },
     { name: "LinkedIn", href: "https://www.linkedin.com/company/sciencelive" },
   ],
@@ -51,7 +51,7 @@ const socialLinks = [
   },
   {
     name: "Email",
-    href: "mailto:contact@sciencelive4all.org",
+    href: "mailto:contact@vitenhub.no",
     icon: Mail,
   },
 ];

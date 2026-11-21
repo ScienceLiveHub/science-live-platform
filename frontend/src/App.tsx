@@ -2,6 +2,7 @@ import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import { MissingEmailDialog } from "./components/missing-email-dialog";
 import { Navbar01 } from "./components/ui/shadcn-io/navbar-01";
 import { Toaster } from "./components/ui/sonner";
+import { EmbedCreate } from "./embed/EmbedCreate";
 import { EmbedLayout } from "./embed/EmbedLayout";
 import { EmbedViewer } from "./embed/EmbedViewer";
 import AuthPage from "./pages/AuthPage";
@@ -10,6 +11,7 @@ import { Home } from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import CreateNanopub from "./pages/np/create/CreateNanopub";
 import ForrtChainWizard from "./pages/np/create/ForrtChainWizard";
+import RequestWizard from "./pages/np/create/RequestWizard";
 import StoryWizard from "./pages/np/create/StoryWizard";
 import ReplicationSummary from "./pages/np/ReplicationSummary";
 import StoryView from "./pages/np/view/StoryView";
@@ -28,6 +30,7 @@ function App() {
         {/* Embed routes — minimal layout, no app shell */}
         <Route path="/embed" element={<EmbedLayout />}>
           <Route path="view" element={<EmbedViewer />} />
+          <Route path="create" element={<EmbedCreate />} />
         </Route>
 
         {/* Main app routes — full app shell with auth, navbar, etc. */}
@@ -66,6 +69,7 @@ function App() {
           <Route path="/np/create" element={<CreateNanopub />} />
           <Route path="/np/create/chain" element={<ForrtChainWizard />} />
           <Route path="/np/create/story" element={<StoryWizard />} />
+          <Route path="/np/create/request" element={<RequestWizard />} />
           <Route path="/np/create/:uri" element={<CreateNanopub />} />
           <Route path="/email-verified" element={<EmailVerified />} />
           {/* Policy Pages */}

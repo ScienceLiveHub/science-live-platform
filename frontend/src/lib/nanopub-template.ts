@@ -9,6 +9,7 @@ import {
   extractSubjectsFiltered,
   fetchPossibleValuesFromQuads,
   NS,
+  termsAreEqual,
 } from "./rdf";
 import { unwrapPEMKey } from "./string-format";
 import {
@@ -57,6 +58,31 @@ export interface TemplateField {
   // multiple?: boolean; // For repeatable statements
   regex?: string; // For zod validation
   prefix?: string; // Optional prefix to append to value when applying template
+  /** `nt:hasDefaultValue` — used when the author supplies no value. */
+  defaultValue?: string;
+}
+
+/**
+ * Fill in `nt:hasDefaultValue` for placeholders the author left empty.
+ *
+ * The author's own values always win; a default only applies where there is no
+ * value at all, so this can never overwrite what someone typed.
+ */
+function withTemplateDefaults(
+  fields: TemplateField[],
+  values: FormValues,
+): FormValues {
+  const filled: FormValues = { ...values };
+  for (const field of fields) {
+    if (!field.defaultValue) continue;
+    const name = getUriEnd(field.id);
+    if (!name) continue;
+    const current = filled[name];
+    if (current === undefined || current === null || current === "") {
+      filled[name] = field.defaultValue as FormValues[string];
+    }
+  }
+  return filled;
 }
 
 /**
@@ -71,6 +97,29 @@ function isRepeatable(statement: Statement | GroupInfo) {
  */
 function isOptional(statement: Statement | GroupInfo) {
   return statement.types?.some((t) => t.equals(NS.NPTs("OptionalStatement")));
+}
+
+/**
+ * Does this statement's object name a placeholder that the author left empty?
+ *
+ * Only placeholders count: an object that is a constant (`a fdof:
+ * FAIRDigitalObject`) is always safe to emit. A repeatable statement fed rows
+ * through its statement id is handled by the caller's repeat loop, so an empty
+ * row list is not treated as unfilled here.
+ */
+function hasUnfilledPlaceholderObject(
+  statement: Statement,
+  values: FormValues,
+  uri: string,
+) {
+  if (!statement.object) return false;
+  if (isRepeatable(statement) && Array.isArray(values[statement.id])) {
+    return false;
+  }
+  const object = statement.object.value;
+  if (!object.startsWith(uri)) return false;
+  const name = getUriEnd(object);
+  return !(name && values[name]);
 }
 
 /**
@@ -157,6 +206,15 @@ export type FormValues = Record<
   | Array<Record<string, string>>
 >;
 
+/**
+ * Form value key under which a form may pass `{ [uri]: label }` for values the user
+ * picked from an API search (a GuidedChoicePlaceholder backed by
+ * `nt:possibleValuesFromApi`). Such terms often cannot be dereferenced for a label
+ * later, so, as Nanodash does, the label is recorded in the pubinfo with
+ * `nt:hasLabelFromApi`, which viewers read back through `findInternalLabel()`.
+ */
+export const API_LABELS_KEY = "_apiLabels";
+
 export class NanopubTemplate extends NanopubStore {
   /**
    * Fields specific to Templates
@@ -215,6 +273,13 @@ export class NanopubTemplate extends NanopubStore {
     },
     privateKey: string,
   ) {
+    // A template may declare `nt:hasDefaultValue` for a placeholder the author
+    // is not asked about — the Dataset template types its subject
+    // `fair:Dataset` that way. Ignoring those defaults drops a statement the
+    // template intends every record of its kind to carry, so fill them in
+    // before generating; anything the author did supply wins.
+    placeholderValues = withTemplateDefaults(this.fields, placeholderValues);
+
     const baseUri = `${SCIENCELIVE_NANOPUB_URI}~~~ARTIFACTCODE~~~/`;
     const newSubUri = `${baseUri}`;
 
@@ -233,6 +298,25 @@ export class NanopubTemplate extends NanopubStore {
       let outputValue = values[placeholderName] || uri;
       // Add any field-specific augmentations (prefix etc)
       const placeholderField = this.fields.find((f) => f.id === uri);
+
+      // A plain nt:LocalResource (not also a placeholder, so not a form field) is a
+      // node the new nanopub mints for itself: <new nanopub>/<local name>, as
+      // Nanodash does. Without this it would keep the template's own URI.
+      // Skipped when a value is supplied: repeatable groups pass their own
+      // per-iteration names (permNode, permNode__1, …) that way.
+      if (
+        !placeholderField &&
+        placeholderName !== uri &&
+        !values[placeholderName] &&
+        this.getQuads(
+          namedNode(uri),
+          NS.RDF("type"),
+          NS.NPTs("LocalResource"),
+          null,
+        ).length > 0
+      ) {
+        return baseUri + encodeURI(placeholderName);
+      }
 
       if (placeholderField?.dataType === NS.XSD("dateTime").value) {
         return new Date(outputValue as string | number | Date).toISOString();
@@ -382,6 +466,23 @@ export class NanopubTemplate extends NanopubStore {
         continue;
       }
 
+      // A REQUIRED statement whose object is an unfilled placeholder used to be
+      // emitted anyway, which published the placeholder node itself as the
+      // object — `dct:creator <…/RAuVB37yy…/creator>`, a form field asserted as
+      // a person, signed and immutable. An absent statement is merely
+      // incomplete; a placeholder node is false. Statements whose object is a
+      // constant (`a fdof:FAIRDigitalObject`) carry no placeholder and are
+      // unaffected.
+      if (
+        hasUnfilledPlaceholderObject(
+          statement,
+          placeholderValues,
+          this.metadata.uri!,
+        )
+      ) {
+        continue;
+      }
+
       if (
         isRepeatable(statement) &&
         Array.isArray(placeholderValues[statementName])
@@ -506,6 +607,29 @@ export class NanopubTemplate extends NanopubStore {
     );
 
     outputStore.addQuad(outSub, NS.DCT("creator"), orcidNode, pubinfoGraph);
+
+    // Labels of values picked from an API search, for terms the assertion uses
+    const apiLabels = placeholderValues[API_LABELS_KEY];
+    if (
+      apiLabels &&
+      typeof apiLabels === "object" &&
+      !Array.isArray(apiLabels)
+    ) {
+      for (const [uri, label] of Object.entries(apiLabels)) {
+        if (
+          label &&
+          outputStore.getQuads(null, null, namedNode(uri), assertionGraph)
+            .length > 0
+        ) {
+          outputStore.addQuad(
+            namedNode(uri),
+            NS.NPTs("hasLabelFromApi"),
+            literal(label),
+            pubinfoGraph,
+          );
+        }
+      }
+    }
 
     // For each field of type IntroducedResource, the generated nanopub should introduce them
     const introducedFields = this.fields.filter((f) =>
@@ -648,6 +772,20 @@ export class NanopubTemplate extends NanopubStore {
   }
 
   /**
+   * The subject that carries the template: whichever subject in the assertion graph is
+   * typed nt:AssertionTemplate, or the assertion graph itself when none says so.
+   */
+  findAssertionTemplate() {
+    const assertion = namedNode(this.graphUris.assertion!);
+    const declared = this.getQuads(null, NS.RDF("type"), null, assertion).find(
+      (quad) =>
+        quad.subject.termType === "NamedNode" &&
+        termsAreEqual(quad.object, NS.NPTs("AssertionTemplate")),
+    );
+    return declared ? namedNode(declared.subject.value) : assertion;
+  }
+
+  /**
    * Afer loading a nanopub template, extract its fields
    */
   async extractFields() {
@@ -664,8 +802,12 @@ export class NanopubTemplate extends NanopubStore {
       tags_$array: [NS.NPT("hasTag")],
     };
 
-    // We are only interested in the assertion graph which contains the template
-    const thisTemplate = namedNode(this.graphUris.assertion!);
+    // We are only interested in the assertion graph which contains the template.
+    // By convention the assertion itself is the template, but the ontology calls that a
+    // convention rather than a rule ("maybe to be revisited at some point"), and templates
+    // exist that declare nt:AssertionTemplate on another subject in the same graph. Follow
+    // the type where it is declared, and fall back to the convention.
+    const thisTemplate = this.findAssertionTemplate();
 
     const props = extractSubjectProps(
       this,
@@ -688,6 +830,7 @@ export class NanopubTemplate extends NanopubStore {
       hasRegex: [NS.NPT("hasRegex")],
       hasPrefix: [NS.NPT("hasPrefix")],
       hasPrefixLabel: [NS.NPT("hasPrefixLabel")],
+      hasDefaultValue: [NS.NPT("hasDefaultValue")],
     };
     type Placeholder = {
       placeholderType: string;
@@ -699,6 +842,7 @@ export class NanopubTemplate extends NanopubStore {
       hasRegex: string;
       hasPrefix: string;
       hasPrefixLabel: string;
+      hasDefaultValue: string;
     };
 
     type Placeholders = Map<string, Placeholder>;
@@ -824,6 +968,7 @@ export class NanopubTemplate extends NanopubStore {
         description: pv.description,
         regex: pv.hasRegex,
         prefix: pv.hasPrefix,
+        defaultValue: pv.hasDefaultValue,
         options: options?.length > 0 ? options : undefined,
         required, // Placeholders are required by default, so if this is undefined, its still required
       });

@@ -66,8 +66,10 @@ export const MultiComboboxField: React.FC<MultiComboboxFieldSpecificProps> = ({
       fieldApi.handleChange(newValues);
     }
 
-    setSearchQuery("");
-    // Keep dropdown open for multi-select
+    // Keep the dropdown open and the search as typed, so several matching options can be
+    // picked in a row. Clearing the search here rebuilt the whole list after every pick:
+    // it jumped away from where the user was, and inside an embedded iframe Firefox also
+    // scrolled the host page.
   };
 
   const handleRemove = (valueToRemove: string) => {
