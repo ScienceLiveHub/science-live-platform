@@ -26,7 +26,7 @@ GRAPH sub:Head {
 
 GRAPH sub:assertion {
   <https://w3id.org/np/o/ntemplate/ASSERTION>
-    dcterms:creator <https://w3id.org/np/o/ntemplate/CREATOR>;
+    dcterms:creator orcid:0000-9999-1234-9999;
     <http://purl.org/spar/cito/agreesWith> <https://doi.org/10.1126/science.aar3646>;
     rdfs:comment "This is a test comment (literal)".
 }
