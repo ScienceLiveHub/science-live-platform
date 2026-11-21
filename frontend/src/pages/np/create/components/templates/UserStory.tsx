@@ -239,13 +239,18 @@ export default function UserStory({
 
         // Labels of the terms picked from the API-backed lists, recorded in the
         // pubinfo (nt:hasLabelFromApi) so the story reads with names, not URIs
+        const picked = new Set<string>([
+          ...(v.challenges ?? []),
+          ...(v.exposedSectors ?? []),
+          ...(v.digitalObjectTypes ?? []),
+        ]);
         const labels: Record<string, string> = {};
         for (const o of [
           ...options.challenge,
           ...options.exposed,
           ...options.digitalObject,
         ]) {
-          labels[o.value] = o.label;
+          if (picked.has(o.value)) labels[o.value] = o.label;
         }
         v[API_LABELS_KEY] = labels;
 
