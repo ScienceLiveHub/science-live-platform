@@ -77,7 +77,7 @@ export const TEMPLATE_URI = {
 
   // Requirements: "As a … I want to … so that …" (FAIR2Adapt User Story template)
   USER_STORY:
-    "https://w3id.org/np/RACciFqZEUYYrteZnGikqUEV8ZRVYfJNB3bzy98X5s_qw",
+    "https://w3id.org/np/RAFwCQ_DZmx01WR4yzhzghLYK5xafhG6KmNB0Dy8jShZg",
 
   // Story (narrative composition of a constellation)
   STORY: "https://w3id.org/np/RAfjXiLtYji0w1Y3AtKmtL_S21esoh5jprGWAPpRQ1zUk",
@@ -159,6 +159,11 @@ export const LEGACY_TEMPLATE_URIS: Partial<
     "https://w3id.org/np/RADCXU2CySzD6H8FxmSr-w3a0sFiEWszmSlbM0VlTwABs",
     "https://w3id.org/np/RAyOwfyJr6t0yyuCywGIDNw0Qv6S2GlA485o4XyJA8gFU",
     "https://w3id.org/np/RA-qSk1kdlC7e2d3kDurzMQ9_QaueAYb-NlqZw6wbobL8",
+  ],
+  // User Story v1 RACciFqZ… — the same template with the general AGROVOC domain list;
+  // v2 restricts domains to a climate-adaptation list. Example stories were made with v1.
+  USER_STORY: [
+    "https://w3id.org/np/RACciFqZEUYYrteZnGikqUEV8ZRVYfJNB3bzy98X5s_qw",
   ],
 };
 

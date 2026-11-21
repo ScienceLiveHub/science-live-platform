@@ -14,7 +14,8 @@ import { extractUserStory } from "../src/pages/np/view/user-story-data";
  * object type, and the story itself minted under the new nanopub from a short name.
  * Values are given as the UserStory form submits them.
  */
-const TEMPLATE = "RACciFqZEUYYrteZnGikqUEV8ZRVYfJNB3bzy98X5s_qw.trig";
+// v2 (RAFwCQ_…): v1 with a climate-adaptation domain list; statements and placeholders unchanged
+const TEMPLATE = "RAFwCQ_DZmx01WR4yzhzghLYK5xafhG6KmNB0Dy8jShZg.trig";
 const FFF = (local: string) => `https://w3id.org/fff/${local}`;
 const FLOOD =
   "http://connectivity-hub.com/terms/58d1c857-2638-477d-bc96-ce5b3afc0ee0";
@@ -164,5 +165,29 @@ describe("the short name made from the title", () => {
     expect(shortNameFrom("Évaluer les crues")).toBe("Evaluer-les-crues");
     expect(shortNameFrom("x".repeat(80))).toHaveLength(60);
     expect(shortNameFrom("???")).toBe("user-story");
+  });
+});
+
+describe("template versions", () => {
+  it("serves stories and the embedded form made with v1 as the current User Story", async () => {
+    const { resolveTemplateUri, TEMPLATE_URI } =
+      await import("../src/pages/np/create/components/templates/registry-metadata");
+    expect(TEMPLATE_URI.USER_STORY).toBe(
+      "https://w3id.org/np/RAFwCQ_DZmx01WR4yzhzghLYK5xafhG6KmNB0Dy8jShZg",
+    );
+    expect(
+      resolveTemplateUri(
+        "https://w3id.org/np/RACciFqZEUYYrteZnGikqUEV8ZRVYfJNB3bzy98X5s_qw",
+      ),
+    ).toBe(TEMPLATE_URI.USER_STORY);
+  });
+
+  it("restricts domains to the list v2 names", async () => {
+    const { USER_STORY_DOMAIN_OPTIONS } =
+      await import("../src/pages/np/create/components/templates/user-story-terms");
+    const v2 = await readFile(join(__dirname, "fixtures", TEMPLATE), "utf8");
+    expect(v2).toContain(
+      `nt:possibleValuesFrom <${USER_STORY_DOMAIN_OPTIONS}>`,
+    );
   });
 });

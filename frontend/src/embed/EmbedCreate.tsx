@@ -20,7 +20,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TEMPLATE_COMPONENTS } from "@/pages/np/create/components/templates/component-registry";
-import { TEMPLATE_METADATA } from "@/pages/np/create/components/templates/registry-metadata";
+import {
+  resolveTemplateUri,
+  TEMPLATE_METADATA,
+} from "@/pages/np/create/components/templates/registry-metadata";
 import { CheckCircle2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -42,7 +45,9 @@ function Notice({ children }: { children: React.ReactNode }) {
 export function EmbedCreate() {
   const [searchParams] = useSearchParams();
   const { platformUrl } = useEmbed();
-  const template = searchParams.get("template") || "";
+  // An older version of a template is served with the current one, so a page that
+  // embeds this form keeps working when the template is updated
+  const template = resolveTemplateUri(searchParams.get("template") || "");
   const service = useMemo(
     () => parseServiceUrl(searchParams.get("service")),
     [searchParams],
