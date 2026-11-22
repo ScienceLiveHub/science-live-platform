@@ -303,12 +303,11 @@ curl http://localhost:3001/health
 
 Contributions are welcome! Please open an issue or pull request.
 
-### Development Team
+### Who is behind Science Live
 
-- **Project Lead:** Anne Fouilloux (VitenHub AS)
-- **Technical Architecture:** Knowledge Pixels + Prophet Town
-- **Semantic Consulting:** Barbara Magagna (Mabablue)
-- **Funding:** Astera Institute
+- **[LifeWatch ERIC](https://www.lifewatch.eu)**: development. Anne Fouilloux, CTO of LifeWatch ERIC, develops the Science Live platform and its open tools: FORRT Research MCP, Replication Radar and fip-mcp.
+- **[VitenHub AS](https://vitenhub.no/)**: infrastructure and operations. Jean Iaquinta, CEO of VitenHub AS, manages the infrastructure behind the platform. VitenHub AS operates Science Live and delivers the paid replication services.
+- **[Knowledge Pixels](https://knowledgepixels.com)**: the nanopublication infrastructure that Science Live publishes to.
 
 ## License
 
@@ -328,4 +327,4 @@ MIT — see [package.json](package.json).
 
 ## Acknowledgments
 
-Science Live is supported by the Astera Institute with planned transition to community-driven governance. Built on the nanopublication ecosystem infrastructure deployed by Knowledge Pixels.
+Science Live was developed with support from the [Astera Institute](https://astera.org) until June 2026. With thanks to [Prophet Town](https://www.ptown.tech) (Vijay Prema) for developing the platform and the Zotero plugin during that period, and to Barbara Magagna (Mabablue) for her semantic consulting. Science Live is built on the nanopublication infrastructure deployed by [Knowledge Pixels](https://knowledgepixels.com).
